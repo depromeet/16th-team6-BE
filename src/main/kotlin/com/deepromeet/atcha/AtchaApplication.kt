@@ -1,11 +1,11 @@
-package com.deepromeet.seulseul
+package com.deepromeet.atcha
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class SeulseulApplication
+class AtchaApplication
 
 fun main(args: Array<String>) {
-	runApplication<SeulseulApplication>(*args)
+	runApplication<AtchaApplication>(*args)
 }

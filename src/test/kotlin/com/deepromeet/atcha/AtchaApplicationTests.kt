@@ -1,10 +1,10 @@
-package com.deepromeet.seulseul
+package com.deepromeet.atcha
 
 import org.junit.jupiter.api.Test
 import org.springframework.boot.test.context.SpringBootTest
 
 @SpringBootTest
-class SeulseulApplicationTests {
+class AtchaApplicationTests {
 
 	@Test
 	fun contextLoads() {

@@ -1,6 +1,6 @@
-package com.deepromeet.seulseul.user.api.response
+package com.deepromeet.atcha.user.api.response
 
-import com.deepromeet.seulseul.user.domain.User
+import com.deepromeet.atcha.user.domain.User
 
 data class UserInfoResponse(
     val email: String,

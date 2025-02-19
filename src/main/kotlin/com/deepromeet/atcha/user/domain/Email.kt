@@ -1,4 +1,4 @@
-package com.deepromeet.seulseul.user.domain
+package com.deepromeet.atcha.user.domain
 
 @JvmInline
 value class Email(val value: String) {

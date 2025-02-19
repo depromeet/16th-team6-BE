@@ -1,7 +1,7 @@
-package com.deepromeet.seulseul.user.domain
+package com.deepromeet.atcha.user.domain
 
-import com.deepromeet.seulseul.user.exception.UserException
-import com.deepromeet.seulseul.user.infrastructure.repository.UserJpaRepository
+import com.deepromeet.atcha.user.exception.UserException
+import com.deepromeet.atcha.user.infrastructure.repository.UserJpaRepository
 import org.springframework.stereotype.Component
 
 @Component
