@@ -1,6 +1,6 @@
-package com.deepromeet.seulseul.common.web
+package com.deepromeet.atcha.common.web
 
-import com.deepromeet.seulseul.common.exception.CustomException
+import com.deepromeet.atcha.common.exception.CustomException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.logging.LogLevel

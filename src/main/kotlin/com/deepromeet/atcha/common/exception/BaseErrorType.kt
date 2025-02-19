@@ -1,4 +1,4 @@
-package com.deepromeet.seulseul.common.exception
+package com.deepromeet.atcha.common.exception
 
 import org.springframework.boot.logging.LogLevel
 

@@ -1,6 +1,6 @@
-package com.deepromeet.seulseul.common.web
+package com.deepromeet.atcha.common.web
 
-import com.deepromeet.seulseul.common.exception.ErrorReason
+import com.deepromeet.atcha.common.exception.ErrorReason
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDateTime
 
