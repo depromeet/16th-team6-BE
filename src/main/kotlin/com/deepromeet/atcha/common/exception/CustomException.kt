@@ -4,6 +4,8 @@ abstract class CustomException(
     val errorType: BaseErrorType
 ) : RuntimeException() {
 
+    abstract fun readResolve(): Any
+
     val status: Int
         get() = errorType.errorReason.status
 

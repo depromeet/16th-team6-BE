@@ -27,14 +27,14 @@ sealed class FeignException(
 ) : CustomException(errorCode) {
 
     data object ExternalApiNotFoundError : FeignException(FeignErrorType.EXTERNAL_API_NOT_FOUND_ERROR) {
-        private fun readResolve(): Any = ExternalApiNotFoundError
+        override fun readResolve(): Any = ExternalApiNotFoundError
     }
 
     data object ExternalApiBadRequestError : FeignException(FeignErrorType.EXTERNAL_API_BAD_REQUEST_ERROR) {
-        private fun readResolve(): Any = ExternalApiBadRequestError
+        override fun readResolve(): Any = ExternalApiBadRequestError
     }
 
     data object ExternalApiInternalServerError : FeignException(FeignErrorType.EXTERNAL_API_INTERNAL_SERVER_ERROR) {
-        private fun readResolve(): Any = ExternalApiInternalServerError
+        override fun readResolve(): Any = ExternalApiInternalServerError
     }
 }

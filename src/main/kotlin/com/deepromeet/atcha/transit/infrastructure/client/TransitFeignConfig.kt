@@ -17,5 +17,4 @@ class TransitFeignConfig(
                 .header("content-type", "application/json")
         }
     }
-
 }
