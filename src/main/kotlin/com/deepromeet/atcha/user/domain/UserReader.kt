@@ -15,4 +15,8 @@ class UserReader(
     fun read(email: Email): User {
         return userJpaRepository.findByEmail(email) ?: throw UserException.NotFound
     }
-}
+
+    fun checkExists(kakaoId: Long) : Boolean {
+        return userJpaRepository.existsByKakaoId(kakaoId);
+    }
+ }
