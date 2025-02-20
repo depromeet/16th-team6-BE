@@ -18,13 +18,18 @@ class FeignConfig {
     fun feignLoggerLever(): Logger.Level = Logger.Level.FULL
 
     @Bean
-    fun feignBuilder(): Feign.Builder =
-        Feign.builder()
-            .options(Request.Options(Duration.ofMillis(1000), Duration.ofMillis(1000), true))
+    fun feignBuilder(): Feign.Builder = Feign.builder()
+        .options(
+            Request.Options(
+                Duration.ofMillis(1000), // connectTimeout
+                Duration.ofMillis(3000), // readTimeout
+                true
+            )
+        )
 
     @Bean
     fun errorDecoder(): ErrorDecoder = CustomErrorDecoder()
 
     @Bean
-    fun retryer() = Retryer.Default(100, 1000, 3)
+    fun retryer() = Retryer.Default(200, 1500, 3)
 }
