@@ -10,5 +10,6 @@ class User(
     val id: Long = 0,
     val kakaoId: Long,
     val name: String,
+    val email: Email,
 ) {
 }
