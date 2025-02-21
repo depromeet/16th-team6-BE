@@ -19,4 +19,8 @@ class UserReader(
     fun checkExists(kakaoId: Long) : Boolean {
         return userJpaRepository.existsByKakaoId(kakaoId);
     }
+
+    fun save(user: User): User{
+        return userJpaRepository.save(user)
+    }
  }

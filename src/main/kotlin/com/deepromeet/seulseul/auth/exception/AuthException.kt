@@ -9,4 +9,8 @@ sealed class AuthException(
     data object NoMatchedProvider : AuthException(AuthErrorType.NO_MATCHED_PROVIDER) {
         private fun readResolve(): Any = NoMatchedProvider
     }
+
+    data object AlreadyExistsUser : AuthException(AuthErrorType.ALREADY_EXISTS_USER) {
+        private fun readResolve(): Any = NoMatchedProvider
+    }
 }

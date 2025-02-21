@@ -7,6 +7,6 @@ data class UserInfoResponse(
     val nickname: String
 ) {
     companion object {
-        fun from(domain: User) = UserInfoResponse(domain.email.value, domain.name)
+        fun from(domain: User) = UserInfoResponse(domain.nickname)
     }
 }

@@ -1,19 +1,18 @@
 package com.deepromeet.seulseul.auth.api.controller
 
+import com.deepromeet.seulseul.auth.api.request.SignUpRequest
 import com.deepromeet.seulseul.auth.domain.OAuthService
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
 import com.deepromeet.seulseul.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestHeader
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.http.HttpStatus
+import org.springframework.web.bind.annotation.*
 
-private val log = KotlinLogging.logger {}
+val log = KotlinLogging.logger {}
 
-@RestController("/api")
+@RestController
+@RequestMapping("/api")
 class AuthController(
     private val oAuthService: OAuthService
 ) {
@@ -25,10 +24,12 @@ class AuthController(
         return ApiResponse.success(result)
     }
 
-    @PostMapping("/members")
+
+    @PostMapping("/auth/sign-up")
+    @ResponseStatus(HttpStatus.CREATED)
     fun signUp(@RequestHeader("Authorization") authorizationHeader: String,
-               @RequestParam("provider") provider: Int) {
-        oAuthService.signUp(authorizationHeader)
+               @RequestBody signUpRequest: SignUpRequest){
+        oAuthService.signUp(authorizationHeader, signUpRequest)
     }
 
     @PostMapping("/auth/logout")

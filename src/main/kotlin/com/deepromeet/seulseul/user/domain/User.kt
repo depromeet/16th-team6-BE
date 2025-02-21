@@ -9,7 +9,9 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     val kakaoId: Long,
-    val name: String,
-    val email: Email,
-) {
-}
+    val nickname: String,
+    val thumbnailImageUrl: String,
+    val profileImageUrl: String,
+    val alertAgreement: Boolean = true,
+    val trackingAgreement: Boolean = true,
+)

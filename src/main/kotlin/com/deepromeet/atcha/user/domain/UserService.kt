@@ -6,7 +6,4 @@ import org.springframework.stereotype.Service
 class UserService(
     private val userReader: UserReader
 ) {
-    fun getUser(email: Email): User {
-        return userReader.read(email)
-    }
 }
