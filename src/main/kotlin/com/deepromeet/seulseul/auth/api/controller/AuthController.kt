@@ -2,6 +2,7 @@ package com.deepromeet.seulseul.auth.api.controller
 
 import com.deepromeet.seulseul.auth.domain.OAuthService
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
+import com.deepromeet.seulseul.auth.infrastructure.client.Provider
 import com.deepromeet.seulseul.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.web.bind.annotation.GetMapping
@@ -16,13 +17,18 @@ private val log = KotlinLogging.logger {}
 class AuthController(
     private val oAuthService: OAuthService
 ) {
-    @GetMapping("/auth/login")
-    fun login(@RequestHeader("Authorization") authorizationHeader: String,
-              @RequestParam("provider") provider: Int
-    ) {
-        log.info { "login CALL" }
-        val result = oAuthService.getUserInfo(authorizationHeader)
-        log.info { "result=$result" }
+    @GetMapping("/auth/check")
+    fun checkUserExists(@RequestHeader("Authorization") authorizationHeader: String,
+                        @RequestParam("provider") provider: Int) : ApiResponse<ExistsUserResponse> {
+        log.info { "existsUser CALL" }
+        val result = oAuthService.checkUserExists(authorizationHeader, Provider.findByIndex(provider))
+        return ApiResponse.success(result)
+    }
+
+    @PostMapping("/members")
+    fun signUp(@RequestHeader("Authorization") authorizationHeader: String,
+               @RequestParam("provider") provider: Int) {
+        oAuthService.signUp(authorizationHeader)
     }
 
     @PostMapping("/auth/logout")
@@ -31,13 +37,5 @@ class AuthController(
         log.info { "logout CALL" }
         val result = oAuthService.logout(authorizationHeader)
         log.info { "result=$result" }
-    }
-
-    @GetMapping("/auth/check")
-    fun checkUserExists(@RequestHeader("Authorization") authorizationHeader: String,
-                   @RequestParam("provider") provider: Int) : ApiResponse<ExistsUserResponse> {
-        log.info { "existsUser CALL" }
-        val result = oAuthService.checkUserExists(authorizationHeader)
-        return ApiResponse.success(result)
     }
 }
