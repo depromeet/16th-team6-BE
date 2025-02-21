@@ -6,6 +6,7 @@ import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.exception.AuthException
 import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
+import com.deepromeet.seulseul.user.api.response.UserInfoResponse
 import com.deepromeet.seulseul.user.domain.User
 import com.deepromeet.seulseul.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -36,6 +37,12 @@ class OAuthService(
         )
         val savedUser = userReader.save(user)
         log.info { "User SingUp Success $savedUser" }
+    }
+
+    fun login(authorizationHeader: String, provider: Int) : UserInfoResponse {
+        val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader)
+        val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
+        return UserInfoResponse.from(user)
     }
 
     fun logout(authorizationHeader: String) {

@@ -5,6 +5,7 @@ import com.deepromeet.seulseul.auth.domain.OAuthService
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
 import com.deepromeet.seulseul.common.web.ApiResponse
+import com.deepromeet.seulseul.user.api.response.UserInfoResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
@@ -24,12 +25,19 @@ class AuthController(
         return ApiResponse.success(result)
     }
 
-
     @PostMapping("/auth/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
     fun signUp(@RequestHeader("Authorization") authorizationHeader: String,
                @RequestBody signUpRequest: SignUpRequest){
         oAuthService.signUp(authorizationHeader, signUpRequest)
+    }
+
+    @GetMapping("/auth/login")
+    fun login(@RequestHeader("Authorization") authorizationHeader: String,
+              @RequestParam("provider") provider: Int) : ApiResponse<UserInfoResponse> {
+        val result = oAuthService.login(authorizationHeader, provider)
+        log.info { "Login Success $result" }
+        return ApiResponse.success(result)
     }
 
     @PostMapping("/auth/logout")

@@ -1,11 +1,12 @@
 package com.deepromeet.seulseul.auth.infrastructure.response
 
+import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class KakaoUserInfoResponse(
-    val kakaoId: Long,
+    @JsonProperty("id") val kakaoId: Long,
     val kakaoAccount: KakaoAccount
 ) {
     val nickname: String get() = kakaoAccount.profile.nickname
