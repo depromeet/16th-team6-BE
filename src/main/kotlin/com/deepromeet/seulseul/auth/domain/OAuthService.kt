@@ -27,7 +27,7 @@ class OAuthService(
             val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader)
             return ExistsUserResponse(userReader.checkExists(kakaoUserInfo.kakaoId))
         }
-        throw AuthException()
+        throw AuthException.NoMatchedProvider
     }
 
     fun logout(authorizationHeader: String) {
