@@ -1,0 +1,47 @@
+spring:
+  config:
+    activate:
+      on-profile: local
+
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    com.deepromeet.seulseul: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+
+    tracer: trace
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+        SQL: trace
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: FULL
+
+kakao:
+  client-id: {CLIENT_ID}
+  api:
+    url: https://kapi.kakao.com/
+  oauth:
+    url: https://kauth.kakao.com/oauth
+
