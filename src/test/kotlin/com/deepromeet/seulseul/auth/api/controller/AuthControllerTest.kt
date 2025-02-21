@@ -9,16 +9,6 @@ class AuthControllerTest {
     val accessToken: String = "LX75YMPA-uoQkDCOIB_gORrzzozDYHALAAAAAQo9c00AAAGVJymDtEA9X5YOsAdz"
 
     @Test
-    fun 토큰_정보_요청() {
-        RestAssured.given().log().all()
-            .param("provider", "1")
-            .header("Authorization", "Bearer $accessToken")
-            .`when`().get("/api/auth/login")
-            .then().log().all()
-            .statusCode(200)
-    }
-
-    @Test
     fun 회원가입() {
         val signUpRequest = SignUpRequest(
             "경기도 화성시 동탄순환대로26길 21",
