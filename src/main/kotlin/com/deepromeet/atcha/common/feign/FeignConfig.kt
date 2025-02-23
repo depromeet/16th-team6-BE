@@ -13,19 +13,19 @@ import java.time.Duration
 @Configuration
 @EnableFeignClients("com.deepromeet.atcha")
 class FeignConfig {
-
     @Bean
     fun feignLoggerLever(): Logger.Level = Logger.Level.FULL
 
     @Bean
-    fun feignBuilder(): Feign.Builder = Feign.builder()
-        .options(
-            Request.Options(
-                Duration.ofMillis(1000), // connectTimeout
-                Duration.ofMillis(3000), // readTimeout
-                true
+    fun feignBuilder(): Feign.Builder =
+        Feign.builder()
+            .options(
+                Request.Options(
+                    Duration.ofMillis(1000),
+                    Duration.ofMillis(3000),
+                    true,
+                ),
             )
-        )
 
     @Bean
     fun errorDecoder(): ErrorDecoder = CustomErrorDecoder()

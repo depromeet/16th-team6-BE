@@ -6,9 +6,8 @@ import org.springframework.context.annotation.Bean
 
 class TransitFeignConfig(
     @Value("\${tmap.api.app-key}")
-    private val appKey: String
+    private val appKey: String,
 ) {
-
     @Bean
     fun requestInterceptor(): RequestInterceptor {
         return RequestInterceptor { requestTemplate ->
