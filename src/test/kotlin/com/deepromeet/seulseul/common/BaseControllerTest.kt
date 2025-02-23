@@ -1,0 +1,29 @@
+package com.deepromeet.seulseul.common
+
+import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
+import io.restassured.RestAssured
+import org.junit.jupiter.api.BeforeEach
+import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.web.server.LocalServerPort
+import org.springframework.test.context.bean.override.mockito.MockitoBean
+
+@SpringBootTest(
+    webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
+    properties = ["kakao.api.url=http://dummy",
+        "jwt.access.secret=thisisfortestdGVzdEFjY2Vzc1NlY3JldEtleVZhbHVlMTIzNDU2Nzg=",
+        "jwt.refresh.secret=thisisfortestddGVzdFJmZXNoU2VjcmV0S2V5VmFsdWUxMjM0NTY3OA"
+    ]
+)
+abstract class BaseControllerTest {
+
+    @LocalServerPort
+    private val port : Int = 0
+
+    @MockitoBean
+    lateinit var kakaoApiClient: KakaoApiClient
+
+    @BeforeEach
+    fun setPort() {
+        RestAssured.port = port
+    }
+}
