@@ -9,7 +9,7 @@ data class ApiResponse<T>(
     val timeStamp: LocalDateTime = LocalDateTime.now(),
     val path: String? = null,
     val message: String? = null,
-    val result: T? = null,
+    val result: T? = null
 ) {
     companion object {
         fun <T> success(result: T): ApiResponse<T> = ApiResponse(responseCode = "SUCCESS", result = result)
@@ -25,7 +25,7 @@ data class ApiResponse<T>(
         fun error(
             errorCode: String,
             path: String,
-            message: String,
+            message: String
         ): ApiResponse<Unit> =
             ApiResponse(
                 path = path,
@@ -35,7 +35,7 @@ data class ApiResponse<T>(
 
         fun error(
             errorCode: String,
-            message: String,
+            message: String
         ): ApiResponse<Unit> =
             ApiResponse(
                 responseCode = errorCode,

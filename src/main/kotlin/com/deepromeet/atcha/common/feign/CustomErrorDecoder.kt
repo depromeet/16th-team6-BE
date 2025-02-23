@@ -6,7 +6,7 @@ import feign.codec.ErrorDecoder
 class CustomErrorDecoder : ErrorDecoder {
     override fun decode(
         methodKey: String,
-        response: Response,
+        response: Response
     ): Exception {
         return when (response.status()) {
             400 -> FeignException.ExternalApiBadRequestError

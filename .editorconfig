@@ -9,3 +9,6 @@ trim_trailing_whitespace = true
 insert_final_newline = true
 max_line_length = 120
 tab_width = 4
+
+[*.{kt,kts}]
+ij_kotlin_allow_trailing_comma = false

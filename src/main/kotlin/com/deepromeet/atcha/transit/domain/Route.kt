@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 data class Plan(
-    val itineraries: List<Itinerary>,
+    val itineraries: List<Itinerary>
 )
 
 data class Itinerary(
@@ -16,17 +16,17 @@ data class Itinerary(
     // 총 보행 소요 시간 (초)
     val totalWalkTime: Int,
     val fare: Fare,
-    val legs: List<Leg>,
+    val legs: List<Leg>
 )
 
 data class Fare(
-    val regular: RegularFare,
+    val regular: RegularFare
 )
 
 data class RegularFare(
     val currency: Currency,
     // 대중교통 요금
-    val totalFare: Double,
+    val totalFare: Double
 )
 
 data class Currency(
@@ -35,7 +35,7 @@ data class Currency(
     // 금액 단위 (원)
     val currency: String,
     // 금액 단위 코드 (KRW)
-    val currencyCode: String,
+    val currencyCode: String
 )
 
 data class Leg(
@@ -68,7 +68,7 @@ data class Leg(
     // 대중교통 구간 좌표
     val passShape: PassShape?,
     // 대중교통 구간 정류장 정보
-    val passStopList: PassStopList?,
+    val passStopList: PassStopList?
 )
 
 data class Lane(
@@ -81,7 +81,7 @@ data class Lane(
     // 다중 대중교통 노선 ID
     val routeId: String,
     // 이동수단별 노선 코드
-    val type: Int,
+    val type: Int
 )
 
 data class Location(
@@ -90,7 +90,7 @@ data class Location(
     // 경도
     val lon: Double,
     // 정류장 명칭
-    val name: String,
+    val name: String
 )
 
 data class Step(
@@ -101,16 +101,16 @@ data class Step(
     // 도보 구간 정보
     val description: String?,
     // 도보 구간 좌표
-    val linestring: String?,
+    val linestring: String?
 )
 
 data class PassShape(
     // 대중교통 구간 좌표
-    val linestring: String,
+    val linestring: String
 )
 
 data class PassStopList(
-    val stations: List<Station> = emptyList(),
+    val stations: List<Station> = emptyList()
 )
 
 data class Station(
@@ -123,5 +123,5 @@ data class Station(
     // 경도
     val lon: String,
     // 위도
-    val lat: String,
+    val lat: String
 )

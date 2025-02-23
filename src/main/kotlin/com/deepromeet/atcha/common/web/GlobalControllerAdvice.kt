@@ -15,7 +15,7 @@ class GlobalControllerAdvice {
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(
         exception: CustomException,
-        request: HttpServletRequest,
+        request: HttpServletRequest
     ): ResponseEntity<ApiResponse<Unit>> {
         when (exception.errorType.logLevel) {
             LogLevel.ERROR -> logger.error(exception) { exception.message }

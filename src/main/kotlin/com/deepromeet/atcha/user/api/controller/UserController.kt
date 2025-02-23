@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class UserController(
-    private val userService: UserService,
+    private val userService: UserService
 ) {
     @GetMapping("/users")
     fun getUser(email: String): ApiResponse<UserInfoResponse> {
