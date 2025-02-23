@@ -30,5 +30,5 @@ logging:
 
 tmap:
   api:
-    url: ${TMAP_API_URL}
+    url: https://apis.openapi.sk.com
     app-key: ${TMAP_API_KEY}
