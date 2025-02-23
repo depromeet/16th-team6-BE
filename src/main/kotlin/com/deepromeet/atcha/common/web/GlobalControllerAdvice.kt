@@ -26,7 +26,7 @@ class GlobalControllerAdvice {
         return ResponseEntity.status(exception.status)
             .body(
                 ApiResponse.error(
-                    exception.errorType.errorReason,
+                    exception.errorType.errorCode,
                     request.requestURI,
                     exception.message,
                 )

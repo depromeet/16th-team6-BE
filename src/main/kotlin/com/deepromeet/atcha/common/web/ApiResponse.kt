@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.common.web
 
-import com.deepromeet.atcha.common.exception.ErrorReason
 import com.fasterxml.jackson.annotation.JsonInclude
 import java.time.LocalDateTime
 
@@ -26,13 +25,13 @@ data class ApiResponse<T>(
                 )
 
         fun error(
-            errorReason: ErrorReason,
+            errorCode: String,
             path: String,
             message: String,
         ): ApiResponse<Unit> =
                 ApiResponse(
                         path = path,
-                        responseCode = errorReason.errorCode,
+                        responseCode = errorCode,
                         message = message,
                 )
 

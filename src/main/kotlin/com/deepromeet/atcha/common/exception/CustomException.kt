@@ -7,8 +7,8 @@ abstract class CustomException(
     abstract fun readResolve(): Any
 
     val status: Int
-        get() = errorType.errorReason.status
+        get() = errorType.status
 
     override val message: String
-        get() = errorType.errorReason.message
+        get() = errorType.message
 }
