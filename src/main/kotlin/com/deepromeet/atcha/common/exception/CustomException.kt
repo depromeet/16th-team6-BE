@@ -1,9 +1,8 @@
 package com.deepromeet.atcha.common.exception
 
 abstract class CustomException(
-    val errorType: BaseErrorType
+    val errorType: BaseErrorType,
 ) : RuntimeException() {
-
     abstract fun readResolve(): Any
 
     val status: Int

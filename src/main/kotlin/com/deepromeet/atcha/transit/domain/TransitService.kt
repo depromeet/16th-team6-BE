@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class TransitService(
-    private val tMapTransitClient: TMapTransitClient
+    private val tMapTransitClient: TMapTransitClient,
 ) {
     fun getRoutes(): TMapRouteResponse {
         return tMapTransitClient.getRoutes(
@@ -17,8 +17,8 @@ class TransitService(
                 endX = "127.027636",
                 endY = "37.497950",
                 count = 5,
-                searchDttm = "202502142100"
-            )
+                searchDttm = "202502142100",
+            ),
         )
     }
 }

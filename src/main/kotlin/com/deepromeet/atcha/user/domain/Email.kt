@@ -2,7 +2,6 @@ package com.deepromeet.atcha.user.domain
 
 @JvmInline
 value class Email(val value: String) {
-
     init {
         require(value.matches(EMAIL_REGEX)) { "Invalid email format: $value" }
     }

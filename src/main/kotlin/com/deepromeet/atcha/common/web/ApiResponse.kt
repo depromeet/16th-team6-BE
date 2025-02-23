@@ -12,11 +12,9 @@ data class ApiResponse<T>(
     val result: T? = null,
 ) {
     companion object {
-        fun <T> success(result: T): ApiResponse<T> =
-            ApiResponse(responseCode = "SUCCESS", result = result)
+        fun <T> success(result: T): ApiResponse<T> = ApiResponse(responseCode = "SUCCESS", result = result)
 
-        fun success(): ApiResponse<Unit> =
-            ApiResponse(responseCode = "SUCCESS")
+        fun success(): ApiResponse<Unit> = ApiResponse(responseCode = "SUCCESS")
 
         fun success(message: String): ApiResponse<Unit> =
             ApiResponse(

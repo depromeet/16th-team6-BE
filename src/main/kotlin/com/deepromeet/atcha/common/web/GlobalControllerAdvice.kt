@@ -12,7 +12,6 @@ private val logger = KotlinLogging.logger {}
 
 @RestControllerAdvice
 class GlobalControllerAdvice {
-
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(
         exception: CustomException,
@@ -29,14 +28,12 @@ class GlobalControllerAdvice {
                     exception.errorType.errorCode,
                     request.requestURI,
                     exception.message,
-                )
+                ),
             )
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(
-        exception: Exception
-    ): ResponseEntity<ApiResponse<Unit>> {
+    fun handleException(exception: Exception): ResponseEntity<ApiResponse<Unit>> {
         logger.error(exception) { "알 수 없는 서버 에러입니다" }
         return ResponseEntity.internalServerError()
             .body(
@@ -44,7 +41,7 @@ class GlobalControllerAdvice {
                     "INTERNAL_SERVER_ERROR",
                     exception.message
                         ?: "알 수 없는 서버 에러입니다",
-                )
+                ),
             )
     }
 }

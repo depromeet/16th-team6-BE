@@ -16,5 +16,5 @@ enum class TransitErrorType(
 }
 
 sealed class TransitException(
-    errorCode: BaseErrorType
+    errorCode: BaseErrorType,
 ) : CustomException(errorCode)

@@ -14,9 +14,8 @@ private val log = KotlinLogging.logger {}
 @ActiveProfiles("local")
 class TransitServiceTest(
     @Autowired
-    private val transitService: TransitService
+    private val transitService: TransitService,
 ) {
-
     @Test
     fun `TMAP API 응답이 정상이다`() {
         // When: API 호출

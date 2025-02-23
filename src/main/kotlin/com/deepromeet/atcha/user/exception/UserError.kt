@@ -15,9 +15,8 @@ enum class UserErrorType(
 }
 
 sealed class UserException(
-    errorCode: BaseErrorType
+    errorCode: BaseErrorType,
 ) : CustomException(errorCode) {
-
     data object NotFound : UserException(UserErrorType.NOTIFICATION_NOT_FOUND) {
         override fun readResolve(): Any = NotFound
     }
