@@ -38,9 +38,14 @@ feign:
         loggerLevel: FULL
 
 kakao:
-  client-id: {CLIENT_ID}
+  client-id: ${OAUTH_KAKAO_CLIENT_ID}
   api:
     url: https://kapi.kakao.com/
   oauth:
     url: https://kauth.kakao.com/oauth
 
+jwt:
+  access:
+    secret: ${JWT_ACCESS_SECRET}
+  refresh:
+    secret: ${JWT_REFRESH_SECRET}
