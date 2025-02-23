@@ -19,7 +19,7 @@ interface TMapLocationClient {
         @RequestParam centerLon: Double,
         @RequestParam page: Int,
         @RequestParam count: Int,
-        @RequestParam appKey: String,
+        @RequestParam appKey: String = "\${tmap.api.app-key}",
         @RequestParam version: String = "1"
     ): TMapPOIResponse
 }

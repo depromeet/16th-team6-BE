@@ -2,15 +2,12 @@ package com.deepromeet.atcha.location.domain
 
 import com.deepromeet.atcha.common.dto.Cursor
 import com.deepromeet.atcha.location.infrastructure.client.TMapLocationClient
-import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Component
 
 @Component
 class LocationReader(
-    private val tMapLocationClient: TMapLocationClient,
-    @Value("\${tmap.api.app-key}")
-    private val appKey: String
+    private val tMapLocationClient: TMapLocationClient
 ) {
     fun read(
         keyword: String,
@@ -22,14 +19,9 @@ class LocationReader(
             currentCoordinate.lat,
             currentCoordinate.lon,
             cursor.page,
-            cursor.size,
-            appKey
+            cursor.size
         ).let {
             return it.toLocations()
         }
-    }
-
-    fun read(coordinate: Coordinate) {
-        TODO()
     }
 }
