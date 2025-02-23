@@ -51,7 +51,7 @@ dependencyManagement {
 
 detekt {
     config.setFrom(
-        files("$rootDir/config/detekt.yml"),
+        files("$rootDir/config/detekt.yml")
     )
     autoCorrect = true
     buildUponDefaultConfig = true

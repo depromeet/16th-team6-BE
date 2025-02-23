@@ -17,8 +17,8 @@ class TransitService(
                 endX = "127.027636",
                 endY = "37.497950",
                 count = 5,
-                searchDttm = "202502142100",
-            ),
+                searchDttm = "202502142100"
+            )
         )
     }
 }
