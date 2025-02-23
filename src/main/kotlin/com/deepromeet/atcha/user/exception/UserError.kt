@@ -8,10 +8,9 @@ enum class UserErrorType(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
-    override val logLevel: LogLevel
+    override val logLevel: LogLevel,
 ) : BaseErrorType {
     NOTIFICATION_NOT_FOUND(404, "NTF_001", "해당 ID의 알림이 없습니다", LogLevel.WARN),
-    ;
 }
 
 sealed class UserException(

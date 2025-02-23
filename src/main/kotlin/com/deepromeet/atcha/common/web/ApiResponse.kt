@@ -27,11 +27,11 @@ data class ApiResponse<T>(
             path: String,
             message: String,
         ): ApiResponse<Unit> =
-                ApiResponse(
-                        path = path,
-                        responseCode = errorCode,
-                        message = message,
-                )
+            ApiResponse(
+                path = path,
+                responseCode = errorCode,
+                message = message,
+            )
 
         fun error(
             errorCode: String,
