@@ -2,8 +2,7 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.infrastructure.client.response.TMapRouteResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.junit.jupiter.api.Assertions.*
-
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

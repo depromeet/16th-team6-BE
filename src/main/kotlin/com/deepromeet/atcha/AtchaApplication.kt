@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class AtchaApplication
 
 fun main(args: Array<String>) {
-	runApplication<AtchaApplication>(*args)
+    runApplication<AtchaApplication>(*args)
 }
