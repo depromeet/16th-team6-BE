@@ -18,7 +18,7 @@ class GlobalControllerAdvice {
         exception: CustomException,
         request: HttpServletRequest,
     ): ResponseEntity<ApiResponse<Unit>> {
-        when(exception.errorType.logLevel) {
+        when (exception.errorType.logLevel) {
             LogLevel.ERROR -> logger.error(exception) { exception.message }
             LogLevel.WARN -> logger.warn(exception) { exception.message }
             else -> logger.info(exception) { exception.message }
@@ -33,11 +33,9 @@ class GlobalControllerAdvice {
             )
     }
 
-
     @ExceptionHandler(Exception::class)
     fun handleException(
-        exception: Exception,
-        request: HttpServletRequest,
+        exception: Exception
     ): ResponseEntity<ApiResponse<Unit>> {
         logger.error(exception) { "알 수 없는 서버 에러입니다" }
         return ResponseEntity.internalServerError()

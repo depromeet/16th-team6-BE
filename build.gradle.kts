@@ -1,9 +1,12 @@
 plugins {
-	kotlin("jvm") version "1.9.25"
-	kotlin("plugin.spring") version "1.9.25"
 	id("org.springframework.boot") version "3.4.2"
 	id("io.spring.dependency-management") version "1.1.7"
-	kotlin("plugin.jpa") version "1.9.25"
+
+	kotlin("jvm") version "2.0.10"
+	kotlin("plugin.spring") version "2.0.10"
+	kotlin("plugin.jpa") version "2.0.10"
+
+	id("io.gitlab.arturbosch.detekt") version "1.23.7"
 }
 
 group = "com.deepromeet"
@@ -17,9 +20,13 @@ java {
 
 repositories {
 	mavenCentral()
+	maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
 }
 
+
 extra["springCloudVersion"] = "2024.0.0"
+
+apply(plugin = "io.gitlab.arturbosch.detekt")
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -38,10 +45,23 @@ dependencies {
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
+val reportMerge by tasks.registering(io.gitlab.arturbosch.detekt.report.ReportMergeTask::class) {
+	output.set(rootProject.layout.buildDirectory.file("reports/detekt/merge.xml"))
+}
+
 dependencyManagement {
 	imports {
 		mavenBom("org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}")
 	}
+}
+
+detekt {
+	config.setFrom(
+		files("$rootDir/config/detekt.yml")
+	)
+	autoCorrect = true
+	buildUponDefaultConfig = true
+	debug = true
 }
 
 kotlin {
@@ -50,12 +70,32 @@ kotlin {
 	}
 }
 
+tasks {
+	test {
+		useJUnitPlatform()
+	}
+
+	check {
+		dependsOn(reportMerge)  // ✅ check 태스크가 reportMerge 실행하도록 변경
+	}
+}
+
+reportMerge {
+	input.from(tasks.detekt.map { it.xmlReportFile })
+}
+
 allOpen {
 	annotation("jakarta.persistence.Entity")
 	annotation("jakarta.persistence.MappedSuperclass")
 	annotation("jakarta.persistence.Embeddable")
 }
 
-tasks.withType<Test> {
-	useJUnitPlatform()
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+	reports {
+		sarif.required.set(true)
+		xml.required.set(true)
+		txt.required.set(false)
+	}
+
+	jvmTarget = "17"
 }

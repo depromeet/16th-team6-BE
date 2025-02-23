@@ -19,7 +19,6 @@ enum class FeignErrorType(
 
     override val errorReason: ErrorReason
         get() = ErrorReason(status, errorCode, message)
-
 }
 
 sealed class FeignException(

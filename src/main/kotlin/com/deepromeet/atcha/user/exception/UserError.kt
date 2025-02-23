@@ -25,5 +25,4 @@ sealed class UserException(
     data object NotFound : UserException(UserErrorType.NOTIFICATION_NOT_FOUND) {
         override fun readResolve(): Any = NotFound
     }
-
 }

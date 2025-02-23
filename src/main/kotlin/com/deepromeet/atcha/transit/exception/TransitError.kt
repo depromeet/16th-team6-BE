@@ -11,15 +11,10 @@ enum class TransitErrorType(
     private val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-
-    ;
     override val errorReason: ErrorReason
         get() = ErrorReason(status, errorCode, message)
-
 }
 
 sealed class TransitException(
     errorCode: BaseErrorType
-) : CustomException(errorCode) {
-
-}
+) : CustomException(errorCode)
