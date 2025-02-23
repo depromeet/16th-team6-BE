@@ -1,5 +1,6 @@
 package com.deepromeet.seulseul.auth.infrastructure.response
 
+import com.deepromeet.seulseul.user.domain.User
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
@@ -13,6 +14,13 @@ data class KakaoUserInfoResponse(
     val thumbnailImageUrl: String get() = kakaoAccount.profile.thumbnailImageUrl
     val profileImageUrl: String get() = kakaoAccount.profile.profileImageUrl
     val profile: Profile get() = kakaoAccount.profile
+
+    fun toDomain() : User = User(
+            kakaoId = kakaoId,
+            nickname = nickname,
+            thumbnailImageUrl = thumbnailImageUrl,
+            profileImageUrl = profileImageUrl
+        )
 }
 
 data class KakaoAccount(
