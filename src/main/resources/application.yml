@@ -24,3 +24,11 @@ logging:
           jdbc:
             bind: trace
         SQL: trace
+    com.deepromeet.seulseul: DEBUG  # FeignClient 패키지 로깅 활성화
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+
+tmap:
+  api:
+    url: ${TMAP_API_URL}
+    app-key: ${TMAP_API_KEY}
