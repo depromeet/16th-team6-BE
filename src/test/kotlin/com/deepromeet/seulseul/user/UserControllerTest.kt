@@ -60,18 +60,25 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(200)
 
+        val findUser = userReader.findById(savedUser.id)
+
         // then
-        val result = RestAssured.given().log().all()
+        assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
+    }
+
+
+    @Test
+    fun `회원 삭제`() {
+        // given && when
+        RestAssured.given().log().all()
             .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            .contentType(ContentType.JSON)
-            .body(userInfoUpdateRequest)
-            .`when`().get("/api/members/me")
+            .`when`().delete("/api/members/me")
             .then().log().all()
             .statusCode(200)
-            .extract().`as`(ApiResponse::class.java)
-            .result
-        val objectMapper = jacksonObjectMapper()
-        val findUser: User = objectMapper.convertValue(result, User::class.java)
-        assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
+
+        val findUser = userReader.findById(savedUser.id)
+
+        // then
+        assertThat(findUser.isDeleted).isTrue()
     }
 }

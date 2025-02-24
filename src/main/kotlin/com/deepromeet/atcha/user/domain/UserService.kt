@@ -25,4 +25,10 @@ class UserService(
         user.trackingAgreement = userInfoUpdateRequest.trackingAgreement
         return UserInfoResponse.from(user)
     }
+
+    @Transactional
+    fun deleteUser(id: Long) {
+        val user = userReader.findById(id)
+        user.isDeleted = true
+    }
 }

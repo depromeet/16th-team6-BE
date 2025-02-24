@@ -20,4 +20,10 @@ class UserController(
     fun updateUserInfo(@CurrentUser id: Long,
                        @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest) : ApiResponse<UserInfoResponse> =
         ApiResponse.success(userService.updateUserInfo(id, userInfoUpdateRequest))
+
+    @DeleteMapping("/members/me")
+    fun deleteUser(@CurrentUser id: Long) : ApiResponse<Unit> {
+        userService.deleteUser(id)
+        return ApiResponse.success()
+    }
 }
