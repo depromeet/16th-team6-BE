@@ -16,12 +16,16 @@ class TokenGenerator(
     @Value("\${jwt.refresh.secret}")
     private val refreshSecret: String,
 ) {
+    companion object {
+        private val blackList : MutableSet<String> = mutableSetOf() // todo 만료 시간 이후 리스트에서 지우기
+    }
+
     private val tokenKeyMap = mapOf(
         TokenType.ACCESS to Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret)),
         TokenType.REFRESH to Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
     )
 
-    fun generateToken(userId: Long) : TokenInfo {
+    fun generateTokens(userId: Long) : TokenInfo {
         val now = Date()
         val accessToken = generateToken(userId, now, TokenType.ACCESS)
         val refreshToken = generateToken(userId, now, TokenType.REFRESH)
@@ -29,11 +33,9 @@ class TokenGenerator(
     }
 
     fun validateToken(token: String, tokenType: TokenType) {
+        validateContainBlacklist(token)
         try {
-            Jwts.parserBuilder()
-                .setSigningKey(tokenKeyMap.get(tokenType))
-                .build()
-                .parse(token)
+            validateJwtFormat(tokenType, token)
         } catch (e: ExpiredJwtException) {
             throw TokenException.ExpiredToken
         } catch (e: Exception) {
@@ -56,12 +58,31 @@ class TokenGenerator(
         }
     }
 
-    private fun generateToken(userId: Long, now: Date, tokenType: TokenType) :String {
+    fun expireToken(token: String) { // todo 로그아웃시 호출
+        blackList.add(token)
+    }
+
+    private fun generateToken(userId: Long, now: Date, tokenType: TokenType) : String {
         return Jwts.builder()
             .setSubject(userId.toString())
             .setIssuedAt(now)
             .setExpiration(Date(now.time + tokenType.expirationMills))
             .signWith(tokenKeyMap.get(tokenType))
             .compact()
+    }
+
+    private fun validateJwtFormat(tokenType: TokenType, token: String) {
+        Jwts.parserBuilder()
+            .setSigningKey(tokenKeyMap.get(tokenType))
+            .build()
+            .parseClaimsJws(token)
+            .body.get("sub")
+            ?: throw TokenException.NotValidToken
+    }
+
+    private fun validateContainBlacklist(token: String) {
+        if (blackList.contains(token)) {
+            throw TokenException.ExpiredToken
+        }
     }
 }
