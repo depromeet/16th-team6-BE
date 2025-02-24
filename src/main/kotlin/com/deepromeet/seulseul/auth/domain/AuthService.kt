@@ -16,7 +16,8 @@ import org.springframework.stereotype.Service
 class AuthService(
     private val kakaoApiClient: KakaoApiClient,
     private val tokenGenerator: TokenGenerator,
-    private val userReader: UserReader
+    private val userReader: UserReader,
+    private val userTokenReader: UserTokenReader,
 ) {
     fun checkUserExists(authorizationHeader: String, provider: Provider) : ExistsUserResponse {
         if (provider == Provider.KAKAO) {
@@ -34,9 +35,10 @@ class AuthService(
         val user = kakaoUserInfo.toDomain()
         val savedUser = userReader.save(user)
         val token = tokenGenerator.generateToken(savedUser.id)
+        val userToken = UserToken(savedUser.id, token)
+        userTokenReader.save(userToken)
 
-        log.info { "User SingUp Success $savedUser" }
-        log.info { "generate token = $token" }
+        log.info { "SingUp Success!! userId = ${savedUser.id} token = $userToken" }
 
         return SignUpResponse(savedUser, token)
     }
@@ -45,6 +47,11 @@ class AuthService(
         val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader) // todo 예외 처리
         val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
         val token = tokenGenerator.generateToken(user.id)
+        val userToken = UserToken(user.id, token)
+        userTokenReader.save(userToken)
+
+        log.info { "Login Success!! userId = ${user.id} token = $userToken" }
+
         return LoginResponse(user, token);
     }
 
