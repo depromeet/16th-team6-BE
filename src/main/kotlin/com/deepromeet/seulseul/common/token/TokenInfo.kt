@@ -1,4 +1,4 @@
-package com.deepromeet.seulseul.auth.domain
+package com.deepromeet.seulseul.common.token
 
 data class TokenInfo(
     val accessToken: String,
