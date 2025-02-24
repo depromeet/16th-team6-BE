@@ -66,7 +66,6 @@ class UserControllerTest(
         assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
     }
 
-
     @Test
     fun `회원 삭제`() {
         // given && when
@@ -74,7 +73,7 @@ class UserControllerTest(
             .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
             .`when`().delete("/api/members/me")
             .then().log().all()
-            .statusCode(200)
+            .statusCode(204)
 
         val findUser = userReader.findById(savedUser.id)
 
