@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 @FeignClient(
     name = "kakaoApi",
     url = "\${kakao.api.url}",
-    configuration = [kakaoFeignConfig::class, LoggingConfiguration::class]
+    configuration = [KakaoFeignConfig::class, LoggingConfiguration::class]
 )
 interface KakaoApiClient {
     @GetMapping("/v2/user/me")
