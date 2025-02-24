@@ -1,11 +1,9 @@
 package com.deepromeet.atcha.location.infrastructure.client
 
-import com.deepromeet.atcha.location.infrastructure.client.response.TMapPOIResponse
-import com.deepromeet.atcha.location.infrastructure.client.response.TMapReverseLabelResponse
-import com.deepromeet.atcha.transit.infrastructure.client.TMapFeignConfig
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.location.domain.POI
+import com.deepromeet.atcha.location.domain.POIFinder
+import org.springframework.stereotype.Component
 
 @FeignClient(
     name = "tmap-location",
