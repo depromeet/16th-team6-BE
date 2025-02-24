@@ -50,8 +50,10 @@ class LocationController(
         }
 
     @GetMapping("/histories")
-    fun getRecentPOIs(): ApiResponse<List<POIResponse>> =
-        locationService.getPOIHistories().let {
+    fun getRecentPOIs(
+        @ModelAttribute coordinate: Coordinate
+    ): ApiResponse<List<POIResponse>> =
+        locationService.getPOIHistories(coordinate).let {
             return ApiResponse.success(
                 it.map { poi -> POIResponse.from(poi) }
             )

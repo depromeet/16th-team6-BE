@@ -27,9 +27,10 @@ class LocationService(
         poiHistoryManager.append(user, poi)
     }
 
-    fun getPOIHistories(): List<POI> {
+    fun getPOIHistories(currentCoordinate: Coordinate): List<POI> {
         val user = userReader.read(USER_ID)
-        return poiHistoryManager.getAll(user)
+        val pois = poiHistoryManager.getAll(user)
+        return DistanceCalculator.calculate(pois, currentCoordinate)
     }
 
     fun removePOIHistory(poi: POI) {
