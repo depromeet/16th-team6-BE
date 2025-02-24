@@ -1,7 +1,4 @@
 spring:
-  config:
-    activate:
-      on-profile: local
   datasource:
     url: jdbc:mysql://${SPRING_DATABASE_HOST}:${SPRING_DATABASE_PORT}/${SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
     username: ${SPRING_DATABASE_USERNAME}
@@ -15,20 +12,8 @@ spring:
         show-sql: true
         format_sql: true
         default_batch_fetch_size: 100
-logging:
-  level:
-    tracer: trace
-    org:
-      hibernate:
-        orm:
-          jdbc:
-            bind: trace
-        SQL: trace
-    com.deepromeet.seulseul: DEBUG  # FeignClient 패키지 로깅 활성화
-    org.springframework.cloud.openfeign: DEBUG
-    feign: DEBUG
 
 tmap:
   api:
-    url: ${TMAP_API_URL}
+    url: https://apis.openapi.sk.com
     app-key: ${TMAP_API_KEY}

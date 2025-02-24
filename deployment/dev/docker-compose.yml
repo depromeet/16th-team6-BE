@@ -1,0 +1,83 @@
+networks:
+  app-tier:
+    driver: bridge
+services:
+  atcha-blue:
+    networks:
+      - app-tier
+    image: ghcr.io/jiwonkkang/atcha:latest
+    depends_on:
+      - redis
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_DATABASE_HOST=${SPRING_DATABASE_HOST}
+      - SPRING_DATABASE_PORT=${SPRING_DATABASE_PORT}
+      - SPRING_DATABASE_NAME=${SPRING_DATABASE_NAME}
+      - SPRING_DATABASE_USERNAME=${SPRING_DATABASE_USERNAME}
+      - SPRING_DATABASE_PASSWORD=${SPRING_DATABASE_PASSWORD}
+      - TMAP_API_KEY=${TMAP_API_KEY}
+    restart: always
+    healthcheck:
+      test: "curl -f http://localhost:8080/health || exit 1"
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  atcha-green:
+    networks:
+      - app-tier
+    image: ghcr.io/jiwonkkang/atcha:latest
+    depends_on:
+      - redis
+      - mysql
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - SPRING_DATABASE_HOST=${SPRING_DATABASE_HOST}
+      - SPRING_DATABASE_PORT=${SPRING_DATABASE_PORT}
+      - SPRING_DATABASE_NAME=${SPRING_DATABASE_NAME}
+      - SPRING_DATABASE_USERNAME=${SPRING_DATABASE_USERNAME}
+      - SPRING_DATABASE_PASSWORD=${SPRING_DATABASE_PASSWORD}
+      - TMAP_API_KEY=${TMAP_API_KEY}
+    restart: always
+    healthcheck:
+      test: "curl -f http://localhost:8080/health || exit 1"
+      interval: 1m
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+  redis:
+    container_name: atcha-redis
+    networks:
+      - app-tier
+    image: redis:latest
+    ports:
+      - "6379:6379"
+  mysql:
+    image: mysql:8.0
+    container_name: atcha-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${SPRING_DATABASE_NAME}
+      MYSQL_USER: ${SPRING_DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATABASE_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - app-tier
+  nginx:
+    image: nginx:1.15-alpine
+    container_name: nginx
+    networks:
+      - app-tier
+    restart: unless-stopped
+    volumes:
+      - ./data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf
+      - ./nginx/log:/var/log/nginx
+      - /etc/localtime:/etc/localtime
+    ports:
+      - "80:80"
+    command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
