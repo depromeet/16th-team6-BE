@@ -1,7 +1,8 @@
-package com.deepromeet.seulseul.auth.domain
+package com.deepromeet.seulseul.auth
 
 import com.deepromeet.seulseul.auth.api.request.SignUpRequest
 import com.deepromeet.seulseul.auth.api.request.Terms
+import com.deepromeet.seulseul.auth.domain.AuthService
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.domain.response.LoginResponse
 import com.deepromeet.seulseul.auth.domain.response.SignUpResponse

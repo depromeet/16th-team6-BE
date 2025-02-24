@@ -1,4 +1,4 @@
-package com.deepromeet.seulseul.auth.domain
+package com.deepromeet.seulseul.auth
 
 import com.deepromeet.seulseul.common.token.TokenGenerator
 import io.jsonwebtoken.Jwts

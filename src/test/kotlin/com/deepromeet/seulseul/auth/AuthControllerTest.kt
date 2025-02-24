@@ -1,4 +1,4 @@
-package com.deepromeet.seulseul.auth.api.controller
+package com.deepromeet.seulseul.auth
 
 import com.deepromeet.seulseul.auth.api.request.SignUpRequest
 import com.deepromeet.seulseul.auth.api.request.Terms
