@@ -10,6 +10,7 @@ class CustomErrorDecoder : ErrorDecoder {
     ): Exception {
         return when (response.status()) {
             400 -> FeignException.ExternalApiBadRequestError
+            403 -> FeignException.ExternalApiForbiddenError
             404 -> FeignException.ExternalApiNotFoundError
             500 -> FeignException.ExternalApiInternalServerError
             else -> {

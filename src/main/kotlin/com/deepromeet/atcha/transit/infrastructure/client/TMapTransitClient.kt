@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping
 @FeignClient(
     name = "tmap",
     url = "\${tmap.api.url}",
-    configuration = [TransitFeignConfig::class],
+    configuration = [TransitFeignConfig::class]
 )
 interface TMapTransitClient {
     @GetMapping("/transit/routes")

@@ -6,7 +6,7 @@ import java.time.LocalDateTime
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class ApiResponse<T>(
     val responseCode: String,
-    val timeStamp: LocalDateTime = LocalDateTime.now(),
+    val timeStamp: LocalDateTime? = null,
     val path: String? = null,
     val message: String? = null,
     val result: T? = null
@@ -19,7 +19,7 @@ data class ApiResponse<T>(
         fun success(message: String): ApiResponse<Unit> =
             ApiResponse(
                 responseCode = "SUCCESS",
-                message = message,
+                message = message
             )
 
         fun error(
@@ -29,8 +29,9 @@ data class ApiResponse<T>(
         ): ApiResponse<Unit> =
             ApiResponse(
                 path = path,
+                timeStamp = LocalDateTime.now(),
                 responseCode = errorCode,
-                message = message,
+                message = message
             )
 
         fun error(
@@ -39,7 +40,8 @@ data class ApiResponse<T>(
         ): ApiResponse<Unit> =
             ApiResponse(
                 responseCode = errorCode,
-                message = message,
+                timeStamp = LocalDateTime.now(),
+                message = message
             )
     }
 }
