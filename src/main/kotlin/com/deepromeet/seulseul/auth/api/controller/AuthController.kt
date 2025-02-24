@@ -48,4 +48,9 @@ class AuthController(
 //        val result = authService.logout(id)
 //        log.info { "result=$result" }
     }
+
+    @GetMapping("/auth/reissue")
+    fun reissueToken(@RequestHeader("Authorization") refreshToken: String) {
+        authService.reissueToken(refreshToken.substring("Bearer ".length))
+    }
 }

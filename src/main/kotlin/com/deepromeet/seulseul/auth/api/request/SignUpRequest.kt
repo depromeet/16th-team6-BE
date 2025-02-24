@@ -8,5 +8,6 @@ data class SignUpRequest(
 )
 
 data class Terms(
-    val alert: Boolean
+    val alert: Boolean = true,
+    val tracking: Boolean = true
 )

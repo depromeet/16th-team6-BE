@@ -9,6 +9,7 @@ import com.deepromeet.seulseul.auth.exception.AuthException
 import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
 import com.deepromeet.seulseul.common.token.TokenGenerator
+import com.deepromeet.seulseul.common.token.TokenType
 import com.deepromeet.seulseul.user.domain.UserReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -37,7 +38,7 @@ class AuthService(
         }
         val user = kakaoUserInfo.toDomain()
         val savedUser = userReader.save(user)
-        val token = tokenGenerator.generateToken(savedUser.id)
+        val token = tokenGenerator.generateTokens(savedUser.id)
         val userToken = UserToken(savedUser.id, token)
         userTokenReader.save(userToken)
 
@@ -50,12 +51,25 @@ class AuthService(
     fun login(authorizationHeader: String, provider: Int) : LoginResponse {
         val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader) // todo 예외 처리
         val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
-        val token = tokenGenerator.generateToken(user.id)
+        val token = tokenGenerator.generateTokens(user.id)
         val userToken = UserToken(user.id, token)
         userTokenReader.save(userToken)
 
         log.info { "Login Success!! userId = ${user.id} token = $userToken" }
 
         return LoginResponse(user, token);
+    }
+
+    @Transactional
+    fun reissueToken(refreshToken: String) {
+        tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userToken = userTokenReader.findByRefreshToken(refreshToken)
+        tokenGenerator.expireToken(userToken.accessToken)
+        tokenGenerator.expireToken(userToken.refreshToken)
+        val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
+        userToken.let {
+            it.accessToken = newTokenInfo.accessToken
+            it.refreshToken = newTokenInfo.refreshToken
+        }
     }
 }

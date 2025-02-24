@@ -88,7 +88,7 @@ class AuthServiceIntegrationTest {
         val profile = Profile("newUser", "new@test.com", "newUrl")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
         `when`(kakaoApiClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
-        val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true))
+        val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true, true))
 
         // when
         val response: SignUpResponse = authService.signUp(authHeader, signUpRequest)
@@ -115,7 +115,7 @@ class AuthServiceIntegrationTest {
             profileImageUrl=kakaoUserInfo.profileImageUrl
         )
         userReader.save(existingUser)
-        val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true))
+        val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true, true))
 
         // when & then
         assertThatThrownBy { authService.signUp(authHeader, signUpRequest) }

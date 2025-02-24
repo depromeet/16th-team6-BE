@@ -28,7 +28,7 @@ class UserControllerTest(
     @BeforeEach
     fun issueToken() {
         savedUser = userReader.save(savedUser)
-        val generateToken = tokenGenerator.generateToken(savedUser.id)
+        val generateToken = tokenGenerator.generateTokens(savedUser.id)
         accessToken = generateToken.accessToken
     }
 
