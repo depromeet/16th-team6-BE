@@ -29,4 +29,18 @@ class LocationReader(
             throw LocationException.LocationApiError
         }
     }
+
+    fun read(coordinate: Coordinate): Location {
+        try {
+            tMapLocationClient.getReverseGeoLabel(
+                coordinate.lat,
+                coordinate.lon
+            ).let {
+                return it.toLocation()
+            }
+        } catch (e: FeignException) {
+            logger.error(e) { "Failed to read location from TMap API" }
+            throw LocationException.LocationApiError
+        }
+    }
 }

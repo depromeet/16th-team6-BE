@@ -12,4 +12,8 @@ class LocationService(
     ): List<POI> {
         return locationReader.readPOIs(keyword, currentCoordinate)
     }
+
+    fun getLocation(coordinate: Coordinate): Location {
+        return locationReader.read(coordinate)
+    }
 }

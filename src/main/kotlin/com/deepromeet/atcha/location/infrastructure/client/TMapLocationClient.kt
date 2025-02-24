@@ -21,4 +21,13 @@ interface TMapLocationClient {
         @RequestParam page: Int = 1,
         @RequestParam count: Int = 20
     ): TMapPOIResponse
+
+    @GetMapping("/tmap/geo/reverseLabel")
+    fun getReverseGeoLabel(
+        @RequestParam centerLat: Double,
+        @RequestParam centerLon: Double,
+        @RequestParam reqCoordType: String = "WGS84GEO",
+        @RequestParam resCoordType: String = "WGS84GEO",
+        @RequestParam reqLevel: Int = 19
+    ): TMapReverseLabelResponse
 }
