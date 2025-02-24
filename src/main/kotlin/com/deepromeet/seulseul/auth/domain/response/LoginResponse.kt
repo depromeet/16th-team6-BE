@@ -1,6 +1,6 @@
 package com.deepromeet.seulseul.auth.domain.response
 
-import com.deepromeet.seulseul.auth.domain.TokenInfo
+import com.deepromeet.seulseul.common.token.TokenInfo
 import com.deepromeet.seulseul.user.domain.User
 
 data class LoginResponse(

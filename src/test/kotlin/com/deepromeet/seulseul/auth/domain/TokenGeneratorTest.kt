@@ -1,5 +1,6 @@
 package com.deepromeet.seulseul.auth.domain
 
+import com.deepromeet.seulseul.common.token.TokenGenerator
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
