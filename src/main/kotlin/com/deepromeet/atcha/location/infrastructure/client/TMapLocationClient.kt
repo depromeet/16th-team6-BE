@@ -1,7 +1,8 @@
 package com.deepromeet.atcha.location.infrastructure.client
 
 import com.deepromeet.atcha.location.infrastructure.client.response.TMapPOIResponse
-import com.deepromeet.atcha.transit.infrastructure.client.TransitFeignConfig
+import com.deepromeet.atcha.location.infrastructure.client.response.TMapReverseLabelResponse
+import com.deepromeet.atcha.transit.infrastructure.client.TMapFeignConfig
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam
 @FeignClient(
     name = "tmap-location",
     url = "\${tmap.api.url}",
-    configuration = [TransitFeignConfig::class]
+    configuration = [TMapFeignConfig::class]
 )
 interface TMapLocationClient {
     @GetMapping("/tmap/pois")

@@ -6,10 +6,10 @@ import org.springframework.stereotype.Service
 class LocationService(
     private val locationReader: LocationReader
 ) {
-    fun getLocations(
+    fun getPOIs(
         keyword: String,
         currentCoordinate: Coordinate
-    ): List<Location> {
-        return locationReader.read(keyword, currentCoordinate)
+    ): List<POI> {
+        return locationReader.readPOIs(keyword, currentCoordinate)
     }
 }

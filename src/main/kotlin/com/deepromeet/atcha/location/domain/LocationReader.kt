@@ -12,17 +12,17 @@ private val logger = KotlinLogging.logger {}
 class LocationReader(
     private val tMapLocationClient: TMapLocationClient
 ) {
-    fun read(
+    fun readPOIs(
         keyword: String,
         currentCoordinate: Coordinate
-    ): List<Location> {
+    ): List<POI> {
         try {
             tMapLocationClient.getPOIs(
                 keyword,
                 currentCoordinate.lat,
                 currentCoordinate.lon
             ).let {
-                return it.toLocations()
+                return it.toPOIs()
             }
         } catch (e: FeignException) {
             logger.error(e) { "Failed to read locations from TMap API" }

@@ -4,7 +4,7 @@ import feign.RequestInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 
-class TransitFeignConfig(
+class TMapFeignConfig(
     @Value("\${tmap.api.app-key}")
     private val appKey: String
 ) {

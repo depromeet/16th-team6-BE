@@ -2,12 +2,13 @@ package com.deepromeet.atcha.location.infrastructure.client.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.Location
+import com.deepromeet.atcha.location.domain.POI
 
 data class TMapPOIResponse(
     val searchPoiInfo: SearchPoiInfo
 ) {
-    fun toLocations(): List<Location> {
-        return searchPoiInfo.pois.poi.map { it.toLocation() }
+    fun toPOIs(): List<POI> {
+        return searchPoiInfo.pois.poi.map { it.toPOI() }
     }
 
     data class SearchPoiInfo(
@@ -30,10 +31,9 @@ data class TMapPOIResponse(
         val lowerBizName: String,
         val newAddressList: NewAddressList
     ) {
-        fun toLocation(): Location {
-            return Location(
-                name,
-                Coordinate(noorLat.toDouble(), noorLon.toDouble()),
+        fun toPOI(): POI {
+            return POI(
+                Location(name, Coordinate(noorLat.toDouble(), noorLon.toDouble())),
                 getBusinessCategory(),
                 getLoadAddress(),
                 radius.toDouble().toInt()
