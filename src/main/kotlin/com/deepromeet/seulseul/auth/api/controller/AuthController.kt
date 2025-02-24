@@ -1,7 +1,7 @@
 package com.deepromeet.seulseul.auth.api.controller
 
 import com.deepromeet.seulseul.auth.api.request.SignUpRequest
-import com.deepromeet.seulseul.auth.domain.OAuthService
+import com.deepromeet.seulseul.auth.domain.AuthService
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.domain.response.LoginResponse
 import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
@@ -17,13 +17,13 @@ val log = KotlinLogging.logger {}
 @RestController
 @RequestMapping("/api")
 class AuthController(
-    private val oAuthService: OAuthService
+    private val authService: AuthService
 ) {
     @GetMapping("/auth/check")
     fun checkUserExists(@RequestHeader("Authorization") authorizationHeader: String,
                         @RequestParam("provider") provider: Int) : ApiResponse<ExistsUserResponse> {
         log.info { "existsUser CALL" }
-        val result = oAuthService.checkUserExists(authorizationHeader, Provider.findByOrdinal(provider))
+        val result = authService.checkUserExists(authorizationHeader, Provider.findByOrdinal(provider))
         return ApiResponse.success(result)
     }
 
@@ -32,23 +32,23 @@ class AuthController(
     fun signUp(@RequestHeader("Authorization") authorizationHeader: String,
                @RequestBody signUpRequest: SignUpRequest,
                response: HttpServletResponse) : ApiResponse<SignUpResponse> {
-        val result = oAuthService.signUp(authorizationHeader, signUpRequest)
+        val result = authService.signUp(authorizationHeader, signUpRequest)
         return ApiResponse.success(result);
     }
 
     @GetMapping("/auth/login")
     fun login(@RequestHeader("Authorization") authorizationHeader: String,
               @RequestParam("provider") provider: Int) : ApiResponse<LoginResponse> {
-        val result = oAuthService.login(authorizationHeader, provider)
+        val result = authService.login(authorizationHeader, provider)
         log.info { "Login Success $result" }
         return ApiResponse.success(result)
     }
 
     @PostMapping("/auth/logout")
-    fun logout(@RequestHeader("Authorization") authorizationHeader: String,
+    fun logout(@RequestHeader("Authorization") accessTokenWithType: String,
                @RequestParam("provider") provider: Int) {
         log.info { "logout CALL" }
-        val result = oAuthService.logout(authorizationHeader)
+        val result = authService.logout(accessTokenWithType)
         log.info { "result=$result" }
     }
 }

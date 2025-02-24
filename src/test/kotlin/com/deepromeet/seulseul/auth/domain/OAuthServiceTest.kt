@@ -28,10 +28,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
         "jwt.refresh.secret=thisisfortestddGVzdFJmZXNoU2VjcmV0S2V5VmFsdWUxMjM0NTY3OA"
     ]
 )
-class OAuthServiceIntegrationTest {
+class AuthServiceIntegrationTest {
 
     @Autowired
-    lateinit var oAuthService: OAuthService
+    lateinit var authService: AuthService
 
     @Autowired
     lateinit var userReader: UserReader
@@ -50,7 +50,7 @@ class OAuthServiceIntegrationTest {
         `when`(kakaoApiClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
 
         // when
-        val response: ExistsUserResponse = oAuthService.checkUserExists(authHeader, Provider.KAKAO)
+        val response: ExistsUserResponse = authService.checkUserExists(authHeader, Provider.KAKAO)
 
         // then
         assertThat(response.exists).isFalse()
@@ -73,7 +73,7 @@ class OAuthServiceIntegrationTest {
         userReader.save(existingUser)
 
         // when
-        val response: ExistsUserResponse = oAuthService.checkUserExists(authHeader, Provider.KAKAO)
+        val response: ExistsUserResponse = authService.checkUserExists(authHeader, Provider.KAKAO)
 
         // then
         assertThat(response.exists).isTrue()
@@ -90,7 +90,7 @@ class OAuthServiceIntegrationTest {
         val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true))
 
         // when
-        val response: SignUpResponse = oAuthService.signUp(authHeader, signUpRequest)
+        val response: SignUpResponse = authService.signUp(authHeader, signUpRequest)
 
         // then
         assertThat(response.id).isNotNull()
@@ -117,7 +117,7 @@ class OAuthServiceIntegrationTest {
         val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true))
 
         // when & then
-        assertThatThrownBy { oAuthService.signUp(authHeader, signUpRequest) }
+        assertThatThrownBy { authService.signUp(authHeader, signUpRequest) }
             .isInstanceOf(AuthException.AlreadyExistsUser::class.java)
     }
 
@@ -139,7 +139,7 @@ class OAuthServiceIntegrationTest {
         val savedUser = userReader.save(user)
 
         // when
-        val response: LoginResponse = oAuthService.login(authHeader, Provider.KAKAO.ordinal)
+        val response: LoginResponse = authService.login(authHeader, Provider.KAKAO.ordinal)
 
         // then
         assertThat(response.id).isEqualTo(savedUser.id)

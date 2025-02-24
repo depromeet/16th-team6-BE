@@ -8,11 +8,12 @@ import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.exception.AuthException
 import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
+import com.deepromeet.seulseul.common.token.TokenGenerator
 import com.deepromeet.seulseul.user.domain.UserReader
 import org.springframework.stereotype.Service
 
 @Service
-class OAuthService(
+class AuthService(
     private val kakaoApiClient: KakaoApiClient,
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader
