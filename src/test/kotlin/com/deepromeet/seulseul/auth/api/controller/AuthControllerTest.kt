@@ -43,7 +43,7 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun 존재하는_유저() {
+    fun `존재하는 유저`() {
         RestAssured.given().log().all()
             .param("provider", "1")
             .header("Authorization", "Bearer $accessToken")
@@ -53,7 +53,7 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun 로그인_요청() {
+    fun `로그인 요청`() {
         // given : 회원가입
         val signUpRequest = SignUpRequest(
             "경기도 화성시 동탄순환대로26길 21",
