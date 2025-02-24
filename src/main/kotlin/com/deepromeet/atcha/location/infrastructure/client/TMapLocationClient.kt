@@ -17,7 +17,7 @@ interface TMapLocationClient {
         @RequestParam searchKeyword: String,
         @RequestParam centerLat: Double,
         @RequestParam centerLon: Double,
-        @RequestParam page: Int,
-        @RequestParam count: Int
+        @RequestParam page: Int = 1,
+        @RequestParam count: Int = 20
     ): TMapPOIResponse
 }

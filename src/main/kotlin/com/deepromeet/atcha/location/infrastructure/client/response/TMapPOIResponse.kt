@@ -2,22 +2,13 @@ package com.deepromeet.atcha.location.infrastructure.client.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.Location
-import org.springframework.data.domain.PageRequest
-import org.springframework.data.domain.Slice
-import org.springframework.data.domain.SliceImpl
 
 data class TMapPOIResponse(
     val searchPoiInfo: SearchPoiInfo
 ) {
-    fun toLocations(): Slice<Location> {
-        return SliceImpl(
-            searchPoiInfo.pois.poi.map { it.toLocation() },
-            PageRequest.of(searchPoiInfo.page.toInt(), searchPoiInfo.count.toInt()),
-            hasNext()
-        )
+    fun toLocations(): List<Location> {
+        return searchPoiInfo.pois.poi.map { it.toLocation() }
     }
-
-    private fun hasNext() = searchPoiInfo.totalCount.toInt() > searchPoiInfo.page.toInt() * searchPoiInfo.count.toInt()
 
     data class SearchPoiInfo(
         val totalCount: String,

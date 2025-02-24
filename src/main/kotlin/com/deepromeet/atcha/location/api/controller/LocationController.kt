@@ -1,8 +1,6 @@
 package com.deepromeet.atcha.location.api.controller
 
-import com.deepromeet.atcha.common.dto.Cursor
 import com.deepromeet.atcha.common.web.ApiResponse
-import com.deepromeet.atcha.common.web.SliceResponse
 import com.deepromeet.atcha.location.api.request.LocationSearchRequest
 import com.deepromeet.atcha.location.api.response.LocationResponse
 import com.deepromeet.atcha.location.domain.LocationService
@@ -18,16 +16,14 @@ class LocationController(
 ) {
     @GetMapping
     fun getLocations(
-        @ModelAttribute request: LocationSearchRequest,
-        @ModelAttribute cursor: Cursor
-    ): ApiResponse<SliceResponse<LocationResponse>> =
+        @ModelAttribute request: LocationSearchRequest
+    ): ApiResponse<List<LocationResponse>> =
         locationService.getLocations(
             request.keyword,
-            request.toCoordinate(),
-            cursor
+            request.toCoordinate()
         ).let {
             return ApiResponse.success(
-                SliceResponse.from(it.map { location -> LocationResponse.from(location) })
+                it.map { location -> LocationResponse.from(location) }
             )
         }
 }
