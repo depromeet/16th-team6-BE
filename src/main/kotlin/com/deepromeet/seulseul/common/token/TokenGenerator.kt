@@ -8,7 +8,6 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.util.*
-import javax.crypto.SecretKey
 
 @Component
 class TokenGenerator(
@@ -16,26 +15,23 @@ class TokenGenerator(
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
     private val refreshSecret: String,
-) { // todo 토큰 타입에 따른 작업 분기처리 리팩터링
-    private val ACCESS_EXPIRATION_MILLISECONDS: Long = 1000L * 60 * 30 // 1시간
-    private val REFRESH_EXPIRATION_MILLISECONDS: Long = 1000L * 60 * 60 * 24 * 30 // 30일
-    private val accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret))
-    private val refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
+) {
+    private val tokenKeyMap = mapOf(
+        TokenType.ACCESS to Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret)),
+        TokenType.REFRESH to Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
+    )
 
     fun generateToken(userId: Long) : TokenInfo {
         val now = Date()
-        val accessExpiration = Date(now.time + ACCESS_EXPIRATION_MILLISECONDS)
-        val refreshExpiration = Date(now.time + REFRESH_EXPIRATION_MILLISECONDS)
-
-        val accessToken = generateToken(userId, now, accessExpiration , accessKey)
-        val refreshToken = generateToken(userId, now, refreshExpiration , refreshKey)
+        val accessToken = generateToken(userId, now, TokenType.ACCESS)
+        val refreshToken = generateToken(userId, now, TokenType.REFRESH)
         return TokenInfo(accessToken, refreshToken)
     }
 
-    fun validateAccessToken(token: String) {
+    fun validateToken(token: String, tokenType: TokenType) {
         try {
             Jwts.parserBuilder()
-                .setSigningKey(accessKey)
+                .setSigningKey(tokenKeyMap.get(tokenType))
                 .build()
                 .parse(token)
         } catch (e: ExpiredJwtException) {
@@ -45,10 +41,10 @@ class TokenGenerator(
         }
     }
 
-    fun getUserIdByToken(token: String) : Long {
+    fun getUserIdByToken(token: String, tokenType: TokenType) : Long {
         try {
             val body = Jwts.parserBuilder()
-                .setSigningKey(accessKey)
+                .setSigningKey(tokenKeyMap.get(tokenType))
                 .build()
                 .parseClaimsJws(token)
                 .body
@@ -60,12 +56,12 @@ class TokenGenerator(
         }
     }
 
-    private fun generateToken(userId: Long, now: Date, expiration: Date, secretKey: SecretKey) :String {
+    private fun generateToken(userId: Long, now: Date, tokenType: TokenType) :String {
         return Jwts.builder()
             .setSubject(userId.toString())
             .setIssuedAt(now)
-            .setExpiration(expiration)
-            .signWith(secretKey)
+            .setExpiration(Date(now.time + tokenType.expirationMills))
+            .signWith(tokenKeyMap.get(tokenType))
             .compact()
     }
 }
