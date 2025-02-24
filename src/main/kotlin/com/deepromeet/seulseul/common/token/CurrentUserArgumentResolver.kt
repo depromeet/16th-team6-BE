@@ -35,7 +35,7 @@ class CurrentUserArgumentResolver(
             throw RequestException.NotValidHeader
         }
         val token = authorization.substring(TOKEN_TYPE.length)
-        tokenGenerator.validateAccessToken(token)
-        return tokenGenerator.getUserIdByToken(token)
+        tokenGenerator.validateToken(token, TokenType.ACCESS)
+        return tokenGenerator.getUserIdByToken(token, TokenType.ACCESS)
     }
 }
