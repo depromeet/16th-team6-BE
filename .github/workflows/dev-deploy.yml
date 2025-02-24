@@ -1,4 +1,4 @@
-name: Cercat-Application Deploy with Docker
+name: Atcha Deploy with Docker
 
 on:
   push:
