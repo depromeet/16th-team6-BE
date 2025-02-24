@@ -6,6 +6,7 @@ import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.domain.response.LoginResponse
 import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
+import com.deepromeet.seulseul.common.token.CurrentUser
 import com.deepromeet.seulseul.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletResponse
@@ -22,7 +23,6 @@ class AuthController(
     @GetMapping("/auth/check")
     fun checkUserExists(@RequestHeader("Authorization") authorizationHeader: String,
                         @RequestParam("provider") provider: Int) : ApiResponse<ExistsUserResponse> {
-        log.info { "existsUser CALL" }
         val result = authService.checkUserExists(authorizationHeader, Provider.findByOrdinal(provider))
         return ApiResponse.success(result)
     }
@@ -40,15 +40,12 @@ class AuthController(
     fun login(@RequestHeader("Authorization") authorizationHeader: String,
               @RequestParam("provider") provider: Int) : ApiResponse<LoginResponse> {
         val result = authService.login(authorizationHeader, provider)
-        log.info { "Login Success $result" }
         return ApiResponse.success(result)
     }
 
     @PostMapping("/auth/logout")
-    fun logout(@RequestHeader("Authorization") accessTokenWithType: String,
-               @RequestParam("provider") provider: Int) {
-        log.info { "logout CALL" }
-        val result = authService.logout(accessTokenWithType)
-        log.info { "result=$result" }
+    fun logout(@CurrentUser id: Long) {
+//        val result = authService.logout(id)
+//        log.info { "result=$result" }
     }
 }

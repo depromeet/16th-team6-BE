@@ -12,6 +12,7 @@ enum class AuthErrorType(
 ) : BaseErrorType {
     NO_MATCHED_PROVIDER(400, "NMP_001", "일치하는 로그인 플랫폼이 없습니다.", LogLevel.WARN),
     ALREADY_EXISTS_USER(400, "AEU_001", "이미 존재하는 유저입니다.", LogLevel.WARN),
+    NO_MATCHED_USER_TOKEN(400, "NMU_001", "일치하는 유저 토큰이 없습니다.", LogLevel.WARN),
     ;
 
     override val errorReason: ErrorReason

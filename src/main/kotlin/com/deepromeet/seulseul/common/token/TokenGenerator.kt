@@ -16,7 +16,7 @@ class TokenGenerator(
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
     private val refreshSecret: String,
-) {
+) { // todo 토큰 타입에 따른 작업 분기처리 리팩터링
     private val ACCESS_EXPIRATION_MILLISECONDS: Long = 1000L * 60 * 30 // 1시간
     private val REFRESH_EXPIRATION_MILLISECONDS: Long = 1000L * 60 * 60 * 24 * 30 // 30일
     private val accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret))

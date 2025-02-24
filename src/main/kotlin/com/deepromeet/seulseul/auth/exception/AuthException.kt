@@ -11,6 +11,10 @@ sealed class AuthException(
     }
 
     data object AlreadyExistsUser : AuthException(AuthErrorType.ALREADY_EXISTS_USER) {
-        private fun readResolve(): Any = NoMatchedProvider
+        private fun readResolve(): Any = AlreadyExistsUser
+    }
+
+    data object NoMatchedUserToken : AuthException(AuthErrorType.NO_MATCHED_USER_TOKEN) {
+        private fun readResolve(): Any = NoMatchedUserToken
     }
 }

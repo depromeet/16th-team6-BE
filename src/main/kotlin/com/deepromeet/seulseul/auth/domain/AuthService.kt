@@ -11,6 +11,7 @@ import com.deepromeet.seulseul.auth.infrastructure.client.Provider
 import com.deepromeet.seulseul.common.token.TokenGenerator
 import com.deepromeet.seulseul.user.domain.UserReader
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthService(
@@ -19,6 +20,7 @@ class AuthService(
     private val userReader: UserReader,
     private val userTokenReader: UserTokenReader,
 ) {
+    @Transactional(readOnly = true)
     fun checkUserExists(authorizationHeader: String, provider: Provider) : ExistsUserResponse {
         if (provider == Provider.KAKAO) {
             val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader)
@@ -27,6 +29,7 @@ class AuthService(
         throw AuthException.NoMatchedProvider
     }
 
+    @Transactional
     fun signUp(authorizationHeader: String, signUpRequest: SignUpRequest) : SignUpResponse {
         val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader) // todo 예외 처리
         if (userReader.checkExists(kakaoUserInfo.kakaoId)) { // todo save 과정에서 uk로 예외처리
@@ -43,6 +46,7 @@ class AuthService(
         return SignUpResponse(savedUser, token)
     }
 
+    @Transactional
     fun login(authorizationHeader: String, provider: Int) : LoginResponse {
         val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader) // todo 예외 처리
         val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
@@ -53,9 +57,5 @@ class AuthService(
         log.info { "Login Success!! userId = ${user.id} token = $userToken" }
 
         return LoginResponse(user, token);
-    }
-
-    fun logout(authorizationHeader: String) {
-        kakaoApiClient.logout(authorizationHeader)
     }
 }
