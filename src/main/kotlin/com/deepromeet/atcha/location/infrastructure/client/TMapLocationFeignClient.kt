@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.location.infrastructure.client
 
 import com.deepromeet.atcha.location.infrastructure.client.response.TMapPOIResponse
+import com.deepromeet.atcha.location.infrastructure.client.response.TMapReverseLabelResponse
 import com.deepromeet.atcha.transit.infrastructure.client.TMapFeignConfig
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
@@ -20,4 +21,13 @@ interface TMapLocationFeignClient {
         @RequestParam page: Int = 1,
         @RequestParam count: Int = 20
     ): TMapPOIResponse
+
+    @GetMapping("/tmap/geo/reverseLabel")
+    fun getReverseGeoLabel(
+        @RequestParam centerLat: Double,
+        @RequestParam centerLon: Double,
+        @RequestParam reqCoordType: String = "WGS84GEO",
+        @RequestParam resCoordType: String = "WGS84GEO",
+        @RequestParam reqLevel: Int = 19
+    ): TMapReverseLabelResponse
 }

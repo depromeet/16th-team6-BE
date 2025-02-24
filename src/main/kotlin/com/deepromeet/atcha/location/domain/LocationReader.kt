@@ -9,7 +9,8 @@ private val logger = KotlinLogging.logger {}
 
 @Component
 class LocationReader(
-    private val poiFinder: POIFinder
+    private val poiFinder: POIFinder,
+    private val reverseLabeler: ReverseLabeler
 ) {
     fun readPOIs(
         keyword: String,
@@ -18,8 +19,17 @@ class LocationReader(
         try {
             return poiFinder.find(keyword, currentCoordinate)
         } catch (e: FeignException) {
-            logger.error(e) { "Failed to read POIs from TMap" }
+            logger.error(e) { "Failed to read POIs from " }
             throw LocationException.FailedToReadPOIs
+        }
+    }
+
+    fun read(coordinate: Coordinate): Location {
+        try {
+            return reverseLabeler.label(coordinate)
+        } catch (e: FeignException) {
+            logger.error(e) { "Failed to read location from TMap" }
+            throw LocationException.FailedToReadLocation
         }
     }
 }
