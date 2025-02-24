@@ -24,6 +24,10 @@ repositories {
     maven(url = "https://oss.sonatype.org/content/repositories/snapshots")
 }
 
+noArg {
+    annotation("com.deepromeet.atcha.common.annotation.NoArg")
+}
+
 extra["springCloudVersion"] = "2024.0.0"
 
 dependencies {

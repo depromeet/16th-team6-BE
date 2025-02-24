@@ -17,3 +17,7 @@ tmap:
   api:
     url: https://apis.openapi.sk.com
     app-key: ${TMAP_API_KEY}
+
+redis:
+  host: redis
+  port: 6379
