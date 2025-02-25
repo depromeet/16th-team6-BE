@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.user.domain
 
-import com.deepromeet.seulseul.user.api.request.UserInfoUpdateRequest
-import com.deepromeet.seulseul.user.api.response.UserInfoResponse
+import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
+import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
