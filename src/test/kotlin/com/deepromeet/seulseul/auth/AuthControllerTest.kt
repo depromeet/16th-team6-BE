@@ -6,8 +6,8 @@ import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.seulseul.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.seulseul.auth.infrastructure.response.Profile
-import com.deepromeet.seulseul.support.BaseControllerTest
 import com.deepromeet.seulseul.common.web.ApiResponse
+import com.deepromeet.seulseul.support.BaseControllerTest
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
 import org.junit.jupiter.api.BeforeEach
@@ -98,7 +98,6 @@ class AuthControllerTest : BaseControllerTest() {
             .then().log().all()
             .extract().`as`(ApiResponse::class.java)
             .result
-
         val objectMapper = jacksonObjectMapper()
         val signUpResponse = objectMapper.convertValue(result, SignUpResponse::class.java)
 

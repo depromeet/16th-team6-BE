@@ -66,6 +66,7 @@ class TokenGenerator(
         return Jwts.builder()
             .setSubject(userId.toString())
             .setIssuedAt(now)
+            .setId(UUID.randomUUID().toString())
             .setExpiration(Date(now.time + tokenType.expirationMills))
             .signWith(tokenKeyMap.get(tokenType))
             .compact()
