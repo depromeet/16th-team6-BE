@@ -1,6 +1,6 @@
 package com.deepromeet.seulseul.user
 
-import com.deepromeet.seulseul.common.BaseControllerTest
+import com.deepromeet.seulseul.support.BaseControllerTest
 import com.deepromeet.seulseul.common.token.TokenGenerator
 import com.deepromeet.seulseul.common.web.ApiResponse
 import com.deepromeet.seulseul.user.api.request.UserInfoUpdateRequest
