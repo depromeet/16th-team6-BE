@@ -7,6 +7,7 @@ import com.deepromeet.seulseul.auth.domain.response.LoginResponse
 import com.deepromeet.seulseul.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.infrastructure.client.Provider
+import com.deepromeet.seulseul.common.token.Token
 import com.deepromeet.seulseul.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletResponse
@@ -45,12 +46,11 @@ class AuthController(
 
     @PostMapping("/auth/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun logout(@RequestHeader("Authorization") accessToken: String) =
-        authService.logout(accessToken.substring("Bearer ".length))
+    fun logout(@Token accessToken: String) = authService.logout(accessToken)
 
     @GetMapping("/auth/reissue")
-    fun reissueToken(@RequestHeader("Authorization") refreshToken: String) : ApiResponse<ReissueTokenResponse> {
-        val result = authService.reissueToken(refreshToken.substring("Bearer ".length))
+    fun reissueToken(@Token refreshToken: String) : ApiResponse<ReissueTokenResponse> {
+        val result = authService.reissueToken(refreshToken)
         return ApiResponse.success(result)
     }
 }
