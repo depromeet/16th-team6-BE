@@ -1,7 +1,7 @@
 spring:
-  config:
-    activate:
-      on-profile: local
+#  config:
+#    activate:
+#      on-profile: local
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -36,6 +36,11 @@ feign:
     config:
       default:
         loggerLevel: FULL
+
+tmap:
+    api:
+        url: https://apis.openapi.sk.com
+        app-key: ${TMAP_API_KEY}
 
 kakao:
   client-id: ${OAUTH_KAKAO_CLIENT_ID}
