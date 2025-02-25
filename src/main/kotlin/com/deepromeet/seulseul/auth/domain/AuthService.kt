@@ -63,7 +63,11 @@ class AuthService(
 
     @Transactional
     fun logout(accessToken: String) {
-
+        tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
+        val userToken = userTokenReader.findByAccessToken(accessToken)
+        tokenGenerator.expireToken(userToken.accessToken)
+        tokenGenerator.expireToken(userToken.refreshToken)
+        log.info { "Logout Success!! userId = ${userToken.id}" }
     }
 
     @Transactional
