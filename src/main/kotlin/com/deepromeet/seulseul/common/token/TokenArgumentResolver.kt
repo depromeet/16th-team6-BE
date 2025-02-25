@@ -10,16 +10,13 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
-
 @Component
-class CurrentUserArgumentResolver(
-    private val tokenGenerator: TokenGenerator
-) : HandlerMethodArgumentResolver {
+class TokenArgumentResolver : HandlerMethodArgumentResolver {
     private val TOKEN_TYPE = "Bearer "
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
-        parameter.hasParameterAnnotation(CurrentUser::class.java) &&
-        parameter.parameterType == Long::class.java
+        parameter.hasParameterAnnotation(Token::class.java) &&
+        parameter.parameterType == String::class.java
 
 
     override fun resolveArgument(
@@ -27,15 +24,13 @@ class CurrentUserArgumentResolver(
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Long {
+    ): String {
         val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
             ?: throw RequestException.NoRequestInfo
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (authorization == null || !authorization.startsWith(TOKEN_TYPE)) {
             throw RequestException.NotValidHeader
         }
-        val token = authorization.substring(TOKEN_TYPE.length)
-        tokenGenerator.validateToken(token, TokenType.ACCESS)
-        return tokenGenerator.getUserIdByToken(token, TokenType.ACCESS)
+        return authorization.substring(TOKEN_TYPE.length)
     }
 }
