@@ -6,7 +6,7 @@ import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.seulseul.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.seulseul.auth.infrastructure.response.Profile
-import com.deepromeet.seulseul.common.BaseControllerTest
+import com.deepromeet.seulseul.support.BaseControllerTest
 import com.deepromeet.seulseul.common.web.ApiResponse
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
@@ -21,7 +21,6 @@ class AuthControllerTest : BaseControllerTest() {
     private val profile = Profile("test", "test@test.com", "testUrl")
     private val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
 
-    // todo beforeEach로 저장된 유저 정보 지우기
     @BeforeEach
     fun setMockKakaoApiClient() {
         `when`(kakaoApiClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)

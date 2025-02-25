@@ -1,12 +1,14 @@
-package com.deepromeet.seulseul.common
+package com.deepromeet.seulseul.support
 
 import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
 import io.restassured.RestAssured
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.web.server.LocalServerPort
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 
+@ExtendWith(DatabaseCleanerExtension::class)
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT,
     properties = ["kakao.api.url=http://dummy",
@@ -17,7 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 abstract class BaseControllerTest {
 
     @LocalServerPort
-    private val port : Int = 0
+    private val port: Int = 0
 
     @MockitoBean
     lateinit var kakaoApiClient: KakaoApiClient
