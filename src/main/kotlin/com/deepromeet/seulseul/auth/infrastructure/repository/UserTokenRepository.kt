@@ -7,4 +7,6 @@ interface UserTokenRepository : JpaRepository<UserToken, Long> {
     fun findByUserId(userId: Long) : UserToken?
 
     fun findByRefreshToken(refreshToken: String) : UserToken?
+
+    fun findByAccessToken(accessToken: String) : UserToken?
 }

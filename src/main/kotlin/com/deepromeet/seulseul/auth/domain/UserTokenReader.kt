@@ -16,4 +16,6 @@ class UserTokenReader(
     fun findByRefreshToken(refreshToken: String) : UserToken = userTokenRepository.findByRefreshToken(refreshToken)
         ?: throw AuthException.NoMatchedUserToken
 
+    fun findByAccessToken(accessToken: String) : UserToken = userTokenRepository.findByAccessToken(accessToken)
+        ?: throw AuthException.NoMatchedUserToken
 }
