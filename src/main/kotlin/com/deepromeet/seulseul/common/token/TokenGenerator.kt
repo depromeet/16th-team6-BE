@@ -58,7 +58,7 @@ class TokenGenerator(
         }
     }
 
-    fun expireToken(token: String) { // todo 로그아웃시 호출
+    fun expireToken(token: String) {
         blackList.add(token)
     }
 
