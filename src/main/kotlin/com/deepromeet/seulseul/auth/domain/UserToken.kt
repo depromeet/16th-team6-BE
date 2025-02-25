@@ -13,16 +13,18 @@ class UserToken(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     val userId: Long,
+    var providerToken: String,
     var accessToken: String,
     var refreshToken: String,
 ) : BaseTimeEntity() {
-    constructor(userId: Long, tokenInfo: TokenInfo) : this(
+    constructor(userId: Long, providerToken: String, tokenInfo: TokenInfo) : this(
         userId = userId,
+        providerToken = providerToken,
         accessToken = tokenInfo.accessToken,
         refreshToken = tokenInfo.refreshToken
     )
 
     override fun toString(): String {
-        return "UserToken(id=$id, userId=$userId, accessToken='$accessToken', refreshToken='$refreshToken')"
+        return "UserToken(id=$id, userId=$userId, providerToken='$providerToken', accessToken='$accessToken', refreshToken='$refreshToken')"
     }
 }
