@@ -40,7 +40,7 @@ class AuthService(
         val user = kakaoUserInfo.toDomain()
         val savedUser = userReader.save(user)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, token)
+        val userToken = UserToken(savedUser.id, authorizationHeader.substring("Bearer ".length), token)
         userTokenReader.save(userToken)
 
         log.info { "SingUp Success!! userId = ${savedUser.id} token = $userToken" }
@@ -53,7 +53,7 @@ class AuthService(
         val kakaoUserInfo = kakaoApiClient.getUserInfo(authorizationHeader) // todo 예외 처리
         val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, token)
+        val userToken = UserToken(user.id, authorizationHeader.substring("Bearer ".length), token)
         userTokenReader.save(userToken)
 
         log.info { "Login Success!! userId = ${user.id} token = $userToken" }
@@ -67,6 +67,7 @@ class AuthService(
         val userToken = userTokenReader.findByAccessToken(accessToken)
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
+        kakaoApiClient.logout("Bearer ${userToken.providerToken}")
         log.info { "Logout Success!! userId = ${userToken.id}" }
     }
 
