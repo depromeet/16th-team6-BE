@@ -4,6 +4,7 @@ import com.deepromeet.seulseul.auth.api.controller.log
 import com.deepromeet.seulseul.auth.api.request.SignUpRequest
 import com.deepromeet.seulseul.auth.domain.response.ExistsUserResponse
 import com.deepromeet.seulseul.auth.domain.response.LoginResponse
+import com.deepromeet.seulseul.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.seulseul.auth.domain.response.SignUpResponse
 import com.deepromeet.seulseul.auth.exception.AuthException
 import com.deepromeet.seulseul.auth.infrastructure.client.KakaoApiClient
@@ -61,7 +62,12 @@ class AuthService(
     }
 
     @Transactional
-    fun reissueToken(refreshToken: String) {
+    fun logout(accessToken: String) {
+
+    }
+
+    @Transactional
+    fun reissueToken(refreshToken: String) : ReissueTokenResponse {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
         val userToken = userTokenReader.findByRefreshToken(refreshToken)
         tokenGenerator.expireToken(userToken.accessToken)
@@ -71,5 +77,6 @@ class AuthService(
             it.accessToken = newTokenInfo.accessToken
             it.refreshToken = newTokenInfo.refreshToken
         }
+        return ReissueTokenResponse(newTokenInfo)
     }
 }
