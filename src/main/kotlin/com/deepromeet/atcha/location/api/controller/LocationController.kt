@@ -25,14 +25,10 @@ class LocationController(
     fun getPOIs(
         @ModelAttribute request: POISearchRequest
     ): ApiResponse<List<POIResponse>> =
-        locationService.getPOIs(
-            request.keyword,
-            request.toCoordinate()
-        ).let {
-            return ApiResponse.success(
-                it.map { poi -> POIResponse.from(poi) }
-            )
-        }
+        ApiResponse.success(
+            locationService.getPOIs(request.keyword, request.toCoordinate())
+                .map(POIResponse::from)
+        )
 
     @PostMapping("/histories")
     @ResponseStatus(HttpStatus.CREATED)

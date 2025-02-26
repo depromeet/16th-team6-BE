@@ -14,22 +14,16 @@ class TMapLocationClient(
     override fun find(
         keyword: String,
         currentCoordinate: Coordinate
-    ): List<POI> {
+    ): List<POI> =
         tMapLocationFeignClient.getPOIs(
             keyword,
             currentCoordinate.lat,
             currentCoordinate.lon
-        ).let {
-            return it.toPOIs()
-        }
-    }
+        ).toPOIs()
 
-    override fun label(coordinate: Coordinate): Location {
+    override fun label(coordinate: Coordinate): Location =
         tMapLocationFeignClient.getReverseGeoLabel(
             coordinate.lat,
             coordinate.lon
-        ).let {
-            return it.toLocation()
-        }
-    }
+        ).toLocation()
 }
