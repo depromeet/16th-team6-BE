@@ -10,13 +10,16 @@ class UserService(
     private val userReader: UserReader
 ) {
     @Transactional(readOnly = true)
-    fun getUserInfo(id: Long) : UserInfoResponse {
+    fun getUserInfo(id: Long): UserInfoResponse {
         val user = userReader.findById(id)
         return UserInfoResponse.from(user)
     }
 
     @Transactional
-    fun updateUserInfo(id: Long, userInfoUpdateRequest: UserInfoUpdateRequest) : UserInfoResponse {
+    fun updateUserInfo(
+        id: Long,
+        userInfoUpdateRequest: UserInfoUpdateRequest
+    ): UserInfoResponse {
         val user = userReader.findById(id)
         user.nickname = userInfoUpdateRequest.nickname
         user.profileImageUrl = userInfoUpdateRequest.profileImageUrl

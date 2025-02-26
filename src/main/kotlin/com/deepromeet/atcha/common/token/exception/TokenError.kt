@@ -11,14 +11,12 @@ enum class TokenError(
     override val logLevel: LogLevel
 ) : BaseErrorType {
     EXPIRED_TOKEN(400, "ET_001", "만료된 토큰입니다.", LogLevel.WARN),
-    NOT_VALID_TOKEN(400, "NVT_001", "유효하지 않는 토큰입니다.", LogLevel.WARN),
-    ;
+    NOT_VALID_TOKEN(400, "NVT_001", "유효하지 않는 토큰입니다.", LogLevel.WARN)
 }
 
-sealed class TokenException (
+sealed class TokenException(
     errorType: TokenError
 ) : CustomException(errorType) {
-
     data object ExpiredToken : TokenException(TokenError.EXPIRED_TOKEN) {
         override fun readResolve(): Any = ExpiredToken
     }

@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth.domain.response
 
 import com.deepromeet.atcha.common.token.TokenInfo
 
-data class ReissueTokenResponse (
+data class ReissueTokenResponse(
     val accessToken: String,
     val refreshToken: String
 ) {

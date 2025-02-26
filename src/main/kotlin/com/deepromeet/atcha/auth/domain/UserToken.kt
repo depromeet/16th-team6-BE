@@ -15,7 +15,7 @@ class UserToken(
     val userId: Long,
     var providerToken: String,
     var accessToken: String,
-    var refreshToken: String,
+    var refreshToken: String
 ) : BaseTimeEntity() {
     constructor(userId: Long, providerToken: String, tokenInfo: TokenInfo) : this(
         userId = userId,

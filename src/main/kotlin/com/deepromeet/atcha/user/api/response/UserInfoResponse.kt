@@ -9,18 +9,18 @@ data class UserInfoResponse(
     val thumbnailImageUrl: String,
     val profileImageUrl: String,
     val alertAgreement: Boolean,
-    val trackingAgreement: Boolean,
+    val trackingAgreement: Boolean
 ) {
     companion object {
-        fun from(domain: User) = UserInfoResponse(
-            domain.id,
-            domain.kakaoId,
-            domain.nickname,
-            domain.thumbnailImageUrl,
-            domain.profileImageUrl,
-            domain.alertAgreement,
-            domain.trackingAgreement
-        )
+        fun from(domain: User) =
+            UserInfoResponse(
+                domain.id,
+                domain.kakaoId,
+                domain.nickname,
+                domain.thumbnailImageUrl,
+                domain.profileImageUrl,
+                domain.alertAgreement,
+                domain.trackingAgreement
+            )
     }
 }
-

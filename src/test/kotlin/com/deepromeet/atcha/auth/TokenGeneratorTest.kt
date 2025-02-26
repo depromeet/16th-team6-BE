@@ -14,7 +14,7 @@ import org.junit.jupiter.api.Test
 class TokenGeneratorTest {
     private val accessSecret = "dGVzdEFjY2Vzc1NlY3JldEtasdleVZhbHVlMTIzNDU2Nzg="
     private val refreshSecret = "dGVzdFJmZXNoU2VjcmV0S2V5asdVmFsdWUxMjM0NTY3OA=="
-    private lateinit var tokenGenerator : TokenGenerator
+    private lateinit var tokenGenerator: TokenGenerator
 
     @BeforeEach
     fun setUpTokenGenerator() {
@@ -32,22 +32,24 @@ class TokenGeneratorTest {
 
         // accessToken 확인
         val accessKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret))
-        val accessClaims = Jwts.parserBuilder()
-            .setSigningKey(accessKey)
-            .build()
-            .parseClaimsJws(tokenInfo.accessToken)
-            .body
+        val accessClaims =
+            Jwts.parserBuilder()
+                .setSigningKey(accessKey)
+                .build()
+                .parseClaimsJws(tokenInfo.accessToken)
+                .body
         assertEquals(userId.toString(), accessClaims.subject, "Access token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
             .isThrownBy { tokenGenerator.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
 
         // refreshToken 확인
         val refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
-        val refreshClaims = Jwts.parserBuilder()
-            .setSigningKey(refreshKey)
-            .build()
-            .parseClaimsJws(tokenInfo.refreshToken)
-            .body
+        val refreshClaims =
+            Jwts.parserBuilder()
+                .setSigningKey(refreshKey)
+                .build()
+                .parseClaimsJws(tokenInfo.refreshToken)
+                .body
         assertEquals(userId.toString(), refreshClaims.subject, "Refresh token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
             .isThrownBy { tokenGenerator.validateToken(tokenInfo.refreshToken, TokenType.REFRESH) }

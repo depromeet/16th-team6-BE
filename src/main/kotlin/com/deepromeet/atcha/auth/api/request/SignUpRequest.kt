@@ -4,7 +4,7 @@ data class SignUpRequest(
     val address: String,
     val lat: String,
     val log: String,
-    val terms: Terms,
+    val terms: Terms
 )
 
 data class Terms(

@@ -8,19 +8,15 @@ import org.springframework.stereotype.Component
 class UserReader(
     private val userJpaRepository: UserJpaRepository
 ) {
-    fun read(id: Long): User {
-        return userJpaRepository.findById(id).orElseThrow { UserException.NotFound }
-    }
+    fun checkExists(kakaoId: Long): Boolean = userJpaRepository.existsByKakaoId(kakaoId)
 
-    fun read(email: Email): User {
-        return userJpaRepository.findByEmail(email) ?: throw UserException.NotFound
-    }
+    fun save(user: User): User = userJpaRepository.save(user)
 
-    fun checkExists(kakaoId: Long) : Boolean {
-        return userJpaRepository.existsByKakaoId(kakaoId);
-    }
+    fun findById(id: Long): User =
+        userJpaRepository.findById(id)
+            .orElseThrow { UserException.UserNotFound }
 
-    fun save(user: User): User{
-        return userJpaRepository.save(user)
-    }
- }
+    fun findByKakaoId(kakaoId: Long): User =
+        userJpaRepository.findByKakaoId(kakaoId)
+            ?: throw UserException.UserNotFound
+}

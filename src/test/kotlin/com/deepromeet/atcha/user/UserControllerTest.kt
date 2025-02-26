@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.user
 
-import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserReader
@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpHeaders
-
 
 class UserControllerTest(
     @Autowired
@@ -34,13 +33,14 @@ class UserControllerTest(
 
     @Test
     fun `회원 정보 조회`() {
-        val result = RestAssured.given().log().all()
-            .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            .`when`().get("/api/members/me")
-            .then().log().all()
-            .statusCode(200)
-            .extract().`as`(ApiResponse::class.java)
-            .result
+        val result =
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+                .`when`().get("/api/members/me")
+                .then().log().all()
+                .statusCode(200)
+                .extract().`as`(ApiResponse::class.java)
+                .result
         val objectMapper = jacksonObjectMapper()
         val findUser: User = objectMapper.convertValue(result, User::class.java)
         assertThat(findUser).isEqualTo(savedUser)
@@ -49,7 +49,7 @@ class UserControllerTest(
     @Test
     fun `회원 정보 수정`() {
         // given
-        val userInfoUpdateRequest = UserInfoUpdateRequest("새로운 닉네임", "", "", true, true);
+        val userInfoUpdateRequest = UserInfoUpdateRequest("새로운 닉네임", "", "", true, true)
 
         // when
         RestAssured.given().log().all()

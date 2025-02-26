@@ -24,13 +24,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 
 @SpringBootTest(
     webEnvironment = SpringBootTest.WebEnvironment.NONE,
-    properties = ["kakao.api.url=http://dummy",
+    properties = [
+        "kakao.api.url=http://dummy",
         "jwt.access.secret=thisisfortestdGVzdEFjY2Vzc1NlY3JldEtleVZhbHVlMTIzNDU2Nzg=",
         "jwt.refresh.secret=thisisfortestddGVzdFJmZXNoU2VjcmV0S2V5VmFsdWUxMjM0NTY3OA"
     ]
 )
 class AuthServiceIntegrationTest {
-
     @Autowired
     lateinit var authService: AuthService
 
@@ -66,11 +66,13 @@ class AuthServiceIntegrationTest {
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
         `when`(kakaoApiClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
 
-        val existingUser = User(kakaoId=kakaoId,
-            nickname = kakaoUserInfo.nickname,
-            thumbnailImageUrl=kakaoUserInfo.thumbnailImageUrl,
-            profileImageUrl=kakaoUserInfo.profileImageUrl
-        )
+        val existingUser =
+            User(
+                kakaoId = kakaoId,
+                nickname = kakaoUserInfo.nickname,
+                thumbnailImageUrl = kakaoUserInfo.thumbnailImageUrl,
+                profileImageUrl = kakaoUserInfo.profileImageUrl
+            )
         userReader.save(existingUser)
 
         // when
@@ -109,11 +111,13 @@ class AuthServiceIntegrationTest {
         `when`(kakaoApiClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 해당 유저 저장
-        val existingUser = User(kakaoId=kakaoId,
-            nickname = kakaoUserInfo.nickname,
-            thumbnailImageUrl=kakaoUserInfo.thumbnailImageUrl,
-            profileImageUrl=kakaoUserInfo.profileImageUrl
-        )
+        val existingUser =
+            User(
+                kakaoId = kakaoId,
+                nickname = kakaoUserInfo.nickname,
+                thumbnailImageUrl = kakaoUserInfo.thumbnailImageUrl,
+                profileImageUrl = kakaoUserInfo.profileImageUrl
+            )
         userReader.save(existingUser)
         val signUpRequest = SignUpRequest("dummyValue", "37.123", "126.123", Terms(true, true))
 
@@ -132,11 +136,13 @@ class AuthServiceIntegrationTest {
         `when`(kakaoApiClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 로그인할 유저 저장
-        val user = User(kakaoId=kakaoId,
-            nickname = kakaoUserInfo.nickname,
-            thumbnailImageUrl=kakaoUserInfo.thumbnailImageUrl,
-            profileImageUrl=kakaoUserInfo.profileImageUrl
-        )
+        val user =
+            User(
+                kakaoId = kakaoId,
+                nickname = kakaoUserInfo.nickname,
+                thumbnailImageUrl = kakaoUserInfo.thumbnailImageUrl,
+                profileImageUrl = kakaoUserInfo.profileImageUrl
+            )
         val savedUser = userReader.save(user)
 
         // when

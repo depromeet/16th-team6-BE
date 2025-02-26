@@ -17,13 +17,13 @@ class DatabaseCleanerExtension : BeforeEachCallback {
         val em = context.getBean(EntityManager::class.java)
         val tt = context.getBean(TransactionTemplate::class.java)
 
-        tt.execute{ action ->
+        tt.execute { action ->
             em.clear()
             truncateTable(em)
         }
     }
 
-    private fun truncateTable(em : EntityManager) {
+    private fun truncateTable(em: EntityManager) {
         em.createNativeQuery("SET REFERENTIAL_INTEGRITY FALSE").executeUpdate()
         for (tableName in findTableNames(em)) {
             em.createNativeQuery("TRUNCATE TABLE $tableName RESTART IDENTITY").executeUpdate()
@@ -31,8 +31,9 @@ class DatabaseCleanerExtension : BeforeEachCallback {
         em.createNativeQuery("SET REFERENTIAL_INTEGRITY TRUE").executeUpdate()
     }
 
-    private fun findTableNames(em: EntityManager) : List<String> {
-        val query = """
+    private fun findTableNames(em: EntityManager): List<String> {
+        val query =
+            """
             SELECT TABLE_NAME
             FROM INFORMATION_SCHEMA.TABLES
             WHERE TABLE_SCHEMA = 'PUBLIC'

@@ -13,8 +13,12 @@ import org.springframework.web.bind.annotation.RequestHeader
 )
 interface KakaoApiClient {
     @GetMapping("/v2/user/me")
-    fun getUserInfo(@RequestHeader("Authorization") providerToken : String) : KakaoUserInfoResponse
+    fun getUserInfo(
+        @RequestHeader("Authorization") providerToken: String
+    ): KakaoUserInfoResponse
 
     @GetMapping("/v1/user/logout")
-    fun logout(@RequestHeader("Authorization") providerToken : String)
+    fun logout(
+        @RequestHeader("Authorization") providerToken: String
+    )
 }

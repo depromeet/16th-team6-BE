@@ -12,6 +12,7 @@ import java.time.LocalDateTime
 abstract class BaseTimeEntity {
     @CreatedDate
     var createdAt: LocalDateTime? = null
+
     @LastModifiedDate
     var modifiedAt: LocalDateTime? = null
 }

@@ -18,15 +18,15 @@ class TokenArgumentResolver : HandlerMethodArgumentResolver {
         parameter.hasParameterAnnotation(Token::class.java) &&
         parameter.parameterType == String::class.java
 
-
     override fun resolveArgument(
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): String {
-        val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            ?: throw RequestException.NoRequestInfo
+        val request =
+            webRequest.getNativeRequest(HttpServletRequest::class.java)
+                ?: throw RequestException.NoRequestInfo
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (authorization == null || !authorization.startsWith(TOKEN_TYPE)) {
             throw RequestException.NotValidHeader

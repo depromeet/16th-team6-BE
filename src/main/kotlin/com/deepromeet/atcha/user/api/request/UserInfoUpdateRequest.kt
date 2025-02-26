@@ -5,5 +5,5 @@ data class UserInfoUpdateRequest(
     val thumbnailImageUrl: String,
     val profileImageUrl: String,
     val alertAgreement: Boolean,
-    val trackingAgreement: Boolean,
+    val trackingAgreement: Boolean
 )

@@ -10,7 +10,6 @@ import org.springframework.web.context.request.NativeWebRequest
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.method.support.ModelAndViewContainer
 
-
 @Component
 class CurrentUserArgumentResolver(
     private val tokenGenerator: TokenGenerator
@@ -19,8 +18,7 @@ class CurrentUserArgumentResolver(
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
         parameter.hasParameterAnnotation(CurrentUser::class.java) &&
-        parameter.parameterType == Long::class.java
-
+            parameter.parameterType == Long::class.java
 
     override fun resolveArgument(
         parameter: MethodParameter,
@@ -28,8 +26,9 @@ class CurrentUserArgumentResolver(
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
     ): Long {
-        val request = webRequest.getNativeRequest(HttpServletRequest::class.java)
-            ?: throw RequestException.NoRequestInfo
+        val request =
+            webRequest.getNativeRequest(HttpServletRequest::class.java)
+                ?: throw RequestException.NoRequestInfo
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (authorization == null || !authorization.startsWith(TOKEN_TYPE)) {
             throw RequestException.NotValidHeader

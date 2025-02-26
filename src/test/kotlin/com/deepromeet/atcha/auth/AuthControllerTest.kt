@@ -29,12 +29,13 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun 회원가입() { // todo Fixture 만들기
         // given
-        val signUpRequest = SignUpRequest(
-            "경기도 화성시 동탄순환대로26길 21",
-            "37.207581",
-            "127.113558",
-            Terms(true, true)
-        )
+        val signUpRequest =
+            SignUpRequest(
+                "경기도 화성시 동탄순환대로26길 21",
+                "37.207581",
+                "127.113558",
+                Terms(true, true)
+            )
 
         // when & then
         RestAssured.given().log().all()
@@ -59,12 +60,13 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `로그인 요청`() {
         // given : 회원가입
-        val signUpRequest = SignUpRequest(
-            "경기도 화성시 동탄순환대로26길 21",
-            "37.207581",
-            "127.113558",
-            Terms(true, true)
-        )
+        val signUpRequest =
+            SignUpRequest(
+                "경기도 화성시 동탄순환대로26길 21",
+                "37.207581",
+                "127.113558",
+                Terms(true, true)
+            )
         RestAssured.given().log().all()
             .header("Content-Type", "application/json")
             .header("Authorization", "Bearer $providerAccessToken")
@@ -84,20 +86,22 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `로그아웃`() {
         // given 회원가입 + 로그인
-        val signUpRequest = SignUpRequest(
-            "경기도 화성시 동탄순환대로26길 21",
-            "37.207581",
-            "127.113558",
-            Terms(true, true)
-        )
-        val result = RestAssured.given().log().all()
-            .header("Content-Type", "application/json")
-            .header("Authorization", "Bearer $providerAccessToken")
-            .body(signUpRequest)
-            .`when`().post("/api/auth/sign-up")
-            .then().log().all()
-            .extract().`as`(ApiResponse::class.java)
-            .result
+        val signUpRequest =
+            SignUpRequest(
+                "경기도 화성시 동탄순환대로26길 21",
+                "37.207581",
+                "127.113558",
+                Terms(true, true)
+            )
+        val result =
+            RestAssured.given().log().all()
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer $providerAccessToken")
+                .body(signUpRequest)
+                .`when`().post("/api/auth/sign-up")
+                .then().log().all()
+                .extract().`as`(ApiResponse::class.java)
+                .result
         val objectMapper = jacksonObjectMapper()
         val signUpResponse = objectMapper.convertValue(result, SignUpResponse::class.java)
 
@@ -112,20 +116,22 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `토큰 재발급`() {
         // given : 회원가입
-        val signUpRequest = SignUpRequest(
-            "경기도 화성시 동탄순환대로26길 21",
-            "37.207581",
-            "127.113558",
-            Terms(true, true)
-        )
-        val result = RestAssured.given().log().all()
-            .header("Content-Type", "application/json")
-            .header("Authorization", "Bearer $providerAccessToken")
-            .body(signUpRequest)
-            .`when`().post("/api/auth/sign-up")
-            .then().log().all()
-            .extract().`as`(ApiResponse::class.java)
-            .result
+        val signUpRequest =
+            SignUpRequest(
+                "경기도 화성시 동탄순환대로26길 21",
+                "37.207581",
+                "127.113558",
+                Terms(true, true)
+            )
+        val result =
+            RestAssured.given().log().all()
+                .header("Content-Type", "application/json")
+                .header("Authorization", "Bearer $providerAccessToken")
+                .body(signUpRequest)
+                .`when`().post("/api/auth/sign-up")
+                .then().log().all()
+                .extract().`as`(ApiResponse::class.java)
+                .result
 
         val objectMapper = jacksonObjectMapper()
         val signUpResponse = objectMapper.convertValue(result, SignUpResponse::class.java)
