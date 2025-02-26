@@ -8,6 +8,7 @@ import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.client.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
+import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -82,16 +83,19 @@ class AuthService(
 
         return LoginResponse(user, token)
     }
-//
-//    @Transactional
-//    fun logout(accessToken: String) {
-//        tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
-//        val userToken = userTokenReader.findByAccessToken(accessToken)
-//        tokenGenerator.expireToken(userToken.accessToken)
-//        tokenGenerator.expireToken(userToken.refreshToken)
-//        kakaoFeignClient.logout("Bearer ${userToken.providerToken}")
-//        log.info { "Logout Success!! userId = ${userToken.id}" }
-//    }
+
+    @Transactional
+    fun logout(accessToken: String) {
+        tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
+        val userToken = userTokenReader.findByAccessToken(accessToken)
+        tokenGenerator.expireToken(userToken.accessToken)
+        tokenGenerator.expireToken(userToken.refreshToken)
+        val provider = userToken.provider
+        val authClient = authClients[provider.clientBeanName]
+            ?: throw AuthException.NoMatchedProvider
+        authClient.logout("Bearer ${userToken.providerToken}")
+        log.info { "Logout Success!! userId = ${userToken.id}" }
+    }
 //
 //    @Transactional
 //    fun reissueToken(refreshToken: String): ReissueTokenResponse {

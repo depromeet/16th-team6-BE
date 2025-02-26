@@ -54,14 +54,14 @@ class AuthController(
         val result = authService.login(authorizationHeader, provider)
         return ApiResponse.success(result)
     }
-//
-//    @PostMapping("/auth/logout")
-//    fun logout(
-//        @Token accessToken: String
-//    ): ApiResponse<Unit> {
-//        authService.logout(accessToken)
-//        return ApiResponse.success()
-//    }
+
+    @PostMapping("/auth/logout")
+    fun logout(
+        @Token accessToken: String
+    ): ApiResponse<Unit> {
+        authService.logout(accessToken)
+        return ApiResponse.success()
+    }
 //
 //    @GetMapping("/auth/reissue")
 //    fun reissueToken(

@@ -13,4 +13,8 @@ class KakaoClient(
         val kakaoUserInfoResponse = kakaoFeignClient.getUserInfo(providerToken)
         return kakaoUserInfoResponse.toUserInfoResponse()
     }
+
+    override fun logout(providerToken: String) {
+        kakaoFeignClient.logout(providerToken)
+    }
 }
