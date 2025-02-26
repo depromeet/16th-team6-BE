@@ -44,12 +44,17 @@ class AuthService(
             throw AuthException.AlreadyExistsUser
         }
         val user = kakaoUserInfo.toDomain()
+        user.let {
+            it.address = signUpRequest.address
+            it.addressLat = signUpRequest.lat
+            it.addressLog = signUpRequest.log
+        }
         val savedUser = userReader.save(user)
         val token = tokenGenerator.generateTokens(savedUser.id)
         val userToken = UserToken(savedUser.id, authorizationHeader.substring("Bearer ".length), token)
         userTokenReader.save(userToken)
 
-        log.info { "SingUp Success!! userId = ${savedUser.id} token = $userToken" }
+        log.info { "SingUp Success!! user=$user" }
 
         return SignUpResponse(savedUser, token)
     }

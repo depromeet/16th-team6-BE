@@ -14,16 +14,15 @@ class User(
     val id: Long = 0,
     val kakaoId: Long,
     var nickname: String,
-    var thumbnailImageUrl: String,
-    var profileImageUrl: String,
+    var thumbnailImageUrl: String = "",
+    var profileImageUrl: String = "",
+    var address: String = "",
+    var addressLat: Double = 0.0,
+    var addressLog: Double? = 0.0,
     var alertAgreement: Boolean = true,
     var trackingAgreement: Boolean = true,
     var isDeleted: Boolean = false
 ) {
-    override fun toString(): String {
-        return "User(id=$id, kakaoId=$kakaoId, nickname='$nickname', thumbnailImageUrl='$thumbnailImageUrl', profileImageUrl='$profileImageUrl', alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement)"
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -35,8 +34,12 @@ class User(
         if (nickname != other.nickname) return false
         if (thumbnailImageUrl != other.thumbnailImageUrl) return false
         if (profileImageUrl != other.profileImageUrl) return false
+        if (address != other.address) return false
+        if (addressLat != other.addressLat) return false
+        if (addressLog != other.addressLog) return false
         if (alertAgreement != other.alertAgreement) return false
         if (trackingAgreement != other.trackingAgreement) return false
+        if (isDeleted != other.isDeleted) return false
 
         return true
     }
@@ -47,8 +50,18 @@ class User(
         result = 31 * result + nickname.hashCode()
         result = 31 * result + thumbnailImageUrl.hashCode()
         result = 31 * result + profileImageUrl.hashCode()
+        result = 31 * result + address.hashCode()
+        result = 31 * result + addressLat.hashCode()
+        result = 31 * result + addressLog.hashCode()
         result = 31 * result + alertAgreement.hashCode()
         result = 31 * result + trackingAgreement.hashCode()
+        result = 31 * result + isDeleted.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "User(id=$id, kakaoId=$kakaoId, nickname='$nickname', thumbnailImageUrl='$thumbnailImageUrl', profileImageUrl='$profileImageUrl', address='$address', addressLat=$addressLat, addressLog=$addressLog, alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement, isDeleted=$isDeleted)"
+    }
+
+
 }

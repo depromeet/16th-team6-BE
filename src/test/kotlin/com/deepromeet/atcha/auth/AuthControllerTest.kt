@@ -32,8 +32,8 @@ class AuthControllerTest : BaseControllerTest() {
         val signUpRequest =
             SignUpRequest(
                 "경기도 화성시 동탄순환대로26길 21",
-                "37.207581",
-                "127.113558",
+                37.207581,
+                127.113558,
                 Terms(true, true)
             )
 
@@ -63,8 +63,8 @@ class AuthControllerTest : BaseControllerTest() {
         val signUpRequest =
             SignUpRequest(
                 "경기도 화성시 동탄순환대로26길 21",
-                "37.207581",
-                "127.113558",
+                37.207581,
+                127.113558,
                 Terms(true, true)
             )
         RestAssured.given().log().all()
@@ -89,8 +89,8 @@ class AuthControllerTest : BaseControllerTest() {
         val signUpRequest =
             SignUpRequest(
                 "경기도 화성시 동탄순환대로26길 21",
-                "37.207581",
-                "127.113558",
+                37.207581,
+                127.113558,
                 Terms(true, true)
             )
         val result =
@@ -110,7 +110,7 @@ class AuthControllerTest : BaseControllerTest() {
             .header("Authorization", "Bearer ${signUpResponse.accessToken}")
             .`when`().post("/api/auth/logout")
             .then().log().all()
-            .statusCode(204)
+            .statusCode(200)
     }
 
     @Test
@@ -119,8 +119,8 @@ class AuthControllerTest : BaseControllerTest() {
         val signUpRequest =
             SignUpRequest(
                 "경기도 화성시 동탄순환대로26길 21",
-                "37.207581",
-                "127.113558",
+                37.207581,
+                127.113558,
                 Terms(true, true)
             )
         val result =

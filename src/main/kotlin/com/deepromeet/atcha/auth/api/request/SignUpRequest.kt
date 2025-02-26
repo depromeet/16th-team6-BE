@@ -2,8 +2,8 @@ package com.deepromeet.atcha.auth.api.request
 
 data class SignUpRequest(
     val address: String,
-    val lat: String,
-    val log: String,
+    val lat: Double,
+    val log: Double,
     val terms: Terms
 )
 
