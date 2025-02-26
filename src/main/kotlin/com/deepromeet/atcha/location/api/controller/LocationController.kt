@@ -7,12 +7,14 @@ import com.deepromeet.atcha.location.api.response.LocationResponse
 import com.deepromeet.atcha.location.api.response.POIResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.LocationService
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -42,12 +44,10 @@ class LocationController(
         }
 
     @PostMapping("/histories")
+    @ResponseStatus(HttpStatus.CREATED)
     fun addRecentPOI(
         @RequestBody request: POIHistoryRequest
-    ): ApiResponse<Unit> =
-        locationService.addPOIHistory(request.toPOI()).let {
-            return ApiResponse.success()
-        }
+    ) = locationService.addPOIHistory(request.toPOI())
 
     @GetMapping("/histories")
     fun getRecentPOIs(
@@ -60,16 +60,12 @@ class LocationController(
         }
 
     @DeleteMapping("/history")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeRecentPOI(
         @RequestBody request: POIHistoryRequest
-    ): ApiResponse<Unit> =
-        locationService.removePOIHistory(request.toPOI()).let {
-            return ApiResponse.success()
-        }
+    ) = locationService.removePOIHistory(request.toPOI())
 
     @DeleteMapping("/histories")
-    fun clearRecentPOIs(): ApiResponse<Unit> =
-        locationService.clearPOIHistories().let {
-            return ApiResponse.success()
-        }
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    fun clearRecentPOIs() = locationService.clearPOIHistories()
 }
