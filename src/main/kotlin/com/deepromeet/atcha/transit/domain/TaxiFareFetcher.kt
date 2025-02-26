@@ -4,7 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 
 interface TaxiFareFetcher {
     fun fetch(
-        originCoordinate: Coordinate,
-        destinationCoordinate: Coordinate
+        origin: Coordinate,
+        destination: Coordinate
     ): Fare?
 }

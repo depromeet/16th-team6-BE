@@ -10,13 +10,13 @@ class KakaoTaxiFareClient(
     private val kakaoRouteFeignClient: KakaoRouteFeignClient
 ) : TaxiFareFetcher {
     override fun fetch(
-        originCoordinate: Coordinate,
-        destinationCoordinate: Coordinate
+        origin: Coordinate,
+        destination: Coordinate
     ): Fare? {
         val response =
             kakaoRouteFeignClient.getRoute(
-                "${originCoordinate.lon},${originCoordinate.lat}",
-                "${destinationCoordinate.lon},${destinationCoordinate.lat}"
+                "${origin.lon},${origin.lat}",
+                "${destination.lon},${destination.lat}"
             )
         return response.firstTaxiFare()
     }

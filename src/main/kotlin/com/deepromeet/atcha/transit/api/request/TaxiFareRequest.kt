@@ -3,12 +3,12 @@ package com.deepromeet.atcha.transit.api.request
 import com.deepromeet.atcha.location.domain.Coordinate
 
 data class TaxiFareRequest(
-    val originLat: Double,
-    val originLon: Double,
-    val destinationLat: Double,
-    val destinationLon: Double
+    val startLat: Double,
+    val startLon: Double,
+    val endLat: Double,
+    val endLon: Double
 ) {
-    fun toOriginCoordinate(): Coordinate = Coordinate(originLat, originLon)
+    fun toOrigin(): Coordinate = Coordinate(startLat, startLon)
 
-    fun toDestinationCoordinate(): Coordinate = Coordinate(destinationLat, destinationLon)
+    fun toDestination(): Coordinate = Coordinate(endLat, endLon)
 }
