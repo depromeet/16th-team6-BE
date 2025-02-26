@@ -13,9 +13,7 @@ class CustomErrorDecoder : ErrorDecoder {
             403 -> FeignException.ExternalApiForbiddenError
             404 -> FeignException.ExternalApiNotFoundError
             500 -> FeignException.ExternalApiInternalServerError
-            else -> {
-                RuntimeException("외부 API에서 알 수 없는 오류가 발생했습니다 - " + response.reason())
-            }
+            else -> FeignException.ExternalApiUnknownError
         }
     }
 }

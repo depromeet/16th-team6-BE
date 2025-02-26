@@ -1,18 +1,19 @@
 package com.deepromeet.atcha.location.domain
 
-import com.deepromeet.atcha.common.dto.Cursor
-import org.springframework.data.domain.Slice
 import org.springframework.stereotype.Service
 
 @Service
 class LocationService(
     private val locationReader: LocationReader
 ) {
-    fun getLocations(
+    fun getPOIs(
         keyword: String,
-        currentCoordinate: Coordinate,
-        cursor: Cursor
-    ): Slice<Location> {
-        return locationReader.read(keyword, currentCoordinate, cursor)
+        currentCoordinate: Coordinate
+    ): List<POI> {
+        return locationReader.readPOIs(keyword, currentCoordinate)
+    }
+
+    fun getLocation(coordinate: Coordinate): Location {
+        return locationReader.read(coordinate)
     }
 }
