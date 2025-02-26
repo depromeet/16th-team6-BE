@@ -11,7 +11,7 @@ enum class Provider(
     companion object {
         fun findByOrdinal(ordinal: Int): Provider {
             return when (ordinal) {
-                1 -> KAKAO
+                0 -> KAKAO
                 else -> throw AuthException.NoMatchedProvider
             }
         }

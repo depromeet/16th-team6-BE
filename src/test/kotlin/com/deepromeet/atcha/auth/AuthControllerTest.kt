@@ -31,7 +31,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given
         val signUpRequest =
             SignUpRequest(
-                1,
+                0,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -52,7 +52,7 @@ class AuthControllerTest : BaseControllerTest() {
     fun `존재하는 유저`() {
         RestAssured.given().log().all()
             .header("Authorization", "Bearer $providerAccessToken")
-            .param("provider", "1")
+            .param("provider", 0)
             .`when`().get("/api/auth/check")
             .then().log().all()
             .statusCode(200)
@@ -63,7 +63,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given : 회원가입
         val signUpRequest =
             SignUpRequest(
-                1,
+                0,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -78,7 +78,7 @@ class AuthControllerTest : BaseControllerTest() {
 
         // when & then
         RestAssured.given().log().all()
-            .param("provider", "1")
+            .param("provider", 0)
             .header("Authorization", "Bearer $providerAccessToken")
             .`when`().get("/api/auth/login")
             .then().log().all()
@@ -90,7 +90,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given 회원가입 + 로그인
         val signUpRequest =
             SignUpRequest(
-                1,
+                0,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -121,7 +121,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given : 회원가입
         val signUpRequest =
             SignUpRequest(
-                1,
+                0,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,

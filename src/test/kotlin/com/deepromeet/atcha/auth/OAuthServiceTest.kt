@@ -81,73 +81,73 @@ class AuthServiceIntegrationTest {
         assertThat(response.exists).isTrue()
     }
 
-//    @Test
-//    fun `회원가입을 성공적으로 수행한다`() {
-//        // given
-//        val authHeader = "Bearer token"
-//        val kakaoId = 67890L
-//        val profile = Profile("newUser", "new@test.com")
-//        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-//        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
-//        val signUpRequest = SignUpRequest("dummyValue", 37.123, 126.123, Terms(true, true))
-//
-//        // when
-//        val response: SignUpResponse = authService.signUp(authHeader, signUpRequest)
-//
-//        // then
-//        assertThat(response.id).isNotNull()
-//        assertThat(response.accessToken).isNotBlank()
-//        assertThat(response.refreshToken).isNotBlank()
-//    }
-//
-//    @Test
-//    fun `회원가입 시 이미 존재하는 유저인 경우 예외를 발생시킨다`() {
-//        // given
-//        val authHeader = "Bearer token"
-//        val kakaoId = 11111L
-//        val profile = Profile("existingUser", "exist@test.com", "existUrl")
-//        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-//        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
-//
-//        // 미리 DB에 해당 유저 저장
-//        val existingUser =
-//            User(
-//                clientId = kakaoId,
-//                nickname = kakaoUserInfo.nickname,
-//                profileImageUrl = kakaoUserInfo.profileImageUrl
-//            )
-//        userReader.save(existingUser)
-//        val signUpRequest = SignUpRequest("dummyValue", 37.123, 126.123, Terms(true, true))
-//
-//        // when & then
-//        assertThatThrownBy { authService.signUp(authHeader, signUpRequest) }
-//            .isInstanceOf(AuthException.AlreadyExistsUser::class.java)
-//    }
-//
-//    @Test
-//    fun `로그인을 성공적으로 수행한다`() {
-//        // given
-//        val authHeader = "Bearer token"
-//        val kakaoId = 22222L
-//        val profile = Profile("loginUser", "login@test.com", "loginUrl")
-//        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-//        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
-//
-//        // 미리 DB에 로그인할 유저 저장
-//        val user =
-//            User(
-//                clientId = kakaoId,
-//                nickname = kakaoUserInfo.nickname,
-//                profileImageUrl = kakaoUserInfo.profileImageUrl
-//            )
-//        val savedUser = userReader.save(user)
-//
-//        // when
-//        val response: LoginResponse = authService.login(authHeader, Provider.KAKAO.ordinal)
-//
-//        // then
-//        assertThat(response.id).isEqualTo(savedUser.id)
-//        assertThat(response.accessToken).isNotBlank()
-//        assertThat(response.refreshToken).isNotBlank()
-//    }
+    @Test
+    fun `회원가입을 성공적으로 수행한다`() {
+        // given
+        val authHeader = "Bearer token"
+        val kakaoId = 67890L
+        val profile = Profile("newUser", "new@test.com")
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
+
+        // when
+        val response: SignUpResponse = authService.signUp(authHeader, signUpRequest)
+
+        // then
+        assertThat(response.id).isNotNull()
+        assertThat(response.accessToken).isNotBlank()
+        assertThat(response.refreshToken).isNotBlank()
+    }
+
+    @Test
+    fun `회원가입 시 이미 존재하는 유저인 경우 예외를 발생시킨다`() {
+        // given
+        val authHeader = "Bearer token"
+        val kakaoId = 11111L
+        val profile = Profile("existingUser", "exist@test.com")
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+
+        // 미리 DB에 해당 유저 저장
+        val existingUser =
+            User(
+                clientId = kakaoId,
+                nickname = kakaoUserInfo.nickname,
+                profileImageUrl = kakaoUserInfo.profileImageUrl
+            )
+        userReader.save(existingUser)
+        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
+
+        // when & then
+        assertThatThrownBy { authService.signUp(authHeader, signUpRequest) }
+            .isInstanceOf(AuthException.AlreadyExistsUser::class.java)
+    }
+
+    @Test
+    fun `로그인을 성공적으로 수행한다`() {
+        // given
+        val authHeader = "Bearer token"
+        val kakaoId = 22222L
+        val profile = Profile("loginUser", "login@test.com")
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+
+        // 미리 DB에 로그인할 유저 저장
+        val user =
+            User(
+                clientId = kakaoId,
+                nickname = kakaoUserInfo.nickname,
+                profileImageUrl = kakaoUserInfo.profileImageUrl
+            )
+        val savedUser = userReader.save(user)
+
+        // when
+        val response: LoginResponse = authService.login(authHeader, Provider.KAKAO.ordinal)
+
+        // then
+        assertThat(response.id).isEqualTo(savedUser.id)
+        assertThat(response.accessToken).isNotBlank()
+        assertThat(response.refreshToken).isNotBlank()
+    }
 }

@@ -45,15 +45,15 @@ class AuthController(
         val result = authService.signUp(authorizationHeader, signUpRequest)
         return ApiResponse.success(result)
     }
-//
-//    @GetMapping("/auth/login")
-//    fun login(
-//        @RequestHeader("Authorization") authorizationHeader: String,
-//        @RequestParam("provider") provider: Int
-//    ): ApiResponse<LoginResponse> {
-//        val result = authService.login(authorizationHeader, provider)
-//        return ApiResponse.success(result)
-//    }
+
+    @GetMapping("/auth/login")
+    fun login(
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @RequestParam("provider") provider: Int
+    ): ApiResponse<LoginResponse> {
+        val result = authService.login(authorizationHeader, provider)
+        return ApiResponse.success(result)
+    }
 //
 //    @PostMapping("/auth/logout")
 //    fun logout(

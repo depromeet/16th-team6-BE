@@ -64,21 +64,27 @@ class AuthService(
         return SignUpResponse(savedUser, token)
     }
 
-//    @Transactional
-//    fun login(
-//        authorizationHeader: String,
-//        provider: Int
-//    ): LoginResponse {
-//        val kakaoUserInfo = kakaoFeignClient.getUserInfo(authorizationHeader) // todo 예외 처리
-//        val user = userReader.findByKakaoId(kakaoUserInfo.kakaoId)
-//        val token = tokenGenerator.generateTokens(user.id)
-//        val userToken = UserToken(user.id, authorizationHeader.substring("Bearer ".length), token)
-//        userTokenReader.save(userToken)
-//
-//        log.info { "Login Success!! userId = ${user.id} token = $userToken" }
-//
-//        return LoginResponse(user, token)
-//    }
+    @Transactional
+    fun login(
+        authorizationHeader: String,
+        providerOrdinal: Int
+    ): LoginResponse {
+        val provider = Provider.findByOrdinal(providerOrdinal)
+        val authClient = authClients[provider.clientBeanName]
+            ?: throw AuthException.NoMatchedProvider
+
+        val userInfo = authClient.getUserInfo(authorizationHeader)
+        val user = userReader.findByClientId(userInfo.clientId)
+
+        val token = tokenGenerator.generateTokens(user.id)
+        val userToken = UserToken(user.id, authorizationHeader.substring("Bearer ".length), token)
+
+        userTokenReader.save(userToken)
+
+        log.info { "Login Success!! userId = ${user.id} token = $userToken" }
+
+        return LoginResponse(user, token)
+    }
 //
 //    @Transactional
 //    fun logout(accessToken: String) {
