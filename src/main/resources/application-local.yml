@@ -6,7 +6,7 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show-sql: true
@@ -29,3 +29,7 @@ tmap:
   api:
     url: https://apis.openapi.sk.com
     app-key: ${TMAP_API_KEY}
+
+redis:
+  host: localhost
+  port: 6379
