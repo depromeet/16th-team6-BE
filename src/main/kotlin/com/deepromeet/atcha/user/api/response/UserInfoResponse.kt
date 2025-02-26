@@ -4,7 +4,7 @@ import com.deepromeet.atcha.user.domain.User
 
 data class UserInfoResponse(
     val id: Long,
-    val kakaoId: Long,
+    val providerId: Long,
     val nickname: String,
     val profileImageUrl: String,
     val alertAgreement: Boolean,
