@@ -62,12 +62,12 @@ class AuthController(
         authService.logout(accessToken)
         return ApiResponse.success()
     }
-//
-//    @GetMapping("/auth/reissue")
-//    fun reissueToken(
-//        @Token refreshToken: String
-//    ): ApiResponse<ReissueTokenResponse> {
-//        val result = authService.reissueToken(refreshToken)
-//        return ApiResponse.success(result)
-//    }
+
+    @GetMapping("/auth/reissue")
+    fun reissueToken(
+        @Token refreshToken: String
+    ): ApiResponse<ReissueTokenResponse> {
+        val result = authService.reissueToken(refreshToken)
+        return ApiResponse.success(result)
+    }
 }

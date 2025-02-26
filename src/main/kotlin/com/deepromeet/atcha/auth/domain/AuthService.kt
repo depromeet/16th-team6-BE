@@ -4,6 +4,7 @@ import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
+import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.client.Provider
@@ -15,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthService(
-    private val authClients: Map<String, AuthClient>,
+    private val authClients: Map<String, AuthClient>, // todo 일급 컬렉션 리팩터링
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
     private val userTokenReader: UserTokenReader
@@ -96,18 +97,18 @@ class AuthService(
         authClient.logout("Bearer ${userToken.providerToken}")
         log.info { "Logout Success!! userId = ${userToken.id}" }
     }
-//
-//    @Transactional
-//    fun reissueToken(refreshToken: String): ReissueTokenResponse {
-//        tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
-//        val userToken = userTokenReader.findByRefreshToken(refreshToken)
-//        tokenGenerator.expireToken(userToken.accessToken)
-//        tokenGenerator.expireToken(userToken.refreshToken)
-//        val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
-//        userToken.let {
-//            it.accessToken = newTokenInfo.accessToken
-//            it.refreshToken = newTokenInfo.refreshToken
-//        }
-//        return ReissueTokenResponse(newTokenInfo)
-//    }
+
+    @Transactional
+    fun reissueToken(refreshToken: String): ReissueTokenResponse {
+        tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userToken = userTokenReader.findByRefreshToken(refreshToken)
+        tokenGenerator.expireToken(userToken.accessToken)
+        tokenGenerator.expireToken(userToken.refreshToken)
+        val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
+        userToken.let {
+            it.accessToken = newTokenInfo.accessToken
+            it.refreshToken = newTokenInfo.refreshToken
+        }
+        return ReissueTokenResponse(newTokenInfo)
+    }
 }
