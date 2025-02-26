@@ -12,7 +12,9 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
 class TokenArgumentResolver : HandlerMethodArgumentResolver {
-    private val TOKEN_TYPE = "Bearer "
+    companion object {
+        private const val TOKEN_TYPE = "Bearer "
+    }
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
         parameter.hasParameterAnnotation(Token::class.java) &&
@@ -33,4 +35,5 @@ class TokenArgumentResolver : HandlerMethodArgumentResolver {
         }
         return authorization.substring(TOKEN_TYPE.length)
     }
+
 }

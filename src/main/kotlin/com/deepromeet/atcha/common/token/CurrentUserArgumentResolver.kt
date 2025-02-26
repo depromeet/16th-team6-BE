@@ -14,7 +14,9 @@ import org.springframework.web.method.support.ModelAndViewContainer
 class CurrentUserArgumentResolver(
     private val tokenGenerator: TokenGenerator
 ) : HandlerMethodArgumentResolver {
-    private val TOKEN_TYPE = "Bearer "
+    companion object {
+        private const val TOKEN_TYPE = "Bearer "
+    }
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
         parameter.hasParameterAnnotation(CurrentUser::class.java) &&
