@@ -11,17 +11,18 @@ data class KakaoUserInfoResponse(
     val kakaoAccount: KakaoAccount
 ) {
     val nickname: String get() = kakaoAccount.profile.nickname
-    val thumbnailImageUrl: String get() = kakaoAccount.profile.thumbnailImageUrl
     val profileImageUrl: String get() = kakaoAccount.profile.profileImageUrl
     val profile: Profile get() = kakaoAccount.profile
 
     fun toDomain(): User =
         User(
-            kakaoId = kakaoId,
+            clientId = kakaoId,
             nickname = nickname,
-            thumbnailImageUrl = thumbnailImageUrl,
             profileImageUrl = profileImageUrl
         )
+
+    fun toUserInfoResponse(): ClientUserInfoResponse =
+        ClientUserInfoResponse(clientId = kakaoId, nickname, profileImageUrl)
 }
 
 data class KakaoAccount(
@@ -31,6 +32,5 @@ data class KakaoAccount(
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class Profile(
     val nickname: String,
-    val thumbnailImageUrl: String,
     val profileImageUrl: String
 )

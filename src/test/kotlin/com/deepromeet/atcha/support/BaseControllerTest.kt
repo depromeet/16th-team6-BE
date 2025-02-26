@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.auth.infrastructure.client.KakaoApiClient
+import com.deepromeet.atcha.auth.infrastructure.client.kakao.KakaoFeignClient
 import io.restassured.RestAssured
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith
@@ -22,7 +22,7 @@ abstract class BaseControllerTest {
     private val port: Int = 0
 
     @MockitoBean
-    lateinit var kakaoApiClient: KakaoApiClient
+    lateinit var kakaoFeignClient: KakaoFeignClient
 
     @BeforeEach
     fun setPort() {

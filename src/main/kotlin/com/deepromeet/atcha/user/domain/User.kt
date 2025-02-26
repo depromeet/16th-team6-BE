@@ -12,9 +12,8 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    val kakaoId: Long,
+    val clientId: Long,
     var nickname: String,
-    var thumbnailImageUrl: String = "",
     var profileImageUrl: String = "",
     var address: String = "",
     var addressLat: Double = 0.0,
@@ -30,9 +29,8 @@ class User(
         other as User
 
         if (id != other.id) return false
-        if (kakaoId != other.kakaoId) return false
+        if (clientId != other.clientId) return false
         if (nickname != other.nickname) return false
-        if (thumbnailImageUrl != other.thumbnailImageUrl) return false
         if (profileImageUrl != other.profileImageUrl) return false
         if (address != other.address) return false
         if (addressLat != other.addressLat) return false
@@ -46,9 +44,8 @@ class User(
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + kakaoId.hashCode()
+        result = 31 * result + clientId.hashCode()
         result = 31 * result + nickname.hashCode()
-        result = 31 * result + thumbnailImageUrl.hashCode()
         result = 31 * result + profileImageUrl.hashCode()
         result = 31 * result + address.hashCode()
         result = 31 * result + addressLat.hashCode()
@@ -60,8 +57,6 @@ class User(
     }
 
     override fun toString(): String {
-        return "User(id=$id, kakaoId=$kakaoId, nickname='$nickname', thumbnailImageUrl='$thumbnailImageUrl', profileImageUrl='$profileImageUrl', address='$address', addressLat=$addressLat, addressLog=$addressLog, alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement, isDeleted=$isDeleted)"
+        return "User(id=$id, clientId=$clientId, nickname='$nickname', profileImageUrl='$profileImageUrl', address='$address', addressLat=$addressLat, addressLog=$addressLog, alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement, isDeleted=$isDeleted)"
     }
-
-
 }

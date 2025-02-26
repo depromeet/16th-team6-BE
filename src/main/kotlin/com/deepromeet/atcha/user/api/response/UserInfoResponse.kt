@@ -6,7 +6,6 @@ data class UserInfoResponse(
     val id: Long,
     val kakaoId: Long,
     val nickname: String,
-    val thumbnailImageUrl: String,
     val profileImageUrl: String,
     val alertAgreement: Boolean,
     val trackingAgreement: Boolean
@@ -15,9 +14,8 @@ data class UserInfoResponse(
         fun from(domain: User) =
             UserInfoResponse(
                 domain.id,
-                domain.kakaoId,
+                domain.clientId,
                 domain.nickname,
-                domain.thumbnailImageUrl,
                 domain.profileImageUrl,
                 domain.alertAgreement,
                 domain.trackingAgreement

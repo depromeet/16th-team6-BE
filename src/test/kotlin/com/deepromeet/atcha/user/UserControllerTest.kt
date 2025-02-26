@@ -22,7 +22,7 @@ class UserControllerTest(
     private val userReader: UserReader
 ) : BaseControllerTest() {
     var accessToken: String = ""
-    var savedUser: User = User(kakaoId = 1L, nickname = "유저", thumbnailImageUrl = "", profileImageUrl = "")
+    var savedUser: User = User(clientId = 1L, nickname = "유저", profileImageUrl = "")
 
     @BeforeEach
     fun issueToken() {

@@ -18,12 +18,12 @@ import org.mockito.Mockito.`when`
 class AuthControllerTest : BaseControllerTest() {
     private val providerAccessToken: String = "thisisfortestfJmGasdwdWIDEbraTFAAAAAQoqJREAAAGVMPfFQEA9X5YOsAdz"
     private val kakaoId = 12345L
-    private val profile = Profile("test", "test@test.com", "testUrl")
+    private val profile = Profile("test", "test@test.com")
     private val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
 
     @BeforeEach
     fun setMockKakaoApiClient() {
-        `when`(kakaoApiClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
     }
 
     @Test
@@ -31,6 +31,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given
         val signUpRequest =
             SignUpRequest(
+                1,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -50,8 +51,8 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `존재하는 유저`() {
         RestAssured.given().log().all()
-            .param("provider", "1")
             .header("Authorization", "Bearer $providerAccessToken")
+            .param("provider", "1")
             .`when`().get("/api/auth/check")
             .then().log().all()
             .statusCode(200)
@@ -62,6 +63,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given : 회원가입
         val signUpRequest =
             SignUpRequest(
+                1,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -88,6 +90,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given 회원가입 + 로그인
         val signUpRequest =
             SignUpRequest(
+                1,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
@@ -118,6 +121,7 @@ class AuthControllerTest : BaseControllerTest() {
         // given : 회원가입
         val signUpRequest =
             SignUpRequest(
+                1,
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,

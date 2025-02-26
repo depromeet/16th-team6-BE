@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.auth.infrastructure.client
+package com.deepromeet.atcha.auth.infrastructure.client.kakao
 
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.common.feign.FeignConfig
@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestHeader
     url = "\${kakao.api.url}",
     configuration = [KakaoFeignConfig::class, FeignConfig::class]
 )
-interface KakaoApiClient {
+interface KakaoFeignClient {
     @GetMapping("/v2/user/me")
     fun getUserInfo(
         @RequestHeader("Authorization") providerToken: String

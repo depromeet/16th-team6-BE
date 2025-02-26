@@ -1,56 +1,51 @@
-spring:
-#  config:
-#    activate:
-#      on-profile: local
-  datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  jpa:
-    database-platform: org.hibernate.dialect.H2Dialect
-    hibernate:
-      ddl-auto: create
-    properties:
-      hibernate:
-        show-sql: true
-        format_sql: true
-        default_batch_fetch_size: 100
-
-logging:
-  level:
-    com.deepromeet.seulseul: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-    feign: DEBUG
-
-    tracer: trace
-    org:
-      hibernate:
-        orm:
-          jdbc:
-            bind: trace
-        SQL: trace
-
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: FULL
-
-tmap:
-    api:
-        url: https://apis.openapi.sk.com
-        app-key: ${TMAP_API_KEY}
-
-kakao:
-  client-id: ${OAUTH_KAKAO_CLIENT_ID}
-  api:
-    url: https://kapi.kakao.com/
-  oauth:
-    url: https://kauth.kakao.com/oauth
-
-jwt:
-  access:
-    secret: ${JWT_ACCESS_SECRET}
-  refresh:
-    secret: ${JWT_REFRESH_SECRET}
+#spring:
+##  config:
+##    activate:
+##      on-profile: local
+#  datasource:
+#    url: jdbc:mysql://${SPRING_DATABASE_HOST}:${SPRING_DATABASE_PORT}/${SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+#    username: ${SPRING_DATABASE_USERNAME}
+#    password: ${SPRING_DATABASE_PASSWORD}
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+#  jpa:
+#    hibernate:
+#      ddl-auto: create
+#    properties:
+#      hibernate:
+#        show-sql: true
+#        format_sql: true
+#        default_batch_fetch_size: 100
+#        dialect: MySQLDialect
+#logging:
+#  level:
+#    com.deepromeet.seulseul: DEBUG
+#    org.springframework.cloud.openfeign: DEBUG
+#    feign: DEBUG
+#
+#    tracer: trace
+#    org:
+#      hibernate:
+#        orm:
+#          jdbc:
+#            bind: trace
+#        SQL: trace
+#
+#
+#feign:
+#  client:
+#    config:
+#      default:
+#        loggerLevel: FULL
+#
+#kakao:
+#  client-id: ${OAUTH_KAKAO_CLIENT_ID}
+#  api:
+#    url: https://kapi.kakao.com/
+#  oauth:
+#    url: https://kauth.kakao.com/oauth
+#
+#jwt:
+#  access:
+#    secret: ${JWT_ACCESS_SECRET}
+#  refresh:
+#    secret: ${JWT_REFRESH_SECRET}

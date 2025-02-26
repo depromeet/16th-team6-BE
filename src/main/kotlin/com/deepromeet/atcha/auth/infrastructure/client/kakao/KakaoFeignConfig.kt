@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.auth.infrastructure.client
+package com.deepromeet.atcha.auth.infrastructure.client.kakao
 
 import feign.RequestInterceptor
 import org.springframework.context.annotation.Bean

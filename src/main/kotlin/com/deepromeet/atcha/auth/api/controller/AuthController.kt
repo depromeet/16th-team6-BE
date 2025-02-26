@@ -32,7 +32,7 @@ class AuthController(
         @RequestHeader("Authorization") authorizationHeader: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
-        val result = authService.checkUserExists(authorizationHeader, Provider.findByOrdinal(provider))
+        val result = authService.checkUserExists(authorizationHeader, provider)
         return ApiResponse.success(result)
     }
 
@@ -45,29 +45,29 @@ class AuthController(
         val result = authService.signUp(authorizationHeader, signUpRequest)
         return ApiResponse.success(result)
     }
-
-    @GetMapping("/auth/login")
-    fun login(
-        @RequestHeader("Authorization") authorizationHeader: String,
-        @RequestParam("provider") provider: Int
-    ): ApiResponse<LoginResponse> {
-        val result = authService.login(authorizationHeader, provider)
-        return ApiResponse.success(result)
-    }
-
-    @PostMapping("/auth/logout")
-    fun logout(
-        @Token accessToken: String
-    ): ApiResponse<Unit> {
-        authService.logout(accessToken)
-        return ApiResponse.success()
-    }
-
-    @GetMapping("/auth/reissue")
-    fun reissueToken(
-        @Token refreshToken: String
-    ): ApiResponse<ReissueTokenResponse> {
-        val result = authService.reissueToken(refreshToken)
-        return ApiResponse.success(result)
-    }
+//
+//    @GetMapping("/auth/login")
+//    fun login(
+//        @RequestHeader("Authorization") authorizationHeader: String,
+//        @RequestParam("provider") provider: Int
+//    ): ApiResponse<LoginResponse> {
+//        val result = authService.login(authorizationHeader, provider)
+//        return ApiResponse.success(result)
+//    }
+//
+//    @PostMapping("/auth/logout")
+//    fun logout(
+//        @Token accessToken: String
+//    ): ApiResponse<Unit> {
+//        authService.logout(accessToken)
+//        return ApiResponse.success()
+//    }
+//
+//    @GetMapping("/auth/reissue")
+//    fun reissueToken(
+//        @Token refreshToken: String
+//    ): ApiResponse<ReissueTokenResponse> {
+//        val result = authService.reissueToken(refreshToken)
+//        return ApiResponse.success(result)
+//    }
 }

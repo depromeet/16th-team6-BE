@@ -23,7 +23,6 @@ class UserService(
         val user = userReader.findById(id)
         user.nickname = userInfoUpdateRequest.nickname
         user.profileImageUrl = userInfoUpdateRequest.profileImageUrl
-        user.thumbnailImageUrl = userInfoUpdateRequest.thumbnailImageUrl
         user.alertAgreement = userInfoUpdateRequest.alertAgreement
         user.trackingAgreement = userInfoUpdateRequest.trackingAgreement
         return UserInfoResponse.from(user)
