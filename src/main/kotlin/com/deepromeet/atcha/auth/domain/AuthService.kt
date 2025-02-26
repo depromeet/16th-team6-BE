@@ -4,13 +4,10 @@ import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
-import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.client.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.client.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
-import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -55,7 +52,7 @@ class AuthService(
 
         val savedUser = userReader.save(user)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, authorizationHeader.substring("Bearer ".length), token)
+        val userToken = UserToken(savedUser.id, provider, authorizationHeader.substring("Bearer ".length), token)
 
         userTokenReader.save(userToken)
 
@@ -74,10 +71,10 @@ class AuthService(
             ?: throw AuthException.NoMatchedProvider
 
         val userInfo = authClient.getUserInfo(authorizationHeader)
-        val user = userReader.findByClientId(userInfo.clientId)
+        val user = userReader.findByProviderId(userInfo.clientId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, authorizationHeader.substring("Bearer ".length), token)
+        val userToken = UserToken(user.id, provider, authorizationHeader.substring("Bearer ".length), token)
 
         userTokenReader.save(userToken)
 

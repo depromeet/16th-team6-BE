@@ -12,7 +12,7 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    val clientId: Long,
+    val providerId: Long,
     var nickname: String,
     var profileImageUrl: String = "",
     var address: String = "",
@@ -29,7 +29,7 @@ class User(
         other as User
 
         if (id != other.id) return false
-        if (clientId != other.clientId) return false
+        if (providerId != other.providerId) return false
         if (nickname != other.nickname) return false
         if (profileImageUrl != other.profileImageUrl) return false
         if (address != other.address) return false
@@ -44,7 +44,7 @@ class User(
 
     override fun hashCode(): Int {
         var result = id.hashCode()
-        result = 31 * result + clientId.hashCode()
+        result = 31 * result + providerId.hashCode()
         result = 31 * result + nickname.hashCode()
         result = 31 * result + profileImageUrl.hashCode()
         result = 31 * result + address.hashCode()
@@ -57,6 +57,6 @@ class User(
     }
 
     override fun toString(): String {
-        return "User(id=$id, clientId=$clientId, nickname='$nickname', profileImageUrl='$profileImageUrl', address='$address', addressLat=$addressLat, addressLog=$addressLog, alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement, isDeleted=$isDeleted)"
+        return "User(id=$id, clientId=$providerId, nickname='$nickname', profileImageUrl='$profileImageUrl', address='$address', addressLat=$addressLat, addressLog=$addressLog, alertAgreement=$alertAgreement, trackingAgreement=$trackingAgreement, isDeleted=$isDeleted)"
     }
 }

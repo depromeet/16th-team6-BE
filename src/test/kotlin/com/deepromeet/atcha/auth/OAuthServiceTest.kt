@@ -68,7 +68,7 @@ class AuthServiceIntegrationTest {
 
         val existingUser =
             User(
-                clientId = kakaoId,
+                providerId = kakaoId,
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
@@ -112,7 +112,7 @@ class AuthServiceIntegrationTest {
         // 미리 DB에 해당 유저 저장
         val existingUser =
             User(
-                clientId = kakaoId,
+                providerId = kakaoId,
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
@@ -136,7 +136,7 @@ class AuthServiceIntegrationTest {
         // 미리 DB에 로그인할 유저 저장
         val user =
             User(
-                clientId = kakaoId,
+                providerId = kakaoId,
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )

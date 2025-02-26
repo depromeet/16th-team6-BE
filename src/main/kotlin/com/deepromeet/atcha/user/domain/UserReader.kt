@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class UserReader(
     private val userJpaRepository: UserJpaRepository
 ) {
-    fun checkExists(clientId: Long): Boolean = userJpaRepository.existsByClientId(clientId)
+    fun checkExists(providerId: Long): Boolean = userJpaRepository.existsByProviderId(providerId)
 
     fun save(user: User): User = userJpaRepository.save(user)
 
@@ -16,7 +16,7 @@ class UserReader(
         userJpaRepository.findById(id)
             .orElseThrow { UserException.UserNotFound }
 
-    fun findByClientId(clientId: Long): User =
-        userJpaRepository.findByClientId(clientId)
+    fun findByProviderId(providerId: Long): User =
+        userJpaRepository.findByProviderId(providerId)
             ?: throw UserException.UserNotFound
 }

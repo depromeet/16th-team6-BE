@@ -14,7 +14,7 @@ data class UserInfoResponse(
         fun from(domain: User) =
             UserInfoResponse(
                 domain.id,
-                domain.clientId,
+                domain.providerId,
                 domain.nickname,
                 domain.profileImageUrl,
                 domain.alertAgreement,

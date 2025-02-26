@@ -16,7 +16,7 @@ data class KakaoUserInfoResponse(
 
     fun toDomain(): User =
         User(
-            clientId = kakaoId,
+            providerId = kakaoId,
             nickname = nickname,
             profileImageUrl = profileImageUrl
         )

@@ -8,7 +8,7 @@ data class ClientUserInfoResponse(
     val profileImageUrl: String,
 ) {
     fun toDomain(): User = User(
-        clientId = clientId,
+        providerId = clientId,
         nickname =  nickname,
         profileImageUrl = profileImageUrl
     )
