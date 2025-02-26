@@ -84,7 +84,7 @@ class AuthService(
     @Transactional
     fun logout(accessToken: String) {
         tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
-        val userToken = userTokenReader.findByAccessToken(accessToken)
+        val userToken = userTokenReader.readByAccessToken(accessToken)
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
         val provider = userToken.provider
@@ -96,7 +96,7 @@ class AuthService(
     @Transactional
     fun reissueToken(refreshToken: String): ReissueTokenResponse {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
-        val userToken = userTokenReader.findByRefreshToken(refreshToken)
+        val userToken = userTokenReader.readByRefreshToken(refreshToken)
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
         val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)

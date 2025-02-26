@@ -10,15 +10,15 @@ class UserTokenReader(
 ) {
     fun save(userToken: UserToken): UserToken = userTokenRepository.save(userToken)
 
-    fun findByUserId(userId: Long): UserToken =
+    fun readById(userId: Long): UserToken =
         userTokenRepository.findByUserId(userId)
             ?: throw AuthException.NoMatchedUserToken
 
-    fun findByRefreshToken(refreshToken: String): UserToken =
+    fun readByRefreshToken(refreshToken: String): UserToken =
         userTokenRepository.findByRefreshToken(refreshToken)
             ?: throw AuthException.NoMatchedUserToken
 
-    fun findByAccessToken(accessToken: String): UserToken =
+    fun readByAccessToken(accessToken: String): UserToken =
         userTokenRepository.findByAccessToken(accessToken)
             ?: throw AuthException.NoMatchedUserToken
 }
