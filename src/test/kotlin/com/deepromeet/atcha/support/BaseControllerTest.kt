@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.auth.infrastructure.client.kakao.KakaoFeignClient
+import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import io.restassured.RestAssured
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.extension.ExtendWith

@@ -7,8 +7,8 @@ import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.client.kakao.KakaoFeignClient
-import com.deepromeet.atcha.auth.infrastructure.client.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
+import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile

@@ -1,9 +1,8 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.auth.infrastructure.client.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.BaseTimeEntity
 import com.deepromeet.atcha.common.token.TokenInfo
-import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated

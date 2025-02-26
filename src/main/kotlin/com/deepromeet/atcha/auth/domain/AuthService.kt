@@ -7,7 +7,7 @@ import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.client.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.user.domain.UserReader
@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 
 @Service
 class AuthService(
-    private val authClients: Map<String, AuthClient>, // todo 일급 컬렉션 리팩터링
+    private val authProviders: AuthProviders,
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
     private val userTokenReader: UserTokenReader
@@ -26,10 +26,8 @@ class AuthService(
         authorizationHeader: String,
         providerOrdinal: Int
     ): ExistsUserResponse {
-        val provider = Provider.findByOrdinal(providerOrdinal)
-        val authClient = authClients[provider.clientBeanName]
-            ?: throw AuthException.NoMatchedProvider
-        val userInfo = authClient.getUserInfo(authorizationHeader)
+        val authProvider = authProviders.getAuthProvider(providerOrdinal)
+        val userInfo = authProvider.getUserInfo(authorizationHeader)
         return ExistsUserResponse(userReader.checkExists(userInfo.clientId))
     }
 
@@ -39,8 +37,7 @@ class AuthService(
         signUpRequest: SignUpRequest
     ): SignUpResponse {
         val provider = Provider.findByOrdinal(signUpRequest.provider)
-        val authClient = authClients[provider.clientBeanName]
-            ?: throw AuthException.NoMatchedProvider
+        val authClient = authProviders.getAuthProvider(provider.ordinal)
         val userInfo = authClient.getUserInfo(authorizationHeader)
 
         if (userReader.checkExists(userInfo.clientId)) { // todo uk로 예외 처리
@@ -69,8 +66,7 @@ class AuthService(
         providerOrdinal: Int
     ): LoginResponse {
         val provider = Provider.findByOrdinal(providerOrdinal)
-        val authClient = authClients[provider.clientBeanName]
-            ?: throw AuthException.NoMatchedProvider
+        val authClient = authProviders.getAuthProvider(provider.ordinal)
 
         val userInfo = authClient.getUserInfo(authorizationHeader)
         val user = userReader.findByProviderId(userInfo.clientId)
@@ -92,8 +88,7 @@ class AuthService(
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
         val provider = userToken.provider
-        val authClient = authClients[provider.clientBeanName]
-            ?: throw AuthException.NoMatchedProvider
+        val authClient = authProviders.getAuthProvider(provider)
         authClient.logout("Bearer ${userToken.providerToken}")
         log.info { "Logout Success!! userId = ${userToken.id}" }
     }

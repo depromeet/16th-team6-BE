@@ -1,13 +1,13 @@
-package com.deepromeet.atcha.auth.infrastructure.client.kakao
+package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
-import com.deepromeet.atcha.auth.domain.AuthClient
+import com.deepromeet.atcha.auth.domain.AuthProvider
 import com.deepromeet.atcha.auth.infrastructure.response.ClientUserInfoResponse
 import org.springframework.stereotype.Component
 
 @Component
-class KakaoClient(
+class KakaoProvider(
     private val kakaoFeignClient: KakaoFeignClient
-) : AuthClient {
+) : AuthProvider {
 
     override fun getUserInfo(providerToken: String): ClientUserInfoResponse {
         val kakaoUserInfoResponse = kakaoFeignClient.getUserInfo(providerToken)

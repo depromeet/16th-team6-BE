@@ -6,7 +6,6 @@ import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
-import com.deepromeet.atcha.auth.infrastructure.client.Provider
 import com.deepromeet.atcha.common.token.Token
 import com.deepromeet.atcha.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging

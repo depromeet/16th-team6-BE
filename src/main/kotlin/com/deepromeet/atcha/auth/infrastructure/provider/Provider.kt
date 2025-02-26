@@ -1,11 +1,11 @@
-package com.deepromeet.atcha.auth.infrastructure.client
+package com.deepromeet.atcha.auth.infrastructure.provider
 
 import com.deepromeet.atcha.auth.exception.AuthException
 
 enum class Provider(
-    val clientBeanName: String
+    val beanName: String
 ) {
-    KAKAO("kakaoClient")
+    KAKAO("kakaoProvider")
     ;
 
     companion object {

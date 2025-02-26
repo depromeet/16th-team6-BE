@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.infrastructure.response.ClientUserInfoResponse
 
-interface AuthClient {
+interface AuthProvider {
 
     fun getUserInfo(providerToken: String): ClientUserInfoResponse
 

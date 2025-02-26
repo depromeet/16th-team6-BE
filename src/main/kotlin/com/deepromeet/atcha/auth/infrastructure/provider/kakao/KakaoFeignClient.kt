@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.auth.infrastructure.client.kakao
+package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.common.feign.FeignConfig
