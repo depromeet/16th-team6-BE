@@ -22,13 +22,16 @@ class UserController(
     @GetMapping("/members/me")
     fun getUserInfo(
         @CurrentUser id: Long
-    ): ApiResponse<UserInfoResponse> = ApiResponse.success(userService.getUserInfo(id))
+    ): ApiResponse<UserInfoResponse> {
+        val user = userService.getUser(id)
+        return ApiResponse.success(UserInfoResponse.from(user))
+    }
 
     @PutMapping("/members/me")
     fun updateUserInfo(
         @CurrentUser id: Long,
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
-    ): ApiResponse<UserInfoResponse> = ApiResponse.success(userService.updateUserInfo(id, userInfoUpdateRequest))
+    ): ApiResponse<UserInfoResponse> = ApiResponse.success(userService.updateUser(id, userInfoUpdateRequest))
 
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)

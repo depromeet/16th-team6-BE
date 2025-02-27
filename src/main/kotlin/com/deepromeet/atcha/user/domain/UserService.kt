@@ -10,13 +10,10 @@ class UserService(
     private val userReader: UserReader
 ) {
     @Transactional(readOnly = true)
-    fun getUserInfo(id: Long): UserInfoResponse {
-        val user = userReader.read(id)
-        return UserInfoResponse.from(user)
-    }
+    fun getUser(id: Long): User = userReader.read(id)
 
     @Transactional
-    fun updateUserInfo(
+    fun updateUser(
         id: Long,
         userInfoUpdateRequest: UserInfoUpdateRequest
     ): UserInfoResponse {
