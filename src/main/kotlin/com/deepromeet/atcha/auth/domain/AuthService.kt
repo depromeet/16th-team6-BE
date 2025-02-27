@@ -2,7 +2,6 @@ package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
@@ -90,7 +89,7 @@ class AuthService(
     }
 
     @Transactional
-    fun reissueToken(refreshToken: String): ReissueTokenResponse {
+    fun reissueToken(refreshToken: String): UserToken {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
         val userToken = userTokenReader.readByRefreshToken(refreshToken)
         tokenGenerator.expireToken(userToken.accessToken)
@@ -100,6 +99,6 @@ class AuthService(
             it.accessToken = newTokenInfo.accessToken
             it.refreshToken = newTokenInfo.refreshToken
         }
-        return ReissueTokenResponse(newTokenInfo)
+        return userToken
     }
 }

@@ -4,7 +4,7 @@ import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.api.response.LoginResponse
-import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
+import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.common.token.Token
 import com.deepromeet.atcha.common.web.ApiResponse
@@ -68,7 +68,8 @@ class AuthController(
     fun reissueToken(
         @Token refreshToken: String
     ): ApiResponse<ReissueTokenResponse> {
-        val result = authService.reissueToken(refreshToken)
+        val userToken = authService.reissueToken(refreshToken)
+        val result = ReissueTokenResponse(userToken)
         return ApiResponse.success(result)
     }
 }
