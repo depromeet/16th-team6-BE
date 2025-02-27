@@ -20,11 +20,12 @@ class UserService(
         id: Long,
         userInfoUpdateRequest: UserInfoUpdateRequest
     ): UserInfoResponse {
-        val user = userReader.findById(id)
-        user.nickname = userInfoUpdateRequest.nickname
-        user.profileImageUrl = userInfoUpdateRequest.profileImageUrl
-        user.alertAgreement = userInfoUpdateRequest.alertAgreement
-        user.trackingAgreement = userInfoUpdateRequest.trackingAgreement
+        val user = userReader.findById(id).apply {
+            nickname = userInfoUpdateRequest.nickname
+            profileImageUrl = userInfoUpdateRequest.profileImageUrl
+            agreement.alert = userInfoUpdateRequest.agreement.alert
+            agreement.tracking = userInfoUpdateRequest.agreement.tracking
+        }
         return UserInfoResponse.from(user)
     }
 

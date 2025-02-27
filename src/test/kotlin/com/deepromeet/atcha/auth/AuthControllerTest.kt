@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth
 
+import com.deepromeet.atcha.auth.api.request.AgreementRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.api.request.Terms
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
@@ -35,7 +35,7 @@ class AuthControllerTest : BaseControllerTest() {
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
-                Terms(true, true)
+                AgreementRequest(true, true)
             )
 
         // when & then
@@ -67,7 +67,7 @@ class AuthControllerTest : BaseControllerTest() {
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
-                Terms(true, true)
+                AgreementRequest(true, true)
             )
         RestAssured.given().log().all()
             .header("Content-Type", "application/json")
@@ -94,7 +94,7 @@ class AuthControllerTest : BaseControllerTest() {
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
-                Terms(true, true)
+                AgreementRequest(true, true)
             )
         val result =
             RestAssured.given().log().all()
@@ -125,7 +125,7 @@ class AuthControllerTest : BaseControllerTest() {
                 "경기도 화성시 동탄순환대로26길 21",
                 37.207581,
                 127.113558,
-                Terms(true, true)
+                AgreementRequest(true, true)
             )
         val result =
             RestAssured.given().log().all()

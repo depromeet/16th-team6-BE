@@ -10,6 +10,7 @@ import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
+import com.deepromeet.atcha.user.domain.Address
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -44,9 +45,7 @@ class AuthService(
             throw AuthException.AlreadyExistsUser
         }
         val user = userInfo.toDomain().apply {
-            address = signUpRequest.address
-            addressLat = signUpRequest.lat
-            addressLog = signUpRequest.log
+            address = Address( signUpRequest.address, signUpRequest.lat, signUpRequest.log)
         }
 
         val savedUser = userReader.save(user)

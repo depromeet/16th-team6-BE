@@ -17,8 +17,8 @@ data class UserInfoResponse(
                 domain.providerId,
                 domain.nickname,
                 domain.profileImageUrl,
-                domain.alertAgreement,
-                domain.trackingAgreement
+                domain.agreement.alert,
+                domain.agreement.tracking
             )
     }
 }

@@ -5,10 +5,10 @@ data class SignUpRequest(
     val address: String,
     val lat: Double,
     val log: Double,
-    val terms: Terms
+    val agreement: AgreementRequest
 )
 
-data class Terms(
+data class AgreementRequest(
     val alert: Boolean = true,
     val tracking: Boolean = true
 )

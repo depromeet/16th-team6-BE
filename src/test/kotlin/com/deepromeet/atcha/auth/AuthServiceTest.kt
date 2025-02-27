@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth
 
+import com.deepromeet.atcha.auth.api.request.AgreementRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.api.request.Terms
 import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
@@ -90,7 +90,7 @@ class AuthServiceTest {
         val profile = Profile("newUser", "new@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
-        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
+        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
 
         // when
         val response: SignUpResponse = authService.signUp(token, signUpRequest)
@@ -118,7 +118,7 @@ class AuthServiceTest {
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
         userReader.save(existingUser)
-        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
+        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
 
         // when & then
         assertThatThrownBy { authService.signUp(token, signUpRequest) }
