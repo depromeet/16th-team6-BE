@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth.api.controller
 
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
-import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
+import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
@@ -31,7 +31,7 @@ class AuthController(
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
         val result = authService.checkUserExists(providerToken, provider)
-        return ApiResponse.success(result)
+        return ApiResponse.success(ExistsUserResponse(result))
     }
 
     @PostMapping("/auth/sign-up")

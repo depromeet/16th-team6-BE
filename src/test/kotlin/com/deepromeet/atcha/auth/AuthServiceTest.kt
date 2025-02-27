@@ -3,12 +3,11 @@ package com.deepromeet.atcha.auth
 import com.deepromeet.atcha.auth.api.request.AgreementRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
-import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile
@@ -52,10 +51,10 @@ class AuthServiceTest {
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // when
-        val response: ExistsUserResponse = authService.checkUserExists(token, Provider.KAKAO.ordinal)
+        val result: Boolean = authService.checkUserExists(token, Provider.KAKAO.ordinal)
 
         // then
-        assertThat(response.exists).isFalse()
+        assertThat(result).isFalse()
     }
 
     @Test
@@ -76,10 +75,10 @@ class AuthServiceTest {
         userReader.save(existingUser)
 
         // when
-        val response: ExistsUserResponse = authService.checkUserExists(token, Provider.KAKAO.ordinal)
+        val result: Boolean = authService.checkUserExists(token, Provider.KAKAO.ordinal)
 
         // then
-        assertThat(response.exists).isTrue()
+        assertThat(result).isTrue()
     }
 
     @Test

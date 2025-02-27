@@ -2,7 +2,6 @@ package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.domain.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.domain.response.SignUpResponse
@@ -26,10 +25,10 @@ class AuthService(
     fun checkUserExists(
         providerToken: String,
         providerOrdinal: Int
-    ): ExistsUserResponse {
+    ): Boolean {
         val authProvider = authProviders.getAuthProvider(providerOrdinal)
         val userInfo = authProvider.getUserInfo(providerToken)
-        return ExistsUserResponse(userReader.checkExists(userInfo.clientId))
+        return userReader.checkExists(userInfo.clientId)
     }
 
     @Transactional
