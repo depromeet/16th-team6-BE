@@ -57,11 +57,11 @@ class AuthController(
     }
 
     @PostMapping("/auth/logout")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun logout(
         @Token accessToken: String
-    ): ApiResponse<Unit> {
+    ) {
         authService.logout(accessToken)
-        return ApiResponse.success()
     }
 
     @GetMapping("/auth/reissue")

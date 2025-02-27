@@ -113,7 +113,7 @@ class AuthControllerTest : BaseControllerTest() {
             .header("Authorization", "Bearer ${signUpResponse.accessToken}")
             .`when`().post("/api/auth/logout")
             .then().log().all()
-            .statusCode(200)
+            .statusCode(204)
     }
 
     @Test
