@@ -25,8 +25,3 @@ data class UserInfoUpdateRequest(
         )
     }
 }
-
-data class AgreementRequest(
-    val alert: Boolean = true,
-    val tracking: Boolean = true
-)

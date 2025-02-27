@@ -7,6 +7,9 @@ data class UserInfoResponse(
     val providerId: Long,
     val nickname: String,
     val profileImageUrl: String,
+    val address: String,
+    val lat: Double,
+    val lon: Double,
     val alertAgreement: Boolean,
     val trackingAgreement: Boolean
 ) {
@@ -17,6 +20,9 @@ data class UserInfoResponse(
                 domain.providerId,
                 domain.nickname,
                 domain.profileImageUrl,
+                domain.address.address,
+                domain.address.lat,
+                domain.address.lon,
                 domain.agreement.alert,
                 domain.agreement.tracking
             )
