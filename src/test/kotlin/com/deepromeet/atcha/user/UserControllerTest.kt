@@ -3,10 +3,10 @@ package com.deepromeet.atcha.user
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
-import com.deepromeet.atcha.user.api.request.AgreementRequest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.domain.User
+import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
@@ -21,14 +21,16 @@ class UserControllerTest(
     @Autowired
     private val tokenGenerator: TokenGenerator,
     @Autowired
-    private val userReader: UserReader
+    private val userReader: UserReader,
+    @Autowired
+    private val userAppender: UserAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
     var savedUser: User = User(providerId = 1L, nickname = "유저", profileImageUrl = "")
 
     @BeforeEach
     fun issueToken() {
-        savedUser = userReader.save(savedUser)
+        savedUser = userAppender.save(savedUser)
         val generateToken = tokenGenerator.generateTokens(savedUser.id)
         accessToken = generateToken.accessToken
     }
@@ -53,9 +55,14 @@ class UserControllerTest(
         // given
         val userInfoUpdateRequest = UserInfoUpdateRequest(
             "새로운 닉네임",
-            "",
-            "",
-            AgreementRequest(true, true))
+            null,
+            null,
+            null,
+            null,
+            null,
+            null,
+            null
+        )
 
         // when
         RestAssured.given().log().all()

@@ -11,6 +11,7 @@ import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile
 import com.deepromeet.atcha.user.domain.User
+import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -32,11 +33,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 class AuthServiceTest {
     @Autowired
     lateinit var authService: AuthService
-
     @Autowired
     lateinit var userReader: UserReader
-
-    // 외부 API 호출은 모킹 처리
+    @Autowired
+    lateinit var userAppender: UserAppender
     @MockitoBean
     lateinit var kakaoFeignClient: KakaoFeignClient
 
@@ -71,7 +71,7 @@ class AuthServiceTest {
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
-        userReader.save(existingUser)
+        userAppender.save(existingUser)
 
         // when
         val result: Boolean = authService.checkUserExists(token, Provider.KAKAO.ordinal)
@@ -115,7 +115,7 @@ class AuthServiceTest {
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
-        userReader.save(existingUser)
+        userAppender.save(existingUser)
         val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
 
         // when & then
@@ -139,7 +139,7 @@ class AuthServiceTest {
                 nickname = kakaoUserInfo.nickname,
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
-        val savedUser = userReader.save(user)
+        val savedUser = userAppender.save(user)
 
         // when
         val result: UserToken = authService.login(token, Provider.KAKAO.ordinal)

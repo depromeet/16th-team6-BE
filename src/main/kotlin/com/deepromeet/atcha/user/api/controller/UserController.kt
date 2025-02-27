@@ -31,7 +31,10 @@ class UserController(
     fun updateUserInfo(
         @CurrentUser id: Long,
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
-    ): ApiResponse<UserInfoResponse> = ApiResponse.success(userService.updateUser(id, userInfoUpdateRequest))
+    ): ApiResponse<UserInfoResponse> {
+        val result = userService.updateUser(id, userInfoUpdateRequest.toUpdateUserInfo())
+        return ApiResponse.success(UserInfoResponse.from(result))
+    }
 
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)

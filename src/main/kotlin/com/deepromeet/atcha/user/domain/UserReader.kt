@@ -17,6 +17,4 @@ class UserReader(
             ?: throw UserException.UserNotFound
 
     fun checkExists(providerId: Long): Boolean = userJpaRepository.existsByProviderId(providerId)
-
-    fun save(user: User): User = userJpaRepository.save(user)
 }

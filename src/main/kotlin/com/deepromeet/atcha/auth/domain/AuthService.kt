@@ -7,6 +7,7 @@ import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.user.domain.Address
+import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -16,6 +17,7 @@ class AuthService(
     private val authProviders: AuthProviders,
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
+    private val userAppender: UserAppender,
     private val userTokenReader: UserTokenReader
 ) {
     @Transactional(readOnly = true)
@@ -44,7 +46,7 @@ class AuthService(
             address = Address( signUpRequest.address, signUpRequest.lat, signUpRequest.log)
         }
 
-        val savedUser = userReader.save(user)
+        val savedUser = userAppender.save(user)
         val token = tokenGenerator.generateTokens(savedUser.id)
         val userToken = UserToken(savedUser.id, provider, providerToken, token)
 
