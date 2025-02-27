@@ -11,7 +11,7 @@ class UserService(
 ) {
     @Transactional(readOnly = true)
     fun getUserInfo(id: Long): UserInfoResponse {
-        val user = userReader.findById(id)
+        val user = userReader.read(id)
         return UserInfoResponse.from(user)
     }
 
@@ -20,7 +20,7 @@ class UserService(
         id: Long,
         userInfoUpdateRequest: UserInfoUpdateRequest
     ): UserInfoResponse {
-        val user = userReader.findById(id).apply {
+        val user = userReader.read(id).apply {
             nickname = userInfoUpdateRequest.nickname
             profileImageUrl = userInfoUpdateRequest.profileImageUrl
             agreement.alert = userInfoUpdateRequest.agreement.alert
@@ -31,7 +31,7 @@ class UserService(
 
     @Transactional
     fun deleteUser(id: Long) {
-        val user = userReader.findById(id)
+        val user = userReader.read(id)
         user.isDeleted = true
     }
 }

@@ -64,7 +64,7 @@ class AuthService(
         val authClient = authProviders.getAuthProvider(provider.ordinal)
 
         val userInfo = authClient.getUserInfo(providerToken)
-        val user = userReader.findByProviderId(userInfo.clientId)
+        val user = userReader.readByProviderId(userInfo.clientId)
 
         val token = tokenGenerator.generateTokens(user.id)
         val userToken = UserToken(user.id, provider, providerToken, token)

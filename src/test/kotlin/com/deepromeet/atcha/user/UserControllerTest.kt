@@ -66,7 +66,7 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(200)
 
-        val findUser = userReader.findById(savedUser.id)
+        val findUser = userReader.read(savedUser.id)
 
         // then
         assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
@@ -81,7 +81,7 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(204)
 
-        val findUser = userReader.findById(savedUser.id)
+        val findUser = userReader.read(savedUser.id)
 
         // then
         assertThat(findUser.isDeleted).isTrue()
