@@ -5,7 +5,7 @@ import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
-import com.deepromeet.atcha.auth.domain.response.SignUpResponse
+import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.common.token.Token
 import com.deepromeet.atcha.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -30,8 +30,9 @@ class AuthController(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
-        val result = authService.checkUserExists(providerToken, provider)
-        return ApiResponse.success(ExistsUserResponse(result))
+        val exist = authService.checkUserExists(providerToken, provider)
+        val result = ExistsUserResponse(exist)
+        return ApiResponse.success(result)
     }
 
     @PostMapping("/auth/sign-up")
@@ -40,7 +41,8 @@ class AuthController(
         @Token providerToken: String,
         @RequestBody signUpRequest: SignUpRequest
     ): ApiResponse<SignUpResponse> {
-        val result = authService.signUp(providerToken, signUpRequest)
+        val userToken = authService.signUp(providerToken, signUpRequest)
+        val result = SignUpResponse(userToken)
         return ApiResponse.success(result)
     }
 

@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth
 
 import com.deepromeet.atcha.auth.api.request.AgreementRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.domain.response.SignUpResponse
+import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile

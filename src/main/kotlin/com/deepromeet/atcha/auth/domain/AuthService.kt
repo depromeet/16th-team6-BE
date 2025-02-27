@@ -4,7 +4,6 @@ import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
-import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
@@ -35,7 +34,7 @@ class AuthService(
     fun signUp(
         providerToken: String,
         signUpRequest: SignUpRequest
-    ): SignUpResponse {
+    ): UserToken {
         val provider = Provider.findByOrdinal(signUpRequest.provider)
         val authClient = authProviders.getAuthProvider(provider.ordinal)
         val userInfo = authClient.getUserInfo(providerToken)
@@ -55,7 +54,7 @@ class AuthService(
 
         log.info { "SingUp Success!! user=$savedUser" }
 
-        return SignUpResponse(savedUser, token)
+        return userToken
     }
 
     @Transactional

@@ -3,8 +3,8 @@ package com.deepromeet.atcha.auth
 import com.deepromeet.atcha.auth.api.request.AgreementRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
+import com.deepromeet.atcha.auth.domain.UserToken
 import com.deepromeet.atcha.auth.domain.response.LoginResponse
-import com.deepromeet.atcha.auth.domain.response.SignUpResponse
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
@@ -92,12 +92,12 @@ class AuthServiceTest {
         val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
 
         // when
-        val response: SignUpResponse = authService.signUp(token, signUpRequest)
+        val result: UserToken = authService.signUp(token, signUpRequest)
 
         // then
-        assertThat(response.id).isNotNull()
-        assertThat(response.accessToken).isNotBlank()
-        assertThat(response.refreshToken).isNotBlank()
+        assertThat(result.id).isNotNull()
+        assertThat(result.accessToken).isNotBlank()
+        assertThat(result.refreshToken).isNotBlank()
     }
 
     @Test
