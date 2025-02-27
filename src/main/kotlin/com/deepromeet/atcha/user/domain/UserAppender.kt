@@ -21,4 +21,8 @@ class UserAppender(
         userUpdateInfo.trackingAgreement?.let { user.agreement.tracking = it }
         return user
     }
+
+    fun delete(user: User) {
+        user.isDeleted = true
+    }
 }

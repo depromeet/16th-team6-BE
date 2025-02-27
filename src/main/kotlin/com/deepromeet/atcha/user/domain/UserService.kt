@@ -23,6 +23,6 @@ class UserService(
     @Transactional
     fun deleteUser(id: Long) {
         val user = userReader.read(id)
-        user.isDeleted = true
+        userAppender.delete(user)
     }
 }
