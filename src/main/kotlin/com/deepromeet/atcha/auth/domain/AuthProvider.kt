@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.auth.infrastructure.response.ClientUserInfoResponse
+import com.deepromeet.atcha.auth.infrastructure.response.ProviderUserInfoResponse
 
 interface AuthProvider {
-    fun getUserInfo(providerToken: String): ClientUserInfoResponse
+    fun getUserInfo(providerToken: String): ProviderUserInfoResponse
 
     fun logout(providerToken: String)
 }

@@ -1,12 +1,10 @@
 package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.api.controller.log
-import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
-import com.deepromeet.atcha.user.domain.Address
 import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -27,26 +25,23 @@ class AuthService(
     ): Boolean {
         val authProvider = authProviders.getAuthProvider(providerOrdinal)
         val userInfo = authProvider.getUserInfo(providerToken)
-        return userReader.checkExists(userInfo.clientId)
+        return userReader.checkExists(userInfo.providerId)
     }
 
     @Transactional
     fun signUp(
         providerToken: String,
-        signUpRequest: SignUpRequest
+        signUpInfo: SignUpInfo
     ): UserToken {
-        val provider = Provider.findByOrdinal(signUpRequest.provider)
+        val provider = Provider.findByOrdinal(signUpInfo.provider)
         val authClient = authProviders.getAuthProvider(provider.ordinal)
-        val userInfo = authClient.getUserInfo(providerToken)
+        val providerUserInfo = authClient.getUserInfo(providerToken)
 
-        if (userReader.checkExists(userInfo.clientId)) { // todo uk로 예외 처리
+        if (userReader.checkExists(providerUserInfo.providerId)) { // todo uk로 예외 처리
             throw AuthException.AlreadyExistsUser
         }
-        val user = userInfo.toDomain().apply {
-            address = Address( signUpRequest.address, signUpRequest.lat, signUpRequest.log)
-        }
 
-        val savedUser = userAppender.save(user)
+        val savedUser = userAppender.save(providerUserInfo, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
         val userToken = UserToken(savedUser.id, provider, providerToken, token)
 
@@ -66,7 +61,7 @@ class AuthService(
         val authClient = authProviders.getAuthProvider(provider.ordinal)
 
         val userInfo = authClient.getUserInfo(providerToken)
-        val user = userReader.readByProviderId(userInfo.clientId)
+        val user = userReader.readByProviderId(userInfo.providerId)
 
         val token = tokenGenerator.generateTokens(user.id)
         val userToken = UserToken(user.id, provider, providerToken, token)

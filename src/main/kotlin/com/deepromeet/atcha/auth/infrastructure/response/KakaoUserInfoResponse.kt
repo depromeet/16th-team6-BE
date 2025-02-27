@@ -14,15 +14,8 @@ data class KakaoUserInfoResponse(
     val profileImageUrl: String get() = kakaoAccount.profile.profileImageUrl
     val profile: Profile get() = kakaoAccount.profile
 
-    fun toDomain(): User =
-        User(
-            providerId = kakaoId,
-            nickname = nickname,
-            profileImageUrl = profileImageUrl
-        )
-
-    fun toUserInfoResponse(): ClientUserInfoResponse =
-        ClientUserInfoResponse(clientId = kakaoId, nickname, profileImageUrl)
+    fun toUserInfoResponse(): ProviderUserInfoResponse =
+        ProviderUserInfoResponse(providerId = kakaoId, nickname, profileImageUrl)
 }
 
 data class KakaoAccount(

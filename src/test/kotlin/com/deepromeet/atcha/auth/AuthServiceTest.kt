@@ -1,8 +1,7 @@
 package com.deepromeet.atcha.auth
 
-import com.deepromeet.atcha.auth.api.request.AgreementRequest
-import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
+import com.deepromeet.atcha.auth.domain.SignUpInfo
 import com.deepromeet.atcha.auth.domain.UserToken
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.Provider
@@ -12,7 +11,6 @@ import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserAppender
-import com.deepromeet.atcha.user.domain.UserReader
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -33,8 +31,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 class AuthServiceTest {
     @Autowired
     lateinit var authService: AuthService
-    @Autowired
-    lateinit var userReader: UserReader
     @Autowired
     lateinit var userAppender: UserAppender
     @MockitoBean
@@ -88,7 +84,7 @@ class AuthServiceTest {
         val profile = Profile("newUser", "new@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
-        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
+        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true)
 
         // when
         val result: UserToken = authService.signUp(token, signUpRequest)
@@ -116,7 +112,7 @@ class AuthServiceTest {
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
         userAppender.save(existingUser)
-        val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, AgreementRequest(true, true))
+        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true)
 
         // when & then
         assertThatThrownBy { authService.signUp(token, signUpRequest) }

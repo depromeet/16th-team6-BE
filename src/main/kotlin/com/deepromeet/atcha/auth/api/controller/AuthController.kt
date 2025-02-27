@@ -41,7 +41,8 @@ class AuthController(
         @Token providerToken: String,
         @RequestBody signUpRequest: SignUpRequest
     ): ApiResponse<SignUpResponse> {
-        val userToken = authService.signUp(providerToken, signUpRequest)
+        val signUpInfo = signUpRequest.toSignUpInfo()
+        val userToken = authService.signUp(providerToken, signUpInfo)
         val result = SignUpResponse(userToken)
         return ApiResponse.success(result)
     }
