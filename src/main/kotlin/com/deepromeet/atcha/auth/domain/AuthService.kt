@@ -16,7 +16,8 @@ class AuthService(
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
     private val userAppender: UserAppender,
-    private val userTokenReader: UserTokenReader
+    private val userTokenReader: UserTokenReader,
+    private val userTokenAppender: UserTokenAppender
 ) {
     @Transactional(readOnly = true)
     fun checkUserExists(
@@ -45,7 +46,7 @@ class AuthService(
         val token = tokenGenerator.generateTokens(savedUser.id)
         val userToken = UserToken(savedUser.id, provider, providerToken, token)
 
-        userTokenReader.save(userToken)
+        userTokenAppender.save(userToken)
 
         log.info { "SingUp Success!! userToken=$userToken" }
 
@@ -66,7 +67,7 @@ class AuthService(
         val token = tokenGenerator.generateTokens(user.id)
         val userToken = UserToken(user.id, provider, providerToken, token)
 
-        userTokenReader.save(userToken)
+        userTokenAppender.save(userToken)
 
         log.info { "Login Success!! userToken=$userToken"}
 

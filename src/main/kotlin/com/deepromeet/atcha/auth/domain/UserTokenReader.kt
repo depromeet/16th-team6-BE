@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component
 class UserTokenReader(
     private val userTokenRepository: UserTokenRepository
 ) {
-    fun save(userToken: UserToken): UserToken = userTokenRepository.save(userToken)
-
     fun readById(userId: Long): UserToken =
         userTokenRepository.findByUserId(userId)
             ?: throw AuthException.NoMatchedUserToken
