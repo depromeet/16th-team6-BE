@@ -3,7 +3,7 @@ package com.deepromeet.atcha.auth.api.controller
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
-import com.deepromeet.atcha.auth.domain.response.LoginResponse
+import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.domain.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.common.token.Token
@@ -51,7 +51,8 @@ class AuthController(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<LoginResponse> {
-        val result = authService.login(providerToken, provider)
+        val userToken = authService.login(providerToken, provider)
+        val result = LoginResponse(userToken)
         return ApiResponse.success(result)
     }
 
