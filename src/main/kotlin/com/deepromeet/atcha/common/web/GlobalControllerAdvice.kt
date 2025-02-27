@@ -39,7 +39,7 @@ class GlobalControllerAdvice {
             .body(
                 ApiResponse.error(
                     "INTERNAL_SERVER_ERROR",
-                    exception.message
+                    exception.cause?.message
                         ?: "알 수 없는 서버 에러입니다"
                 )
             )
