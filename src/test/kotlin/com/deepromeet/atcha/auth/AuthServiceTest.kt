@@ -31,7 +31,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
         "jwt.refresh.secret=thisisfortestddGVzdFJmZXNoU2VjcmV0S2V5VmFsdWUxMjM0NTY3OA"
     ]
 )
-class AuthServiceIntegrationTest {
+class AuthServiceTest {
     @Autowired
     lateinit var authService: AuthService
 
