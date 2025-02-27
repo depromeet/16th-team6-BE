@@ -23,22 +23,22 @@ class AuthService(
 ) {
     @Transactional(readOnly = true)
     fun checkUserExists(
-        authorizationHeader: String,
+        providerToken: String,
         providerOrdinal: Int
     ): ExistsUserResponse {
         val authProvider = authProviders.getAuthProvider(providerOrdinal)
-        val userInfo = authProvider.getUserInfo(authorizationHeader)
+        val userInfo = authProvider.getUserInfo(providerToken)
         return ExistsUserResponse(userReader.checkExists(userInfo.clientId))
     }
 
     @Transactional
     fun signUp(
-        authorizationHeader: String,
+        providerToken: String,
         signUpRequest: SignUpRequest
     ): SignUpResponse {
         val provider = Provider.findByOrdinal(signUpRequest.provider)
         val authClient = authProviders.getAuthProvider(provider.ordinal)
-        val userInfo = authClient.getUserInfo(authorizationHeader)
+        val userInfo = authClient.getUserInfo(providerToken)
 
         if (userReader.checkExists(userInfo.clientId)) { // todo uk로 예외 처리
             throw AuthException.AlreadyExistsUser
@@ -51,7 +51,7 @@ class AuthService(
 
         val savedUser = userReader.save(user)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, provider, authorizationHeader.substring("Bearer ".length), token)
+        val userToken = UserToken(savedUser.id, provider, providerToken, token)
 
         userTokenReader.save(userToken)
 
@@ -62,17 +62,17 @@ class AuthService(
 
     @Transactional
     fun login(
-        authorizationHeader: String,
+        providerToken: String,
         providerOrdinal: Int
     ): LoginResponse {
         val provider = Provider.findByOrdinal(providerOrdinal)
         val authClient = authProviders.getAuthProvider(provider.ordinal)
 
-        val userInfo = authClient.getUserInfo(authorizationHeader)
+        val userInfo = authClient.getUserInfo(providerToken)
         val user = userReader.findByProviderId(userInfo.clientId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, provider, authorizationHeader.substring("Bearer ".length), token)
+        val userToken = UserToken(user.id, provider, providerToken, token)
 
         userTokenReader.save(userToken)
 

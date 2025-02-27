@@ -17,6 +17,7 @@ import com.deepromeet.atcha.user.domain.UserReader
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.mockito.Mockito.anyString
 import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -44,14 +45,14 @@ class AuthServiceIntegrationTest {
     @Test
     fun `존재하지 않은 유저를 확인한다`() {
         // given
-        val authHeader = "Bearer token"
+        val token = "token"
         val kakaoId = 12345L
         val profile = Profile("test", "test@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // when
-        val response: ExistsUserResponse = authService.checkUserExists(authHeader, Provider.KAKAO.ordinal)
+        val response: ExistsUserResponse = authService.checkUserExists(token, Provider.KAKAO.ordinal)
 
         // then
         assertThat(response.exists).isFalse()
@@ -60,11 +61,11 @@ class AuthServiceIntegrationTest {
     @Test
     fun `존재하는 유저를 확인한다`() {
         // given
-        val authHeader = "Bearer token"
+        val token = "token"
         val kakaoId = 12345L
         val profile = Profile("test", "test@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         val existingUser =
             User(
@@ -75,7 +76,7 @@ class AuthServiceIntegrationTest {
         userReader.save(existingUser)
 
         // when
-        val response: ExistsUserResponse = authService.checkUserExists(authHeader, Provider.KAKAO.ordinal)
+        val response: ExistsUserResponse = authService.checkUserExists(token, Provider.KAKAO.ordinal)
 
         // then
         assertThat(response.exists).isTrue()
@@ -84,15 +85,15 @@ class AuthServiceIntegrationTest {
     @Test
     fun `회원가입을 성공적으로 수행한다`() {
         // given
-        val authHeader = "Bearer token"
+        val token = "token"
         val kakaoId = 67890L
         val profile = Profile("newUser", "new@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
         val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
 
         // when
-        val response: SignUpResponse = authService.signUp(authHeader, signUpRequest)
+        val response: SignUpResponse = authService.signUp(token, signUpRequest)
 
         // then
         assertThat(response.id).isNotNull()
@@ -103,11 +104,11 @@ class AuthServiceIntegrationTest {
     @Test
     fun `회원가입 시 이미 존재하는 유저인 경우 예외를 발생시킨다`() {
         // given
-        val authHeader = "Bearer token"
+        val token = "token"
         val kakaoId = 11111L
         val profile = Profile("existingUser", "exist@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 해당 유저 저장
         val existingUser =
@@ -120,18 +121,18 @@ class AuthServiceIntegrationTest {
         val signUpRequest = SignUpRequest(0, "dummyValue", 37.123, 126.123, Terms(true, true))
 
         // when & then
-        assertThatThrownBy { authService.signUp(authHeader, signUpRequest) }
+        assertThatThrownBy { authService.signUp(token, signUpRequest) }
             .isInstanceOf(AuthException.AlreadyExistsUser::class.java)
     }
 
     @Test
     fun `로그인을 성공적으로 수행한다`() {
         // given
-        val authHeader = "Bearer token"
+        val token = "token"
         val kakaoId = 22222L
         val profile = Profile("loginUser", "login@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
-        `when`(kakaoFeignClient.getUserInfo(authHeader)).thenReturn(kakaoUserInfo)
+        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 로그인할 유저 저장
         val user =
@@ -143,7 +144,7 @@ class AuthServiceIntegrationTest {
         val savedUser = userReader.save(user)
 
         // when
-        val response: LoginResponse = authService.login(authHeader, Provider.KAKAO.ordinal)
+        val response: LoginResponse = authService.login(token, Provider.KAKAO.ordinal)
 
         // then
         assertThat(response.id).isEqualTo(savedUser.id)

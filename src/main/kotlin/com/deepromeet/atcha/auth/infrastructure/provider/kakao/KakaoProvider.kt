@@ -8,9 +8,12 @@ import org.springframework.stereotype.Component
 class KakaoProvider(
     private val kakaoFeignClient: KakaoFeignClient
 ) : AuthProvider {
+    companion object {
+        private const val TOKEN_TYPE = "Bearer "
+    }
 
     override fun getUserInfo(providerToken: String): ClientUserInfoResponse {
-        val kakaoUserInfoResponse = kakaoFeignClient.getUserInfo(providerToken)
+        val kakaoUserInfoResponse = kakaoFeignClient.getUserInfo(TOKEN_TYPE + providerToken)
         return kakaoUserInfoResponse.toUserInfoResponse()
     }
 

@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
@@ -28,29 +27,29 @@ class AuthController(
 ) {
     @GetMapping("/auth/check")
     fun checkUserExists(
-        @RequestHeader("Authorization") authorizationHeader: String,
+        @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
-        val result = authService.checkUserExists(authorizationHeader, provider)
+        val result = authService.checkUserExists(providerToken, provider)
         return ApiResponse.success(result)
     }
 
     @PostMapping("/auth/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
     fun signUp(
-        @RequestHeader("Authorization") authorizationHeader: String,
+        @Token providerToken: String,
         @RequestBody signUpRequest: SignUpRequest
     ): ApiResponse<SignUpResponse> {
-        val result = authService.signUp(authorizationHeader, signUpRequest)
+        val result = authService.signUp(providerToken, signUpRequest)
         return ApiResponse.success(result)
     }
 
     @GetMapping("/auth/login")
     fun login(
-        @RequestHeader("Authorization") authorizationHeader: String,
+        @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<LoginResponse> {
-        val result = authService.login(authorizationHeader, provider)
+        val result = authService.login(providerToken, provider)
         return ApiResponse.success(result)
     }
 
