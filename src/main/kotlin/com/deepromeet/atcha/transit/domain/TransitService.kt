@@ -26,10 +26,10 @@ class TransitService(
     }
 
     fun getTaxiFare(
-        origin: Coordinate,
-        destination: Coordinate
+        start: Coordinate,
+        end: Coordinate
     ): Fare {
-        return taxiFareFetcher.fetch(origin, destination)
+        return taxiFareFetcher.fetch(start, end)
             ?: throw TransitException.TaxiFareFetchFailed
     }
 }

@@ -20,8 +20,8 @@ class TransitController(
     ): ApiResponse<Fare> =
         ApiResponse.success(
             transitService.getTaxiFare(
-                request.toOrigin(),
-                request.toDestination()
+                request.toStart(),
+                request.toEnd()
             )
         )
 }
