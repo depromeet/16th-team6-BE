@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.provider.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.user.domain.UserAppender
@@ -34,9 +34,9 @@ class AuthService(
         providerToken: String,
         signUpInfo: SignUpInfo
     ): UserToken {
-        val provider = Provider.findByOrdinal(signUpInfo.provider)
-        val authClient = authProviders.getAuthProvider(provider.ordinal)
-        val providerUserInfo = authClient.getUserInfo(providerToken)
+        val provider = Provider(ProviderType.findByOrdinal(signUpInfo.provider), providerToken)
+        val authProvider = authProviders.getAuthProvider(provider)
+        val providerUserInfo = authProvider.getUserInfo(providerToken)
 
         if (userReader.checkExists(providerUserInfo.providerId)) { // todo uk로 예외 처리
             throw AuthException.AlreadyExistsUser
@@ -44,7 +44,7 @@ class AuthService(
 
         val savedUser = userAppender.save(providerUserInfo, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, provider, providerToken, token)
+        val userToken = UserToken(savedUser.id, provider, token)
 
         userTokenAppender.save(userToken)
 
@@ -58,14 +58,14 @@ class AuthService(
         providerToken: String,
         providerOrdinal: Int
     ): UserToken {
-        val provider = Provider.findByOrdinal(providerOrdinal)
-        val authClient = authProviders.getAuthProvider(provider.ordinal)
+        val provider = Provider(ProviderType.findByOrdinal(providerOrdinal), providerToken)
+        val authProvider = authProviders.getAuthProvider(provider.providerType)
 
-        val userInfo = authClient.getUserInfo(providerToken)
+        val userInfo = authProvider.getUserInfo(provider.providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, provider, providerToken, token)
+        val userToken = UserToken(user.id, provider, token)
 
         userTokenAppender.save(userToken)
 
@@ -77,26 +77,28 @@ class AuthService(
     @Transactional
     fun logout(accessToken: String) {
         tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
+
         val userToken = userTokenReader.readByAccessToken(accessToken)
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
-        val provider = userToken.provider
-        val authClient = authProviders.getAuthProvider(provider)
-        authClient.logout("Bearer ${userToken.providerToken}")
+
+        val authProvider = authProviders.getAuthProvider(userToken.provider)
+        authProvider.logout(userToken.provider.providerToken)
+
         log.info { "Logout Success!! userId = ${userToken.id}" }
     }
 
     @Transactional
     fun reissueToken(refreshToken: String): UserToken {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+
         val userToken = userTokenReader.readByRefreshToken(refreshToken)
         tokenGenerator.expireToken(userToken.accessToken)
         tokenGenerator.expireToken(userToken.refreshToken)
+
         val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
-        userToken.let {
-            it.accessToken = newTokenInfo.accessToken
-            it.refreshToken = newTokenInfo.refreshToken
-        }
+        userTokenAppender.update(userToken, newTokenInfo)
+
         return userToken
     }
 }

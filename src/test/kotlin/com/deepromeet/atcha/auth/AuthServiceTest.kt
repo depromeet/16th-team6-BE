@@ -4,7 +4,7 @@ import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.domain.SignUpInfo
 import com.deepromeet.atcha.auth.domain.UserToken
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.provider.Provider
+import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
@@ -46,7 +46,7 @@ class AuthServiceTest {
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // when
-        val result: Boolean = authService.checkUserExists(token, Provider.KAKAO.ordinal)
+        val result: Boolean = authService.checkUserExists(token, ProviderType.KAKAO.ordinal)
 
         // then
         assertThat(result).isFalse()
@@ -70,7 +70,7 @@ class AuthServiceTest {
         userAppender.save(existingUser)
 
         // when
-        val result: Boolean = authService.checkUserExists(token, Provider.KAKAO.ordinal)
+        val result: Boolean = authService.checkUserExists(token, ProviderType.KAKAO.ordinal)
 
         // then
         assertThat(result).isTrue()
@@ -138,7 +138,7 @@ class AuthServiceTest {
         val savedUser = userAppender.save(user)
 
         // when
-        val result: UserToken = authService.login(token, Provider.KAKAO.ordinal)
+        val result: UserToken = authService.login(token, ProviderType.KAKAO.ordinal)
 
         // then
         assertThat(result.id).isEqualTo(savedUser.id)

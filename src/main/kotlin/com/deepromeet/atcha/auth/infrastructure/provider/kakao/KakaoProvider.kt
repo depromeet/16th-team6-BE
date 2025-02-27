@@ -18,6 +18,6 @@ class KakaoProvider(
     }
 
     override fun logout(providerToken: String) {
-        kakaoFeignClient.logout(providerToken)
+        kakaoFeignClient.logout(TOKEN_TYPE + providerToken)
     }
 }
