@@ -30,6 +30,14 @@ class LocationController(
                 .map(POIResponse::from)
         )
 
+    @GetMapping("/rgeo")
+    fun getReverseGeoLabel(
+        @ModelAttribute coordinate: Coordinate
+    ): ApiResponse<LocationResponse> =
+        ApiResponse.success(
+            LocationResponse(locationService.getLocation(coordinate))
+        )
+
     @PostMapping("/histories")
     @ResponseStatus(HttpStatus.CREATED)
     fun addRecentPOI(
