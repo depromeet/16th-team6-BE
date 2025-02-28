@@ -53,16 +53,17 @@ class UserControllerTest(
     @Test
     fun `회원 정보 수정`() {
         // given
-        val userInfoUpdateRequest = UserInfoUpdateRequest(
-            "새로운 닉네임",
-            null,
-            null,
-            null,
-            null,
-            null,
-            null,
-            null
-        )
+        val userInfoUpdateRequest =
+            UserInfoUpdateRequest(
+                "새로운 닉네임",
+                null,
+                null,
+                null,
+                null,
+                null,
+                null,
+                null
+            )
 
         // when
         RestAssured.given().log().all()

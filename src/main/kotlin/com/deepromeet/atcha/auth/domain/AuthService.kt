@@ -69,7 +69,7 @@ class AuthService(
 
         userTokenAppender.save(userToken)
 
-        log.info { "Login Success!! userToken=$userToken"}
+        log.info { "Login Success!! userToken=$userToken" }
 
         return userToken
     }

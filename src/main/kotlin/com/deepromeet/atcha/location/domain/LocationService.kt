@@ -18,6 +18,10 @@ class LocationService(
         return locationReader.readPOIs(keyword, currentCoordinate)
     }
 
+    fun getLocation(coordinate: Coordinate): Location {
+        return locationReader.read(coordinate)
+    }
+
     fun addPOIHistory(poi: POI) {
         val user = userReader.read(USER_ID)
         poiHistoryManager.append(user, poi)

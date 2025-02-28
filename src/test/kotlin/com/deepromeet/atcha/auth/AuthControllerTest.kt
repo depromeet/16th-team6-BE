@@ -26,7 +26,7 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun 회원가입() { // todo Fixture 만들기
+    fun `회원가입`() { // todo Fixture 만들기
         // given
         val signUpRequest =
             SignUpRequest(

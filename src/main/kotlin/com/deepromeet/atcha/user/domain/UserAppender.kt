@@ -11,18 +11,25 @@ class UserAppender(
 ) {
     fun save(user: User): User = userJpaRepository.save(user)
 
-    fun save(providerUserInfo: ProviderUserInfoResponse, signUpInfo: SignUpInfo): User {
-        val user = User(
-            nickname = providerUserInfo.nickname,
-            providerId = providerUserInfo.providerId,
-            profileImageUrl = providerUserInfo.profileImageUrl,
-            address = signUpInfo.getAddress(),
-            agreement = signUpInfo.getAgreement()
-        )
+    fun save(
+        providerUserInfo: ProviderUserInfoResponse,
+        signUpInfo: SignUpInfo
+    ): User {
+        val user =
+            User(
+                nickname = providerUserInfo.nickname,
+                providerId = providerUserInfo.providerId,
+                profileImageUrl = providerUserInfo.profileImageUrl,
+                address = signUpInfo.getAddress(),
+                agreement = signUpInfo.getAgreement()
+            )
         return userJpaRepository.save(user)
     }
 
-    fun update(user: User, userUpdateInfo: UserUpdateInfo): User {
+    fun update(
+        user: User,
+        userUpdateInfo: UserUpdateInfo
+    ): User {
         userUpdateInfo.nickname?.let { user.nickname = it }
         userUpdateInfo.profileImageUrl?.let { user.profileImageUrl = it }
 

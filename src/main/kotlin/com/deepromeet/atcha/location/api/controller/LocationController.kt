@@ -3,6 +3,7 @@ package com.deepromeet.atcha.location.api.controller
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.api.request.POIHistoryRequest
 import com.deepromeet.atcha.location.api.request.POISearchRequest
+import com.deepromeet.atcha.location.api.response.LocationResponse
 import com.deepromeet.atcha.location.api.response.POIResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.LocationService

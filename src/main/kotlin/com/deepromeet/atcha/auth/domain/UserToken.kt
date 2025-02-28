@@ -17,7 +17,7 @@ class UserToken(
     @Embedded
     val provider: Provider,
     var accessToken: String,
-    var refreshToken: String,
+    var refreshToken: String
 ) : BaseTimeEntity() {
     constructor(userId: Long, provider: Provider, tokenInfo: TokenInfo) : this(
         userId = userId,
@@ -27,6 +27,12 @@ class UserToken(
     )
 
     override fun toString(): String {
-        return "UserToken(id=$id, userId=$userId, provider=$provider, accessToken='$accessToken', refreshToken='$refreshToken')"
+        return "UserToken(" +
+            "id=$id," +
+            " userId=$userId," +
+            " provider=$provider," +
+            " accessToken='$accessToken'," +
+            " refreshToken='$refreshToken'" +
+            ")"
     }
 }
