@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client.response
+package com.deepromeet.atcha.transit.infrastructure.client.kakao.response
 
 import com.deepromeet.atcha.transit.domain.Fare
 

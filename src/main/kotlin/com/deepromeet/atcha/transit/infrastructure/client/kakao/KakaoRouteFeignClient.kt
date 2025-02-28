@@ -1,6 +1,6 @@
-package com.deepromeet.atcha.transit.infrastructure.client
+package com.deepromeet.atcha.transit.infrastructure.client.kakao
 
-import com.deepromeet.atcha.transit.infrastructure.client.response.KakaoRouteResponse
+import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoRouteResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
