@@ -52,3 +52,9 @@ jwt:
     secret: ${secret.JWT_ACCESS_SECRET}
   refresh:
     secret: ${secret.JWT_REFRESH_SECRET}
+
+open-api:
+    api:
+        url:
+            bus: http://ws.bus.go.kr
+        service-key: ${OPEN_API_SERVICE_KEY}
