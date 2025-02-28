@@ -37,6 +37,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // xml parsing
+    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
+
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
 
