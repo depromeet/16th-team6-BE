@@ -48,6 +48,12 @@ redis:
   host: redis
   port: 6379
 
+open-api:
+    api:
+        url:
+            bus: http://ws.bus.go.kr
+        service-key: ${OPEN_API_SERVICE_KEY}
+
 jwt:
     access:
         secret: ${secret.JWT_ACCESS_SECRET}
