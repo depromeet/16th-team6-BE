@@ -2,15 +2,16 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.TMapTransitClient
-import com.deepromeet.atcha.transit.infrastructure.client.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.infrastructure.client.response.TMapRouteResponse
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import org.springframework.stereotype.Service
 
 @Service
 class TransitService(
     private val tMapTransitClient: TMapTransitClient,
-    private val taxiFareFetcher: TaxiFareFetcher
+    private val taxiFareFetcher: TaxiFareFetcher,
+    private val busManager: BusManager
 ) {
     fun getRoutes(): TMapRouteResponse {
         return tMapTransitClient.getRoutes(
@@ -23,6 +24,13 @@ class TransitService(
                 searchDttm = "202502142100"
             )
         )
+    }
+
+    fun getBusArrivalInfo(
+        routeName: String,
+        stationName: String
+    ): BusArrival {
+        return busManager.getArrivalInfo(routeName, stationName)
     }
 
     fun getTaxiFare(
