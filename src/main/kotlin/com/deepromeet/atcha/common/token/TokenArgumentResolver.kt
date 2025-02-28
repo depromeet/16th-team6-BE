@@ -18,7 +18,7 @@ class TokenArgumentResolver : HandlerMethodArgumentResolver {
 
     override fun supportsParameter(parameter: MethodParameter): Boolean =
         parameter.hasParameterAnnotation(Token::class.java) &&
-        parameter.parameterType == String::class.java
+            parameter.parameterType == String::class.java
 
     override fun resolveArgument(
         parameter: MethodParameter,
@@ -35,5 +35,4 @@ class TokenArgumentResolver : HandlerMethodArgumentResolver {
         }
         return authorization.substring(TOKEN_TYPE.length)
     }
-
 }

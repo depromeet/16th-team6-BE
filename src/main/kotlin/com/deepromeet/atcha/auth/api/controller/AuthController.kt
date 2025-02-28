@@ -1,11 +1,11 @@
 package com.deepromeet.atcha.auth.api.controller
 
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
+import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.common.token.Token
 import com.deepromeet.atcha.common.web.ApiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging

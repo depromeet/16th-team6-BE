@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.auth.infrastructure.response
 
-import com.deepromeet.atcha.user.domain.User
 import com.fasterxml.jackson.annotation.JsonProperty
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming

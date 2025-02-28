@@ -31,8 +31,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 class AuthServiceTest {
     @Autowired
     lateinit var authService: AuthService
+
     @Autowired
     lateinit var userAppender: UserAppender
+
     @MockitoBean
     lateinit var kakaoFeignClient: KakaoFeignClient
 

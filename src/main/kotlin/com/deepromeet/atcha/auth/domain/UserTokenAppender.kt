@@ -10,10 +10,13 @@ class UserTokenAppender(
 ) {
     fun save(userToken: UserToken): UserToken = userTokenRepository.save(userToken)
 
-    fun update(userToken: UserToken, newTokenInfo: TokenInfo) {
-         userToken.apply {
-             accessToken = newTokenInfo.accessToken
-             refreshToken = newTokenInfo.refreshToken
-         }
+    fun update(
+        userToken: UserToken,
+        newTokenInfo: TokenInfo
+    ) {
+        userToken.apply {
+            accessToken = newTokenInfo.accessToken
+            refreshToken = newTokenInfo.refreshToken
+        }
     }
 }

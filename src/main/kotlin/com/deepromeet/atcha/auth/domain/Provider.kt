@@ -9,5 +9,5 @@ import jakarta.persistence.Enumerated
 class Provider(
     @Enumerated(EnumType.STRING)
     var providerType: ProviderType,
-    var providerToken: String,
+    var providerToken: String
 )

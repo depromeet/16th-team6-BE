@@ -36,6 +36,13 @@ class User(
     }
 
     override fun toString(): String {
-        return "User(id=$id, providerId=$providerId, nickname='$nickname', profileImageUrl='$profileImageUrl', address=$address, agreement=$agreement, isDeleted=$isDeleted)"
+        return "User(id=$id, " +
+            "providerId=$providerId," +
+            " nickname='$nickname'," +
+            " profileImageUrl='$profileImageUrl'," +
+            " address=$address," +
+            " agreement=$agreement," +
+            " isDeleted=$isDeleted" +
+            ")"
     }
 }

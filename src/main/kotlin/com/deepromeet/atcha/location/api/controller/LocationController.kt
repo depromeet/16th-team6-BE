@@ -3,6 +3,7 @@ package com.deepromeet.atcha.location.api.controller
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.api.request.POIHistoryRequest
 import com.deepromeet.atcha.location.api.request.POISearchRequest
+import com.deepromeet.atcha.location.api.response.LocationResponse
 import com.deepromeet.atcha.location.api.response.POIResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.LocationService
@@ -25,14 +26,18 @@ class LocationController(
     fun getPOIs(
         @ModelAttribute request: POISearchRequest
     ): ApiResponse<List<POIResponse>> =
-        locationService.getPOIs(
-            request.keyword,
-            request.toCoordinate()
-        ).let {
-            return ApiResponse.success(
-                it.map { poi -> POIResponse.from(poi) }
-            )
-        }
+        ApiResponse.success(
+            locationService.getPOIs(request.keyword, request.toCoordinate())
+                .map(POIResponse::from)
+        )
+
+    @GetMapping("/rgeo")
+    fun getReverseGeoLabel(
+        @ModelAttribute coordinate: Coordinate
+    ): ApiResponse<LocationResponse> =
+        ApiResponse.success(
+            LocationResponse(locationService.getLocation(coordinate))
+        )
 
     @PostMapping("/histories")
     @ResponseStatus(HttpStatus.CREATED)

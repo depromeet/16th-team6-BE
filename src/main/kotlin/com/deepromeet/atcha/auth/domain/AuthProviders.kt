@@ -8,18 +8,18 @@ import org.springframework.stereotype.Component
 class AuthProviders(
     private val providers: Map<String, AuthProvider>
 ) {
-    fun getAuthProvider(providerOrdinal: Int) : AuthProvider {
+    fun getAuthProvider(providerOrdinal: Int): AuthProvider {
         val providerType = ProviderType.findByOrdinal(providerOrdinal)
         return providers[providerType.beanName]
             ?: throw AuthException.NoMatchedProvider
     }
 
-    fun getAuthProvider(providerType: ProviderType) : AuthProvider {
+    fun getAuthProvider(providerType: ProviderType): AuthProvider {
         return providers[providerType.beanName]
             ?: throw AuthException.NoMatchedProvider
     }
 
-    fun getAuthProvider(provider: Provider) : AuthProvider {
+    fun getAuthProvider(provider: Provider): AuthProvider {
         return providers[provider.providerType.beanName]
             ?: throw AuthException.NoMatchedProvider
     }

@@ -10,12 +10,13 @@ data class SignUpRequest(
     val alertAgreement: Boolean,
     val trackingAgreement: Boolean
 ) {
-    fun toSignUpInfo() = SignUpInfo(
-        provider = provider,
-        address = address,
-        lat = lat,
-        log = log,
-        alertAgreement = alertAgreement,
-        trackingAgreement = trackingAgreement
-    )
+    fun toSignUpInfo() =
+        SignUpInfo(
+            provider = provider,
+            address = address,
+            lat = lat,
+            log = log,
+            alertAgreement = alertAgreement,
+            trackingAgreement = trackingAgreement
+        )
 }
