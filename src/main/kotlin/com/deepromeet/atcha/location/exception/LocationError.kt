@@ -10,13 +10,13 @@ enum class LocationErrorType(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    LOCATION_API_ERROR(500, "MAP_001", "지도 API 호출 중 에러가 발생했습니다", LogLevel.ERROR)
+    FAILED_TO_READ_POIS(500, "LOCATION_001", "POI 정보를 읽어오는데 실패했습니다", LogLevel.ERROR)
 }
 
 sealed class LocationException(
     errorCode: BaseErrorType
 ) : CustomException(errorCode) {
-    data object LocationApiError : LocationException(LocationErrorType.LOCATION_API_ERROR) {
-        override fun readResolve(): Any = LocationApiError
+    data object FailedToReadPOIs : LocationException(LocationErrorType.FAILED_TO_READ_POIS) {
+        override fun readResolve(): Any = FailedToReadPOIs
     }
 }

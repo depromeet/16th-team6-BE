@@ -1,33 +1,24 @@
 package com.deepromeet.atcha.location.infrastructure.client
 
-import com.deepromeet.atcha.location.infrastructure.client.response.TMapPOIResponse
-import com.deepromeet.atcha.location.infrastructure.client.response.TMapReverseLabelResponse
-import com.deepromeet.atcha.transit.infrastructure.client.TMapFeignConfig
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.RequestParam
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.location.domain.POI
+import com.deepromeet.atcha.location.domain.POIFinder
+import org.springframework.stereotype.Component
 
-@FeignClient(
-    name = "tmap-location",
-    url = "\${tmap.api.url}",
-    configuration = [TMapFeignConfig::class]
-)
-interface TMapLocationClient {
-    @GetMapping("/tmap/pois")
-    fun getPOIs(
-        @RequestParam searchKeyword: String,
-        @RequestParam centerLat: Double,
-        @RequestParam centerLon: Double,
-        @RequestParam page: Int = 1,
-        @RequestParam count: Int = 20
-    ): TMapPOIResponse
-
-    @GetMapping("/tmap/geo/reverseLabel")
-    fun getReverseGeoLabel(
-        @RequestParam centerLat: Double,
-        @RequestParam centerLon: Double,
-        @RequestParam reqCoordType: String = "WGS84GEO",
-        @RequestParam resCoordType: String = "WGS84GEO",
-        @RequestParam reqLevel: Int = 19
-    ): TMapReverseLabelResponse
+@Component
+class TMapLocationClient(
+    private val tMapLocationFeignClient: TMapLocationFeignClient
+) : POIFinder {
+    override fun find(
+        keyword: String,
+        currentCoordinate: Coordinate
+    ): List<POI> {
+        tMapLocationFeignClient.getPOIs(
+            keyword,
+            currentCoordinate.lat,
+            currentCoordinate.lon
+        ).let {
+            return it.toPOIs()
+        }
+    }
 }
