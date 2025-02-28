@@ -3,10 +3,28 @@ package com.deepromeet.atcha.user.api.response
 import com.deepromeet.atcha.user.domain.User
 
 data class UserInfoResponse(
-    val email: String,
-    val nickname: String
+    val id: Long,
+    val providerId: Long,
+    val nickname: String,
+    val profileImageUrl: String,
+    val address: String,
+    val lat: Double,
+    val lon: Double,
+    val alertAgreement: Boolean,
+    val trackingAgreement: Boolean
 ) {
     companion object {
-        fun from(domain: User) = UserInfoResponse(domain.email.value, domain.name)
+        fun from(domain: User) =
+            UserInfoResponse(
+                domain.id,
+                domain.providerId,
+                domain.nickname,
+                domain.profileImageUrl,
+                domain.address.address,
+                domain.address.lat,
+                domain.address.lon,
+                domain.agreement.alert,
+                domain.agreement.tracking
+            )
     }
 }

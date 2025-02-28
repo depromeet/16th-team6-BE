@@ -13,6 +13,32 @@ spring:
         format_sql: true
         default_batch_fetch_size: 100
 
+logging:
+  level:
+    com.deepromeet.seulseul: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+    tracer: trace
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+        SQL: trace
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: FULL
+
+kakao:
+  client-id: {CLIENT_ID}
+  api:
+    url: https://kapi.kakao.com/
+  oauth:
+    url: https://kauth.kakao.com/oauth
+
 tmap:
   api:
     url: https://apis.openapi.sk.com

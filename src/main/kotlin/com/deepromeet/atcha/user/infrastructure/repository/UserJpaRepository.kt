@@ -1,9 +1,10 @@
 package com.deepromeet.atcha.user.infrastructure.repository
 
-import com.deepromeet.atcha.user.domain.Email
 import com.deepromeet.atcha.user.domain.User
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface UserJpaRepository : JpaRepository<User, Long> {
-    fun findByEmail(email: Email): User?
+    fun existsByProviderId(providerId: Long): Boolean
+
+    fun findByProviderId(providerId: Long): User?
 }
