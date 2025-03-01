@@ -7,18 +7,21 @@ import org.slf4j.MDC
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 import java.lang.Exception
-import java.util.*
-
+import java.util.UUID
 
 @Component
-class LoggingInterceptor: HandlerInterceptor {
+class LoggingInterceptor : HandlerInterceptor {
     companion object {
         private const val REQUEST_ID = "requestId"
         private const val REQUEST_TIME = "requestTime"
         private val logger = KotlinLogging.logger {}
     }
 
-    override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+    override fun preHandle(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        handler: Any
+    ): Boolean {
         MDC.put(REQUEST_ID, UUID.randomUUID().toString().substring(0, 8))
         MDC.put(REQUEST_TIME, System.currentTimeMillis().toString())
 

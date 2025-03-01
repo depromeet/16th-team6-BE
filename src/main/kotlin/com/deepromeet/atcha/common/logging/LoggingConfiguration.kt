@@ -7,7 +7,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class LoggingConfiguration(
     private val loggingInterceptor: LoggingInterceptor
-): WebMvcConfigurer {
+) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(loggingInterceptor)
     }
