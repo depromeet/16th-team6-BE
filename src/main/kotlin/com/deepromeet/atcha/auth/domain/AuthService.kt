@@ -47,8 +47,6 @@ class AuthService(
 
         userTokenAppender.save(userToken)
 
-        log.info { "SingUp Success!! userToken=$userToken" }
-
         return userToken
     }
 
