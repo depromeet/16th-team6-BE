@@ -1,6 +1,8 @@
 name: Atcha Deploy with Docker
 
 on:
+  workflow_dispatch:
+
   push:
     branches: [ dev ]
 
