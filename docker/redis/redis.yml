@@ -1,17 +1,9 @@
 services:
-  mysql:
-    image: mysql:8.0
-    container_name: atcha-mysql
+  redis:
+    container_name: atcha-redis
+    image: redis:latest
     restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: ${SPRING_DATABASE_NAME}
-      MYSQL_USER: ${SPRING_DATABASE_USERNAME}
-      MYSQL_PASSWORD: ${SPRING_DATABASE_PASSWORD}
     ports:
-      - "3307:3306"
-    volumes:
-      - ./volumes:/var/lib/mysql
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+      - "6380:6379"
     networks:
       - app-tier
