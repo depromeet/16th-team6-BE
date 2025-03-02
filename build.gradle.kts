@@ -101,6 +101,13 @@ tasks.withType<Test> {
     useJUnitPlatform()
 }
 
+tasks.register("initSetting") {
+    group = "custom tasks"
+    description = "Execute both copyHooks and copySecret tasks."
+
+    dependsOn("copyHooks", "copySecret")
+}
+
 tasks.register("copyHooks") {
     group = "git hooks"
     description = "Copy pre-commit and pre-push git hooks from .githooks to .git/hooks folder."
