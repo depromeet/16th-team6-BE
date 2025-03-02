@@ -22,6 +22,16 @@ jobs:
         with:
           submodule: true
           token: ${{ secrets.SUBMODULE_TOKEN }}
+        # 디버그: 전체 워크스페이스 파일 목록 출력
+      - name: Debug - List workspace files
+        run: |
+          echo "=== Workspace File Structure ==="
+          ls -Rla
+        # 디버그: 서브모듈 폴더 내용 확인
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
 
       - name: Setup docker buildx
         id: buildx
