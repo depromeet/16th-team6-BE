@@ -34,14 +34,14 @@ feign:
 tmap:
   api:
     url: https://apis.openapi.sk.com
-    app-key: ${TMAP_API_KEY}
+    app-key: ${secret.TMAP_API_KEY}
 
 redis:
     host: redis
     port: 6379
 
 kakao:
-  client-id: ${OAUTH_KAKAO_CLIENT_ID}
+  client-id: ${secret.OAUTH_KAKAO_CLIENT_ID}
   api:
     url: https://kapi.kakao.com/
   oauth:
@@ -49,6 +49,6 @@ kakao:
 
 jwt:
   access:
-    secret: ${JWT_ACCESS_SECRET}
+    secret: ${secret.JWT_ACCESS_SECRET}
   refresh:
-    secret: ${JWT_REFRESH_SECRET}
+    secret: ${secret.JWT_REFRESH_SECRET}
