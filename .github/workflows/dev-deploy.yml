@@ -19,6 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2 # git 레파지토리를 클론하는것과 같음
+        with:
+          submodule: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
 
       - name: Setup docker buildx
         id: buildx
