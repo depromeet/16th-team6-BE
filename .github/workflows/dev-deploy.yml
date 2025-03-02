@@ -20,13 +20,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2 # git 레파지토리를 클론하는것과 같음
         with:
-          submodule: true
+          submodules: true
           token: ${{ secrets.SUBMODULE_TOKEN }}
-        # 디버그: 전체 워크스페이스 파일 목록 출력
-      - name: Debug - List workspace files
-        run: |
-          echo "=== Workspace File Structure ==="
-          ls -Rla
         # 디버그: 서브모듈 폴더 내용 확인
       - name: Debug - List submodule folder contents
         run: |
