@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.auth.domain.AuthProvider
+import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.infrastructure.response.ProviderUserInfoResponse
 import org.springframework.stereotype.Component
 
@@ -19,5 +20,9 @@ class KakaoProvider(
 
     override fun logout(providerToken: String) {
         kakaoFeignClient.logout(TOKEN_TYPE + providerToken)
+    }
+
+    override fun logout(provider: Provider) {
+        kakaoFeignClient.logout(TOKEN_TYPE + provider.providerToken)
     }
 }

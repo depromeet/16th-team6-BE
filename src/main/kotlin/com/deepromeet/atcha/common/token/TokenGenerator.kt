@@ -29,8 +29,8 @@ class TokenGenerator(
 
     fun generateTokens(userId: Long): TokenInfo {
         val now = Date()
-        val accessToken = generateToken(userId, now, TokenType.ACCESS)
-        val refreshToken = generateToken(userId, now, TokenType.REFRESH)
+        val accessToken = generateAccessToken(userId, now)
+        val refreshToken = generateRefreshToken(userId, now, accessToken)
         return TokenInfo(accessToken, refreshToken)
     }
 
@@ -67,21 +67,57 @@ class TokenGenerator(
         }
     }
 
+    fun expireTokensWithRefreshToken(refreshToken: String) {
+        val accessToken = getAccessTokenByRefreshToken(refreshToken)
+        expireToken(accessToken)
+        expireToken(refreshToken)
+    }
+
     fun expireToken(token: String) {
         blackList.add(token)
     }
 
-    private fun generateToken(
+    private fun getAccessTokenByRefreshToken(refreshToken: String): String {
+        try {
+            val body =
+                Jwts.parserBuilder()
+                    .setSigningKey(tokenKeyMap.get(TokenType.REFRESH))
+                    .build()
+                    .parseClaimsJws(refreshToken)
+                    .body
+            return body.get(TokenType.ACCESS.name).toString()
+        } catch (e: ExpiredJwtException) {
+            throw TokenException.ExpiredToken
+        } catch (e: Exception) {
+            throw TokenException.NotValidToken
+        }
+    }
+
+    private fun generateAccessToken(
         userId: Long,
-        now: Date,
-        tokenType: TokenType
+        now: Date
     ): String {
         return Jwts.builder()
             .setSubject(userId.toString())
             .setIssuedAt(now)
             .setId(UUID.randomUUID().toString())
-            .setExpiration(Date(now.time + tokenType.expirationMills))
-            .signWith(tokenKeyMap.get(tokenType))
+            .setExpiration(Date(now.time + TokenType.ACCESS.expirationMills))
+            .signWith(tokenKeyMap.get(TokenType.ACCESS))
+            .compact()
+    }
+
+    private fun generateRefreshToken(
+        userId: Long,
+        now: Date,
+        accessToken: String
+    ): String {
+        return Jwts.builder()
+            .setSubject(userId.toString())
+            .setIssuedAt(now)
+            .claim(TokenType.ACCESS.name, accessToken)
+            .setId(UUID.randomUUID().toString())
+            .setExpiration(Date(now.time + TokenType.REFRESH.expirationMills))
+            .signWith(tokenKeyMap.get(TokenType.REFRESH))
             .compact()
     }
 

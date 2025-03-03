@@ -57,9 +57,9 @@ class AuthController(
     @PostMapping("/auth/logout")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun logout(
-        @Token accessToken: String
+        @Token refreshToken: String
     ) {
-        authService.logout(accessToken)
+        authService.logout(refreshToken)
     }
 
     @GetMapping("/auth/reissue")

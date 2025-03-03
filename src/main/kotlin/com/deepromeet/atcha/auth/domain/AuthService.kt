@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.auth.domain
 
+import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.common.token.TokenGenerator
@@ -15,8 +16,8 @@ class AuthService(
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
     private val userAppender: UserAppender,
-    private val userTokenReader: UserTokenReader,
-    private val userTokenAppender: UserTokenAppender
+    private val userProviderAppender: UserProviderAppender,
+    private val userProviderReader: UserProviderReader
 ) {
     @Transactional(readOnly = true)
     fun checkUserExists(
@@ -33,21 +34,21 @@ class AuthService(
         providerToken: String,
         signUpInfo: SignUpInfo
     ): UserTokenInfo {
-        val provider = Provider(ProviderType.findByOrdinal(signUpInfo.provider), providerToken)
-        val authProvider = authProviders.getAuthProvider(provider)
+        val providerType = ProviderType.findByOrdinal(signUpInfo.provider)
+        val authProvider = authProviders.getAuthProvider(providerType)
         val providerUserInfo = authProvider.getUserInfo(providerToken)
-
         if (userReader.checkExists(providerUserInfo.providerId)) { // todo uk로 예외 처리
             throw AuthException.AlreadyExistsUser
         }
 
         val savedUser = userAppender.save(providerUserInfo, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, provider, token)
 
-        userTokenAppender.save(userToken)
+        userProviderAppender.save(savedUser.id, Provider(providerType, providerToken))
 
-        return userToken
+        log.info { "SingUp Success!! user=$savedUser" }
+
+        return UserTokenInfo(savedUser.id, token)
     }
 
     @Transactional
@@ -55,43 +56,42 @@ class AuthService(
         providerToken: String,
         providerOrdinal: Int
     ): UserTokenInfo {
-        val provider = Provider(ProviderType.findByOrdinal(providerOrdinal), providerToken)
-        val authProvider = authProviders.getAuthProvider(provider.providerType)
+        val providerType = ProviderType.findByOrdinal(providerOrdinal)
+        val authProvider = authProviders.getAuthProvider(providerType)
 
-        val userInfo = authProvider.getUserInfo(provider.providerToken)
+        val userInfo = authProvider.getUserInfo(providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userTokenInfo = UserTokenInfo(user.id, token)
 
-        userTokenAppender.save(userTokenInfo)
+        log.info { "Login Success!! user=$user" }
 
-        return userTokenInfo
+        return UserTokenInfo(user.id, token)
     }
 
     @Transactional
-    fun logout(accessToken: String) {
-        tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
-
-        val userToken = userTokenReader.readByAccessToken(accessToken)
-        tokenGenerator.expireToken(userToken.accessToken)
-        tokenGenerator.expireToken(userToken.refreshToken)
-
-        val authProvider = authProviders.getAuthProvider(userToken.provider)
-        authProvider.logout(userToken.provider.providerToken)
-    }
-
-    @Transactional
-    fun reissueToken(refreshToken: String): UserToken {
+    fun logout(refreshToken: String) {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userId = tokenGenerator.getUserIdByToken(refreshToken, TokenType.REFRESH)
 
-        val userToken = userTokenReader.readByRefreshToken(refreshToken)
-        tokenGenerator.expireToken(userToken.accessToken)
-        tokenGenerator.expireToken(userToken.refreshToken)
+        val userProvider = userProviderReader.read(userId)
+        val authProvider = authProviders.getAuthProvider(userProvider.provider)
+        authProvider.logout(userProvider.provider)
 
-        val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
-        userTokenAppender.update(userToken, newTokenInfo)
+        tokenGenerator.expireTokensWithRefreshToken(refreshToken)
 
-        return userToken
+        log.info { "Logout Success!! userId = $userId" }
+    }
+
+    @Transactional
+    fun reissueToken(refreshToken: String): UserTokenInfo {
+        tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userId = tokenGenerator.getUserIdByToken(refreshToken, TokenType.REFRESH)
+
+        tokenGenerator.expireTokensWithRefreshToken(refreshToken)
+
+        val tokenInfo = tokenGenerator.generateTokens(userId)
+
+        return UserTokenInfo(userId, tokenInfo)
     }
 }
