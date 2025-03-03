@@ -40,3 +40,7 @@ out/
 .kotlin
 
 .DS_Store
+
+
+# secret
+src/main/resources/secret-env.yml
