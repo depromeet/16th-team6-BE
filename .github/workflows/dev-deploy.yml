@@ -19,6 +19,14 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2 # git 레파지토리를 클론하는것과 같음
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
+        # 디버그: 서브모듈 폴더 내용 확인
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
 
       - name: Setup docker buildx
         id: buildx
@@ -43,6 +51,8 @@ jobs:
         id: docker_build
         uses: docker/build-push-action@v2
         with:
+          context: .
+          file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ env.DOCKER_IMAGE }}:latest

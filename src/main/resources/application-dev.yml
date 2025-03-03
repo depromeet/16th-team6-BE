@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:mysql://${SPRING_DATABASE_HOST}:${SPRING_DATABASE_PORT}/${SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
-    username: ${SPRING_DATABASE_USERNAME}
-    password: ${SPRING_DATABASE_PASSWORD}
+    url: jdbc:mysql://${secret.SPRING_DATABASE_HOST}:${secret.SPRING_DATABASE_PORT}/${secret.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${secret.SPRING_DATABASE_USERNAME}
+    password: ${secret.SPRING_DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
@@ -42,7 +42,7 @@ kakao:
 tmap:
   api:
     url: https://apis.openapi.sk.com
-    app-key: ${TMAP_API_KEY}
+    app-key: ${secret.TMAP_API_KEY}
 
 redis:
   host: redis
