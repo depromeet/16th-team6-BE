@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.auth.api.controller.log
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.common.token.TokenGenerator
@@ -48,8 +47,6 @@ class AuthService(
 
         userTokenAppender.save(userToken)
 
-        log.info { "SingUp Success!! userToken=$userToken" }
-
         return userToken
     }
 
@@ -69,8 +66,6 @@ class AuthService(
 
         userTokenAppender.save(userToken)
 
-        log.info { "Login Success!! userToken=$userToken" }
-
         return userToken
     }
 
@@ -84,8 +79,6 @@ class AuthService(
 
         val authProvider = authProviders.getAuthProvider(userToken.provider)
         authProvider.logout(userToken.provider.providerToken)
-
-        log.info { "Logout Success!! userId = ${userToken.id}" }
     }
 
     @Transactional
