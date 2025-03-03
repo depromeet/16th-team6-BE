@@ -48,6 +48,12 @@ redis:
   host: redis
   port: 6379
 
+jwt:
+    access:
+        secret: ${secret.JWT_ACCESS_SECRET}
+    refresh:
+        secret: ${secret.JWT_REFRESH_SECRET}
+
 open-api:
     api:
         url:
