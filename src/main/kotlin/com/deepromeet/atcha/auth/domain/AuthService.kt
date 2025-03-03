@@ -32,7 +32,7 @@ class AuthService(
     fun signUp(
         providerToken: String,
         signUpInfo: SignUpInfo
-    ): UserToken {
+    ): UserTokenInfo {
         val provider = Provider(ProviderType.findByOrdinal(signUpInfo.provider), providerToken)
         val authProvider = authProviders.getAuthProvider(provider)
         val providerUserInfo = authProvider.getUserInfo(providerToken)
