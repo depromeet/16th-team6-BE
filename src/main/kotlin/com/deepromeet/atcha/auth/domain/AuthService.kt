@@ -54,7 +54,7 @@ class AuthService(
     fun login(
         providerToken: String,
         providerOrdinal: Int
-    ): UserToken {
+    ): UserTokenInfo {
         val provider = Provider(ProviderType.findByOrdinal(providerOrdinal), providerToken)
         val authProvider = authProviders.getAuthProvider(provider.providerType)
 
@@ -62,11 +62,11 @@ class AuthService(
         val user = userReader.readByProviderId(userInfo.providerId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, provider, token)
+        val userTokenInfo = UserTokenInfo(user.id, token)
 
-        userTokenAppender.save(userToken)
+        userTokenAppender.save(userTokenInfo)
 
-        return userToken
+        return userTokenInfo
     }
 
     @Transactional
