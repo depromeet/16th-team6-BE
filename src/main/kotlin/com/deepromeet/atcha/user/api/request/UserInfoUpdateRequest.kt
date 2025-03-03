@@ -4,7 +4,6 @@ import com.deepromeet.atcha.user.domain.UserUpdateInfo
 
 data class UserInfoUpdateRequest(
     val nickname: String?,
-    val thumbnailImageUrl: String?,
     val profileImageUrl: String?,
     val address: String?,
     val lat: Double?,
@@ -15,7 +14,6 @@ data class UserInfoUpdateRequest(
     fun toUpdateUserInfo(): UserUpdateInfo {
         return UserUpdateInfo(
             nickname = nickname,
-            thumbnailImageUrl = thumbnailImageUrl,
             profileImageUrl = profileImageUrl,
             address = address,
             lat = lat,
