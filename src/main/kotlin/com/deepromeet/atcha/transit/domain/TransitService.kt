@@ -28,9 +28,10 @@ class TransitService(
 
     fun getBusArrivalInfo(
         routeName: String,
-        stationName: String
+        stationName: String,
+        coordinate: Coordinate
     ): BusArrival {
-        return busManager.getArrivalInfo(routeName, stationName)
+        return busManager.getArrivalInfo(routeName, StationInfo(stationName, coordinate))
     }
 
     fun getTaxiFare(

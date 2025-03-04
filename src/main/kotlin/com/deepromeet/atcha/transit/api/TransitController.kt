@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.api
 
 import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.domain.BusArrival
@@ -40,7 +41,8 @@ class TransitController(
         return ApiResponse.success(
             transitService.getBusArrivalInfo(
                 request.routeName,
-                request.stationName
+                request.stationName,
+                Coordinate(request.lat, request.lon)
             )
         )
     }
