@@ -9,14 +9,6 @@ services:
     depends_on:
       - redis
       - mysql
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - SPRING_DATABASE_HOST=${SPRING_DATABASE_HOST}
-      - SPRING_DATABASE_PORT=${SPRING_DATABASE_PORT}
-      - SPRING_DATABASE_NAME=${SPRING_DATABASE_NAME}
-      - SPRING_DATABASE_USERNAME=${SPRING_DATABASE_USERNAME}
-      - SPRING_DATABASE_PASSWORD=${SPRING_DATABASE_PASSWORD}
-      - TMAP_API_KEY=${TMAP_API_KEY}
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
@@ -31,14 +23,6 @@ services:
     depends_on:
       - redis
       - mysql
-    environment:
-      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
-      - SPRING_DATABASE_HOST=${SPRING_DATABASE_HOST}
-      - SPRING_DATABASE_PORT=${SPRING_DATABASE_PORT}
-      - SPRING_DATABASE_NAME=${SPRING_DATABASE_NAME}
-      - SPRING_DATABASE_USERNAME=${SPRING_DATABASE_USERNAME}
-      - SPRING_DATABASE_PASSWORD=${SPRING_DATABASE_PASSWORD}
-      - TMAP_API_KEY=${TMAP_API_KEY}
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
