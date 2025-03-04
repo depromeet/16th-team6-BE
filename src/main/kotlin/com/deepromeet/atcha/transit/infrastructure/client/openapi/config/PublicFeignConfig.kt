@@ -4,7 +4,7 @@ import feign.RequestInterceptor
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 
-class OpenAPIFeignConfig(
+class PublicFeignConfig(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String
 ) {

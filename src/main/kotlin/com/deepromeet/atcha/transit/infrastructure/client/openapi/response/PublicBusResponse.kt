@@ -1,10 +1,14 @@
 package com.deepromeet.atcha.transit.infrastructure.client.openapi.response
 
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.domain.ArsId
 import com.deepromeet.atcha.transit.domain.BusArrival
+import com.deepromeet.atcha.transit.domain.BusRoute
+import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.RouteId
-import com.deepromeet.atcha.transit.domain.StationId
+import com.deepromeet.atcha.transit.domain.StationInfo
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
@@ -31,16 +35,58 @@ data class MsgHeader(
 data class MsgBody<T>(
     @JacksonXmlElementWrapper(useWrapping = false)
     @JacksonXmlProperty(localName = "itemList")
-    val itemList: List<T>
+    val itemList: List<T>?
 )
 
+data class StationResponse(
+    @JacksonXmlProperty(localName = "arsId")
+    val arsId: String,
+    @JacksonXmlProperty(localName = "stNm")
+    val stNm: String,
+    @JacksonXmlProperty(localName = "tmX")
+    val tmX: String,
+    @JacksonXmlProperty(localName = "tmY")
+    val tmY: String
+) {
+    fun toBusStation(): BusStation =
+        BusStation(
+            arsId = ArsId(arsId),
+            stationInfo =
+                StationInfo(
+                    name = stNm,
+                    coordinate =
+                        Coordinate(
+                            lat = tmY.toDouble(),
+                            lon = tmX.toDouble()
+                        )
+                )
+        )
+}
+
+data class BusRouteResponse(
+    @JacksonXmlProperty(localName = "busRouteId")
+    val busRouteId: String,
+    @JacksonXmlProperty(localName = "busRouteAbrv")
+    val busRouteAbrv: String
+) {
+    fun toBusRoute(): BusRoute =
+        BusRoute(
+            id = RouteId(busRouteId),
+            name = busRouteAbrv
+        )
+}
+
 data class BusArrivalResponse(
+    @JacksonXmlProperty(localName = "arsId")
+    val arsId: String,
     @JacksonXmlProperty(localName = "arrmsg1")
     val arrmsg1: String,
     @JacksonXmlProperty(localName = "arrmsg2")
     val arrmsg2: String,
     @JacksonXmlProperty(localName = "busRouteId")
     val busRouteId: String,
+    @JacksonXmlProperty(localName = "busRouteAbrv")
+    val busRouteAbrv: String,
     @JacksonXmlProperty(localName = "firstTm")
     val firstTm: String,
     @JacksonXmlProperty(localName = "lastTm")
@@ -58,7 +104,9 @@ data class BusArrivalResponse(
     @JacksonXmlProperty(localName = "isLast1")
     val isLast1: String,
     @JacksonXmlProperty(localName = "isLast2")
-    val isLast2: String
+    val isLast2: String,
+    @JacksonXmlProperty(localName = "term")
+    val term: String
 ) {
     fun toBusArrival(): BusArrival {
         val realTimeBusArrivals =
@@ -76,9 +124,12 @@ data class BusArrivalResponse(
             )
 
         return BusArrival(
-            routeId = RouteId(busRouteId.toInt()),
-            stationId = StationId(stId.toInt()),
+            routeId = RouteId(busRouteId),
+            routeName = busRouteAbrv,
+            arsId = ArsId(arsId),
+            stationName = stNm,
             lastTime = parseDateTime(lastTm),
+            term = term.toInt(),
             realTimeInfo = realTimeBusArrivals
         )
     }
@@ -95,7 +146,6 @@ data class BusArrivalResponse(
             busStatus = busStatus,
             remainingTime = remainingTime,
             remainingStations = staOrd.toInt() - sectionOrder.toInt(),
-            currentStation = stNm,
             isLast = isLast == "1"
         )
     }
