@@ -16,9 +16,9 @@ import org.mockito.Mockito.`when`
 
 class AuthControllerTest : BaseControllerTest() {
     private val providerAccessToken: String = "thisisfortestfJmGasdwdWIDEbraTFAAAAAQoqJREAAAGVMPfFQEA9X5YOsAdz"
-    private val kakaoId = 12345L
+    private val providerId = 12345L
     private val profile = Profile("test", "test@test.com")
-    private val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+    private val kakaoUserInfo = KakaoUserInfoResponse(providerId, KakaoAccount(profile))
 
     @BeforeEach
     fun setMockKakaoApiClient() {
@@ -112,7 +112,7 @@ class AuthControllerTest : BaseControllerTest() {
 
         // when & then
         RestAssured.given().log().all()
-            .header("Authorization", "Bearer ${signUpResponse.accessToken}")
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)

@@ -15,8 +15,8 @@ class AuthService(
     private val tokenGenerator: TokenGenerator,
     private val userReader: UserReader,
     private val userAppender: UserAppender,
-    private val userTokenReader: UserTokenReader,
-    private val userTokenAppender: UserTokenAppender
+    private val userProviderAppender: UserProviderAppender,
+    private val userProviderReader: UserProviderReader
 ) {
     @Transactional(readOnly = true)
     fun checkUserExists(
@@ -32,66 +32,59 @@ class AuthService(
     fun signUp(
         providerToken: String,
         signUpInfo: SignUpInfo
-    ): UserToken {
-        val provider = Provider(ProviderType.findByOrdinal(signUpInfo.provider), providerToken)
-        val authProvider = authProviders.getAuthProvider(provider)
+    ): UserTokenInfo {
+        val providerType = ProviderType.findByOrdinal(signUpInfo.provider)
+        val authProvider = authProviders.getAuthProvider(providerType)
         val providerUserInfo = authProvider.getUserInfo(providerToken)
-
         if (userReader.checkExists(providerUserInfo.providerId)) { // todo uk로 예외 처리
             throw AuthException.AlreadyExistsUser
         }
 
         val savedUser = userAppender.save(providerUserInfo, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
-        val userToken = UserToken(savedUser.id, provider, token)
 
-        userTokenAppender.save(userToken)
+        userProviderAppender.save(savedUser.id, Provider(providerType, providerToken))
 
-        return userToken
+        return UserTokenInfo(savedUser.id, token)
     }
 
     @Transactional
     fun login(
         providerToken: String,
         providerOrdinal: Int
-    ): UserToken {
-        val provider = Provider(ProviderType.findByOrdinal(providerOrdinal), providerToken)
-        val authProvider = authProviders.getAuthProvider(provider.providerType)
+    ): UserTokenInfo {
+        val providerType = ProviderType.findByOrdinal(providerOrdinal)
+        val authProvider = authProviders.getAuthProvider(providerType)
 
-        val userInfo = authProvider.getUserInfo(provider.providerToken)
+        val userInfo = authProvider.getUserInfo(providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
 
         val token = tokenGenerator.generateTokens(user.id)
-        val userToken = UserToken(user.id, provider, token)
 
-        userTokenAppender.save(userToken)
-
-        return userToken
+        return UserTokenInfo(user.id, token)
     }
 
     @Transactional
-    fun logout(accessToken: String) {
-        tokenGenerator.validateToken(accessToken, TokenType.ACCESS)
-
-        val userToken = userTokenReader.readByAccessToken(accessToken)
-        tokenGenerator.expireToken(userToken.accessToken)
-        tokenGenerator.expireToken(userToken.refreshToken)
-
-        val authProvider = authProviders.getAuthProvider(userToken.provider)
-        authProvider.logout(userToken.provider.providerToken)
-    }
-
-    @Transactional
-    fun reissueToken(refreshToken: String): UserToken {
+    fun logout(refreshToken: String) {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userId = tokenGenerator.getUserIdByToken(refreshToken, TokenType.REFRESH)
 
-        val userToken = userTokenReader.readByRefreshToken(refreshToken)
-        tokenGenerator.expireToken(userToken.accessToken)
-        tokenGenerator.expireToken(userToken.refreshToken)
+        val userProvider = userProviderReader.read(userId)
+        val authProvider = authProviders.getAuthProvider(userProvider.provider)
+        authProvider.logout(userProvider.provider)
 
-        val newTokenInfo = tokenGenerator.generateTokens(userToken.userId)
-        userTokenAppender.update(userToken, newTokenInfo)
+        tokenGenerator.expireTokensWithRefreshToken(refreshToken)
+    }
 
-        return userToken
+    @Transactional
+    fun reissueToken(refreshToken: String): UserTokenInfo {
+        tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
+        val userId = tokenGenerator.getUserIdByToken(refreshToken, TokenType.REFRESH)
+
+        tokenGenerator.expireTokensWithRefreshToken(refreshToken)
+
+        val tokenInfo = tokenGenerator.generateTokens(userId)
+
+        return UserTokenInfo(userId, tokenInfo)
     }
 }

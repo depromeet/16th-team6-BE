@@ -6,4 +6,6 @@ interface AuthProvider {
     fun getUserInfo(providerToken: String): ProviderUserInfoResponse
 
     fun logout(providerToken: String)
+
+    fun logout(provider: Provider)
 }
