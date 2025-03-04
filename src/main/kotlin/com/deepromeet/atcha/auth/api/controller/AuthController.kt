@@ -32,7 +32,7 @@ class AuthController(
         return ApiResponse.success(result)
     }
 
-    @PostMapping("/auth/sign-up")
+    @PostMapping("/auth/sign-up") // test
     @ResponseStatus(HttpStatus.CREATED)
     fun signUp(
         @Token providerToken: String,
