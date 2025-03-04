@@ -26,7 +26,13 @@ class UserControllerTest(
     private val userAppender: UserAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
-    var savedUser: User = User(providerId = 1L, nickname = "유저", profileImageUrl = "")
+    var savedUser: User =
+        User(
+            providerId = 1L,
+            nickname = "유저",
+            profileImageUrl = "유저 이미지",
+            alertFrequencies = mutableSetOf(1, 10, 20)
+        )
 
     @BeforeEach
     fun issueToken() {
@@ -56,6 +62,8 @@ class UserControllerTest(
         val userInfoUpdateRequest =
             UserInfoUpdateRequest(
                 "새로운 닉네임",
+                null,
+                null,
                 null,
                 null,
                 null,

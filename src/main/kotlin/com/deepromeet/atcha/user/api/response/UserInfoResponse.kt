@@ -11,7 +11,8 @@ data class UserInfoResponse(
     val lat: Double,
     val lon: Double,
     val alertAgreement: Boolean,
-    val trackingAgreement: Boolean
+    val trackingAgreement: Boolean,
+    val alertFrequencies: Set<Int>
 ) {
     companion object {
         fun from(domain: User) =
@@ -24,7 +25,8 @@ data class UserInfoResponse(
                 domain.address.lat,
                 domain.address.lon,
                 domain.agreement.alert,
-                domain.agreement.tracking
+                domain.agreement.tracking,
+                domain.alertFrequencies
             )
     }
 }

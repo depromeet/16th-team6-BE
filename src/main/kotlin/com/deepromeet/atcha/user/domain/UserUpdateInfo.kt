@@ -7,5 +7,6 @@ data class UserUpdateInfo(
     val lat: Double?,
     val log: Double?,
     val alertAgreement: Boolean?,
-    val trackingAgreement: Boolean?
+    val trackingAgreement: Boolean?,
+    val alertFrequencies: Set<Int>?
 )
