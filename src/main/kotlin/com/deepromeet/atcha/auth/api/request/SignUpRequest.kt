@@ -8,7 +8,8 @@ data class SignUpRequest(
     val lat: Double,
     val log: Double,
     val alertAgreement: Boolean,
-    val trackingAgreement: Boolean
+    val trackingAgreement: Boolean,
+    val alertFrequencies: Set<Int>
 ) {
     fun toSignUpInfo() =
         SignUpInfo(
@@ -17,6 +18,7 @@ data class SignUpRequest(
             lat = lat,
             log = log,
             alertAgreement = alertAgreement,
-            trackingAgreement = trackingAgreement
+            trackingAgreement = trackingAgreement,
+            alertFrequencies = alertFrequencies
         )
 }

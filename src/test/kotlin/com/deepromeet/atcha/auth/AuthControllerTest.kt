@@ -35,7 +35,8 @@ class AuthControllerTest : BaseControllerTest() {
                 37.207581,
                 127.113558,
                 true,
-                true
+                true,
+                setOf(1, 10, 15)
             )
 
         // when & then
@@ -61,21 +62,7 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `로그인 요청`() {
         // given : 회원가입
-        val signUpRequest =
-            SignUpRequest(
-                0,
-                "경기도 화성시 동탄순환대로26길 21",
-                37.207581,
-                127.113558,
-                true,
-                true
-            )
-        RestAssured.given().log().all()
-            .header("Content-Type", "application/json")
-            .header("Authorization", "Bearer $providerAccessToken")
-            .body(signUpRequest)
-            .`when`().post("/api/auth/sign-up")
-            .then().log().all()
+        signUpUser()
 
         // when & then
         RestAssured.given().log().all()
@@ -89,26 +76,7 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `로그아웃`() {
         // given 회원가입 + 로그인
-        val signUpRequest =
-            SignUpRequest(
-                0,
-                "경기도 화성시 동탄순환대로26길 21",
-                37.207581,
-                127.113558,
-                true,
-                true
-            )
-        val result =
-            RestAssured.given().log().all()
-                .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer $providerAccessToken")
-                .body(signUpRequest)
-                .`when`().post("/api/auth/sign-up")
-                .then().log().all()
-                .extract().`as`(ApiResponse::class.java)
-                .result
-        val objectMapper = jacksonObjectMapper()
-        val signUpResponse = objectMapper.convertValue(result, SignUpResponse::class.java)
+        val signUpResponse = signUpUser()
 
         // when & then
         RestAssured.given().log().all()
@@ -121,6 +89,17 @@ class AuthControllerTest : BaseControllerTest() {
     @Test
     fun `토큰 재발급`() {
         // given : 회원가입
+        val signUpResponse = signUpUser()
+
+        // when & then
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
+            .`when`().get("/api/auth/reissue")
+            .then().log().all()
+            .statusCode(200)
+    }
+
+    private fun signUpUser(): SignUpResponse {
         val signUpRequest =
             SignUpRequest(
                 0,
@@ -128,8 +107,11 @@ class AuthControllerTest : BaseControllerTest() {
                 37.207581,
                 127.113558,
                 true,
-                true
+                true,
+                setOf(1, 10, 15)
             )
+
+        // when & then
         val result =
             RestAssured.given().log().all()
                 .header("Content-Type", "application/json")
@@ -139,15 +121,7 @@ class AuthControllerTest : BaseControllerTest() {
                 .then().log().all()
                 .extract().`as`(ApiResponse::class.java)
                 .result
-
         val objectMapper = jacksonObjectMapper()
-        val signUpResponse = objectMapper.convertValue(result, SignUpResponse::class.java)
-
-        // when & then
-        RestAssured.given().log().all()
-            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
-            .`when`().get("/api/auth/reissue")
-            .then().log().all()
-            .statusCode(200)
+        return objectMapper.convertValue(result, SignUpResponse::class.java)
     }
 }

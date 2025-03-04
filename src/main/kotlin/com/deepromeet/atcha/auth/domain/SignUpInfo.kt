@@ -9,7 +9,8 @@ data class SignUpInfo(
     val lat: Double,
     val log: Double,
     val alertAgreement: Boolean,
-    val trackingAgreement: Boolean
+    val trackingAgreement: Boolean,
+    val alertFrequencies: Set<Int>
 ) {
     fun getAddress(): Address = Address(address, lat, log)
 
