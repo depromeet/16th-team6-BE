@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated
 
 @Embeddable
 class Provider(
+    val providerId: Long,
     @Enumerated(EnumType.STRING)
     var providerType: ProviderType,
     var providerToken: String
