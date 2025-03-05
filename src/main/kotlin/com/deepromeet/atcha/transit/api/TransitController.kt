@@ -3,9 +3,11 @@ package com.deepromeet.atcha.transit.api
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
+import com.deepromeet.atcha.transit.api.request.SubwayLastTimeRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.TransitService
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import org.springframework.web.bind.annotation.GetMapping
@@ -43,6 +45,19 @@ class TransitController(
                 request.routeName,
                 request.stationName,
                 Coordinate(request.lat, request.lon)
+            )
+        )
+    }
+
+    @GetMapping("/last-time")
+    fun getLastTime(
+        @ModelAttribute request: SubwayLastTimeRequest
+    ): ApiResponse<SubwayTime?> {
+        return ApiResponse.success(
+            transitService.getLastTime(
+                request.toStartMeta(),
+                request.toEndMeta(),
+                request.direction
             )
         )
     }
