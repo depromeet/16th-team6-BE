@@ -1,9 +1,9 @@
 spring:
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
+    url: jdbc:mysql://${secret.SPRING_DATABASE_HOST}:${secret.SPRING_DATABASE_PORT}/${secret.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${secret.SPRING_DATABASE_USERNAME}
+    password: ${secret.SPRING_DATABASE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: create
@@ -57,4 +57,11 @@ open-api:
     api:
         url:
             bus: http://ws.bus.go.kr
-        service-key: ${OPEN_API_SERVICE_KEY}
+            subway: http://apis.data.go.kr/1613000/SubwayInfoService
+            holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
+        service-key: ${secret.OPEN_API_SERVICE_KEY}
+kric:
+    api:
+        url:
+            subway: https://openapi.kric.go.kr/openapi/trainUseInfo
+        service-key: ${secret.KRIC_SERVICE_KEY}
