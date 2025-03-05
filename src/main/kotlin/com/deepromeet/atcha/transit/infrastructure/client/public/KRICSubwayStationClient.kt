@@ -13,28 +13,16 @@ import org.springframework.stereotype.Component
 @Component
 class KRICSubwayStationClient(
     private val kricFeignClient: KRICSubwayStationFeignClient,
-    private val publicFeignClient: PublicSubwayInfoFeignClient,
+    private val publicSubwayInfoClient: PublicSubwayInfoClient,
     @Value("\${kric.api.service-key}")
-    private val kricServiceKey: String,
-    @Value("\${open-api.api.service-key}")
-    private val openApiServiceKey: String
+    private val kricServiceKey: String
 ) : SubwayStationFetcher {
     override suspend fun fetch(lnCd: String): List<SubwayStation> =
         coroutineScope {
             val stationsResponse = kricFeignClient.getSubwayRouteInfo(kricServiceKey, lnCd).body
-
-            // 비동기 병렬 처리
             stationsResponse.map { st ->
                 async(Dispatchers.IO) {
-                    val station =
-                        publicFeignClient.getStationByName(openApiServiceKey, st.stinNm)
-                            .response
-                            .body
-                            .items
-                            ?.item
-                            ?.find { st.routNm == it.subwayRouteName }
-                            ?.toData()
-
+                    val station = publicSubwayInfoClient.getSubwayStationByName(st.stinNm, st.routNm)
                     SubwayStation(
                         station?.id ?: SubwayStationId("UNKNOWN-" + st.stinCd),
                         st.stinCd,
@@ -44,6 +32,6 @@ class KRICSubwayStationClient(
                         st.stinConsOrdr
                     )
                 }
-            }.awaitAll() // 모든 비동기 요청 완료 후 리스트 반환
+            }.awaitAll()
         }
 }
