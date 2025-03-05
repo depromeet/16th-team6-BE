@@ -85,7 +85,7 @@ class AuthServiceTest {
         val profile = Profile("newUser", "new@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
-        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true)
+        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true, setOf(1, 10, 15))
 
         // when
         val result = authService.signUp(token, signUpRequest)
@@ -113,7 +113,7 @@ class AuthServiceTest {
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
         userAppender.save(existingUser)
-        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true)
+        val signUpRequest = SignUpInfo(0, "dummyValue", 37.123, 126.123, true, true, setOf(1, 10, 15))
 
         // when & then
         assertThatThrownBy { authService.signUp(token, signUpRequest) }
