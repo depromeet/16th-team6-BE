@@ -38,8 +38,6 @@ class UserAppender(
         userUpdateInfo.lat?.let { user.address.lat = it }
         userUpdateInfo.log?.let { user.address.lon = it }
 
-        userUpdateInfo.alertAgreement?.let { user.agreement.alert = it }
-        userUpdateInfo.trackingAgreement?.let { user.agreement.tracking = it }
         return user
     }
 

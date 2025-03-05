@@ -8,8 +8,6 @@ data class UserInfoUpdateRequest(
     val address: String?,
     val lat: Double?,
     val log: Double?,
-    val alertAgreement: Boolean?,
-    val trackingAgreement: Boolean?,
     val alertFrequencies: Set<Int>?
 ) {
     fun toUpdateUserInfo(): UserUpdateInfo {
@@ -19,8 +17,6 @@ data class UserInfoUpdateRequest(
             address = address,
             lat = lat,
             log = log,
-            alertAgreement = alertAgreement,
-            trackingAgreement = trackingAgreement,
             alertFrequencies = alertFrequencies
         )
     }

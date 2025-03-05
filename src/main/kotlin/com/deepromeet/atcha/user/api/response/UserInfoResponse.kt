@@ -10,8 +10,6 @@ data class UserInfoResponse(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertAgreement: Boolean,
-    val trackingAgreement: Boolean,
     val alertFrequencies: Set<Int>
 ) {
     companion object {
@@ -24,8 +22,6 @@ data class UserInfoResponse(
                 domain.address.address,
                 domain.address.lat,
                 domain.address.lon,
-                domain.agreement.alert,
-                domain.agreement.tracking,
                 domain.alertFrequencies
             )
     }

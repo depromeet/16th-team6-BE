@@ -66,8 +66,6 @@ class UserControllerTest(
                 null,
                 null,
                 null,
-                null,
-                null,
                 null
             )
 
