@@ -3,6 +3,7 @@ package com.deepromeet.atcha.user
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
+import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.domain.User
@@ -26,18 +27,12 @@ class UserControllerTest(
     private val userAppender: UserAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
-    var savedUser: User =
-        User(
-            providerId = 1L,
-            nickname = "유저",
-            profileImageUrl = "유저 이미지",
-            alertFrequencies = mutableSetOf(1, 10, 20)
-        )
+    var user: User = UserFixture.create()
 
     @BeforeEach
     fun issueToken() {
-        savedUser = userAppender.save(savedUser)
-        val generateToken = tokenGenerator.generateTokens(savedUser.id)
+        user = userAppender.save(user)
+        val generateToken = tokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
     }
 
@@ -53,21 +48,14 @@ class UserControllerTest(
                 .result
         val objectMapper = jacksonObjectMapper()
         val findUser: UserInfoResponse = objectMapper.convertValue(result, UserInfoResponse::class.java)
-        assertThat(findUser.id).isEqualTo(savedUser.id)
+        assertThat(findUser.id).isEqualTo(user.id)
     }
 
     @Test
     fun `회원 정보 수정`() {
         // given
         val userInfoUpdateRequest =
-            UserInfoUpdateRequest(
-                "새로운 닉네임",
-                null,
-                null,
-                null,
-                null,
-                null
-            )
+            UserInfoUpdateRequest("새로운 닉네임")
 
         // when
         RestAssured.given().log().all()
@@ -78,7 +66,7 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(200)
 
-        val findUser = userReader.read(savedUser.id)
+        val findUser = userReader.read(user.id)
 
         // then
         assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
@@ -93,7 +81,7 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(204)
 
-        val findUser = userReader.read(savedUser.id)
+        val findUser = userReader.read(user.id)
 
         // then
         assertThat(findUser.isDeleted).isTrue()
