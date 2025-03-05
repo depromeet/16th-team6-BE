@@ -1,19 +1,19 @@
-package com.deepromeet.atcha.transit.infrastructure.client.openapi
+package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
-import com.deepromeet.atcha.transit.domain.StationInfo
+import com.deepromeet.atcha.transit.domain.BusStationMeta
 import org.springframework.stereotype.Component
 
 @Component
 class PublicBusStationInfoClient(
     private val publicBusClient: PublicBusStationInfoFeignClient
 ) : BusStationInfoClient {
-    override fun getStationByName(info: StationInfo): BusStation? {
+    override fun getStationByName(info: BusStationMeta): BusStation? {
         val response = publicBusClient.getStationInfoByName(info.name)
         val busStations = response.msgBody.itemList?.map { it.toBusStation() }
-        return busStations?.minByOrNull { it.stationInfo.coordinate.distanceTo(info.coordinate) }
+        return busStations?.minByOrNull { it.busStationMeta.coordinate.distanceTo(info.coordinate) }
     }
 
     override fun getRoute(

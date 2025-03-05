@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client.openapi.config
+package com.deepromeet.atcha.transit.infrastructure.client.public.config
 
 import feign.RequestInterceptor
 import org.springframework.beans.factory.annotation.Value
@@ -10,7 +10,6 @@ class PublicFeignConfig(
 ) {
     @Bean
     fun openApiRequestInterceptor(): RequestInterceptor {
-        println("serviceKey: $serviceKey")
         return RequestInterceptor { requestTemplate ->
             requestTemplate.header("serviceKey", serviceKey)
         }

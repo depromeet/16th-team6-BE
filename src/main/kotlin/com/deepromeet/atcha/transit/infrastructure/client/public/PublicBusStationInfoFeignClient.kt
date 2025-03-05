@@ -1,9 +1,9 @@
-package com.deepromeet.atcha.transit.infrastructure.client.openapi
+package com.deepromeet.atcha.transit.infrastructure.client.public
 
-import com.deepromeet.atcha.transit.infrastructure.client.openapi.config.PublicFeignConfig
-import com.deepromeet.atcha.transit.infrastructure.client.openapi.response.BusRouteResponse
-import com.deepromeet.atcha.transit.infrastructure.client.openapi.response.ServiceResult
-import com.deepromeet.atcha.transit.infrastructure.client.openapi.response.StationResponse
+import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.BusRouteResponse
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.StationResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam

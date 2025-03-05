@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client.openapi
+package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusArrivalInfoFetcher
