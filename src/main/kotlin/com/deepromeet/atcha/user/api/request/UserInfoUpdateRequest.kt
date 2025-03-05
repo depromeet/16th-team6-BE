@@ -3,12 +3,12 @@ package com.deepromeet.atcha.user.api.request
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
 
 data class UserInfoUpdateRequest(
-    val nickname: String?,
-    val profileImageUrl: String?,
-    val address: String?,
-    val lat: Double?,
-    val log: Double?,
-    val alertFrequencies: Set<Int>?
+    val nickname: String? = null,
+    val profileImageUrl: String? = null,
+    val address: String? = null,
+    val lat: Double? = null,
+    val log: Double? = null,
+    val alertFrequencies: Set<Int>? = null
 ) {
     fun toUpdateUserInfo(): UserUpdateInfo {
         return UserUpdateInfo(
