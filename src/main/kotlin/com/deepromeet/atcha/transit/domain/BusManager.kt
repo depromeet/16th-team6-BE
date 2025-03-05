@@ -10,10 +10,10 @@ class BusManager(
 ) {
     fun getArrivalInfo(
         routeName: String,
-        stationInfo: StationInfo
+        busStationMeta: BusStationMeta
     ): BusArrival {
         val station =
-            busStationInfoClient.getStationByName(stationInfo)
+            busStationInfoClient.getStationByName(busStationMeta)
                 ?: throw TransitException.NotFoundBusStation
         val busRoute =
             busStationInfoClient.getRoute(station, routeName)
