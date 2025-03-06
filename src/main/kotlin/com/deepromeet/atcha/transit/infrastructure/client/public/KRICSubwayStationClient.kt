@@ -6,7 +6,7 @@ import com.deepromeet.atcha.transit.domain.SubwayStationId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -17,8 +17,8 @@ class KRICSubwayStationClient(
     @Value("\${kric.api.service-key}")
     private val kricServiceKey: String
 ) : SubwayStationFetcher {
-    override suspend fun fetch(lnCd: String): List<SubwayStation> =
-        coroutineScope {
+    override fun fetch(lnCd: String): List<SubwayStation> =
+        runBlocking {
             val stationsResponse = kricFeignClient.getSubwayRouteInfo(kricServiceKey, lnCd).body
             stationsResponse.map { st ->
                 async(Dispatchers.IO) {
