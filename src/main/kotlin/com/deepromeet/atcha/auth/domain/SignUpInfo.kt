@@ -9,5 +9,5 @@ data class SignUpInfo(
     val lon: Double,
     val alertFrequencies: Set<Int>
 ) {
-    fun getAddress(): Address = Address(address, lat, log)
+    fun getAddress(): Address = Address(address, lat, lon)
 }
