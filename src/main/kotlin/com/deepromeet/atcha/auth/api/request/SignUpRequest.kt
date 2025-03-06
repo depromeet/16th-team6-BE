@@ -6,7 +6,7 @@ data class SignUpRequest(
     val provider: Int,
     val address: String,
     val lat: Double,
-    val log: Double,
+    val lon: Double,
     val alertAgreement: Boolean,
     val trackingAgreement: Boolean,
     val alertFrequencies: Set<Int>
@@ -16,7 +16,7 @@ data class SignUpRequest(
             provider = provider,
             address = address,
             lat = lat,
-            log = log,
+            lon = lon,
             alertAgreement = alertAgreement,
             trackingAgreement = trackingAgreement,
             alertFrequencies = alertFrequencies

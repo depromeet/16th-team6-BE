@@ -7,12 +7,12 @@ data class SignUpInfo(
     val provider: Int,
     val address: String,
     val lat: Double,
-    val log: Double,
+    val lon: Double,
     val alertAgreement: Boolean,
     val trackingAgreement: Boolean,
     val alertFrequencies: Set<Int>
 ) {
-    fun getAddress(): Address = Address(address, lat, log)
+    fun getAddress(): Address = Address(address, lat, lon)
 
     fun getAgreement(): Agreement = Agreement(alertAgreement, trackingAgreement)
 }

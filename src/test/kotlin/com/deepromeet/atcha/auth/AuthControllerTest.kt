@@ -1,12 +1,12 @@
 package com.deepromeet.atcha.auth
 
-import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
+import com.deepromeet.atcha.support.fixture.UserFixture
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
 import org.junit.jupiter.api.BeforeEach
@@ -26,18 +26,11 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
-    fun `회원가입`() { // todo Fixture 만들기
+    fun `회원가입`() {
         // given
-        val signUpRequest =
-            SignUpRequest(
-                0,
-                "경기도 화성시 동탄순환대로26길 21",
-                37.207581,
-                127.113558,
-                true,
-                true,
-                setOf(1, 10, 15)
-            )
+        val user = UserFixture.create()
+        val provider = 0
+        val signUpRequest = UserFixture.userToSignUpRequest(user, provider)
 
         // when & then
         RestAssured.given().log().all()
@@ -100,16 +93,9 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     private fun signUpUser(): SignUpResponse {
-        val signUpRequest =
-            SignUpRequest(
-                0,
-                "경기도 화성시 동탄순환대로26길 21",
-                37.207581,
-                127.113558,
-                true,
-                true,
-                setOf(1, 10, 15)
-            )
+        val user = UserFixture.create()
+        val provider = 0
+        val signUpRequest = UserFixture.userToSignUpRequest(user, provider)
 
         // when & then
         val result =
