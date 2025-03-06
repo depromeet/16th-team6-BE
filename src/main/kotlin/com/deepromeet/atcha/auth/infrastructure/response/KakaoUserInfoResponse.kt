@@ -9,16 +9,19 @@ data class KakaoUserInfoResponse(
     @JsonProperty("id") val kakaoId: Long,
     val kakaoAccount: KakaoAccount
 ) {
-    val nickname: String get() = kakaoAccount.profile.nickname
-    val profileImageUrl: String get() = kakaoAccount.profile.profileImageUrl
-    val profile: Profile get() = kakaoAccount.profile
+    val nickname: String
+        get() = kakaoAccount.profile.nickname
+    val profileImageUrl: String
+        get() = kakaoAccount.profile.profileImageUrl
+    val profile: Profile
+        get() = kakaoAccount.profile
 
     fun toUserInfoResponse(): ProviderUserInfoResponse =
         ProviderUserInfoResponse(providerId = kakaoId, nickname, profileImageUrl)
 }
 
 data class KakaoAccount(
-    val profile: Profile
+    val profile: Profile = Profile("익명", "")
 )
 
 @JsonNaming(value = PropertyNamingStrategies.SnakeCaseStrategy::class)
