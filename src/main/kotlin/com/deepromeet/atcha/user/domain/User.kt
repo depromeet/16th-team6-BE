@@ -23,8 +23,6 @@ class User(
     var profileImageUrl: String = "",
     @Embedded
     var address: Address = Address(),
-    @Embedded
-    var agreement: Agreement = Agreement(),
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "user_alert_frequencies", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "alert_frequencies")
@@ -50,7 +48,6 @@ class User(
             "nickname='$nickname', " +
             "profileImageUrl='$profileImageUrl', " +
             "address=$address, " +
-            "agreement=$agreement, " +
             "alertFrequencies=$alertFrequencies, " +
             "isDeleted=$isDeleted)"
     }
