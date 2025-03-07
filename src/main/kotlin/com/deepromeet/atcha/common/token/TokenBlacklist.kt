@@ -6,5 +6,5 @@ interface TokenBlacklist {
         tokenType: TokenType
     )
 
-    fun has(token: String): Boolean
+    fun contains(token: String): Boolean
 }

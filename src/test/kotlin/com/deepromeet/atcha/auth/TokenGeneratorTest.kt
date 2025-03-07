@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.auth
 
+import com.deepromeet.atcha.common.token.TokenBlacklist
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
 import com.deepromeet.atcha.common.token.exception.TokenException
@@ -14,11 +15,12 @@ import org.junit.jupiter.api.Test
 class TokenGeneratorTest {
     private val accessSecret = "dGVzdEFjY2Vzc1NlY3JldEtasdleVZhbHVlMTIzNDU2Nzg="
     private val refreshSecret = "dGVzdFJmZXNoU2VjcmV0S2V5asdVmFsdWUxMjM0NTY3OA=="
+    private lateinit var tokenBlacklist: TokenBlacklist
     private lateinit var tokenGenerator: TokenGenerator
 
     @BeforeEach
     fun setUpTokenGenerator() {
-        tokenGenerator = TokenGenerator(accessSecret, refreshSecret)
+        tokenGenerator = TokenGenerator(accessSecret, refreshSecret, tokenBlacklist)
     }
 
     @Test
@@ -62,7 +64,7 @@ class TokenGeneratorTest {
         val tokenInfo = tokenGenerator.generateTokens(userId)
 
         // when
-        tokenGenerator.expireToken(tokenInfo.accessToken)
+        tokenGenerator.expireToken(tokenInfo.accessToken, TokenType.ACCESS)
 
         // then
         Assertions.assertThatThrownBy { tokenGenerator.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }

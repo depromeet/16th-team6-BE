@@ -14,13 +14,13 @@ class TokenRedisBlacklist(
         token: String,
         tokenType: TokenType
     ) {
-        if (!has(token)) {
+        if (!contains(token)) {
             blacklistRedisTemplate.opsForValue()
                 .set(getKey(token), token, Duration.ofMillis(tokenType.expirationMills))
         }
     }
 
-    override fun has(token: String): Boolean = get(token) != null
+    override fun contains(token: String): Boolean = get(token) != null
 
     private fun get(token: String): String? =
         blacklistRedisTemplate.opsForValue()
