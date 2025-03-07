@@ -1,4 +1,4 @@
-name: [DEV CD] Atcha Deploy with Docker
+name: DEV CD
 
 on:
   workflow_dispatch:
