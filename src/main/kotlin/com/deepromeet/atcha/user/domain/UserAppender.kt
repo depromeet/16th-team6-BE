@@ -21,7 +21,6 @@ class UserAppender(
                 providerId = providerUserInfo.providerId,
                 profileImageUrl = providerUserInfo.profileImageUrl,
                 address = signUpInfo.getAddress(),
-                agreement = signUpInfo.getAgreement(),
                 alertFrequencies = signUpInfo.alertFrequencies.toMutableSet()
             )
         return userJpaRepository.save(user)
