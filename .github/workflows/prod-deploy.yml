@@ -47,18 +47,18 @@ jobs:
       - name: Docker login on remote
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.REMOTE_IP }}
+          host: ${{ secrets.REMOTE_BASTION_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
           password: ${{ secrets.REMOTE_SSH_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             sudo chmod 666 /var/run/docker.sock
-            echo ${{ secrets.DOCKERHUB_TOKEN }} | docker login -u ${{ secrets.DOCKERHUB_USERNAME }} --password-stdin
+            echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
 
       - name: Run deploy script on remote
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.REMOTE_IP }}
+          host: ${{ secrets.REMOTE_BASTION_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
           password: ${{ secrets.REMOTE_SSH_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
