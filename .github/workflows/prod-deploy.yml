@@ -1,0 +1,76 @@
+name: PROD CD
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches: [ main ]
+
+env:
+  DOCKER_IMAGE: ghcr.io/jiwonkkang/atcha
+  VERSION: ${{ github.sha }}
+  CONTAINER_NAME: atcha
+
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
+
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Docker hub login
+        uses: docker/login-action@v3
+        with:
+            username: ${{secrets.DOCKER_HUB_USERNAME}}
+            password: ${{secrets.DOCKER_HUB_TOKEN}}
+
+      - name: Build and push to DockerHub
+        env:
+            NAME: ${{secrets.DOCKER_HUB_USERNAME}}
+            REPO: atcha-prod
+        run: |
+            docker build -t $REPO .
+            docker tag $REPO:latest $NAME/$REPO:latest
+            docker push $NAME/$REPO:latest
+        with:
+          context: .
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ env.DOCKER_IMAGE }}:latest
+
+  deploy:
+    needs: build
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Docker login
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_SSH_ID }}
+          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            sudo chmod 666 /var/run/docker.sock
+            echo ${{ secrets.GHCR_TOKEN }} | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: Run
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.REMOTE_IP }}
+          username: ${{ secrets.REMOTE_SSH_ID }}
+          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            ./deploy.sh
