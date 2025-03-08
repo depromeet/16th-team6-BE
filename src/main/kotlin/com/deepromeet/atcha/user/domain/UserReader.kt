@@ -9,11 +9,11 @@ class UserReader(
     private val userJpaRepository: UserJpaRepository
 ) {
     fun read(id: Long): User =
-        userJpaRepository.findById(id)
-            .orElseThrow { UserException.UserNotFound }
+        userJpaRepository.findByIdAndIsDeletedFalse(id)
+            ?: throw UserException.UserNotFound
 
     fun readByProviderId(providerId: Long): User =
-        userJpaRepository.findByProviderId(providerId)
+        userJpaRepository.findByProviderIdAndIsDeletedFalse(providerId)
             ?: throw UserException.UserNotFound
 
     fun checkExists(providerId: Long): Boolean = userJpaRepository.existsByProviderId(providerId)
