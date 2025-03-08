@@ -48,7 +48,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_BASTION_IP }}
-          username: ${{ secrets.PROD_USERNAME }}
+          username: ${{ secrets.PROD_APP_USERNAME }}
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
