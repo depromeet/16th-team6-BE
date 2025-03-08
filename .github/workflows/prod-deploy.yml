@@ -48,8 +48,8 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_BASTION_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
-          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          username: ${{ secrets.PROD_USERNAME }}
+          password: ${{ secrets.PROD_KEY_PATH }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             ssh atcha@${{ secrets.PROD_APP_A_IP }} -i ${{ secrets.PROD_KEY_PATH }}
