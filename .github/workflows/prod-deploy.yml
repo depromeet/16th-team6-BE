@@ -52,8 +52,8 @@ jobs:
           password: ${{ secrets.REMOTE_SSH_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            sudo chmod 666 /var/run/docker.sock
-            echo ${{ secrets.DOCKER_HUB_TOKEN }} | docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} --password-stdin
+            ssh atcha@${{ secrets.PROD_APP_A_IP }} -i ${{ secrets.PROD_KEY_PATH }}
+            echo "SUCCESS !!!!!"
 
       - name: Run deploy script on remote
         uses: appleboy/ssh-action@master
