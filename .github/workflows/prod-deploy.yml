@@ -45,10 +45,10 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/{$IMAGE_NAME}:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/{$IMAGE_NAME}:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
 
 
   deploy:
