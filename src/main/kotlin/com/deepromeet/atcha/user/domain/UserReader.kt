@@ -16,5 +16,5 @@ class UserReader(
         userJpaRepository.findByProviderIdAndIsDeletedFalse(providerId)
             ?: throw UserException.UserNotFound
 
-    fun checkExists(providerId: Long): Boolean = userJpaRepository.existsByProviderId(providerId)
+    fun checkExists(providerId: Long): Boolean = userJpaRepository.existsByProviderIdAndIsDeletedFalse(providerId)
 }

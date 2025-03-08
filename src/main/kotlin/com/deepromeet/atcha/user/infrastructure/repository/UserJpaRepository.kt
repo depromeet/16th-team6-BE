@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface UserJpaRepository : JpaRepository<User, Long> {
     fun findByIdAndIsDeletedFalse(id: Long): User?
 
-    fun existsByProviderId(providerId: Long): Boolean
+    fun existsByProviderIdAndIsDeletedFalse(providerId: Long): Boolean
 
     fun findByProviderIdAndIsDeletedFalse(providerId: Long): User?
 }

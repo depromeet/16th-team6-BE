@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mockito.`when`
+import org.springframework.http.HttpHeaders
 
 class AuthControllerTest : BaseControllerTest() {
     private val providerAccessToken: String = "thisisfortestfJmGasdwdWIDEbraTFAAAAAQoqJREAAAGVMPfFQEA9X5YOsAdz"
@@ -77,6 +78,25 @@ class AuthControllerTest : BaseControllerTest() {
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)
+    }
+
+    @Test
+    fun `회원 탈퇴한 유저는 더이상 존재하지 않는다`() {
+        val signUpResponse = signUpUser()
+
+        // when
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
+            .`when`().post("/api/auth/logout")
+            .then().log().all()
+            .statusCode(204)
+
+        // then
+        RestAssured.given().log().all()
+            .header(HttpHeaders.AUTHORIZATION, "Bearer ${signUpResponse.accessToken}")
+            .`when`().delete("/api/members/me")
+            .then().log().all()
+            .statusCode(400)
     }
 
     @Test
