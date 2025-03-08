@@ -6,7 +6,7 @@ spring:
     password: ${secret.SPRING_DATABASE_PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show-sql: true
@@ -20,7 +20,7 @@ logging:
         orm:
           jdbc:
             bind: trace
-      SQL: trace
+        SQL: trace
     com.deepromeet.atcha: DEBUG  # FeignClient 패키지 로깅 활성화
     org.springframework.cloud.openfeign: DEBUG
     feign: DEBUG
