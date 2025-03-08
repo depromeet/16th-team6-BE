@@ -40,7 +40,7 @@ jobs:
 
 
   deploy:
-    needs: build
+#    needs: build
     name: Deploy
     runs-on: ubuntu-latest
     steps:
