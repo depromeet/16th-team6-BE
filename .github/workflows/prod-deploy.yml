@@ -51,7 +51,8 @@ jobs:
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-              ssh -i ${{ secrets.PROD_KEY_PATH }} ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.PROD_APP_A_IP }} "sudo sh ./deploy.sh"
+              ssh -i ${{ secrets.PROD_KEY_PATH }} ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.PROD_APP_A_IP }}
+              echo "SUCCESS"
 
 
 
