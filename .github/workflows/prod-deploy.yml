@@ -52,5 +52,6 @@ jobs:
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
+            ssh ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.PROD_APP_A_IP }} -i ${{ secrets.PROD_KEY_PATH }}
             echo "SUCCESS !!!!!"
 
