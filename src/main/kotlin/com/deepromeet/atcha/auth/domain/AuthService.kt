@@ -59,6 +59,9 @@ class AuthService(
         val userInfo = authProvider.getUserInfo(providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
 
+        val userProvider = userProviderReader.read(user.id)
+        userProviderAppender.updateProviderToken(userProvider, providerToken)
+
         val token = tokenGenerator.generateTokens(user.id)
 
         return UserTokenInfo(user.id, token)

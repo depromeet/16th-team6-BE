@@ -12,4 +12,11 @@ class UserProviderAppender(
         user: User,
         provider: Provider
     ) = userProviderRepository.save(UserProvider(user, provider))
+
+    fun updateProviderToken(
+        userProvider: UserProvider,
+        providerToken: String
+    ) {
+        userProvider.provider.providerToken = providerToken
+    }
 }

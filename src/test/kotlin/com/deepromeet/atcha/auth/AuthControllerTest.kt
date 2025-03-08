@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.auth
 
+import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
@@ -110,6 +111,45 @@ class AuthControllerTest : BaseControllerTest() {
             .`when`().get("/api/auth/reissue")
             .then().log().all()
             .statusCode(200)
+    }
+
+    @Test
+    fun `로그아웃 한 유저가 로그인 후 다시 로그아웃한다`() {
+        val signUpResponse = signUpUser()
+
+        // 로그인
+        RestAssured.given().log().all()
+            .param("provider", 0)
+            .header("Authorization", "Bearer $providerAccessToken")
+            .`when`().get("/api/auth/login")
+            .then().log().all()
+            .statusCode(200)
+
+        // 로그아웃
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
+            .`when`().post("/api/auth/logout")
+            .then().log().all()
+            .statusCode(204)
+
+        // 재로그인
+        val result =
+            RestAssured.given().log().all()
+                .param("provider", 0)
+                .header("Authorization", "Bearer $providerAccessToken")
+                .`when`().get("/api/auth/login")
+                .then().log().all()
+                .extract().`as`(ApiResponse::class.java)
+                .result
+        val objectMapper = jacksonObjectMapper()
+        val reLoginResponse: LoginResponse = objectMapper.convertValue(result, LoginResponse::class.java)
+
+        // 재로그아웃
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${reLoginResponse.refreshToken}")
+            .`when`().post("/api/auth/logout")
+            .then().log().all()
+            .statusCode(204)
     }
 
     private fun signUpUser(): SignUpResponse {
