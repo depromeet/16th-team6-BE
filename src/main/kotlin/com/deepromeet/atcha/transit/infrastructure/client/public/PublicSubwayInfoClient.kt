@@ -7,7 +7,6 @@ import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.SubwayTimeResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -28,7 +27,9 @@ class PublicSubwayInfoClient(
             .body
             .items
             ?.item
-            ?.find { it.subwayRouteName == routeName } // TODO : KRIC 노선이름과 공공데이터의 노선이름이 일치하는지 확인 필요
+            ?.find {
+                it.subwayRouteName == routeName && it.subwayStationName == stationName
+            } // TODO : KRIC 노선이름과 공공데이터의 노선이름이 일치하는지 확인 필요
             ?.toData()
     }
 
@@ -40,8 +41,9 @@ class PublicSubwayInfoClient(
         val items =
             subwayInfoFeignClient.getStationSchedule(serviceKey, startStation.id.value, dailyType.code, direction.code)
                 .response.body.items?.item
+                ?.filter { it.endSubwayStationNm != null }
                 ?.map {
-                    val finalStation = findSubwayStation(startStation, it)
+                    val finalStation = findSubwayStation(startStation, it.endSubwayStationNm!!)
                     it.toDomain(finalStation)
                 }
                 ?: emptyList()
@@ -56,12 +58,12 @@ class PublicSubwayInfoClient(
 
     private fun findSubwayStation(
         startStation: SubwayStation,
-        subwayTimeResponse: SubwayTimeResponse
+        endStationName: String
     ): SubwayStation {
         val finalStation =
-            subwayStationRepository.findByRouteNameAndNameContaining(
-                startStation.routeName,
-                subwayTimeResponse.endSubwayStationNm
+            subwayStationRepository.findByRouteCodeAndName(
+                startStation.routeCode,
+                endStationName
             ) ?: throw TransitException.NotFoundSubwayStation
         return finalStation
     }

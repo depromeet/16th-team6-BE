@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.transit.domain.RouteId
+import com.deepromeet.atcha.transit.domain.SubwayDirection
 import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayStationId
@@ -55,8 +56,8 @@ data class SubwayTimeResponse(
     val arrTime: String,
     val dailyTypeCode: String,
     val depTime: String,
-    val endSubwayStationId: String,
-    val endSubwayStationNm: String,
+    val endSubwayStationId: String?,
+    val endSubwayStationNm: String?,
     val subwayRouteId: RouteId,
     val subwayStationId: String,
     val subwayStationNm: String,
@@ -66,10 +67,13 @@ data class SubwayTimeResponse(
         SubwayTime(
             finalStation = endStation,
             arrivalTime = parseTime(arrTime),
-            departureTime = parseTime(depTime)
+            departureTime = parseTime(depTime),
+            subwayDirection = SubwayDirection.fromCode(upDownTypeCode)
         )
 
-    private fun parseTime(time: String): LocalDateTime {
+    private fun parseTime(time: String): LocalDateTime? {
+        if (time == "0") return null
+
         val formatter = DateTimeFormatter.ofPattern("HHmmss")
         val localTime = LocalTime.parse(time, formatter)
         val now = LocalDate.now()

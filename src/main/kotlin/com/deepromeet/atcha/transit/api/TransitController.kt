@@ -7,9 +7,9 @@ import com.deepromeet.atcha.transit.api.request.SubwayLastTimeRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.SubwayLine
 import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.TransitService
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
@@ -20,11 +20,6 @@ import org.springframework.web.bind.annotation.RestController
 class TransitController(
     private val transitService: TransitService
 ) {
-    @GetMapping("/test")
-    fun test(): ApiResponse<TMapRouteResponse> {
-        return ApiResponse.success(transitService.getRoutes())
-    }
-
     @GetMapping("/taxi-fare")
     fun getTaxiFare(
         @ModelAttribute request: TaxiFareRequest
@@ -55,10 +50,16 @@ class TransitController(
     ): ApiResponse<SubwayTime?> {
         return ApiResponse.success(
             transitService.getLastTime(
-                request.toStartMeta(),
-                request.toEndMeta(),
-                request.direction
+                SubwayLine.fromRouteName(request.routeName),
+                request.startStationName,
+                request.endStationName
             )
         )
+    }
+
+    @GetMapping("/batch")
+    fun batch(): ApiResponse<Unit> {
+        transitService.init()
+        return ApiResponse.success(Unit)
     }
 }

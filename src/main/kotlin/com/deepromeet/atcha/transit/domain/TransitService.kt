@@ -5,7 +5,6 @@ import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
-import jakarta.annotation.PostConstruct
 import org.springframework.stereotype.Service
 
 @Service
@@ -16,7 +15,6 @@ class TransitService(
     private val subwayManager: SubwayManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender
 ) {
-    @PostConstruct
     fun init() {
         subwayStationBatchAppender.appendAll()
     }
@@ -51,11 +49,10 @@ class TransitService(
     }
 
     fun getLastTime(
-        startMeta: SubwayStationMeta,
-        endMeta: SubwayStationMeta
+        subwayLine: SubwayLine,
+        startStationName: String,
+        endStationName: String
     ): SubwayTime? {
-        val startStation = subwayManager.getStation(startMeta)
-        val endStation = subwayManager.getStation(endMeta)
-        return subwayManager.getLastTime(startStation, endStation)
+        return subwayManager.getLastTime(subwayLine, startStationName, endStationName)
     }
 }
