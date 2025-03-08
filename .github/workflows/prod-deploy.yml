@@ -49,7 +49,7 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_BASTION_IP }}
           username: ${{ secrets.PROD_USERNAME }}
-          password: ${{ secrets.PROD_KEY_PATH }}
+          password: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             ssh atcha@${{ secrets.PROD_APP_A_IP }} -i ${{ secrets.PROD_KEY_PATH }}
