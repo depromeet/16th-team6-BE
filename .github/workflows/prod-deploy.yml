@@ -49,7 +49,7 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_BASTION_IP }}
           username: ${{ secrets.PROD_USERNAME }}
-          password: ${{ secrets.PROD_APP_KEY }}
+          key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             echo "SUCCESS !!!!!"
