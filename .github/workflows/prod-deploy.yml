@@ -10,34 +10,33 @@ env:
   VERSION: ${{ github.sha }}
 
 jobs:
-#  build:
-#    name: Build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#        with:
-#          submodules: true
-#          token: ${{ secrets.SUBMODULE_TOKEN }}
-#
-#      - name: Debug - List submodule folder contents
-#        run: |
-#          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
-#          ls -Rla ./16th-team6-BE-submodule
-#
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v3
-#        with:
-#          registry: docker.io
-#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-#
-#      - name: Build Docker Image
-#        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
-#
-#      - name: Push Docker Image
-#        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
 
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
 
   deploy:
 #    needs: build
@@ -53,5 +52,7 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             ssh ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.PROD_APP_A_IP }} -i ${{ secrets.PROD_KEY_PATH }}
-            echo "SUCCESS !!!!!"
+            sudo sh ./deploy.sh
+
+
 
