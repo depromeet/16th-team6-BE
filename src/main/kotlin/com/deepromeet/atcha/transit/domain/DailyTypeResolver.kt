@@ -11,7 +11,7 @@ class DailyTypeResolver(
     fun resolve(date: LocalDate = LocalDate.now()): DailyType {
         return when {
             isHoliday(date) -> DailyType.HOLIDAY
-            date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY
+            date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.HOLIDAY
             date.dayOfWeek == DayOfWeek.SUNDAY -> DailyType.HOLIDAY
             else -> DailyType.WEEKDAY
         }
