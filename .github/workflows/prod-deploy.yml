@@ -39,7 +39,7 @@ jobs:
         run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
 
   deploy:
-#    needs: build
+    needs: build
     name: Deploy
     runs-on: ubuntu-latest
     steps:
