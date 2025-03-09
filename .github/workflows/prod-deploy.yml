@@ -43,26 +43,6 @@ jobs:
     name: Deploy
     runs-on: ubuntu-latest
     steps:
-      - name: Copy files
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_BASTION_IP }}
-          username: ${{ secrets.PROD_APP_USERNAME }}
-          key: ${{ secrets.PROD_APP_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-            scp -i ${{ secrets.PROD_KEY_PATH }} deploy.sh docker-compose.yml ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.TEST_IP }}:/home/${{ secrets.PROD_APP_USERNAME }}/
-
-      - name: Copy files B
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.REMOTE_BASTION_IP }}
-          username: ${{ secrets.PROD_APP_USERNAME }}
-          key: ${{ secrets.PROD_APP_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-            scp -i ${{ secrets.PROD_KEY_PATH }} deploy.sh docker-compose.yml ${{ secrets.PROD_APP_USERNAME }}@${{ secrets.PROD_APP_B_IP }}:/home/${{ secrets.PROD_APP_USERNAME }}/
-
       - name: Pull docker and deploy at Prod A
         uses: appleboy/ssh-action@master
         with:
