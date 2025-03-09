@@ -2,12 +2,20 @@ package com.deepromeet.atcha.common.feign
 
 import feign.Response
 import feign.codec.ErrorDecoder
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val logger = KotlinLogging.logger {}
 
 class CustomErrorDecoder : ErrorDecoder {
     override fun decode(
         methodKey: String,
         response: Response
     ): Exception {
+        val responseBody =
+            response.body()?.asInputStream()?.bufferedReader()?.use { it.readText() }
+                ?: "No response body"
+        logger.error { "Feign error - status: ${response.status()}, reason: ${response.reason()}, body: $responseBody" }
+
         return when (response.status()) {
             400 -> FeignException.ExternalApiBadRequestError
             403 -> FeignException.ExternalApiForbiddenError

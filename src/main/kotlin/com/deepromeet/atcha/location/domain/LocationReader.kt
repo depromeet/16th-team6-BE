@@ -19,7 +19,7 @@ class LocationReader(
         try {
             return poiFinder.find(keyword, currentCoordinate)
         } catch (e: FeignException) {
-            logger.error(e) { "Failed to read POIs from " }
+            logger.error(e) { e.message }
             throw LocationException.FailedToReadPOIs
         }
     }
@@ -28,7 +28,7 @@ class LocationReader(
         try {
             return reverseLabeler.label(coordinate)
         } catch (e: FeignException) {
-            logger.error(e) { "Failed to read location from TMap" }
+            logger.error(e) { e.message }
             throw LocationException.FailedToReadLocation
         }
     }

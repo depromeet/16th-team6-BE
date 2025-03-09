@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.common.feign
 
-import feign.Feign
 import feign.Logger
 import feign.Request
 import feign.Retryer
@@ -17,15 +16,9 @@ class FeignConfig {
     fun feignLoggerLever(): Logger.Level = Logger.Level.FULL
 
     @Bean
-    fun feignBuilder(): Feign.Builder =
-        Feign.builder()
-            .options(
-                Request.Options(
-                    Duration.ofMillis(1000),
-                    Duration.ofMillis(3000),
-                    true
-                )
-            )
+    fun requestOptions(): Request.Options {
+        return Request.Options(Duration.ofMillis(1000), Duration.ofMillis(3000), true)
+    }
 
     @Bean
     fun errorDecoder(): ErrorDecoder = CustomErrorDecoder()

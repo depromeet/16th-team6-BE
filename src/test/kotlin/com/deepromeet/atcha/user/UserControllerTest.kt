@@ -9,10 +9,12 @@ import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
+import com.deepromeet.atcha.user.exception.UserException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -81,9 +83,8 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(204)
 
-        val findUser = userReader.read(user.id)
-
         // then
-        assertThat(findUser.isDeleted).isTrue()
+        assertThatThrownBy { userReader.read(user.id) }
+            .isInstanceOf(UserException.UserNotFound::class.java)
     }
 }

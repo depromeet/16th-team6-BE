@@ -31,21 +31,21 @@ feign:
       default:
         loggerLevel: FULL
 
-tmap:
-  api:
-    url: https://apis.openapi.sk.com
-    app-key: ${secret.TMAP_API_KEY}
-
-redis:
-    host: redis
-    port: 6379
-
 kakao:
   client-id: ${secret.OAUTH_KAKAO_CLIENT_ID}
   api:
     url: https://kapi.kakao.com/
   oauth:
     url: https://kauth.kakao.com/oauth
+
+tmap:
+    api:
+        url: https://apis.openapi.sk.com
+        app-key: ${secret.TMAP_API_KEY}
+
+redis:
+    host: redis
+    port: 6379
 
 jwt:
   access:
