@@ -73,7 +73,7 @@ class UserControllerTest(
     }
 
     @Test
-    fun `회원 삭제`() {
+    fun `회원 탈퇴`() {
         // given && when
         RestAssured.given().log().all()
             .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
