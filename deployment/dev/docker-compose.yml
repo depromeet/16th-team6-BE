@@ -6,6 +6,8 @@ services:
     networks:
       - app-tier
     image: atchadockerhub/atcha:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
@@ -18,6 +20,8 @@ services:
     networks:
       - app-tier
     image: atchadockerhub/atcha:latest
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
