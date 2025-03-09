@@ -51,7 +51,7 @@ jobs:
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-              sudo sh ./deploy.sh
+              sudo bash ./deploy.sh
 
       - name: Pull docker and deploy at Prod B
         uses: appleboy/ssh-action@master
@@ -61,7 +61,7 @@ jobs:
             key: ${{ secrets.PROD_APP_KEY }}
             port: ${{ secrets.REMOTE_SSH_PORT }}
             script: |
-                sudo sh ./deploy.sh
+                sudo bash ./deploy.sh
 
 
 
