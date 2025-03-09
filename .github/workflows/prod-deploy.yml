@@ -46,12 +46,22 @@ jobs:
       - name: Pull docker and deploy at Prod A
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.PROD_APP_A_IP }}
+          host: ${{ secrets.PROD_APP_A_IP }} #TODO private ip 변경 시 수정
           username: ${{ secrets.PROD_APP_USERNAME }}
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
               sudo sh ./deploy.sh
+
+      - name: Pull docker and deploy at Prod B
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.PROD_APP_B_IP }} #TODO private ip 변경 시 수정
+            username: ${{ secrets.PROD_APP_USERNAME }}
+            key: ${{ secrets.PROD_APP_KEY }}
+            port: ${{ secrets.REMOTE_SSH_PORT }}
+            script: |
+                sudo sh ./deploy.sh
 
 
 
