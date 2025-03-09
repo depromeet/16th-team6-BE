@@ -50,6 +50,7 @@ kakao:
 
 jwt:
   access:
-    secret.prod: ${secret.prod.JWT_ACCESS_SECRET}
+    secret: ${secret.prod.JWT_ACCESS_SECRET}
+
   refresh:
-    secret.prod: ${secret.prod.JWT_REFRESH_SECRET}
+    secret: ${secret.prod.JWT_REFRESH_SECRET}
