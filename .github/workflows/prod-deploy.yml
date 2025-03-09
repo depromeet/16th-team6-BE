@@ -2,7 +2,7 @@ name: PROD CD
 
 on:
   workflow_dispatch:
-  push:
+  pull_request: # TODO push 로 변경
     branches: [ main ]
 
 env:
