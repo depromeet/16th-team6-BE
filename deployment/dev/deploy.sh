@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
 DEFAULT_CONF=" data/nginx/nginx.conf"
@@ -49,7 +49,7 @@ if [ -z "$IS_BLUE" ];then
   docker compose pull atcha-blue
 
   echo "2. BLUE 컨테이너 실행"
-  docker compose up -d atcha-blue --scale atcha-blue=2
+  docker compose up -d atcha-blue
 
   echo "3. health check"
   if ! check_service "atcha-blue"; then
@@ -72,7 +72,7 @@ else
   docker compose pull atcha-green
 
   echo "2. GREEN 컨테이너 실행"
-  docker compose up -d atcha-green --scale atcha-green=2
+  docker compose up -d atcha-green
 
   echo "3. health check"
   if ! check_service "atcha-green"; then
