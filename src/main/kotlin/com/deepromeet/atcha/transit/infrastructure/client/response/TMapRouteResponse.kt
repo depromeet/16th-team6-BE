@@ -1,7 +1,13 @@
 package com.deepromeet.atcha.transit.infrastructure.client.response
 
 data class TMapRouteResponse(
-    val metaData: MetaData
+    val metaData: MetaData?,
+    val result: Result?
+)
+
+data class Result(
+    val status: Int,
+    val message: String
 )
 
 data class MetaData(
