@@ -40,7 +40,7 @@ jobs:
           java-version: '17'
 
       - name: Set up Redis
-        uses: supercharge/redis-github-action@v1
+        uses: supercharge/redis-github-action@v1.7.0
         with:
           redis-version: '7.4'
 
