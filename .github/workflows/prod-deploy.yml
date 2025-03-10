@@ -41,21 +41,26 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    env:
-      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }} # TODO private ip로 변경
-      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }} # TODO private ip로 변경
     strategy:
       matrix:
-        include:
-          - target: "Prod A"
-            host: $PROD_APP_A_IP
-          - target: "Prod B"
-            host: $PROD_APP_B_IP
+        target: [ "Prod A", "Prod B" ]
+    env:
+      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }} # TODO private ip 변경
+      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }}
     steps:
+      - name: Set host variable based on target
+        id: set_host
+        run: |
+          if [ "${{ matrix.target }}" = "Prod A" ]; then
+            echo "HOST=${PROD_APP_A_IP}" >> $GITHUB_ENV
+          else
+            echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
+          fi
+
       - name: Deploy to ${{ matrix.target }}
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ matrix.host }}
+          host: ${{ env.HOST }}
           username: ${{ secrets.PROD_APP_USERNAME }}
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
