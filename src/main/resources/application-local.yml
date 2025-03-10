@@ -44,7 +44,7 @@ tmap:
     app-key: ${secret.TMAP_API_KEY}
 
 redis:
-  host: localhost
+  host: redis
   port: 6379
 
 jwt:
