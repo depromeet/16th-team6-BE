@@ -4,6 +4,6 @@ enum class TokenType(
     val expirationMills: Long
 ) {
 //    ACCESS(1000L * 60 * 30), // 30분
-    ACCESS(1000L * 15), // 15초
+    ACCESS(1000L * 60 * 60 * 24 * 60), // TODO 추후 삭제
     REFRESH(1000L * 60 * 60 * 24 * 60) // 60일
 }
