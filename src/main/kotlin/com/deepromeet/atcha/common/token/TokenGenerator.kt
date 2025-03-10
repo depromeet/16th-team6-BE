@@ -15,12 +15,9 @@ class TokenGenerator(
     @Value("\${jwt.access.secret}")
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
-    private val refreshSecret: String
+    private val refreshSecret: String,
+    private val blacklist: TokenBlacklist
 ) {
-    companion object {
-        private val blackList: MutableSet<String> = mutableSetOf() // todo 만료 시간 이후 리스트에서 지우기
-    }
-
     private val tokenKeyMap =
         mapOf(
             TokenType.ACCESS to Keys.hmacShaKeyFor(Decoders.BASE64.decode(accessSecret)),
@@ -69,12 +66,15 @@ class TokenGenerator(
 
     fun expireTokensWithRefreshToken(refreshToken: String) {
         val accessToken = getAccessTokenByRefreshToken(refreshToken)
-        expireToken(accessToken)
-        expireToken(refreshToken)
+        expireToken(accessToken, TokenType.ACCESS)
+        expireToken(refreshToken, TokenType.REFRESH)
     }
 
-    fun expireToken(token: String) {
-        blackList.add(token)
+    fun expireToken(
+        token: String,
+        tokenType: TokenType
+    ) {
+        blacklist.add(token, tokenType)
     }
 
     private fun getAccessTokenByRefreshToken(refreshToken: String): String {
@@ -134,7 +134,7 @@ class TokenGenerator(
     }
 
     private fun validateContainBlacklist(token: String) {
-        if (blackList.contains(token)) {
+        if (blacklist.contains(token)) {
             throw TokenException.ExpiredToken
         }
     }

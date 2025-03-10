@@ -28,8 +28,28 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Start Redis container using Docker
+        run: |
+          docker run -d --name redis -p 6379:6379 redis:6.2-alpine
+
+      - name: Wait for Redis to be ready
+        run: |
+          echo "Waiting for Redis to be ready..."
+          # 초기 지연 추가 (컨테이너 기동 시간 확보)
+          sleep 15
+          for i in {1..10}; do
+            if docker exec redis redis-cli ping | grep -q "PONG"; then
+              echo "Redis is up!"
+              exit 0
+            fi
+            echo "Still waiting for Redis... attempt $i"
+            sleep 5
+          done
+          echo "Redis did not start in time."
+          exit 1
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Test with Gradle
-        run: ./gradlew test
+        run: ./gradlew test -Dspring.profiles.active=local
