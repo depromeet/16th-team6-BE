@@ -2,8 +2,8 @@ name: PROD CD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ main ]
+  pull_request: # TODO 변경
+    branches: [ dev ]
 
 env:
   IMAGE_NAME: atcha
