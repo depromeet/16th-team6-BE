@@ -1,23 +1,18 @@
 #!/usr/bin/env bash
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
-DEFAULT_CONF=" data/nginx/nginx.conf"
 MAX_RETRIES=30
 
 check_service() {
   local RETRIES=0
   local SERVICE_NAME=$1
-
   local container_ids=($(docker compose ps -q $SERVICE_NAME))
 
-  # 최대 재시도 횟수
   while [ $RETRIES -lt $MAX_RETRIES ]; do
     echo "Checking service $SERVICE_NAME (attempt: $((RETRIES+1)))"
     sleep 3
-
     local all_healthy=true
 
-    # 각 컨테이너의 헬스 상태 검사
     for id in "${container_ids[@]}"; do
       local health_status
       health_status=$(docker container inspect --format='{{.State.Health.Status}}' "$id")
@@ -46,11 +41,15 @@ ensure_nginx_running() {
   if [ -z "$nginx_exists" ]; then
     echo "nginx 컨테이너가 존재하지 않습니다. nginx 컨테이너를 실행합니다."
     docker compose up -d nginx
-    # nginx가 완전히 실행될 때까지 잠시 대기
-    sleep 5
+    sleep 5  # nginx가 완전히 실행될 때까지 대기
   else
     echo "nginx 컨테이너가 이미 실행 중입니다."
   fi
+}
+
+restart_nginx() {
+  echo "nginx 컨테이너를 재시작합니다."
+  docker compose restart nginx
 }
 
 if [ -z "$IS_BLUE" ]; then
@@ -68,10 +67,10 @@ if [ -z "$IS_BLUE" ]; then
     exit 1
   fi
 
-  echo "4. nginx 재실행"
+  echo "4. nginx 재시작 및 설정 반영"
   ensure_nginx_running
   sudo cp data/nginx/nginx-blue.conf data/nginx/nginx.conf
-  sudo docker compose exec -it nginx nginx -s reload
+  restart_nginx
 
   echo "5. GREEN 컨테이너 중지 및 삭제"
   docker compose stop atcha-green
@@ -92,10 +91,10 @@ else
     exit 1
   fi
 
-  echo "4. nginx 재실행"
+  echo "4. nginx 재시작 및 설정 반영"
   ensure_nginx_running
   sudo cp data/nginx/nginx-green.conf data/nginx/nginx.conf
-  sudo docker compose exec -it nginx nginx -s reload
+  restart_nginx
 
   echo "5. BLUE 컨테이너 중지 및 삭제"
   docker compose stop atcha-blue
