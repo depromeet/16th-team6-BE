@@ -2,8 +2,8 @@ name: PROD CI
 
 on:
   workflow_dispatch:
-  pull_request: # TODO push 로 변경
-    branches: [ dev ] # TODO main 로 변경
+  pull_request:
+    branches: [ main ]
 
 
 jobs:

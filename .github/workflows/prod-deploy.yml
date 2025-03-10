@@ -2,8 +2,8 @@ name: PROD CD
 
 on:
   workflow_dispatch:
-  pull_request: # TODO 변경
-    branches: [ dev ]
+  push:
+    branches: [ main ]
 
 env:
   IMAGE_NAME: atcha
@@ -66,6 +66,3 @@ jobs:
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             sudo bash ./deploy.sh
-
-
-
