@@ -114,6 +114,34 @@ class AuthControllerTest : BaseControllerTest() {
     }
 
     @Test
+    fun `로그아웃 한 유저는 토큰을 사용할 수 없다`() {
+        // given
+        val signUpResponse = signUpUser()
+
+        // when
+        // 로그인
+        RestAssured.given().log().all()
+            .param("provider", 0)
+            .header("Authorization", "Bearer $providerAccessToken")
+            .`when`().get("/api/auth/login")
+            .then().log().all()
+            .statusCode(200)
+        // 로그아웃
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
+            .`when`().post("/api/auth/logout")
+            .then().log().all()
+            .statusCode(204)
+
+        // then
+        RestAssured.given().log().all()
+            .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
+            .`when`().get("/api/auth/reissue")
+            .then().log().all()
+            .statusCode(400)
+    }
+
+    @Test
     fun `로그아웃 한 유저가 로그인 후 다시 로그아웃한다`() {
         val signUpResponse = signUpUser()
 
