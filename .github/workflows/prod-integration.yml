@@ -3,7 +3,7 @@ name: PROD CI
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ dev ] #TODO 변경
+    branches: [ main ]
 
 
 jobs:
