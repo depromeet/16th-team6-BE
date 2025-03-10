@@ -2,8 +2,8 @@ name: PROD CD
 
 on:
   workflow_dispatch:
-  pull_request: # TODO push 로 변경
-    branches: [ dev ] # TODO main 로 변경
+  push:
+    branches: [ main ]
 
 env:
   IMAGE_NAME: atcha
@@ -48,9 +48,9 @@ jobs:
       matrix:
         include:
           - target: "Prod A"
-            host: ${{ env.PROD_APP_A_IP }}
+            host: $PROD_APP_A_IP
           - target: "Prod B"
-            host: ${{ env.PROD_APP_B_IP }}
+            host: $PROD_APP_B_IP
     steps:
       - name: Deploy to ${{ matrix.target }}
         uses: appleboy/ssh-action@master
