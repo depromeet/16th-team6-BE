@@ -3,12 +3,18 @@ name: PROD CI
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ main ]
+    branches: [ dev ] #TODO 변경
 
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      redis:
+        image: redis:6.2-alpine
+        ports:
+          - 6379:6379
 
     steps:
       - name: Checkout code
