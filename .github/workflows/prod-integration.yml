@@ -39,21 +39,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
+      - name: Set up Redis
+        uses: supercharge/redis-github-action@v1
+        with:
+          redis-version: '7.4'
+
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
-
-      - name: Wait for Redis to be ready
-        run: |
-          for i in {1..10}; do
-          if nc -z redis 6379; then
-           echo "Redis is up!"
-           exit 0
-          fi
-          echo "Waiting for Redis..."
-          sleep 5
-          done
-          echo "Redis did not start in time."
-          exit 1
 
       - name: Test with Gradle
         run: ./gradlew test -Dspring.profiles.active=local
