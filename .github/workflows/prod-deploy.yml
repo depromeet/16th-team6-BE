@@ -40,15 +40,17 @@ jobs:
 
   deploy:
     needs: build
-    name: Deploy
     runs-on: ubuntu-latest
+    env:
+      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }} # TODO private ip로 변경
+      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }} # TODO private ip로 변경
     strategy:
       matrix:
         include:
           - target: "Prod A"
-            host: ${{ secrets.PROD_APP_A_IP }} # TODO private ip로 변경
+            host: ${{ env.PROD_APP_A_IP }}
           - target: "Prod B"
-            host: ${{ secrets.PROD_APP_B_IP }} # TODO private ip로 변경
+            host: ${{ env.PROD_APP_B_IP }}
     steps:
       - name: Deploy to ${{ matrix.target }}
         uses: appleboy/ssh-action@master
