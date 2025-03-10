@@ -1,0 +1,35 @@
+name: PROD CI
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [ main ]
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
+
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Test with Gradle
+        run: ./gradlew test

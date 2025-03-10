@@ -2,12 +2,14 @@ package com.deepromeet.atcha.auth
 
 import com.deepromeet.atcha.auth.domain.AuthService
 import com.deepromeet.atcha.auth.domain.SignUpInfo
+import com.deepromeet.atcha.auth.domain.UserProviderAppender
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.auth.infrastructure.response.Profile
+import com.deepromeet.atcha.support.fixture.ProviderFixture
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserAppender
 import org.assertj.core.api.Assertions.assertThat
@@ -28,6 +30,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
     ]
 )
 class AuthServiceTest {
+    @Autowired
+    private lateinit var userProviderAppender: UserProviderAppender
+
     @Autowired
     lateinit var authService: AuthService
 
@@ -127,6 +132,7 @@ class AuthServiceTest {
         val kakaoId = 22222L
         val profile = Profile("loginUser", "login@test.com")
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 로그인할 유저 저장
@@ -137,6 +143,7 @@ class AuthServiceTest {
                 profileImageUrl = kakaoUserInfo.profileImageUrl
             )
         val savedUser = userAppender.save(user)
+        userProviderAppender.save(savedUser, ProviderFixture.create(savedUser))
 
         // when
         val result = authService.login(token, ProviderType.KAKAO.ordinal)

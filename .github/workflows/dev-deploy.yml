@@ -9,8 +9,6 @@ on:
 env:
   DOCKER_IMAGE: ghcr.io/jiwonkkang/atcha
   VERSION: ${{ github.sha }}
-  CONTAINER_NAME: atcha
-
 
 jobs:
   build:
