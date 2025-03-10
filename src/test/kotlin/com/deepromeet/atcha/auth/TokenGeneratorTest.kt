@@ -11,11 +11,16 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.test.context.SpringBootTest
 
-class TokenGeneratorTest {
+@SpringBootTest
+class TokenGeneratorTest(
+    @Autowired
+    private var tokenBlacklist: TokenBlacklist
+) {
     private val accessSecret = "dGVzdEFjY2Vzc1NlY3JldEtasdleVZhbHVlMTIzNDU2Nzg="
     private val refreshSecret = "dGVzdFJmZXNoU2VjcmV0S2V5asdVmFsdWUxMjM0NTY3OA=="
-    private lateinit var tokenBlacklist: TokenBlacklist
     private lateinit var tokenGenerator: TokenGenerator
 
     @BeforeEach
