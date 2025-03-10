@@ -42,26 +42,23 @@ jobs:
     needs: build
     name: Deploy
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - target: "Prod A"
+            host: ${{ secrets.PROD_APP_A_IP }} # TODO private ip로 변경
+          - target: "Prod B"
+            host: ${{ secrets.PROD_APP_B_IP }} # TODO private ip로 변경
     steps:
-      - name: Pull docker and deploy at Prod A
+      - name: Deploy to ${{ matrix.target }}
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.PROD_APP_A_IP }} #TODO private ip 변경 시 수정
+          host: ${{ matrix.host }}
           username: ${{ secrets.PROD_APP_USERNAME }}
           key: ${{ secrets.PROD_APP_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             sudo bash ./deploy.sh
-
-      - name: Pull docker and deploy at Prod B
-        uses: appleboy/ssh-action@master
-        with:
-          host: ${{ secrets.PROD_APP_B_IP }} #TODO private ip 변경 시 수정
-          username: ${{ secrets.PROD_APP_USERNAME }}
-          key: ${{ secrets.PROD_APP_KEY }}
-          port: ${{ secrets.REMOTE_SSH_PORT }}
-          script: |
-             sudo bash ./deploy.sh
 
 
 
