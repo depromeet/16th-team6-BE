@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: jdbc:mysql://${secret.dev.SPRING_DATABASE_HOST}:${secret.dev.SPRING_DATABASE_PORT}/${secret.dev.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
-    username: ${secret.dev.SPRING_DATABASE_USERNAME}
-    password: ${secret.dev.SPRING_DATABASE_PASSWORD}
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create
     properties:
       hibernate:
         show-sql: true
@@ -48,7 +48,7 @@ tmap:
     app-key: ${secret.dev.TMAP_API_KEY}
 
 redis:
-  host: redis
+  host: localhost
   port: 6379
 
 open-api:
