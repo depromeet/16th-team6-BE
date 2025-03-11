@@ -12,15 +12,25 @@ class SubwayManager(
     private val dailyTypeResolver: DailyTypeResolver,
     private val subwayBranchRepository: SubwayBranchRepository
 ) {
-    fun getLastTime(
-        subwayLine: SubwayLine,
-        startStationName: String,
-        endStationName: String
-    ): SubwayTime? {
-        val routes = getRoutes(subwayLine.lnCd)
-        val startStation = getStation(subwayLine.lnCd, startStationName)
-        val endStation = getStation(subwayLine.lnCd, endStationName)
+    fun getRoutes(subwayLine: SubwayLine) =
+        subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
+            .groupBy { it.finalStationName }
+            .values
+            .map { Route(it) }
 
+    fun getStation(
+        subwayLine: SubwayLine,
+        stationName: String
+    ): SubwayStation {
+        return subwayStationRepository.findByRouteCodeAndName(subwayLine.lnCd, stationName)
+            ?: throw TransitException.NotFoundSubwayStation
+    }
+
+    fun getTimeTable(
+        startStation: SubwayStation,
+        endStation: SubwayStation,
+        routes: List<Route>
+    ): SubwayTimeTable {
         val timeTable =
             subwayInfoClient.getTimeTable(
                 startStation,
@@ -32,20 +42,6 @@ class SubwayManager(
             throw TransitException.NotFoundSubwayTimeTable
         }
 
-        return timeTable.getLastTime(endStation, routes)
+        return timeTable
     }
-
-    private fun getStation(
-        routeCode: String,
-        stationName: String
-    ): SubwayStation {
-        return subwayStationRepository.findByRouteCodeAndName(routeCode, stationName)
-            ?: throw TransitException.NotFoundSubwayStation
-    }
-
-    private fun getRoutes(routeCode: String) =
-        subwayBranchRepository.findByRouteCode(routeCode)
-            .groupBy { it.finalStationName }
-            .values
-            .map { Route(it) }
 }

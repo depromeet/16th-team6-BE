@@ -53,6 +53,9 @@ class TransitService(
         startStationName: String,
         endStationName: String
     ): SubwayTime? {
-        return subwayManager.getLastTime(subwayLine, startStationName, endStationName)
+        val routes = subwayManager.getRoutes(subwayLine)
+        val startStation = subwayManager.getStation(subwayLine, startStationName)
+        val endStation = subwayManager.getStation(subwayLine, endStationName)
+        return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
     }
 }
