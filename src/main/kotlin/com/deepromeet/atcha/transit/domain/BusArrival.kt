@@ -10,7 +10,29 @@ data class BusArrival(
     val lastTime: LocalDateTime,
     val term: Int,
     val realTimeInfo: List<RealTimeBusArrival>
-)
+) {
+    fun getNearestTime(
+        time: LocalDateTime,
+        timeDirection: TimeDirection
+    ): LocalDateTime {
+        var current = lastTime
+
+        return when (timeDirection) {
+            TimeDirection.BEFORE -> {
+                while (current.isAfter(time)) {
+                    current = current.minusMinutes(term.toLong())
+                }
+                current
+            }
+            TimeDirection.AFTER -> {
+                while (current.isBefore(time)) {
+                    current = current.plusMinutes(term.toLong())
+                }
+                current
+            }
+        }
+    }
+}
 
 data class RealTimeBusArrival(
     val busStatus: BusStatus,

@@ -51,9 +51,4 @@ data class SubwayTimeTable(
             route.isReachable(startStation.name, endStation.name, finalStation.name)
         }
     }
-
-    enum class TimeDirection {
-        AFTER,
-        BEFORE
-    }
 }
