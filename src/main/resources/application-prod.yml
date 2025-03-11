@@ -33,9 +33,13 @@ jwt:
   refresh:
     secret: ${secret.prod.JWT_REFRESH_SECRET}
 
+server:
+  port: 8080
+
 management:
   server:
     port: 5959
+
   endpoints:
     web:
       exposure:
@@ -48,7 +52,7 @@ management:
       default: none
   endpoint:
     prometheus:
-      access: unrestricted
+      enabled: true
     health:
+      enabled: true
       show-components: never
-      access: unrestricted
