@@ -34,6 +34,8 @@ jwt:
     secret: ${secret.prod.JWT_REFRESH_SECRET}
 
 management:
+  server:
+    port: 5959
   endpoints:
     web:
       exposure:
