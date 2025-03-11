@@ -38,7 +38,7 @@ server:
 
 management:
   server:
-    port: 5959
+    port: ${secret.prod.MANAGEMENT_PORT}
 
   endpoints:
     web:
