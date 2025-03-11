@@ -10,8 +10,7 @@ class SubwayStation(
     val stationCode: String,
     val name: String,
     val routeName: String,
-    val routeCode: String,
-    val ord: Int
+    val routeCode: String
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -22,7 +21,6 @@ class SubwayStation(
         if (name != other.name) return false
         if (routeName != other.routeName) return false
         if (routeCode != other.routeCode) return false
-        if (ord != other.ord) return false
 
         return true
     }

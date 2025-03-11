@@ -28,8 +28,7 @@ class KRICSubwayStationClient(
                         st.stinCd,
                         st.stinNm,
                         st.routNm,
-                        st.routCd,
-                        st.stinConsOrdr
+                        st.routCd
                     )
                 }
             }.awaitAll()
