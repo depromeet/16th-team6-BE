@@ -4,5 +4,5 @@ interface BusArrivalInfoFetcher {
     fun getBusArrival(
         station: BusStation,
         route: BusRoute
-    ): BusArrival?
+    ): BusArrival
 }

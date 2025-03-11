@@ -5,20 +5,22 @@ import org.springframework.stereotype.Component
 
 @Component
 class BusManager(
-    private val busStationInfoClient: BusStationInfoClient,
-    private val busArrivalInfoFetcher: BusArrivalInfoFetcher
+    private val busStationInfoClientMap: Map<BusRegion, BusStationInfoClient>,
+    private val busArrivalInfoFetcherMap: Map<BusRegion, BusArrivalInfoFetcher>,
+    private val regionIdentifier: RegionIdentifier
 ) {
     fun getArrivalInfo(
         routeName: String,
         busStationMeta: BusStationMeta
     ): BusArrival {
+        val region = regionIdentifier.identify(busStationMeta.coordinate)
         val station =
-            busStationInfoClient.getStationByName(busStationMeta)
+            busStationInfoClientMap[region]?.getStationByName(busStationMeta)
                 ?: throw TransitException.NotFoundBusStation
         val busRoute =
-            busStationInfoClient.getRoute(station, routeName)
+            busStationInfoClientMap[region]?.getRoute(station, routeName)
                 ?: throw TransitException.NotFoundBusRoute
-        return busArrivalInfoFetcher.getBusArrival(station, busRoute)
+        return busArrivalInfoFetcherMap[region]?.getBusArrival(station, busRoute)
             ?: throw TransitException.NotFoundBusArrival
     }
 }

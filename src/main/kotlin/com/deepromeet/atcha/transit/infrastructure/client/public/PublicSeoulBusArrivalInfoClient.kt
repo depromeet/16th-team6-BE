@@ -7,16 +7,17 @@ import com.deepromeet.atcha.transit.domain.BusStation
 import org.springframework.stereotype.Component
 
 @Component
-class BusArrivalInfoClient(
-    private val publicBusArrivalInfoFeignClient: PublicBusArrivalInfoFeignClient
+class PublicSeoulBusArrivalInfoClient(
+    private val publicSeoulBusArrivalInfoFeignClient: PublicSeoulBusArrivalInfoFeignClient
 ) : BusArrivalInfoFetcher {
     override fun getBusArrival(
         station: BusStation,
         route: BusRoute
-    ): BusArrival? {
+    ): BusArrival {
         val response =
-            publicBusArrivalInfoFeignClient.getArrivalInfoByRoute(route.id.value)
-        val findResult = response.msgBody.itemList?.find { it.arsId == station.arsId.value }
-        return findResult?.toBusArrival()
+            publicSeoulBusArrivalInfoFeignClient.getArrivalInfoByRoute(route.id.value)
+        val findResult = response.msgBody.itemList?.find { it.arsId == station.id.value }
+        requireNotNull(findResult) { "Bus arrival info not found" }
+        return findResult.toBusArrival()
     }
 }

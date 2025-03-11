@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 data class BusArrival(
     val routeId: RouteId,
     val routeName: String,
-    val arsId: ArsId,
+    val busStationId: BusStationId,
     val stationName: String,
     val lastTime: LocalDateTime,
     val term: Int,
@@ -16,7 +16,7 @@ data class RealTimeBusArrival(
     val busStatus: BusStatus,
     val remainingTime: Int,
     val remainingStations: Int,
-    val isLast: Boolean
+    val isLast: Boolean?
 ) {
     val expectedArrivalTime: LocalDateTime?
         get() =

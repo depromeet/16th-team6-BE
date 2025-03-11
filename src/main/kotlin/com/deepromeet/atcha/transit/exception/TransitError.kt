@@ -18,7 +18,8 @@ enum class TransitErrorType(
     NOT_FOUND_SUBWAY_STATION(404, "TRS_006", "지하철 역을 찾을 수 없습니다", LogLevel.ERROR),
     NOT_FOUND_SUBWAY_TIME_TABLE(404, "TRS_007", "지하철 시간표를 찾을 수 없습니다", LogLevel.ERROR),
     SUBWAY_DIRECTION_RESOLVE_FAILED(400, "TRS_008", "유효하지 않은 지하철 방향입니다", LogLevel.ERROR),
-    NOT_FOUND_SUBWAY_ROUTE(404, "TRS_009", "지하철 노선을 찾을 수 없습니다", LogLevel.ERROR)
+    NOT_FOUND_SUBWAY_ROUTE(404, "TRS_009", "지하철 노선을 찾을 수 없습니다", LogLevel.ERROR),
+    NOT_FOUND_BUS_TIME(404, "TRS_010", "버스 시간표를 찾을 수 없습니다", LogLevel.ERROR)
 }
 
 sealed class TransitException(
@@ -38,6 +39,10 @@ sealed class TransitException(
 
     data object NotFoundBusArrival : TransitException(TransitErrorType.NOT_FOUND_BUS_ARRIVAL) {
         override fun readResolve(): Any = NotFoundBusArrival
+    }
+
+    data object NotFoundBusTime : TransitException(TransitErrorType.NOT_FOUND_BUS_TIME) {
+        override fun readResolve(): Any = NotFoundBusTime
     }
 
     data object NotFoundSubwayStation : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_STATION) {

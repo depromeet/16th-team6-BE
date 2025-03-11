@@ -7,8 +7,8 @@ import com.deepromeet.atcha.transit.domain.BusStationMeta
 import org.springframework.stereotype.Component
 
 @Component
-class PublicBusStationInfoClient(
-    private val publicBusClient: PublicBusStationInfoFeignClient
+class PublicSeoulBusStationInfoClient(
+    private val publicBusClient: PublicSeoulBusStationInfoFeignClient
 ) : BusStationInfoClient {
     override fun getStationByName(info: BusStationMeta): BusStation? {
         val response = publicBusClient.getStationInfoByName(info.name)
@@ -22,7 +22,7 @@ class PublicBusStationInfoClient(
     ): BusRoute? {
         val busRoutes =
             publicBusClient
-                .getRouteByStation(station.arsId.value)
+                .getRouteByStation(station.id.value)
                 .msgBody
                 .itemList
                 ?.map { it.toBusRoute() }

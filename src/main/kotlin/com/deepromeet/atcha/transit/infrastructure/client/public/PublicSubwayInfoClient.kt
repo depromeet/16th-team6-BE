@@ -29,7 +29,7 @@ class PublicSubwayInfoClient(
             ?.item
             ?.find {
                 it.subwayRouteName == routeName && it.subwayStationName == stationName
-            } // TODO : KRIC 노선이름과 공공데이터의 노선이름이 일치하는지 확인 필요
+            }
             ?.toData()
     }
 
@@ -38,14 +38,19 @@ class PublicSubwayInfoClient(
         dailyType: DailyType,
         direction: SubwayDirection
     ): SubwayTimeTable {
+        val subwayStations = subwayStationRepository.findByRouteCode(startStation.routeCode)
         val items =
             subwayInfoFeignClient.getStationSchedule(serviceKey, startStation.id.value, dailyType.code, direction.code)
                 .response.body.items?.item
                 ?.filter { it.endSubwayStationNm != null }
+                ?.parallelStream()
                 ?.map {
-                    val finalStation = findSubwayStation(startStation, it.endSubwayStationNm!!)
+                    val finalStation =
+                        subwayStations.find { station -> station.name == it.endSubwayStationNm }
+                            ?: throw TransitException.NotFoundSubwayStation
                     it.toDomain(finalStation)
                 }
+                ?.toList()
                 ?: emptyList()
 
         return SubwayTimeTable(
@@ -54,17 +59,5 @@ class PublicSubwayInfoClient(
             direction,
             items
         )
-    }
-
-    private fun findSubwayStation(
-        startStation: SubwayStation,
-        endStationName: String
-    ): SubwayStation {
-        val finalStation =
-            subwayStationRepository.findByRouteCodeAndName(
-                startStation.routeCode,
-                endStationName
-            ) ?: throw TransitException.NotFoundSubwayStation
-        return finalStation
     }
 }

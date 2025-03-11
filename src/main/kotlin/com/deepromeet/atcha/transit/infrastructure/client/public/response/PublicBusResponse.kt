@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.ArsId
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusStation
+import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
@@ -39,6 +39,8 @@ data class MsgBody<T>(
 )
 
 data class StationResponse(
+    @JacksonXmlProperty(localName = "stId")
+    val stId: String,
     @JacksonXmlProperty(localName = "arsId")
     val arsId: String,
     @JacksonXmlProperty(localName = "stNm")
@@ -50,7 +52,7 @@ data class StationResponse(
 ) {
     fun toBusStation(): BusStation =
         BusStation(
-            arsId = ArsId(arsId),
+            id = BusStationId(arsId),
             busStationMeta =
                 BusStationMeta(
                     name = stNm,
@@ -106,27 +108,33 @@ data class BusArrivalResponse(
     @JacksonXmlProperty(localName = "isLast2")
     val isLast2: String,
     @JacksonXmlProperty(localName = "term")
-    val term: String
+    val term: String,
+    @JacksonXmlProperty(localName = "traTime1")
+    val traTime1: String,
+    @JacksonXmlProperty(localName = "traTime2")
+    val traTime2: String
 ) {
     fun toBusArrival(): BusArrival {
         val realTimeBusArrivals =
             listOf(
-                createArrivalInfo(
+                createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg1,
                     sectionOrder = sectOrd1,
-                    isLast = isLast1
+                    isLast = isLast1,
+                    remainingTime = traTime1
                 ),
-                createArrivalInfo(
+                createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg2,
                     sectionOrder = sectOrd2,
-                    isLast = isLast2
+                    isLast = isLast2,
+                    remainingTime = traTime2
                 )
             )
 
         return BusArrival(
             routeId = RouteId(busRouteId),
             routeName = busRouteAbrv,
-            arsId = ArsId(arsId),
+            busStationId = BusStationId(arsId),
             stationName = stNm,
             lastTime = parseDateTime(lastTm),
             term = term.toInt(),
@@ -134,26 +142,21 @@ data class BusArrivalResponse(
         )
     }
 
-    private fun createArrivalInfo(
+    private fun createRealTimeArrivalInfo(
         arrivalMessage: String,
         sectionOrder: String,
-        isLast: String
+        isLast: String,
+        remainingTime: String
     ): RealTimeBusArrival {
         val busStatus = determineBusStatus(arrivalMessage)
-        val remainingTime = calculateRemainingTime(arrivalMessage, busStatus)
 
         return RealTimeBusArrival(
             busStatus = busStatus,
-            remainingTime = remainingTime,
+            remainingTime = remainingTime.toInt(),
             remainingStations = staOrd.toInt() - sectionOrder.toInt(),
             isLast = isLast == "1"
         )
     }
-
-    private fun calculateRemainingTime(
-        arrivalMessage: String,
-        busStatus: BusStatus
-    ): Int = if (busStatus == BusStatus.OPERATING) extractTimeFromMessage(arrivalMessage) else 0
 
     private fun determineBusStatus(arrivalMessage: String): BusStatus =
         when (arrivalMessage) {
@@ -166,15 +169,7 @@ data class BusArrivalResponse(
     private fun parseDateTime(dateTimeString: String): LocalDateTime =
         LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
 
-    private fun extractTimeFromMessage(timeString: String): Int {
-        val matchResult = TIME_PATTERN.find(timeString) ?: return 0
-
-        val (minutes, seconds) = matchResult.destructured
-        return minutes.toInt() * 60 + seconds.toInt()
-    }
-
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-        private val TIME_PATTERN = """(\d+)분(\d+)초후""".toRegex()
     }
 }

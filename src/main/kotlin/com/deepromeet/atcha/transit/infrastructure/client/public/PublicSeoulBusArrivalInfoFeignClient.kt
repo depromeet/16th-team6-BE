@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam
     url = "\${open-api.api.url.bus}",
     configuration = [PublicFeignConfig::class]
 )
-interface PublicBusArrivalInfoFeignClient {
+interface PublicSeoulBusArrivalInfoFeignClient {
     @GetMapping("/api/rest/arrive/getArrInfoByRouteAll")
     fun getArrivalInfoByRoute(
         @RequestParam busRouteId: String
