@@ -53,7 +53,3 @@ management:
     health:
       enabled: true
       show-components: never
-
-server:
-  address: 0.0.0.0
-  port: 5959
