@@ -20,8 +20,8 @@ enum class TransitErrorType(
     SUBWAY_DIRECTION_RESOLVE_FAILED(400, "TRS_008", "유효하지 않은 지하철 방향입니다", LogLevel.ERROR),
     NOT_FOUND_SUBWAY_ROUTE(404, "TRS_009", "지하철 노선을 찾을 수 없습니다", LogLevel.ERROR),
     NOT_FOUND_BUS_TIME(404, "TRS_010", "버스 시간표를 찾을 수 없습니다", LogLevel.ERROR),
-    DISTANCE_TOO_SHORT(400, "TRS_003", "출발지와 도착지 간 거리가 너무 가깝습니다.", LogLevel.ERROR),
-    SERVICE_AREA_NOT_SUPPORTED(400, "TRS_004", "서비스 지역이 아닙니다.", LogLevel.ERROR)
+    DISTANCE_TOO_SHORT(400, "TRS_011", "출발지와 도착지 간 거리가 너무 가깝습니다.", LogLevel.ERROR),
+    SERVICE_AREA_NOT_SUPPORTED(400, "TRS_012", "서비스 지역이 아닙니다.", LogLevel.ERROR)
 }
 
 sealed class TransitException(

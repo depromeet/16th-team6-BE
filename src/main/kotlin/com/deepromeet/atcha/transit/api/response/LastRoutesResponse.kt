@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.api.response
 
-import com.deepromeet.atcha.transit.infrastructure.client.response.Location
-import com.deepromeet.atcha.transit.infrastructure.client.response.Station
-import com.deepromeet.atcha.transit.infrastructure.client.response.Step
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 
 data class LastRoutesResponse(
     val routeId: String,

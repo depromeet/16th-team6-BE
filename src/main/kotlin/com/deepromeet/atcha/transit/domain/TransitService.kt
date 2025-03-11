@@ -7,7 +7,10 @@ import com.deepromeet.atcha.transit.api.response.Legs
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
+import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
@@ -21,7 +24,8 @@ class TransitService(
     private val taxiFareFetcher: TaxiFareFetcher,
     private val busManager: BusManager,
     private val subwayManager: SubwayManager,
-    private val subwayStationBatchAppender: SubwayStationBatchAppender
+    private val subwayStationBatchAppender: SubwayStationBatchAppender,
+    private val lastRoutesResponseRedisTemplate: RedisTemplate<String, LastRoutesResponse>
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -55,6 +59,17 @@ class TransitService(
         return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
     }
 
+    fun getLastTime(
+        subwayLine: SubwayLine,
+        startStationName: String,
+        endStationName: String
+    ): SubwayTime? {
+        val routes = subwayManager.getRoutes(subwayLine)
+        val startStation = subwayManager.getStation(subwayLine, startStationName)
+        val endStation = subwayManager.getStation(subwayLine, endStationName)
+        return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
+    }
+
     fun getLastRoutes(
         userId: Long,
         request: LastRoutesRequest
@@ -74,11 +89,13 @@ class TransitService(
             deduplicatedRoutes.map { route ->
                 // 1. 경로 내 대중교통 별 막차 시간 조회
                 val calculatedLegs = calculateLegLastArriveDateTimes(route.legs)
-                // 2. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
-                val adjustedLegs = adjustTransitDepartureTimes(calculatedLegs)
-                // 3. 출발 시간 계산
+                // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
+                val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
+                // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
+                val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
+                // 4. 출발 시간 계산
                 val departureDateTime = calculateDepartureDateTime(adjustedLegs)
-                // 4. 총 소요 시간 계산
+                // 5. 총 소요 시간 계산
                 val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
 
                 LastRoutesResponse(
@@ -99,7 +116,9 @@ class TransitService(
                 val departureDateTime = LocalDateTime.parse(response.departureDateTime)
                 departureDateTime.isAfter(now)
             }
-        compareFilteredRoutes(lastRoutesResponses, filteredRoutes)
+//        compareFilteredRoutes(lastRoutesResponses, filteredRoutes)
+
+        saveRoutesToRedis(filteredRoutes)
 
         return sortedByMinTransfer(filteredRoutes)
     }
@@ -153,6 +172,16 @@ class TransitService(
         }
     }
 
+    private fun increaseWalkTime(legs: List<Legs>): List<Legs> {
+        return legs.map { leg ->
+            if (leg.mode == "WALK") {
+                leg.copy(sectionTime = leg.sectionTime + 120) // 기존 시간 + 120초
+            } else {
+                leg
+            }
+        }
+    }
+
     private fun adjustTransitDepartureTimes(legs: List<Legs>): List<Legs> {
         val adjustedLegs = legs.toMutableList()
         val transitLegs =
@@ -161,7 +190,7 @@ class TransitService(
         if (transitLegs.isEmpty()) return adjustedLegs
 
         // 1. 대중교통 기준 가장 빠른 막차 시간 찾기
-        val earliestTransitLeg = transitLegs.minBy { LocalDateTime.parse(it.value.departureDateTime) }
+        val earliestTransitLeg = transitLegs.minBy { LocalDateTime.parse(it.value.departureDateTime!!) }
 
         var isAllRideable = true
         var lastUnrideableIndex: Int? = null
@@ -173,7 +202,7 @@ class TransitService(
 
             // 2-1. 출발 시간 + 소요 시간
             var currentLegAvailableTime =
-                LocalDateTime.parse(currentLeg.departureDateTime).plusSeconds(currentLeg.sectionTime.toLong())
+                LocalDateTime.parse(currentLeg.departureDateTime!!).plusSeconds(currentLeg.sectionTime.toLong())
 
             // 2-2. 2-1 결과 시간과 다음 대중교통 출발 시간 비교 -> 탑승 가능 여부 확인
             var nextIndex = i + 1
@@ -186,7 +215,7 @@ class TransitService(
             if (nextIndex > adjustedLegs.lastIndex) break
 
             val nextLeg = adjustedLegs[nextIndex]
-            val nextLegArriveTime = LocalDateTime.parse(nextLeg.departureDateTime)
+            val nextLegArriveTime = LocalDateTime.parse(nextLeg.departureDateTime!!)
 
             if (currentLegAvailableTime.isAfter(nextLegArriveTime)) {
                 isAllRideable = false
@@ -198,7 +227,7 @@ class TransitService(
         val adjustBaseIndex = if (isAllRideable) earliestTransitLeg.index else lastUnrideableIndex!!
 
         // 4. 기준점 앞쪽 시간 재조정
-        var adjustBaseTime = LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime)
+        var adjustBaseTime = LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime!!)
         for (i in adjustBaseIndex - 1 downTo 0) {
             val leg = adjustedLegs[i]
 
@@ -215,7 +244,7 @@ class TransitService(
 
         // 5. 기준점 뒤쪽 시간 재조정
         adjustBaseTime =
-            LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime)
+            LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime!!)
                 .plusSeconds(adjustedLegs[adjustBaseIndex].sectionTime.toLong())
         for (i in adjustBaseIndex + 1 until adjustedLegs.size) {
             val leg = adjustedLegs[i]
@@ -237,7 +266,7 @@ class TransitService(
     private fun calculateDepartureDateTime(legs: List<Legs>): LocalDateTime {
         val firstTransitIndex = legs.indexOfFirst { it.mode != "WALK" }
         val firstTransit = legs[firstTransitIndex]
-        val departureDateTime = LocalDateTime.parse(firstTransit.departureDateTime)
+        val departureDateTime = LocalDateTime.parse(firstTransit.departureDateTime!!)
         val totalWalkTime =
             if (firstTransitIndex > 0) {
                 legs.subList(0, firstTransitIndex).filter { it.mode == "WALK" }.sumOf { it.sectionTime.toLong() }
@@ -255,7 +284,7 @@ class TransitService(
         val lastTransitIndex = adjustedLegs.indexOfLast { it.mode != "WALK" }
         val lastTransit = adjustedLegs[lastTransitIndex]
 
-        val lastTransitDepartureTime = LocalDateTime.parse(lastTransit.departureDateTime)
+        val lastTransitDepartureTime = LocalDateTime.parse(lastTransit.departureDateTime!!)
         var arrivalTime = lastTransitDepartureTime.plusSeconds(lastTransit.sectionTime.toLong())
 
         val totalWalkTime =
@@ -298,6 +327,13 @@ class TransitService(
 //    private fun sortedByShortestTime(routes: List<LastRoutesResponse>) = routes.sortedWith(
 //        compareBy({ it.totalTime }, { it.transferCount })
 //    )
+
+    private fun saveRoutesToRedis(routes: List<LastRoutesResponse>) {
+        routes.forEach { route ->
+            val key = "routes:last:${route.routeId}"
+            lastRoutesResponseRedisTemplate.opsForValue().set(key, route, Duration.ofHours(12))
+        }
+    }
 
     // 중복 제거 전후 확인 코드 - 데이터 확인용
     fun printItineraryComparison(
@@ -350,16 +386,5 @@ class TransitService(
                 println("🔹 After : (제거됨)\n")
             }
         }
-    }
-
-    fun getLastTime(
-        subwayLine: SubwayLine,
-        startStationName: String,
-        endStationName: String
-    ): SubwayTime? {
-        val routes = subwayManager.getRoutes(subwayLine)
-        val startStation = subwayManager.getStation(subwayLine, startStationName)
-        val endStation = subwayManager.getStation(subwayLine, endStationName)
-        return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
     }
 }
