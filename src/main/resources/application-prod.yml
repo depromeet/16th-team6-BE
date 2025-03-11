@@ -44,7 +44,7 @@ management:
       base-path: /act-atcha
     jmx:
       exposure:
-        exclude: *
+        exclude: "*"
     access:
       default: none
   endpoint:
