@@ -1,4 +1,6 @@
-package com.deepromeet.atcha.transit.infrastructure.client.response
+package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
+
+import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
 data class TMapRouteResponse(
     val metaData: MetaData

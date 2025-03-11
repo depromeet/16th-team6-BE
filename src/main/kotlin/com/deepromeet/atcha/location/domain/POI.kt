@@ -8,4 +8,8 @@ data class POI(
     val businessCategory: String,
     val address: String,
     val radius: Int? = null
-)
+) {
+    fun distanceTo(other: Coordinate): POI {
+        return copy(radius = location.coordinate.distanceTo(other).toInt())
+    }
+}

@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client.request
+package com.deepromeet.atcha.transit.infrastructure.client.tmap.request
 
 data class TMapRouteRequest(
     val startX: String,

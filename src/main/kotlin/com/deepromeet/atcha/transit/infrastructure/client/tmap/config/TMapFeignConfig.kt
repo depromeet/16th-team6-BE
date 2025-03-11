@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client
+package com.deepromeet.atcha.transit.infrastructure.client.tmap.config
 
 import feign.RequestInterceptor
 import org.springframework.beans.factory.annotation.Value

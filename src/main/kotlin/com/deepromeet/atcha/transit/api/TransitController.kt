@@ -1,8 +1,14 @@
 package com.deepromeet.atcha.transit.api
 
 import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
+import com.deepromeet.atcha.transit.api.request.SubwayLastTimeRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
+import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.SubwayLine
+import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.TransitService
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -24,4 +30,36 @@ class TransitController(
                 request.toEnd()
             )
         )
+
+    @GetMapping("/arrival")
+    fun getArrivalInfo(
+        @ModelAttribute request: BusArrivalRequest
+    ): ApiResponse<BusArrival> {
+        return ApiResponse.success(
+            transitService.getBusArrivalInfo(
+                request.routeName,
+                request.stationName,
+                Coordinate(request.lat, request.lon)
+            )
+        )
+    }
+
+    @GetMapping("/last-time")
+    fun getLastTime(
+        @ModelAttribute request: SubwayLastTimeRequest
+    ): ApiResponse<SubwayTime?> {
+        return ApiResponse.success(
+            transitService.getLastTime(
+                SubwayLine.fromRouteName(request.routeName),
+                request.startStationName,
+                request.endStationName
+            )
+        )
+    }
+
+    @GetMapping("/batch")
+    fun batch(): ApiResponse<Unit> {
+        transitService.init()
+        return ApiResponse.success(Unit)
+    }
 }

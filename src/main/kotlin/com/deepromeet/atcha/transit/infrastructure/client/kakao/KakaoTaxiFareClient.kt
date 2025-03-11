@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client
+package com.deepromeet.atcha.transit.infrastructure.client.kakao
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.Fare
