@@ -44,3 +44,4 @@ out/
 
 # secret
 src/main/resources/secret-env.yml
+src/main/resources/application-local.yml
