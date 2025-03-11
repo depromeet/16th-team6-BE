@@ -2,4 +2,4 @@ spring:
   config:
     import: secret-env.yml
   profiles:
-    active: local
+    active: test

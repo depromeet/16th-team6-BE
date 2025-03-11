@@ -5,11 +5,9 @@ import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.api.response.Legs
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.TMapTransitClient
-import com.deepromeet.atcha.transit.infrastructure.client.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.infrastructure.client.response.Itinerary
-import com.deepromeet.atcha.transit.infrastructure.client.response.Leg
-import com.deepromeet.atcha.transit.infrastructure.client.response.TMapRouteResponse
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
@@ -20,8 +18,15 @@ import java.util.UUID
 @Service
 class TransitService(
     private val tMapTransitClient: TMapTransitClient,
-    private val taxiFareFetcher: TaxiFareFetcher
+    private val taxiFareFetcher: TaxiFareFetcher,
+    private val busManager: BusManager,
+    private val subwayManager: SubwayManager,
+    private val subwayStationBatchAppender: SubwayStationBatchAppender
 ) {
+    fun init() {
+        subwayStationBatchAppender.appendAll()
+    }
+
     fun getRoutes(): TMapRouteResponse {
         return tMapTransitClient.getRoutes(
             TMapRouteRequest(
@@ -33,6 +38,14 @@ class TransitService(
                 searchDttm = "202502142100"
             )
         )
+    }
+
+    fun getBusArrivalInfo(
+        routeName: String,
+        stationName: String,
+        coordinate: Coordinate
+    ): BusArrival {
+        return busManager.getArrivalInfo(routeName, BusStationMeta(stationName, coordinate))
     }
 
     fun getTaxiFare(
@@ -337,5 +350,16 @@ class TransitService(
                 println("🔹 After : (제거됨)\n")
             }
         }
+    }
+
+    fun getLastTime(
+        subwayLine: SubwayLine,
+        startStationName: String,
+        endStationName: String
+    ): SubwayTime? {
+        val routes = subwayManager.getRoutes(subwayLine)
+        val startStation = subwayManager.getStation(subwayLine, startStationName)
+        val endStation = subwayManager.getStation(subwayLine, endStationName)
+        return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
     }
 }
