@@ -51,13 +51,15 @@ class AuthService(
     @Transactional
     fun login(
         providerToken: String,
-        providerOrdinal: Int
+        providerOrdinal: Int,
+        fcmToken: String
     ): UserTokenInfo {
         val providerType = ProviderType.findByOrdinal(providerOrdinal)
         val authProvider = authProviders.getAuthProvider(providerType)
 
         val userInfo = authProvider.getUserInfo(providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
+        userAppender.updateFcmToken(user, fcmToken)
 
         val userProvider = userProviderReader.read(user.id)
         userProviderAppender.updateProviderToken(userProvider, providerToken)

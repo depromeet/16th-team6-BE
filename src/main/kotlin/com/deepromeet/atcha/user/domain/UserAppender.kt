@@ -37,7 +37,14 @@ class UserAppender(
         userUpdateInfo.address?.let { user.address.address = it }
         userUpdateInfo.lat?.let { user.address.lat = it }
         userUpdateInfo.log?.let { user.address.lon = it }
-        // TODO FCM 토큰 업데이트
+        userUpdateInfo.fcmToken?.let { user.fcmToken = it }
+        return user
+    }
+
+    fun updateFcmToken(user: User, fcmToken: String): User {
+        if (user.fcmToken != fcmToken) {
+            user.fcmToken = fcmToken
+        }
         return user
     }
 
