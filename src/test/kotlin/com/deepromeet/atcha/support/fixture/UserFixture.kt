@@ -16,7 +16,7 @@ object UserFixture {
                 37.0
             ),
         alertFrequencies: MutableSet<Int> = mutableSetOf(1, 5, 10),
-        fcmToken: String = "TEST_FCMTOKEN",
+        fcmToken: String = "TEST_FCMTOKEN"
     ): User =
         User(
             providerId = providerId,
