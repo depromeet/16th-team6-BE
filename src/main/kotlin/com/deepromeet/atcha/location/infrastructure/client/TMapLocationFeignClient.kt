@@ -2,7 +2,7 @@ package com.deepromeet.atcha.location.infrastructure.client
 
 import com.deepromeet.atcha.location.infrastructure.client.response.TMapPOIResponse
 import com.deepromeet.atcha.location.infrastructure.client.response.TMapReverseLabelResponse
-import com.deepromeet.atcha.transit.infrastructure.client.TMapFeignConfig
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.config.TMapFeignConfig
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam

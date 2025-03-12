@@ -1,12 +1,12 @@
 spring:
   datasource:
-    url: jdbc:mysql://${secret.SPRING_DATABASE_HOST}:${secret.SPRING_DATABASE_PORT}/${secret.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
-    username: ${secret.SPRING_DATABASE_USERNAME}
-    password: ${secret.SPRING_DATABASE_PASSWORD}
+    url: jdbc:mysql://${secret.dev.SPRING_DATABASE_HOST}:${secret.dev.SPRING_DATABASE_PORT}/${secret.dev.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${secret.dev.SPRING_DATABASE_USERNAME}
+    password: ${secret.dev.SPRING_DATABASE_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
-      ddl-auto: create
+      ddl-auto: update
     properties:
       hibernate:
         show-sql: true
@@ -33,17 +33,43 @@ feign:
         loggerLevel: FULL
 
 kakao:
-  client-id: {CLIENT_ID}
+  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
   api:
     url: https://kapi.kakao.com/
   oauth:
     url: https://kauth.kakao.com/oauth
+  local:
+    url: https://dapi.kakao.com/v2/local
+    key: ${secret.dev.KAKAO_REST_API_KEY}
 
 tmap:
   api:
     url: https://apis.openapi.sk.com
-    app-key: ${secret.TMAP_API_KEY}
+    app-key: ${secret.dev.TMAP_API_KEY}
 
 redis:
   host: redis
   port: 6379
+
+open-api:
+  api:
+    url:
+      bus: http://ws.bus.go.kr
+      gyeonggi-bus: http://apis.data.go.kr/6410000/busstationservice/v2
+      gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
+      gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
+      subway: http://apis.data.go.kr/1613000/SubwayInfoService
+      holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
+    service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+
+kric:
+  api:
+    url:
+      subway: https://openapi.kric.go.kr/openapi/trainUseInfo
+    service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+jwt:
+  access:
+    secret: ${secret.dev.JWT_ACCESS_SECRET}
+  refresh:
+    secret: ${secret.dev.JWT_REFRESH_SECRET}

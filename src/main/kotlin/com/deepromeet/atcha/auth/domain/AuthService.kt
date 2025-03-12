@@ -43,7 +43,7 @@ class AuthService(
         val savedUser = userAppender.save(providerUserInfo, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
 
-        userProviderAppender.save(savedUser.id, Provider(providerType, providerToken))
+        userProviderAppender.save(savedUser, Provider(providerUserInfo.providerId, providerType, providerToken))
 
         return UserTokenInfo(savedUser.id, token)
     }
@@ -58,6 +58,9 @@ class AuthService(
 
         val userInfo = authProvider.getUserInfo(providerToken)
         val user = userReader.readByProviderId(userInfo.providerId)
+
+        val userProvider = userProviderReader.read(user.id)
+        userProviderAppender.updateProviderToken(userProvider, providerToken)
 
         val token = tokenGenerator.generateTokens(user.id)
 
