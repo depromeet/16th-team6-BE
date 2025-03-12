@@ -63,7 +63,7 @@ class AuthControllerTest : BaseControllerTest() {
         RestAssured.given().log().all()
             .param("provider", 0)
             .header("Authorization", "Bearer $providerAccessToken")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().get("/api/auth/login")
             .then().log().all()
             .statusCode(200)
@@ -77,7 +77,7 @@ class AuthControllerTest : BaseControllerTest() {
         // when & then
         RestAssured.given().log().all()
             .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)
@@ -90,7 +90,7 @@ class AuthControllerTest : BaseControllerTest() {
         // when
         RestAssured.given().log().all()
             .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)
@@ -125,7 +125,7 @@ class AuthControllerTest : BaseControllerTest() {
         // 로그인
         RestAssured.given().log().all()
             .param("provider", 0)
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .header("Authorization", "Bearer $providerAccessToken")
             .`when`().get("/api/auth/login")
             .then().log().all()
@@ -133,7 +133,7 @@ class AuthControllerTest : BaseControllerTest() {
         // 로그아웃
         RestAssured.given().log().all()
             .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)
@@ -153,7 +153,7 @@ class AuthControllerTest : BaseControllerTest() {
         // 로그인
         RestAssured.given().log().all()
             .param("provider", 0)
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .header("Authorization", "Bearer $providerAccessToken")
             .`when`().get("/api/auth/login")
             .then().log().all()
@@ -162,7 +162,7 @@ class AuthControllerTest : BaseControllerTest() {
         // 로그아웃
         RestAssured.given().log().all()
             .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)
@@ -171,7 +171,7 @@ class AuthControllerTest : BaseControllerTest() {
         val result =
             RestAssured.given().log().all()
                 .param("provider", 0)
-                .param("token", "TEST_FCM_TOKEN")
+                .param("fcmToken", "TEST_FCM_TOKEN")
                 .header("Authorization", "Bearer $providerAccessToken")
                 .`when`().get("/api/auth/login")
                 .then().log().all()
@@ -183,7 +183,7 @@ class AuthControllerTest : BaseControllerTest() {
         // 재로그아웃
         RestAssured.given().log().all()
             .header("Authorization", "Bearer ${reLoginResponse.refreshToken}")
-            .param("token", "TEST_FCM_TOKEN")
+            .param("fcmToken", "TEST_FCM_TOKEN")
             .`when`().post("/api/auth/logout")
             .then().log().all()
             .statusCode(204)

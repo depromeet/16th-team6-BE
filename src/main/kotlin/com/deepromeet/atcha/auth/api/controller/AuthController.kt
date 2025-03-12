@@ -48,7 +48,7 @@ class AuthController(
     fun login(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int,
-        @RequestParam("token") fcmToken: String
+        @RequestParam("fcmToken") fcmToken: String
     ): ApiResponse<LoginResponse> {
         val userToken = authService.login(providerToken, provider, fcmToken)
         val result = LoginResponse(userToken)
