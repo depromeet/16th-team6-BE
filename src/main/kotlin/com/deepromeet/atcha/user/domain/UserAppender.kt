@@ -22,7 +22,7 @@ class UserAppender(
                 profileImageUrl = providerUserInfo.profileImageUrl,
                 address = signUpInfo.getAddress(),
                 alertFrequencies = signUpInfo.alertFrequencies.toMutableSet(),
-                fcmToken = signUpInfo.fcmToken,
+                fcmToken = signUpInfo.fcmToken
             )
         return userJpaRepository.save(user)
     }

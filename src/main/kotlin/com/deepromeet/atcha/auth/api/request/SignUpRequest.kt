@@ -8,7 +8,7 @@ data class SignUpRequest(
     val lat: Double,
     val lon: Double,
     val alertFrequencies: Set<Int>,
-    val fcmToken: String,
+    val fcmToken: String
 ) {
     fun toSignUpInfo() =
         SignUpInfo(
