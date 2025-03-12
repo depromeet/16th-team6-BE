@@ -142,7 +142,7 @@ class AuthServiceTest {
         userProviderAppender.save(savedUser, Provider(0, ProviderType.KAKAO, token))
 
         // when
-        val result = authService.login(token, ProviderType.KAKAO.ordinal)
+        val result = authService.login(token, ProviderType.KAKAO.ordinal, "TEST_FCM_TOKEN")
 
         // then
         assertThat(result.id).isEqualTo(savedUser.id)
