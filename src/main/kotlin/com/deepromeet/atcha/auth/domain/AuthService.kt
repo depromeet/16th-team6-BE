@@ -4,6 +4,7 @@ import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -32,7 +33,7 @@ class AuthService(
     fun signUp(
         providerToken: String,
         signUpInfo: SignUpInfo
-    ): UserTokenInfo {
+    ): UserAuthInfo {
         val providerType = ProviderType.findByOrdinal(signUpInfo.provider)
         val authProvider = authProviders.getAuthProvider(providerType)
         val providerUserInfo = authProvider.getUserInfo(providerToken)
@@ -44,8 +45,10 @@ class AuthService(
         val token = tokenGenerator.generateTokens(savedUser.id)
 
         userProviderAppender.save(savedUser, Provider(providerUserInfo.providerId, providerType, providerToken))
+        val userTokenInfo = UserTokenInfo(savedUser.id, token)
+        val coordinate = Coordinate(savedUser.address.lat, savedUser.address.lon)
 
-        return UserTokenInfo(savedUser.id, token)
+        return UserAuthInfo(userTokenInfo, coordinate)
     }
 
     @Transactional
@@ -53,7 +56,7 @@ class AuthService(
         providerToken: String,
         providerOrdinal: Int,
         fcmToken: String
-    ): UserTokenInfo {
+    ): UserAuthInfo {
         val providerType = ProviderType.findByOrdinal(providerOrdinal)
         val authProvider = authProviders.getAuthProvider(providerType)
 
@@ -65,8 +68,10 @@ class AuthService(
         userProviderAppender.updateProviderToken(userProvider, providerToken)
 
         val token = tokenGenerator.generateTokens(user.id)
+        val userTokenInfo = UserTokenInfo(user.id, token)
+        val coordinate = Coordinate(user.address.lat, user.address.lon)
 
-        return UserTokenInfo(user.id, token)
+        return UserAuthInfo(userTokenInfo, coordinate)
     }
 
     @Transactional
