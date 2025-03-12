@@ -9,7 +9,7 @@ data class UserInfoUpdateRequest(
     val lat: Double? = null,
     val log: Double? = null,
     val alertFrequencies: Set<Int>? = null,
-    val fcmToken: String? = null,
+    val fcmToken: String? = null
 ) {
     fun toUpdateUserInfo(): UserUpdateInfo {
         return UserUpdateInfo(
@@ -19,7 +19,7 @@ data class UserInfoUpdateRequest(
             lat = lat,
             log = log,
             alertFrequencies = alertFrequencies,
-            fcmToken = fcmToken,
+            fcmToken = fcmToken
         )
     }
 }
