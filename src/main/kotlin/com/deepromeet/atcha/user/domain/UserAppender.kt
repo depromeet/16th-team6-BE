@@ -41,7 +41,10 @@ class UserAppender(
         return user
     }
 
-    fun updateFcmToken(user: User, fcmToken: String): User {
+    fun updateFcmToken(
+        user: User,
+        fcmToken: String
+    ): User {
         if (user.fcmToken != fcmToken) {
             user.fcmToken = fcmToken
         }
