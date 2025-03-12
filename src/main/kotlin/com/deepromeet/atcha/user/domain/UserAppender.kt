@@ -21,7 +21,8 @@ class UserAppender(
                 providerId = providerUserInfo.providerId,
                 profileImageUrl = providerUserInfo.profileImageUrl,
                 address = signUpInfo.getAddress(),
-                alertFrequencies = signUpInfo.alertFrequencies.toMutableSet()
+                alertFrequencies = signUpInfo.alertFrequencies.toMutableSet(),
+                fcmToken = signUpInfo.fcmToken,
             )
         return userJpaRepository.save(user)
     }
@@ -36,7 +37,7 @@ class UserAppender(
         userUpdateInfo.address?.let { user.address.address = it }
         userUpdateInfo.lat?.let { user.address.lat = it }
         userUpdateInfo.log?.let { user.address.lon = it }
-
+        // TODO FCM 토큰 업데이트
         return user
     }
 
