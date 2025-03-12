@@ -21,5 +21,6 @@ class NotificationController(
 }
 
 data class NotificationRequest(
-    val lastRouteId: String
+    val lastRouteId: String,
+    val alertToken: String
 )

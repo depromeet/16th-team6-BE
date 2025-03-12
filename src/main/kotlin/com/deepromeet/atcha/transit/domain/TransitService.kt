@@ -9,13 +9,13 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRoute
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
-import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Service
 
 @Service
 class TransitService(

@@ -1,6 +1,11 @@
 package com.deepromeet.atcha.common.redis
 
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.databind.SerializationFeature
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
+import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -31,10 +36,21 @@ class RedisConfig(
         val template = RedisTemplate<String, LastRoutesResponse>()
         template.connectionFactory = redisConnectionFactory
 
-        template.keySerializer = StringRedisSerializer()
-        val serializer = Jackson2JsonRedisSerializer(LastRoutesResponse::class.java)
+        val kotlinModule = KotlinModule.Builder().build()
+        val objectMapper =
+            ObjectMapper()
+                .registerModule(kotlinModule)
+                .registerModule(JavaTimeModule())
+                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
+        val serializer = Jackson2JsonRedisSerializer(objectMapper, LastRoutesResponse::class.java)
+
+        template.keySerializer = StringRedisSerializer()
         template.valueSerializer = serializer
+        template.hashKeySerializer = StringRedisSerializer()
+        template.hashValueSerializer = serializer
+
         return template
     }
 }
