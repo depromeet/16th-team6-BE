@@ -11,6 +11,8 @@ import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.RouteId
+import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusStationListDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -28,6 +30,7 @@ data class PublicGyeonggiResponse<T>(
     )
 
     data class BusStationResponse(
+        @JsonDeserialize(using = BusStationListDeserializer::class)
         val busStationList: List<GyeonggiBusStation>
     )
 
@@ -149,7 +152,6 @@ data class GyeonggiBusRouteStation(
 }
 
 class GyeonggiBusStation(
-    val regionName: String,
     val stationId: String,
     val stationName: String,
     val x: String,
