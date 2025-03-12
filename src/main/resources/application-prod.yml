@@ -47,9 +47,6 @@ kakao:
     url: https://kapi.kakao.com/
   oauth:
     url: https://kauth.kakao.com/oauth
-  local:
-    url: https://dapi.kakao.com/v2/local
-    key: ${secret.prod.KAKAO_REST_API_KEY}
 
 open-api:
   api:
