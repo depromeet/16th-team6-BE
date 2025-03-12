@@ -26,6 +26,7 @@ class NotificationService(
         user.alertFrequencies.forEach { minute ->
             val userNotification =
                 UserNotification(
+                    notificationFrequency = minute.toString(),
                     notificationToken = notificationToken,
                     notificationTime = departureTime.minusMinutes(minute.toLong()).toString()
                 )
