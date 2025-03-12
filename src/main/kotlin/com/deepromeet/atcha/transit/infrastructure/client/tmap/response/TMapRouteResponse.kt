@@ -3,7 +3,13 @@ package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
 data class TMapRouteResponse(
-    val metaData: MetaData
+    val metaData: MetaData?,
+    val result: Result?
+)
+
+data class Result(
+    val status: Int,
+    val message: String
 )
 
 data class MetaData(
@@ -120,7 +126,7 @@ data class PassShape(
 )
 
 data class PassStopList(
-    val stations: List<Station> = emptyList()
+    val stationList: List<Station> = emptyList()
 )
 
 data class Station(

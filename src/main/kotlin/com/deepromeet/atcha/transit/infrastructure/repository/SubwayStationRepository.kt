@@ -11,6 +11,11 @@ interface SubwayStationRepository : JpaRepository<SubwayStation, SubwayStationId
         name: String
     ): SubwayStation?
 
+    fun findByRouteCodeAndNameContains(
+        routeCode: String,
+        name: String
+    ): SubwayStation?
+
     fun findByRouteCode(routeCode: String): List<SubwayStation>
 
     @Query(

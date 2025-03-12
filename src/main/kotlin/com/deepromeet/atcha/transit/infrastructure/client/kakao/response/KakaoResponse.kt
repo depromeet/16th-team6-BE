@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.kakao.response
 
-import com.deepromeet.atcha.transit.domain.BusRegion
+import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class KakaoResponse(
@@ -24,11 +25,11 @@ data class KakaoRegionResponse(
     val x: Double,
     val y: Double
 ) {
-    fun toBusRegion(): BusRegion {
+    fun toServiceRegion(): ServiceRegion {
         return when (region1depthName) {
-            "서울특별시" -> BusRegion.SEOUL
-            "경기도" -> BusRegion.GYEONGGI
-            else -> throw IllegalArgumentException("Unsupported region: $region1depthName")
+            "서울특별시" -> ServiceRegion.SEOUL
+            "경기도" -> ServiceRegion.GYEONGGI
+            else -> throw TransitException.ServiceAreaNotSupported
         }
     }
 }

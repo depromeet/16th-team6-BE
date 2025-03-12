@@ -14,21 +14,29 @@ data class BusArrival(
     fun getNearestTime(
         time: LocalDateTime,
         timeDirection: TimeDirection
-    ): LocalDateTime {
-        var current = lastTime
-
+    ): LocalDateTime? {
         return when (timeDirection) {
             TimeDirection.BEFORE -> {
+                var current = lastTime
                 while (current.isAfter(time)) {
                     current = current.minusMinutes(term.toLong())
                 }
                 current
             }
+
             TimeDirection.AFTER -> {
-                while (current.isBefore(time)) {
-                    current = current.plusMinutes(term.toLong())
+                if (time.isAfter(lastTime)) {
+                    return null
                 }
-                current
+
+                var temp = lastTime
+                var candidate = lastTime
+
+                while (temp.isAfter(time)) {
+                    candidate = temp
+                    temp = temp.minusMinutes(term.toLong())
+                }
+                candidate
             }
         }
     }
@@ -46,6 +54,7 @@ data class RealTimeBusArrival(
                 BusStatus.OPERATING, BusStatus.SOON ->
                     LocalDateTime.now()
                         .plusSeconds(remainingTime.toLong())
+
                 else -> null
             }
 }

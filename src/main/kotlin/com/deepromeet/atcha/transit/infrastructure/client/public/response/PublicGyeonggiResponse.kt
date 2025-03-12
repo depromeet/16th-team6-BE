@@ -99,8 +99,15 @@ data class BusArrivalItem(
         val firstRemainOrder = staOrder - firstBusCurrentStation.stationSeq
         val secondRemainOrder = staOrder - secondBusCurrentStation.stationSeq
         val averageSecondPerStation =
-            predictTimeSec2?.div(secondRemainOrder)
-                ?: predictTimeSec1?.div(firstRemainOrder) ?: 0
+            when {
+                predictTimeSec2 != null && secondRemainOrder != 0 ->
+                    predictTimeSec2.div(secondRemainOrder)
+
+                predictTimeSec1 != null && firstRemainOrder != 0 ->
+                    predictTimeSec1.div(firstRemainOrder)
+
+                else -> 0
+            }
         val stationCount = if (staOrder < turnSeq) staOrder else staOrder - turnSeq
         return (averageSecondPerStation * stationCount).toLong()
     }
@@ -229,12 +236,14 @@ data class BusRouteInfoItem(
                         BusDirection.DOWN -> downLastTime
                     }
                 }
+
                 DailyType.SATURDAY -> {
                     when (busDirection) {
                         BusDirection.UP -> satUpLastTime
                         BusDirection.DOWN -> satDownLastTime
                     }
                 }
+
                 DailyType.HOLIDAY -> {
                     when (busDirection) {
                         BusDirection.UP -> sunUpLastTime
