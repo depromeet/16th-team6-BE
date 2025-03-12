@@ -22,7 +22,7 @@ class SubwayManager(
         subwayLine: SubwayLine,
         stationName: String
     ): SubwayStation {
-        return subwayStationRepository.findByRouteCodeAndName(subwayLine.lnCd, stationName)
+        return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
             ?: throw TransitException.NotFoundSubwayStation
     }
 
