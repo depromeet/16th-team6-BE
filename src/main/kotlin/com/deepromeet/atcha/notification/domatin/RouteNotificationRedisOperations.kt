@@ -30,4 +30,35 @@ class RouteNotificationRedisOperations(
     ) {
         routeNotificationRedisTemplate.delete("notification:$userId:$lastRouteId")
     }
+
+    fun findNotificationsByMinute(timeMinute: String): List<UserNotification> {
+        val pattern = "notification:*"
+        val notificationKeys = routeNotificationRedisTemplate.keys(pattern)
+
+        return notificationKeys.flatMap { key ->
+            val entries =
+                routeNotificationRedisTemplate.opsForHash<String, UserNotification>()
+                    .entries(key)
+
+            entries.values.filter { notification ->
+                notification.notificationTime.substring(0, 16) == timeMinute
+            }
+        }
+    }
+
+    fun deleteNotification(notification: UserNotification) {
+        val pattern = "notification:*"
+        val keys = routeNotificationRedisTemplate.keys(pattern)
+
+        keys.forEach { key ->
+            routeNotificationRedisTemplate.opsForHash<String, UserNotification>()
+                .entries(key)
+                .forEach { (hashKey, value) ->
+                    if (value.notificationTime == notification.notificationTime) {
+                        routeNotificationRedisTemplate.opsForHash<String, UserNotification>()
+                            .delete(key, hashKey)
+                    }
+                }
+        }
+    }
 }
