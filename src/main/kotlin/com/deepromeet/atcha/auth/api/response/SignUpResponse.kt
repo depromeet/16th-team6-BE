@@ -7,9 +7,15 @@ data class SignUpResponse(
     val accessToken: String,
     val refreshToken: String,
     val lat: Double,
-    val lon: Double,
+    val lon: Double
 ) {
     constructor(
         userAuthInfo: UserAuthInfo
-    ) : this(userAuthInfo.userTokenInfo.id, userAuthInfo.userTokenInfo.accessToken, userAuthInfo.userTokenInfo.refreshToken, userAuthInfo.coordinate.lat, userAuthInfo.coordinate.lon)
+    ) : this(
+        userAuthInfo.userTokenInfo.id,
+        userAuthInfo.userTokenInfo.accessToken,
+        userAuthInfo.userTokenInfo.refreshToken,
+        userAuthInfo.coordinate.lat,
+        userAuthInfo.coordinate.lon
+    )
 }
