@@ -2,50 +2,42 @@ package com.deepromeet.atcha.notification.domatin
 
 import com.deepromeet.atcha.notification.api.NotificationRequest
 import com.deepromeet.atcha.notification.exception.NotificationException
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.user.domain.UserReader
-import java.time.LocalDateTime
-import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Service
+import java.time.LocalDateTime
 
 @Service
 class NotificationService(
-    private val lastRoutesResponseRedisTemplate: RedisTemplate<String, LastRoutesResponse>,
-    private val redisTemplate: StringRedisTemplate,
+    private val redisOperations: RouteNotificationRedisOperations,
     private val userReader: UserReader
 ) {
     fun addRouteNotification(
         id: Long,
         request: NotificationRequest
     ) {
-        val route = getRedisLastRoute(request.lastRouteId) ?: throw NotificationException.InvalidRouteId
+        val route =
+            redisOperations.findLastRoute(request.lastRouteId)
+                ?: throw NotificationException.InvalidRouteId
         val departureTime = LocalDateTime.parse(route.departureDateTime)
 
         val user = userReader.read(id)
-        val notificationToken = request.alertToken // TODO : 사용자 정보에서 찾아오는 방향으로 결정되면 변경 필요
+        val notificationToken = request.notificationToken // TODO : 사용자 정보에서 찾아오는 방향으로 결정되면 변경 필요
 
         user.alertFrequencies.forEach { minute ->
-            val notificationTime = departureTime.minusMinutes(minute.toLong())
-            val notificationMap =
-                mapOf(
-                    "notificationToken" to notificationToken,
-                    "notificationTime" to notificationTime.toString()
+            val userNotification =
+                UserNotification(
+                    notificationToken = notificationToken,
+                    notificationTime = departureTime.minusMinutes(minute.toLong()).toString()
                 )
-            addRedisNotification(id.toString(), request.lastRouteId, minute, notificationMap)
+            redisOperations.saveNotification(user.id, request.lastRouteId, minute, userNotification)
         }
     }
 
-    fun getRedisLastRoute(routeId: String): LastRoutesResponse? {
-        val key = "routes:last:$routeId"
-        return lastRoutesResponseRedisTemplate.opsForValue().get(key)
+    fun deleteRouteNotification(
+        id: Long,
+        request: NotificationRequest
+    ) {
+        val user = userReader.read(id)
+        redisOperations.deleteNotification(user.id, request.lastRouteId)
     }
-
-    fun addRedisNotification(
-        userId: String,
-        lastRouteId: String,
-        minute: Int,
-        notificationMap: Map<String, String>
-    ) = redisTemplate.opsForHash<String, String>()
-        .putAll("notification:$userId:$lastRouteId:$minute", notificationMap)
 }

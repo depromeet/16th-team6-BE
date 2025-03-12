@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.common.redis
 
+import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -29,11 +30,11 @@ class RedisConfig(
         return LettuceConnectionFactory(host, port)
     }
 
-    @Bean
-    fun lastRoutesResponseRedisTemplate(
-        redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, LastRoutesResponse> {
-        val template = RedisTemplate<String, LastRoutesResponse>()
+    fun <T> createRedisTemplate(
+        redisConnectionFactory: RedisConnectionFactory,
+        clazz: Class<T>
+    ): RedisTemplate<String, T> {
+        val template = RedisTemplate<String, T>()
         template.connectionFactory = redisConnectionFactory
 
         val kotlinModule = KotlinModule.Builder().build()
@@ -44,7 +45,7 @@ class RedisConfig(
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
 
-        val serializer = Jackson2JsonRedisSerializer(objectMapper, LastRoutesResponse::class.java)
+        val serializer = Jackson2JsonRedisSerializer(objectMapper, clazz)
 
         template.keySerializer = StringRedisSerializer()
         template.valueSerializer = serializer
@@ -52,5 +53,19 @@ class RedisConfig(
         template.hashValueSerializer = serializer
 
         return template
+    }
+
+    @Bean
+    fun lastRoutesResponseRedisTemplate(
+        redisConnectionFactory: RedisConnectionFactory
+    ): RedisTemplate<String, LastRoutesResponse> {
+        return createRedisTemplate(redisConnectionFactory, LastRoutesResponse::class.java)
+    }
+
+    @Bean
+    fun routeNotificationRedisTemplate(
+        redisConnectionFactory: RedisConnectionFactory
+    ): RedisTemplate<String, UserNotification> {
+        return createRedisTemplate(redisConnectionFactory, UserNotification::class.java)
     }
 }

@@ -1,12 +1,13 @@
 package com.deepromeet.atcha.notification.api
 
+import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.notification.domatin.NotificationService
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-
-const val USER_ID = 1L; // TODO : 향후 JWT 토큰에서 추출할 예정
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -15,12 +16,18 @@ class NotificationController(
 ) {
     @PostMapping("/route")
     fun addRouteNotification(
-//        @CurrentUser id: Long,
+        @CurrentUser id: Long,
         @RequestBody request: NotificationRequest
-    ) = notificationService.addRouteNotification(USER_ID, request)
+    ) = notificationService.addRouteNotification(id, request)
+
+    @DeleteMapping("/route")
+    fun deleteRouteNotification(
+        @CurrentUser id: Long,
+        @ModelAttribute request: NotificationRequest
+    ) = notificationService.deleteRouteNotification(id, request)
 }
 
 data class NotificationRequest(
     val lastRouteId: String,
-    val alertToken: String
+    val notificationToken: String
 )
