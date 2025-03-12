@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.api
 
+import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
@@ -16,8 +17,6 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
-
-const val USER_ID = 1L
 
 @RestController
 @RequestMapping("/api/transits")
@@ -68,9 +67,9 @@ class TransitController(
     }
 
     @GetMapping("/last-routes")
-    fun getLastRoutes(
-//        @CurrentUser id: Long,
+    suspend fun getLastRoutes(
+        @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRoutesResponse>> =
-        ApiResponse.success(transitService.getLastRoutes(USER_ID, request.toStart(), request.toEnd()))
+        ApiResponse.success(transitService.getLastRoutes(id, request.toStart(), request.endLat, request.endLon))
 }

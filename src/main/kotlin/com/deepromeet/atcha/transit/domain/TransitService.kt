@@ -9,13 +9,18 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRoute
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
-import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.stereotype.Service
+import com.deepromeet.atcha.user.domain.UserReader
 import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import java.util.UUID
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.stereotype.Service
 
 @Service
 class TransitService(
@@ -25,7 +30,8 @@ class TransitService(
     private val subwayManager: SubwayManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender,
     private val lastRoutesResponseRedisTemplate: RedisTemplate<String, LastRoutesResponse>,
-    private val regionIdentifier: RegionIdentifier
+    private val regionIdentifier: RegionIdentifier,
+    private val userReader: UserReader
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -70,58 +76,55 @@ class TransitService(
         return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
     }
 
-    fun getLastRoutes(
+    suspend fun getLastRoutes(
         userId: Long,
         start: Coordinate,
-        end: Coordinate
+        endLat: String?,
+        endLon: String?
     ): List<LastRoutesResponse> {
+        val end =
+            if (endLat == null || endLon == null) {
+                Coordinate(
+                    userReader.read(userId).address.lat,
+                    userReader.read(userId).address.lon
+                )
+            } else {
+                Coordinate(endLat.toDouble(), endLon.toDouble())
+            }
+
         // 서비스 지역인지 판별 -> 서비스 지역이 아니면 Exception 발생
-//        regionIdentifier.identify(start)
-//        regionIdentifier.identify(end)
+        regionIdentifier.identify(start)
+        regionIdentifier.identify(end)
 
         val today = LocalDate.now()
         val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         val baseDate = today.format(dateFormatter)
-        val hours = listOf("21", "22", "23")
 
-        val allRoutes = getItineraries(hours, baseDate, start, end)
+        val allRoutes =
+            coroutineScope {
+                listOf("21", "22", "23")
+                    .map { hour ->
+                        async(Dispatchers.IO) {
+                            getItineraries(hour, baseDate, start, end)
+                        }
+                    }
+                    .awaitAll()
+                    .flatten()
+            }
+
         val deduplicatedRoutes = filterAndDeduplicateItineraries(allRoutes)
-
-//        printItineraryComparison(allRoutes, deduplicatedRoutes)
 
         // 경로 막차 계산
         val lastRoutesResponses =
-            deduplicatedRoutes.mapNotNull { route ->
-                // 1. 경로 내 대중교통 별 막차 시간 조회
-                val calculatedLegs = calculateLegLastArriveDateTimes(route.legs)
-                // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
-                val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
-                // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
-                val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
-                // 4. 유효하지 않는 경로 제거 (leg.departureTime=null 인 경우)
-                val hasInvalidLeg =
-                    adjustedLegs.any { leg ->
-                        (leg.mode == "SUBWAY" || leg.mode == "BUS") && leg.departureDateTime == null
+            coroutineScope {
+                deduplicatedRoutes
+                    .map { route ->
+                        async(Dispatchers.Default) {
+                            calculateRoute(route)
+                        }
                     }
-                if (hasInvalidLeg) {
-                    null
-                } else {
-                    // 5. 출발 시간 계산
-                    val departureDateTime = calculateDepartureDateTime(adjustedLegs)
-                    // 6. 총 소요 시간 계산
-                    val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
-
-                    LastRoutesResponse(
-                        routeId = UUID.randomUUID().toString(),
-                        departureDateTime = departureDateTime.toString(),
-                        totalTime = totalTime.toInt(),
-                        totalWalkTime = route.totalWalkTime,
-                        transferCount = route.transferCount,
-                        totalDistance = route.totalDistance,
-                        pathType = 0,
-                        legs = adjustedLegs
-                    )
-                }
+                    .awaitAll()
+                    .filterNotNull()
             }
 
         val now = LocalDateTime.now()
@@ -130,19 +133,18 @@ class TransitService(
                 val departureDateTime = LocalDateTime.parse(response.departureDateTime)
                 departureDateTime.isAfter(now)
             }
-        compareFilteredRoutes(lastRoutesResponses, filteredRoutes)
 
         saveRoutesToRedis(filteredRoutes)
 
         return sortedByMinTransfer(filteredRoutes)
     }
 
-    private fun getItineraries(
-        hours: List<String>,
+    private suspend fun getItineraries(
+        hour: String,
         baseDate: String?,
         start: Coordinate,
         end: Coordinate
-    ) = hours.flatMap { hour ->
+    ): List<Itinerary> {
         val searchDttm = "$baseDate${hour}00"
         val response =
             tMapTransitClient.getRoutes(
@@ -163,7 +165,7 @@ class TransitService(
             }
         }
 
-        response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError
+        return response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError
     }
 
     private fun filterAndDeduplicateItineraries(itineraries: List<Itinerary>): List<Itinerary> {
@@ -179,14 +181,39 @@ class TransitService(
         }.values.toList()
     }
 
+    private suspend fun calculateRoute(route: Itinerary): LastRoutesResponse? {
+        // 1. 경로 내 대중교통 별 막차 시간 조회
+        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs)
+        // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
+        val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
+        // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
+        val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
+        // 4. 유효하지 않는 경로 제거 (leg.departureTime=null 인 경우)
+        if (adjustedLegs.any { leg ->
+                (leg.mode == "SUBWAY" || leg.mode == "BUS") && leg.departureDateTime == null
+            }
+        ) {
+            return null
+        }
+        // 5. 출발 시간 계산
+        val departureDateTime = calculateDepartureDateTime(adjustedLegs)
+        // 6. 총 소요 시간 계산
+        val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
+
+        return LastRoutesResponse(
+            routeId = UUID.randomUUID().toString(),
+            departureDateTime = departureDateTime.toString(),
+            totalTime = totalTime.toInt(),
+            totalWalkTime = route.totalWalkTime,
+            transferCount = route.transferCount,
+            totalDistance = route.totalDistance,
+            pathType = 0,
+            legs = adjustedLegs
+        )
+    }
+
     private fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg> {
         return legs.map { leg ->
-            println("Start: ${leg.start.name}, End: ${leg.end.name}, Route: ${leg.route}")
-            if (leg.mode == "BUS") {
-                println("Bus: ${leg.route!!.split(":")[1]}")
-                println(leg.passStopList?.stationList)
-            }
-            println("------------")
             val departureDateTime =
                 when (leg.mode) {
                     "SUBWAY" ->
@@ -395,71 +422,10 @@ class TransitService(
             compareBy({ it.transferCount }, { it.totalTime })
         )
 
-//    private fun sortedByMinWalking(routes: List<LastRoutesResponse>) = routes.sortedWith(
-//        compareBy({ it.totalWalkDistance }, { it.totalTime })
-//    )
-
-//    private fun sortedByShortestTime(routes: List<LastRoutesResponse>) = routes.sortedWith(
-//        compareBy({ it.totalTime }, { it.transferCount })
-//    )
-
     private fun saveRoutesToRedis(routes: List<LastRoutesResponse>) {
         routes.forEach { route ->
             val key = "routes:last:${route.routeId}"
             lastRoutesResponseRedisTemplate.opsForValue().set(key, route, Duration.ofHours(12))
-        }
-    }
-
-    // 중복 제거 전후 확인 코드 - 데이터 확인용
-    fun printItineraryComparison(
-        original: List<Itinerary>,
-        deduplicated: List<Itinerary>
-    ) {
-        println("=== 제거 전 Itinerary ===")
-        println(original.size)
-        original.forEach { itinerary ->
-            itinerary.legs.forEach { leg ->
-                println("Start: ${leg.start.name}, End: ${leg.end.name}, Route: ${leg.route}")
-            }
-            println("-----")
-        }
-
-        println("\n=== 중복 제거 후 Itinerary ===")
-        println(deduplicated.size)
-        deduplicated.forEach { itinerary ->
-            itinerary.legs.forEach { leg ->
-                println("Start: ${leg.start.name}, End: ${leg.end.name}, Route: ${leg.route}")
-            }
-            println("-----")
-        }
-    }
-
-    // 이전 시간 필터 전후 확인 코드 - 데이터 확인용
-    fun compareFilteredRoutes(
-        lastRoutesResponses: List<LastRoutesResponse>,
-        filteredRoutes: List<LastRoutesResponse>
-    ) {
-        println("\n🚀 필터 전/후 경로 비교 🚀\n")
-
-        lastRoutesResponses.forEach { original ->
-            val filtered = filteredRoutes.find { it.departureDateTime == original.departureDateTime }
-
-            val originalLegsInfo =
-                original.legs.joinToString { leg ->
-                    "(Start: ${leg.start.name}, End: ${leg.end.name}, Route: ${leg.route ?: "N/A"})"
-                }
-
-            if (filtered != null) {
-                val filteredLegsInfo =
-                    filtered.legs.joinToString { leg ->
-                        "(Start: ${leg.start.name}, End: ${leg.end.name}, Route: ${leg.route ?: "N/A"})"
-                    }
-                println("🔹 Before: ${original.departureDateTime} | Legs: $originalLegsInfo")
-                println("🔹 After : ${filtered.departureDateTime} | Legs: $filteredLegsInfo\n")
-            } else {
-                println("🔹 Before: ${original.departureDateTime} | Legs: $originalLegsInfo")
-                println("🔹 After : (제거됨)\n")
-            }
         }
     }
 }
