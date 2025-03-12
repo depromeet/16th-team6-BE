@@ -41,7 +41,9 @@ out/
 
 .DS_Store
 
+/docker/volumes/
 
 # secret
 src/main/resources/secret-env.yml
 src/main/resources/application-local.yml
+src/main/resources/firebase-service-account.json
