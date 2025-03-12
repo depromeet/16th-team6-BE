@@ -126,7 +126,7 @@ data class PassShape(
 )
 
 data class PassStopList(
-    val stations: List<Station> = emptyList()
+    val stationList: List<Station> = emptyList()
 )
 
 data class Station(

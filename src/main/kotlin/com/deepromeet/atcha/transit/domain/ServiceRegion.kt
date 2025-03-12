@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
-enum class BusRegion {
+enum class ServiceRegion {
     SEOUL,
     GYEONGGI
 }

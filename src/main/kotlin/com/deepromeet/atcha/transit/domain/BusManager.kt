@@ -5,8 +5,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class BusManager(
-    private val busStationInfoClientMap: Map<BusRegion, BusStationInfoClient>,
-    private val busArrivalInfoFetcherMap: Map<BusRegion, BusArrivalInfoFetcher>,
+    private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
+    private val busArrivalInfoFetcherMap: Map<ServiceRegion, BusArrivalInfoFetcher>,
     private val regionIdentifier: RegionIdentifier
 ) {
     fun getArrivalInfo(

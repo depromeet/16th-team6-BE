@@ -12,10 +12,10 @@ data class LastRoutesResponse(
     val transferCount: Int,
     val totalDistance: Int,
     val pathType: Int,
-    val legs: List<Legs>
+    val legs: List<LastRouteLeg>
 )
 
-data class Legs(
+data class LastRouteLeg(
     val distance: Int,
     val sectionTime: Int,
     val mode: String,

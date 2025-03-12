@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.config
 
 import com.deepromeet.atcha.transit.domain.BusArrivalInfoFetcher
-import com.deepromeet.atcha.transit.domain.BusRegion
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
+import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiArrivalInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiStationInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusArrivalInfoClient
@@ -18,16 +18,16 @@ class BusBeanConfig(
     private val gyeonggiArrivalInfoClient: PublicGyeonggiArrivalInfoClient
 ) {
     @Bean
-    fun seoulStationInfoClient(): Map<BusRegion, BusStationInfoClient> =
+    fun seoulStationInfoClient(): Map<ServiceRegion, BusStationInfoClient> =
         mapOf(
-            BusRegion.SEOUL to seoulStationInfoClient,
-            BusRegion.GYEONGGI to gyeonggiStationInfoClient
+            ServiceRegion.SEOUL to seoulStationInfoClient,
+            ServiceRegion.GYEONGGI to gyeonggiStationInfoClient
         )
 
     @Bean
-    fun seoulArrivalInfoClient(): Map<BusRegion, BusArrivalInfoFetcher> =
+    fun seoulArrivalInfoClient(): Map<ServiceRegion, BusArrivalInfoFetcher> =
         mapOf(
-            BusRegion.SEOUL to seoulArrivalInfoClient,
-            BusRegion.GYEONGGI to gyeonggiArrivalInfoClient
+            ServiceRegion.SEOUL to seoulArrivalInfoClient,
+            ServiceRegion.GYEONGGI to gyeonggiArrivalInfoClient
         )
 }

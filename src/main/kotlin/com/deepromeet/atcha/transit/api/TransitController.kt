@@ -72,5 +72,5 @@ class TransitController(
 //        @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRoutesResponse>> =
-        ApiResponse.success(transitService.getLastRoutes(USER_ID, request))
+        ApiResponse.success(transitService.getLastRoutes(USER_ID, request.toStart(), request.toEnd()))
 }

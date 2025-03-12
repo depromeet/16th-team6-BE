@@ -26,20 +26,20 @@ data class SubwayTimeTable(
     fun findNearestTime(
         time: LocalDateTime,
         direction: TimeDirection
-    ) {
+    ): SubwayTime =
         when (direction) {
             TimeDirection.AFTER -> {
                 schedule
                     .filter { it.departureTime?.isAfter(time) ?: false }
                     .minByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
             }
+
             TimeDirection.BEFORE -> {
                 schedule
                     .filter { it.departureTime?.isBefore(time) ?: false }
                     .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
             }
-        }
-    }
+        } ?: throw TransitException.NotFoundBusTime
 
     private fun isReachable(
         startStation: SubwayStation,
