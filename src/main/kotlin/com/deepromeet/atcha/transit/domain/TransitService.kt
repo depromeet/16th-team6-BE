@@ -10,17 +10,17 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerar
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import com.deepromeet.atcha.user.domain.UserReader
-import java.time.Duration
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
-import java.util.UUID
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.UUID
 
 @Service
 class TransitService(
