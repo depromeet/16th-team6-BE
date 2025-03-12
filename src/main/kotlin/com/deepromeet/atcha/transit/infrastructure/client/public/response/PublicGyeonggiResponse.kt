@@ -173,38 +173,30 @@ data class GyeonggiBusRoute(
 }
 
 data class BusRouteInfoItem(
-    val downFirstTime: String,
-    val downLastTime: String,
-    val endStationId: Int,
-    val endStationName: String,
-    val peekAlloc: Int,
     val routeId: String,
     val routeName: String,
-    val satDownFirstTime: String,
-    val satDownLastTime: String,
-    val satNPeekAlloc: Int,
-    val satPeekAlloc: Int,
-    val satUpFirstTime: String,
-    val satUpLastTime: String,
     val startStationId: String,
     val startStationName: String,
-    val sunDownFirstTime: String,
-    val sunDownLastTime: String,
-    val sunNPeekAlloc: Int,
-    val sunPeekAlloc: Int,
-    val sunUpFirstTime: String,
-    val sunUpLastTime: String,
-    val turnStID: Int,
+    val endStationId: String,
+    val endStationName: String,
+    val turnStID: String,
     val turnStNm: String,
-    val upFirstTime: String,
-    val upLastTime: String,
-    val weDownFirstTime: String,
-    val weDownLastTime: String,
-    val weNPeekAlloc: Int,
+    val upLastTime: String?,
+    val downLastTime: String?,
+    val satUpLastTime: String?,
+    val satDownLastTime: String?,
+    val sunUpLastTime: String?,
+    val sunDownLastTime: String?,
+    val weUpLastTime: String?,
+    val weDownLastTime: String?,
+    val peekAlloc: Int,
+    val nPeekAlloc: Int,
     val wePeekAlloc: Int,
-    val weUpFirstTime: String,
-    val weUpLastTime: String,
-    val nPeekAlloc: Int
+    val weNPeekAlloc: Int,
+    val satPeekAlloc: Int,
+    val satNPeekAlloc: Int,
+    val sunPeekAlloc: Int,
+    val sunNPeekAlloc: Int
 ) {
     fun toBusArrival(
         dailyType: DailyType,
@@ -229,7 +221,7 @@ data class BusRouteInfoItem(
         dailyType: DailyType,
         busDirection: BusDirection
     ): LocalDateTime {
-        val timeStr =
+        val timeStr: String =
             when (dailyType) {
                 DailyType.WEEKDAY -> {
                     when (busDirection) {
@@ -249,14 +241,24 @@ data class BusRouteInfoItem(
                         BusDirection.DOWN -> sunDownLastTime
                     }
                 }
+            } ?: throw IllegalArgumentException("막차 시간을 가져올 수 없습니다.")
+
+        val localTime =
+            try {
+                LocalTime.parse(timeStr)
+            } catch (e: Exception) {
+                throw IllegalArgumentException(
+                    "올바르지 않은 시간 형식입니다."
+                )
             }
-        val localTime = LocalTime.parse(timeStr)
+
         val date =
             if (localTime.isBefore(LocalTime.of(3, 0))) {
                 LocalDate.now().plusDays(1)
             } else {
                 LocalDate.now()
             }
+
         return LocalDateTime.of(date, localTime)
     }
 
