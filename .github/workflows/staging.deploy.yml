@@ -3,7 +3,7 @@ name: STAGING CD
 on:
   workflow_dispatch:
   pull_request: # TODO 변경
-    branches: [ staging ]
+    branches: [ dev ] # TODO 변경
 
 jobs:
   build:
