@@ -74,7 +74,7 @@ jobs:
           proxy_port: 22
 
           source: "./deployment/staging/deploy.sh"
-          target: /home/atcha/
+          target: /home/atcha/deploy.sh
 
       - name: SSH Jump Host to Staging Server and Deploy
         uses: appleboy/ssh-action@v1.2.2
