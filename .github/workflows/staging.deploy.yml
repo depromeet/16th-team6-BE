@@ -73,7 +73,7 @@ jobs:
           proxy_key: ${{ secrets.STAG_SSH_KEY }} # Bastion 서버의 SSH Private Key
           proxy_port: 22
 
-          source: "./deployment/deploy.sh"
+          source: "./deployment/staging/deploy.sh"
           target: /home/atcha/
 
       - name: SSH Jump Host to Staging Server and Deploy
