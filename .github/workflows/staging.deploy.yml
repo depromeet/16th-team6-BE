@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        target: [ "Prod A", "Prod B" ]
+        target: [ "Stag A", "Stag B" ]
     env:
       STAG_APP_A_IP: ${{ secrets.STAG_APP_A_IP }}
       STAG_APP_B_IP: ${{ secrets.STAG_APP_B_IP }}
@@ -40,7 +40,7 @@ jobs:
       - name: Set host variable based on target
         id: set_host
         run: |
-          if [ "${{ matrix.target }}" = "Prod A" ]; then
+          if [ "${{ matrix.target }}" = "Stag A" ]; then
             echo "HOST=${STAG_APP_A_IP}" >> $GITHUB_ENV
           else
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
