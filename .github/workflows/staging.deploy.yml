@@ -59,6 +59,23 @@ jobs:
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
           fi
 
+      - uses: actions/checkout@v4
+      - name: copy file via ssh password
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ secrets.STAG_USERNAME }}
+          key: ${{ secrets.STAG_SSH_KEY }}
+          port: 22
+
+          proxy_host: ${{ secrets.STAG_BASTION_IP }} # Bastion 서버 IP
+          proxy_username: ${{ secrets.STAG_USERNAME }} # Bastion 서버의 SSH 사용자
+          proxy_key: ${{ secrets.STAG_SSH_KEY }} # Bastion 서버의 SSH Private Key
+          proxy_port: 22
+
+          source: "./deployment/deploy.sh"
+          target: /home/atcha/
+
       - name: SSH Jump Host to Staging Server and Deploy
         uses: appleboy/ssh-action@v1.2.2
         with:
@@ -73,9 +90,8 @@ jobs:
           proxy_port: 22
 
           script: |
-            echo "SUCCESS!!"
-            cd /home/ubuntu/app
-            echo "YEAAAAA"
+            cd /home/atcha
+            ls -al
 #            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
 #            docker stop atcha-container || true
 #            docker rm atcha-container || true
