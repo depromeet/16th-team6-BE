@@ -1,0 +1,70 @@
+name: STAGING CD
+
+on:
+  workflow_dispatch:
+  pull_request: # TODO 변경
+    branches: [ staging ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
+
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ "Prod A", "Prod B" ]
+    env:
+      STAG_APP_A_IP: ${{ secerts.STAG_APP_A_IP }}
+      STAG_APP_B_IP: ${{ secerts.STAG_APP_B_IP }}
+    steps:
+      - name: Set host variable based on target
+        id: set_host
+        run: |
+          if [ "${{ matrix.target }}" = "Prod A" ]; then
+            echo "HOST=${STAG_APP_A_IP}" >> $GITHUB_ENV
+          else
+            echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to Web Server via Bastion
+        env:
+          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
+          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
+        run: |
+          # SSH 키 설정
+          mkdir -p ~/.ssh
+          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          echo $HOST
+          echo ${env.HOST}
+
+          # Bastion 서버를 통해 웹 서버에 명령 실행
+          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa atcha@$BASTION_HOST << 'EOF'
+            ssh -o StrictHostKeyChecking=no atcha@${HOST} << 'INNER_EOF'
+#              docker stop my-app || true
+#              docker rm my-app || true
+#              docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+#              docker run -d --name my-app -p 8080:8080 $DOCKER_IMAGE
+            INNER_EOF
+          EOF
