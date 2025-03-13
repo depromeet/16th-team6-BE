@@ -116,7 +116,7 @@ tasks.register("initSetting") {
     group = "custom tasks"
     description = "Execute both copyHooks and copySecret tasks."
 
-    dependsOn("copyHooks", "copySecret")
+    dependsOn("copyHooks", "copySecret", "copyFirebaseServiceAccount")
 }
 
 tasks.register("copyHooks") {
@@ -142,10 +142,17 @@ tasks.register("copyHooks") {
 
 tasks.named<ProcessResources>("processResources") {
     dependsOn("copySecret")
+    dependsOn("copyFirebaseServiceAccount")
 }
 
 tasks.register<Copy>("copySecret") {
     from("./16th-team6-BE-submodule")
     include("secret-env.yml")
+    into("src/main/resources")
+}
+
+tasks.register<Copy>("copyFirebaseServiceAccount") {
+    from("./16th-team6-BE-submodule")
+    include("firebase-service-account.json")
     into("src/main/resources")
 }

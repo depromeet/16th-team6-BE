@@ -6,7 +6,7 @@ enum class SubwayLine(
     val isCircular: Boolean = false
 ) {
     // 일반 노선 (수도권호선)
-    LINE_1(listOf("수도권1호선", "1호선"), "1"),
+    LINE_1(listOf("수도권1호선(급행)", "수도권1호선", "1호선"), "1"),
     LINE_2(listOf("수도권2호선", "2호선"), "2", isCircular = true),
     LINE_3(listOf("수도권3호선", "3호선"), "3"),
     LINE_4(listOf("수도권4호선", "4호선"), "4"),

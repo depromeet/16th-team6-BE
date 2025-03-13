@@ -5,5 +5,5 @@ interface SubwayInfoClient {
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
-    ): SubwayTimeTable
+    ): SubwayTimeTable?
 }
