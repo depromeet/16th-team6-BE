@@ -92,11 +92,5 @@ jobs:
           script: |
             cd /home/atcha
 
-#            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
-#            docker stop atcha-container || true
-#            docker rm atcha-container || true
-#            docker run -d --name atcha-container -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
-#            chmod +x ./deployment/staging/deploy.sh
-#            ./deployment/staging/deploy.sh
 
 
