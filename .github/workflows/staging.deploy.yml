@@ -34,8 +34,8 @@ jobs:
       matrix:
         target: [ "Prod A", "Prod B" ]
     env:
-      STAG_APP_A_IP: ${{ secerts.STAG_APP_A_IP }}
-      STAG_APP_B_IP: ${{ secerts.STAG_APP_B_IP }}
+      STAG_APP_A_IP: ${{ secrets.STAG_APP_A_IP }}
+      STAG_APP_B_IP: ${{ secrets.STAG_APP_B_IP }}
     steps:
       - name: Set host variable based on target
         id: set_host
