@@ -56,7 +56,7 @@ jobs:
           echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 #
-          echo "$HOST"
+#          echo "$HOST"
 #
 #          # Bastion 서버를 통해 웹 서버에 명령 실행
 #          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa atcha@$BASTION_HOST << 'EOF'
