@@ -37,7 +37,7 @@ class TransitController(
     @GetMapping("/arrival")
     fun getArrivalInfo(
         @ModelAttribute request: BusArrivalRequest
-    ): ApiResponse<BusArrival> {
+    ): ApiResponse<BusArrival?> {
         return ApiResponse.success(
             transitService.getBusArrivalInfo(
                 request.routeName,

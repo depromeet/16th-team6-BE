@@ -8,8 +8,11 @@ import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class PublicSubwayInfoClient(
@@ -37,27 +40,33 @@ class PublicSubwayInfoClient(
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
-    ): SubwayTimeTable {
-        val subwayStations = subwayStationRepository.findByRouteCode(startStation.routeCode)
-        val items =
-            subwayInfoFeignClient.getStationSchedule(serviceKey, startStation.id.value, dailyType.code, direction.code)
-                .response.body.items?.item
-                ?.filter { it.endSubwayStationNm != null }
-                ?.parallelStream()
-                ?.map {
-                    val finalStation =
-                        subwayStations.find { station -> station.name == it.endSubwayStationNm }
-                            ?: throw TransitException.NotFoundSubwayStation
-                    it.toDomain(finalStation)
-                }
-                ?.toList()
-                ?: emptyList()
+    ): SubwayTimeTable? {
+        try {
+            val subwayStations = subwayStationRepository.findByRouteCode(startStation.routeCode)
+            val items =
+                subwayInfoFeignClient
+                    .getStationSchedule(serviceKey, startStation.id.value, dailyType.code, direction.code)
+                    .response.body.items?.item
+                    ?.filter { it.endSubwayStationNm != null }
+                    ?.parallelStream()
+                    ?.map {
+                        val finalStation =
+                            subwayStations.find { station -> station.name == it.endSubwayStationNm }
+                                ?: throw TransitException.NotFoundSubwayStation
+                        it.toDomain(finalStation)
+                    }
+                    ?.toList()
+                    ?: return null
 
-        return SubwayTimeTable(
-            startStation,
-            dailyType,
-            direction,
-            items
-        )
+            return SubwayTimeTable(
+                startStation,
+                dailyType,
+                direction,
+                items
+            )
+        } catch (e: Exception) {
+            log.warn(e) { "지하철 시간표를 가져오는데 실패했습니다." }
+            return null
+        }
     }
 }

@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -54,7 +55,7 @@ class TransitService(
         routeName: String,
         stationName: String,
         coordinate: Coordinate
-    ): BusArrival {
+    ): BusArrival? {
         return busManager.getArrivalInfo(routeName, BusStationMeta(stationName, coordinate))
     }
 
@@ -73,7 +74,7 @@ class TransitService(
         val routes = subwayManager.getRoutes(subwayLine)
         val startStation = subwayManager.getStation(subwayLine, startStationName)
         val endStation = subwayManager.getStation(subwayLine, endStationName)
-        return subwayManager.getTimeTable(startStation, endStation, routes).getLastTime(endStation, routes)
+        return subwayManager.getTimeTable(startStation, endStation, routes)?.getLastTime(endStation, routes)
     }
 
     suspend fun getLastRoutes(
@@ -147,16 +148,18 @@ class TransitService(
     ): List<Itinerary> {
         val searchDttm = "$baseDate${hour}00"
         val response =
-            tMapTransitClient.getRoutes(
-                TMapRouteRequest(
-                    startX = start.lon.toString(),
-                    startY = start.lat.toString(),
-                    endX = end.lon.toString(),
-                    endY = end.lat.toString(),
-                    count = 20,
-                    searchDttm = searchDttm
+            withContext(Dispatchers.IO) {
+                tMapTransitClient.getRoutes(
+                    TMapRouteRequest(
+                        startX = start.lon.toString(),
+                        startY = start.lat.toString(),
+                        endX = end.lon.toString(),
+                        endY = end.lat.toString(),
+                        count = 20,
+                        searchDttm = searchDttm
+                    )
                 )
-            )
+            }
 
         response.result?.let { result ->
             when (result.status) {
@@ -173,7 +176,7 @@ class TransitService(
             val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
             val hasValidModes = itinerary.legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
-            !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 4
+            !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
             itinerary.legs.joinToString("|") { leg ->
                 "${leg.start.name}-${leg.end.name}-${leg.route ?: ""}"
@@ -183,7 +186,7 @@ class TransitService(
 
     private suspend fun calculateRoute(route: Itinerary): LastRoutesResponse? {
         // 1. 경로 내 대중교통 별 막차 시간 조회
-        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs)
+        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
         // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
         val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
         // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
@@ -212,27 +215,37 @@ class TransitService(
         )
     }
 
-    private fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg> {
-        return legs.map { leg ->
-            val departureDateTime =
-                when (leg.mode) {
-                    "SUBWAY" ->
-                        getLastTime(
-                            SubwayLine.fromRouteName(leg.route!!),
-                            leg.start.name,
-                            leg.end.name
-                        )?.departureTime.toString()
+    private fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
+        val calculatedLegs =
+            legs.map { leg ->
+                val departureDateTime =
+                    when (leg.mode) {
+                        "SUBWAY" ->
+                            getLastTime(
+                                SubwayLine.fromRouteName(leg.route!!),
+                                leg.start.name,
+                                leg.end.name
+                            )?.departureTime?.toString()
 
-                    "BUS" ->
-                        getBusArrivalInfo(
-                            leg.route!!.split(":")[1],
-                            leg.start.name,
-                            Coordinate(leg.start.lat, leg.start.lon)
-                        ).lastTime.toString()
+                        "BUS" ->
+                            getBusArrivalInfo(
+                                leg.route!!.split(":")[1],
+                                leg.start.name.removeSuffix(),
+                                Coordinate(leg.start.lat, leg.start.lon)
+                            )?.lastTime?.toString()
 
-                    else -> null
-                }
-            leg.toLeg(departureDateTime)
+                        else -> null
+                    }
+
+                // departureDateTime이 null일 수 있음
+                leg.toLeg(departureDateTime)
+            }
+
+        // null이 섞여있는 leg가 하나라도 있다면, 전체 경로 자체를 제거
+        return if (calculatedLegs.any { (it.mode == "BUS" || it.mode == "SUBWAY") && it.departureDateTime == null }) {
+            null
+        } else {
+            calculatedLegs
         }
     }
 
@@ -352,15 +365,15 @@ class TransitService(
                 val endStation = subwayManager.getStation(subwayLine, leg.end.name)
 
                 subwayManager.getTimeTable(startStation, endStation, routes)
-                    .findNearestTime(adjustedDepartureTime, direction).departureTime
+                    ?.findNearestTime(adjustedDepartureTime, direction)?.departureTime
             }
 
             "BUS" ->
                 getBusArrivalInfo(
                     leg.route!!.split(":")[1],
-                    leg.start.name,
+                    leg.start.name.removeSuffix(),
                     Coordinate(leg.start.lat, leg.start.lon)
-                ).getNearestTime(adjustedDepartureTime, direction)
+                )?.getNearestTime(adjustedDepartureTime, direction)
 
             else -> null
         }
@@ -428,4 +441,6 @@ class TransitService(
             lastRoutesResponseRedisTemplate.opsForValue().set(key, route, Duration.ofHours(12))
         }
     }
+
+    private fun String.removeSuffix(): String = this.replace("(중)", "").trim()
 }

@@ -30,18 +30,13 @@ class SubwayManager(
         startStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
-    ): SubwayTimeTable {
+    ): SubwayTimeTable? {
         val timeTable =
             subwayInfoClient.getTimeTable(
                 startStation,
                 dailyTypeResolver.resolve(),
                 SubwayDirection.resolve(routes, startStation, endStation)
             )
-
-        if (timeTable.schedule.isEmpty()) {
-            throw TransitException.NotFoundSubwayTimeTable
-        }
-
         return timeTable
     }
 }
