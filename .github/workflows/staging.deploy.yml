@@ -59,35 +59,27 @@ jobs:
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-      - name: Download Deployment Script
-        uses: actions/download-artifact@v4
+      - name: SSH Jump Host to Staging Server and Deploy
+        uses: appleboy/ssh-action@v1.2.2
         with:
-          name: deployment-script
-          path: ./deploy.sh
+          host: ${{ env.HOST }} # Staging A or B 서버
+          username: ${{ secrets.STAG_USERNAME }} # 공통 SSH 사용자 (ex. ubuntu)
+          key: ${{ secrets.STAG_SSH_KEY }} # Staging A/B 서버의 SSH Private Key
+          port: 22
 
-      - name: Debug script
-        run: |
-          echo ./deploy.sh
+          proxy_host: ${{ secrets.STAG_BASTION_IP }} # Bastion 서버 IP
+          proxy_username: ${{ secrets.STAG_USERNAME }} # Bastion 서버의 SSH 사용자
+          proxy_key: ${{ secrets.STAG_SSH_KEY }} # Bastion 서버의 SSH Private Key
+          proxy_port: 22
+
+          script: |
+            echo "SUCCESS!!"
+            cd /home/ubuntu/app
+            docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
+            docker stop atcha-container || true
+            docker rm atcha-container || true
+            docker run -d --name atcha-container -p 8080:8080 ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
+            chmod +x ./deployment/staging/deploy.sh
+            ./deployment/staging/deploy.sh
 
 
-#      - name: Deploy to Web Server via Bastion
-#        env:
-#          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
-#          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
-#        run: |
-#          # SSH 키 설정
-#          mkdir -p ~/.ssh
-#          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
-#          chmod 600 ~/.ssh/id_rsa
-#
-#          echo "$HOST"
-#
-#          # Bastion 서버를 통해 웹 서버에 명령 실행
-#          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa atcha@$BASTION_HOST << 'EOF'
-#            ssh -o StrictHostKeyChecking=no atcha@${HOST} << 'INNER_EOF'
-##              docker stop my-app || true
-##              docker rm my-app || true
-##              docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
-##              docker run -d --name my-app -p 8080:8080 $DOCKER_IMAGE
-#            INNER_EOF
-#          EOF
