@@ -21,11 +21,17 @@ jobs:
           echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
           ls -Rla ./16th-team6-BE-submodule
 
+      - name: Upload Deployment Script
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-script
+          path: ./deployment/staging/deploy.sh
+
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atchaApp:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atchaApp:latest
 
   deploy:
     needs: build
@@ -46,15 +52,26 @@ jobs:
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-      - name: Deploy to Web Server via Bastion
-        env:
-          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
-          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
+      - name: Download Deployment Script
+        uses: actions/download-artifact@v4
+        with:
+          name: deployment-script
+          path: ./deploy.sh
+
+      - name: Debug script
         run: |
-          # SSH 키 설정
-          mkdir -p ~/.ssh
-          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
+          echo ./deploy.sh
+
+
+#      - name: Deploy to Web Server via Bastion
+#        env:
+#          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
+#          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
+#        run: |
+#          # SSH 키 설정
+#          mkdir -p ~/.ssh
+#          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
+#          chmod 600 ~/.ssh/id_rsa
 #
 #          echo "$HOST"
 #
