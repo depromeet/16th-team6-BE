@@ -91,4 +91,6 @@ jobs:
 
           script: |
             cd /home/atcha
+            mv /home/atcha/deployment/staging/deploy.sh /home/atcha/deploy.sh
+            bash ./deploy.sh
 
