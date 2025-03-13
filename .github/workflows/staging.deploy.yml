@@ -46,13 +46,13 @@ jobs:
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-#      - name: Deploy to Web Server via Bastion
-#        env:
-#          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
-#          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
-#        run: |
-#          # SSH 키 설정
-#          mkdir -p ~/.ssh
+      - name: Deploy to Web Server via Bastion
+        env:
+          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
+          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
+        run: |
+          # SSH 키 설정
+          mkdir -p ~/.ssh
 #          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
 #          chmod 600 ~/.ssh/id_rsa
 #
