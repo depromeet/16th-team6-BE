@@ -1,0 +1,21 @@
+#!/bin/sh
+
+# Place this hook in the repo .git/hooks folder.
+# make sure you chmod a+x this hook in terminal.
+# Otherwise, you'll tear your hair out when you think it should run but it doesn't.
+# Video Pre-Push Git Hook for ktlint Formatting With Plugin: https://www.youtube.com/watch?v=eysVDO2_X0s
+# Ktlint Plugin: org.jlleitschuh.gradle:ktlint-gradle
+
+echo "Checking code formatting"
+
+./gradlew ktlintFormat --daemon
+
+status=$?
+
+if [ "$status" == 0 ] ; then
+	echo "No formatting issues were found"
+	exit 0
+else
+	echo>&2 "* There are code formatting issues that must be addressed"
+	exit 1
+fi
