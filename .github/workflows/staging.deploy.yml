@@ -75,7 +75,6 @@ jobs:
 
           source: "./deployment/staging/deploy.sh"
           target: /home/atcha/
-          rm: true
 
       - name: SSH Jump Host to Staging Server and Deploy
         uses: appleboy/ssh-action@master
