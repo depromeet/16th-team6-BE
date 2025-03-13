@@ -74,7 +74,6 @@ jobs:
           proxy_port: 22
 
           source: "./deployment/staging/deploy.sh"
-          strip_components: 1
           target: /home/atcha
 
       - name: SSH Jump Host to Staging Server and Deploy
