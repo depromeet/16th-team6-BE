@@ -3,7 +3,7 @@ package com.deepromeet.atcha.transit.domain
 import java.time.LocalDateTime
 
 data class BusArrival(
-    val routeId: RouteId,
+    val busRouteId: BusRouteId,
     val routeName: String,
     val busStationId: BusStationId,
     val stationName: String,
@@ -45,7 +45,7 @@ data class BusArrival(
 data class RealTimeBusArrival(
     val busStatus: BusStatus,
     val remainingTime: Int,
-    val remainingStations: Int,
+    val remainingStations: Int?,
     val isLast: Boolean?
 ) {
     val expectedArrivalTime: LocalDateTime?

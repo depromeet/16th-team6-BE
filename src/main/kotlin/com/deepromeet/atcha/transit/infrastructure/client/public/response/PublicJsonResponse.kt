@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
-import com.deepromeet.atcha.transit.domain.RouteId
 import com.deepromeet.atcha.transit.domain.SubwayDirection
 import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
@@ -58,7 +57,6 @@ data class SubwayTimeResponse(
     val depTime: String,
     val endSubwayStationId: String?,
     val endSubwayStationNm: String?,
-    val subwayRouteId: RouteId,
     val subwayStationId: String,
     val subwayStationNm: String,
     val upDownTypeCode: String

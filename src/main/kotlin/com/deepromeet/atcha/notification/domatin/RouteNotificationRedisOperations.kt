@@ -33,7 +33,7 @@ class RouteNotificationRedisOperations(
 
     fun findNotificationsByMinute(timeMinute: String): List<UserNotification> {
         val pattern = "notification:*"
-        val notificationKeys = routeNotificationRedisTemplate.keys(pattern)
+        val notificationKeys = routeNotificationRedisTemplate.keys(pattern) // TODO: SCAN으로 변경
 
         return notificationKeys.flatMap { key ->
             val entries =

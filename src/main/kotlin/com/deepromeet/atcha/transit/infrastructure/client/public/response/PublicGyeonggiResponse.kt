@@ -4,13 +4,13 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusDirection
 import com.deepromeet.atcha.transit.domain.BusRoute
+import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
-import com.deepromeet.atcha.transit.domain.RouteId
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusStationListDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
@@ -47,10 +47,15 @@ data class PublicGyeonggiResponse<T>(
             stationName: String,
             staOrder: Int
         ): GyeonggiBusRouteStation {
+            if (stationName.contains("미정차")) {
+                stationName.replace("미정차", "")
+            }
+
             val station =
                 busRouteStationList
                     .filter { it.stationName.contains(stationName) }
                     .minByOrNull { abs(staOrder - it.stationSeq) }
+
             requireNotNull(station) { "Station not found: $stationName" }
             return station
         }
@@ -78,51 +83,59 @@ data class BusArrivalItem(
     val predictTimeSec1: Int?,
     val predictTimeSec2: Int?
 ) {
-    fun toRealTimeBussArrivals(
-        busStationList: PublicGyeonggiResponse.BusRouteStationListResponse
-    ): List<RealTimeBusArrival> {
-        val firstBusCurrentStation = busStationList.getStation(stationNm1, staOrder)
-        val secondBusCurrentStation = busStationList.getStation(stationNm2, staOrder)
-        val firstRealTimeArrivalInfo =
-            createRealTimeArrivalInfo(
-                predictTimeSec1,
-                staOrder - firstBusCurrentStation.stationSeq
-            )
-        val secondRealTimeArrivalInfo =
-            createRealTimeArrivalInfo(
-                predictTimeSec2,
-                staOrder - secondBusCurrentStation.stationSeq
-            )
+    fun toRealTimeBussArrivals(): List<RealTimeBusArrival> {
+        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1)
+        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2)
         return listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
     }
 
     fun calculateTravelTimeFromStart(busStationList: PublicGyeonggiResponse.BusRouteStationListResponse): Long {
-        val firstBusCurrentStation = busStationList.getStation(stationNm1, staOrder)
-        val secondBusCurrentStation = busStationList.getStation(stationNm2, staOrder)
-        val firstRemainOrder = staOrder - firstBusCurrentStation.stationSeq
-        val secondRemainOrder = staOrder - secondBusCurrentStation.stationSeq
-        val averageSecondPerStation =
+        // 1) 우선순위에 따라 사용할 station 이름 결정
+        val chosenStationName =
             when {
-                predictTimeSec2 != null && secondRemainOrder != 0 ->
-                    predictTimeSec2.div(secondRemainOrder)
-
-                predictTimeSec1 != null && firstRemainOrder != 0 ->
-                    predictTimeSec1.div(firstRemainOrder)
-
-                else -> 0
+                stationNm2.isNotBlank() -> stationNm2
+                stationNm1.isNotBlank() -> stationNm1
+                else -> ""
             }
-        val stationCount = if (staOrder < turnSeq) staOrder else staOrder - turnSeq
+
+        // 2) 두 스테이션 모두 이름이 비어 있으면 기본(평균 2초/정류장) 사용
+        if (chosenStationName.isBlank()) {
+            val stationCount = if (staOrder < turnSeq) staOrder else staOrder - turnSeq
+            return (2 * stationCount).toLong()
+        }
+
+        // 3) 실제 스테이션 정보 조회
+        val chosenStation = busStationList.getStation(chosenStationName, staOrder)
+        val remainOrder = staOrder - chosenStation.stationSeq
+
+        // 4) 스테이션에 따라 예측 시간(predictTimeSec)도 정해줌
+        val chosenPredictTimeSec =
+            when (chosenStationName) {
+                stationNm2 -> predictTimeSec2
+                stationNm1 -> predictTimeSec1
+                else -> null
+            }
+
+        // 5) 평균 이동 시간 계산 (remainOrder가 0이거나 예측시간이 null이면 2초 기본값)
+        val averageSecondPerStation =
+            if (chosenPredictTimeSec != null && remainOrder != 0) {
+                chosenPredictTimeSec.div(remainOrder)
+            } else {
+                2
+            }
+
+        // 6) 구간별 정류장 수
+        val stationCount = if (staOrder < turnSeq) staOrder else (staOrder - turnSeq)
+
+        // 최종 이동 시간 (초)
         return (averageSecondPerStation * stationCount).toLong()
     }
 
-    private fun createRealTimeArrivalInfo(
-        predictTimeSec: Int?,
-        remainingStations: Int
-    ): RealTimeBusArrival {
+    private fun createRealTimeArrivalInfo(predictTimeSec: Int?): RealTimeBusArrival {
         return RealTimeBusArrival(
             busStatus = determineBusStatus(predictTimeSec),
             remainingTime = predictTimeSec ?: 0,
-            remainingStations = remainingStations,
+            remainingStations = null,
             isLast = null
         )
     }
@@ -175,7 +188,7 @@ data class GyeonggiBusRoute(
 ) {
     fun toBusRoute(): BusRoute {
         return BusRoute(
-            id = RouteId(routeId),
+            id = BusRouteId(routeId),
             name = routeName
         )
     }
@@ -216,13 +229,13 @@ data class BusRouteInfoItem(
         val lastTime = getLastTime(dailyType, busDirection)
         val term = getTerm(dailyType)
         return BusArrival(
-            routeId = RouteId(routeId),
+            busRouteId = BusRouteId(routeId),
             routeName = routeName,
             busStationId = BusStationId(busArrivalInfo.stationId),
             stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
             lastTime = lastTime.plusSeconds(busArrivalInfo.calculateTravelTimeFromStart(busStationList)),
             term = term,
-            realTimeInfo = busArrivalInfo.toRealTimeBussArrivals(busStationList)
+            realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
         )
     }
 
