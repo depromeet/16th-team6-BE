@@ -6,15 +6,15 @@ on:
     branches: [ dev ] # TODO 변경
 
 jobs:
-#  build:  TODO 추후 주석 해제
-#    name: Build
-#    runs-on: ubuntu-latest
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v4
-#        with:
-#          submodules: true
-#          token: ${{ secrets.SUBMODULE_TOKEN }}
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
 #
 #      - name: Debug - List submodule folder contents
 #        run: |
@@ -28,11 +28,11 @@ jobs:
 #          username: ${{ secrets.DOCKER_HUB_USERNAME }}
 #          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 #
-#      - name: Upload Deployment Script
-#        uses: actions/upload-artifact@v4
-#        with:
-#          name: deployment-script
-#          path: ./deployment/staging/deploy.sh
+      - name: Upload Deployment Script
+        uses: actions/upload-artifact@v4
+        with:
+          name: deployment-script
+          path: ./deployment/staging/deploy.sh
 #
 #      - name: Build Docker Image
 #        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest .
