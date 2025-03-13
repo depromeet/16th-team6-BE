@@ -46,24 +46,24 @@ jobs:
             echo "HOST=${STAG_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-      - name: Deploy to Web Server via Bastion
-        env:
-          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
-          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
-        run: |
-          # SSH 키 설정
-          mkdir -p ~/.ssh
-          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          echo "$HOST"
-
-          # Bastion 서버를 통해 웹 서버에 명령 실행
-          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa atcha@$BASTION_HOST << 'EOF'
-            ssh -o StrictHostKeyChecking=no atcha@${HOST} << 'INNER_EOF'
-#              docker stop my-app || true
-#              docker rm my-app || true
-#              docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
-#              docker run -d --name my-app -p 8080:8080 $DOCKER_IMAGE
-            INNER_EOF
-          EOF
+#      - name: Deploy to Web Server via Bastion
+#        env:
+#          STAG_SSH_KEY: ${{ secrets.STAG_SSH_KEY }}
+#          BASTION_HOST: ${{ secrets.STAG_BASTION_IP }}
+#        run: |
+#          # SSH 키 설정
+#          mkdir -p ~/.ssh
+#          echo "$STAG_SSH_KEY" > ~/.ssh/id_rsa
+#          chmod 600 ~/.ssh/id_rsa
+#
+#          echo "$HOST"
+#
+#          # Bastion 서버를 통해 웹 서버에 명령 실행
+#          ssh -o StrictHostKeyChecking=no -i ~/.ssh/id_rsa atcha@$BASTION_HOST << 'EOF'
+#            ssh -o StrictHostKeyChecking=no atcha@${HOST} << 'INNER_EOF'
+##              docker stop my-app || true
+##              docker rm my-app || true
+##              docker pull ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+##              docker run -d --name my-app -p 8080:8080 $DOCKER_IMAGE
+#            INNER_EOF
+#          EOF
