@@ -28,10 +28,10 @@ jobs:
           path: ./deployment/staging/deploy.sh
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_app:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_app:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
 
   deploy:
     needs: build
