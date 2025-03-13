@@ -92,5 +92,3 @@ jobs:
           script: |
             cd /home/atcha
 
-
-
