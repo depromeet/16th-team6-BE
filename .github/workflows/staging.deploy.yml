@@ -15,24 +15,18 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.SUBMODULE_TOKEN }}
-#
-#      - name: Debug - List submodule folder contents
-#        run: |
-#          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
-#          ls -Rla ./16th-team6-BE-submodule
-#
-#      - name: Login to Docker Hub
-#        uses: docker/login-action@v3
-#        with:
-#          registry: docker.io
-#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-#
-      - name: Upload Deployment Script
-        uses: actions/upload-artifact@v4
+
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          name: deployment-script
-          path: ./deployment/staging/deploy.sh
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker Image
         run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest .
@@ -70,7 +64,7 @@ jobs:
 
           proxy_host: ${{ secrets.STAG_BASTION_IP }} # Bastion 서버 IP
           proxy_username: ${{ secrets.STAG_USERNAME }} # Bastion 서버의 SSH 사용자
-          proxy_key: ${{ secrets.STAG_SSH_KEY }} # Bastion 서버의 SSH Private Key
+          proxy_key: ${{ secrets.STAG_SSH_KEY }}
           proxy_port: 22
 
           source: "./deployment/staging"
@@ -80,13 +74,13 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }} # Staging A or B 서버
-          username: ${{ secrets.STAG_USERNAME }} # 공통 SSH 사용자 (ex. ubuntu)
-          key: ${{ secrets.STAG_SSH_KEY }} # Staging A/B 서버의 SSH Private Key
+          username: ${{ secrets.STAG_USERNAME }}
+          key: ${{ secrets.STAG_SSH_KEY }}
           port: 22
 
-          proxy_host: ${{ secrets.STAG_BASTION_IP }} # Bastion 서버 IP
-          proxy_username: ${{ secrets.STAG_USERNAME }} # Bastion 서버의 SSH 사용자
-          proxy_key: ${{ secrets.STAG_SSH_KEY }} # Bastion 서버의 SSH Private Key
+          proxy_host: ${{ secrets.STAG_BASTION_IP }}
+          proxy_username: ${{ secrets.STAG_USERNAME }}
+          proxy_key: ${{ secrets.STAG_SSH_KEY }}
           proxy_port: 22
 
           script: |
