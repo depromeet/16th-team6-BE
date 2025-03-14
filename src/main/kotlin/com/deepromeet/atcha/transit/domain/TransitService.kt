@@ -8,14 +8,12 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import com.deepromeet.atcha.user.domain.UserReader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
-import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDate
@@ -30,25 +28,13 @@ class TransitService(
     private val busManager: BusManager,
     private val subwayManager: SubwayManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender,
-    private val lastRoutesResponseRedisTemplate: RedisTemplate<String, LastRoutesResponse>,
     private val regionIdentifier: RegionIdentifier,
-    private val userReader: UserReader
+    private val userReader: UserReader,
+    private val lastRouteReader: LastRouteReader,
+    private val lastRouteAppender: LastRouteAppender
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
-    }
-
-    fun getRoutes(): TMapRouteResponse {
-        return tMapTransitClient.getRoutes(
-            TMapRouteRequest(
-                startX = "126.978388",
-                startY = "37.566610",
-                endX = "127.027636",
-                endY = "37.497950",
-                count = 5,
-                searchDttm = "202502142100"
-            )
-        )
     }
 
     fun getBusArrivalInfo(
@@ -75,6 +61,14 @@ class TransitService(
         val startStation = subwayManager.getStation(subwayLine, startStationName)
         val endStation = subwayManager.getStation(subwayLine, endStationName)
         return subwayManager.getTimeTable(startStation, endStation, routes)?.getLastTime(endStation, routes)
+    }
+
+    fun getRoute(routeId: String): LastRoutesResponse {
+        return lastRouteReader.read(routeId)
+    }
+
+    fun getDepartureRemainingTime(routeId: String): Int {
+        return lastRouteReader.readRemainingTime(routeId)
     }
 
     suspend fun getLastRoutes(
@@ -173,12 +167,12 @@ class TransitService(
 
     private fun filterAndDeduplicateItineraries(itineraries: List<Itinerary>): List<Itinerary> {
         return itineraries.filterNot { itinerary ->
-            val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
+            val transitModes = itinerary.Legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
-            val hasValidModes = itinerary.legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
+            val hasValidModes = itinerary.Legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
             !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
-            itinerary.legs.joinToString("|") { leg ->
+            itinerary.Legs.joinToString("|") { leg ->
                 "${leg.start.name}-${leg.end.name}-${leg.route ?: ""}"
             }
         }.values.toList()
@@ -186,7 +180,7 @@ class TransitService(
 
     private suspend fun calculateRoute(route: Itinerary): LastRoutesResponse? {
         // 1. 경로 내 대중교통 별 막차 시간 조회
-        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
+        val calculatedLegs = calculateLegLastArriveDateTimes(route.Legs) ?: return null
         // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
         val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
         // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
@@ -215,9 +209,9 @@ class TransitService(
         )
     }
 
-    private fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
+    private fun calculateLegLastArriveDateTimes(Legs: List<Leg>): List<LastRouteLeg>? {
         val calculatedLegs =
-            legs.map { leg ->
+            Legs.map { leg ->
                 val departureDateTime =
                     when (leg.mode) {
                         "SUBWAY" ->
@@ -424,7 +418,7 @@ class TransitService(
             start = this.start,
             end = this.end,
             passStopList = this.passStopList?.stationList,
-            step = this.steps,
+            Step = this.steps,
             passShape = this.passShape?.linestring
         )
     }
@@ -436,10 +430,7 @@ class TransitService(
         )
 
     private fun saveRoutesToRedis(routes: List<LastRoutesResponse>) {
-        routes.forEach { route ->
-            val key = "routes:last:${route.routeId}"
-            lastRoutesResponseRedisTemplate.opsForValue().set(key, route, Duration.ofHours(12))
-        }
+        routes.forEach { route -> lastRouteAppender.append(route) }
     }
 
     private fun String.removeSuffix(): String = this.replace("(중)", "").trim()
