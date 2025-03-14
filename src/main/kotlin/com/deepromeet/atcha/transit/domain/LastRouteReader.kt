@@ -12,5 +12,5 @@ class LastRouteReader(
         return lastRouteCache.get(routeId) ?: throw TransitException.NotFoundRoute
     }
 
-    fun readRemainingTime(routeId: String): Int = read(routeId).getRemainingTime()
+    fun readRemainingTime(routeId: String): Int = read(routeId).calculateRemainingTime()
 }

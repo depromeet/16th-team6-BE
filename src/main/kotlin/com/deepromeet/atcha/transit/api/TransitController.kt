@@ -35,15 +35,13 @@ class TransitController(
     @GetMapping("/bus-arrival")
     fun getArrivalInfo(
         @ModelAttribute request: BusArrivalRequest
-    ): ApiResponse<RealTimeBusArrivalResponse> {
+    ): ApiResponse<List<RealTimeBusArrivalResponse>> {
         return ApiResponse.success(
-            RealTimeBusArrivalResponse(
-                transitService.getBusArrivalInfo(
-                    request.routeName,
-                    request.stationName,
-                    Coordinate(request.lat, request.lon)
-                )?.realTimeInfo ?: emptyList()
-            )
+            transitService.getBusArrivalInfo(
+                request.routeName,
+                request.stationName,
+                Coordinate(request.lat, request.lon)
+            )?.realTimeInfo?.map { RealTimeBusArrivalResponse(it) } ?: emptyList()
         )
     }
 

@@ -17,7 +17,7 @@ data class LastRoutesResponse(
     val pathType: Int,
     val legs: List<LastRouteLeg>
 ) {
-    fun getRemainingTime(): Int {
+    fun calculateRemainingTime(): Int {
         return Duration.between(
             LocalDateTime.parse(departureDateTime),
             LocalDateTime.now()
