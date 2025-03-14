@@ -1,11 +1,8 @@
-package com.deepromeet.atcha.transit.infrastructure.refresher
+package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.response.LastRouteLeg
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
-import com.deepromeet.atcha.transit.domain.BusManager
-import com.deepromeet.atcha.transit.domain.BusStationMeta
-import com.deepromeet.atcha.transit.infrastructure.cache.LastRouteRedisCache
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -13,12 +10,19 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class RouteDepartureTimeRefresher(
-    private val lastRouteRedisCache: LastRouteRedisCache,
+    private val lastRouteCache: LastRouteCache,
+    private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    fun refreshDepartureTime(route: LastRoutesResponse) {
+    fun refresh() {
+        lastRouteCache.processRoutes { route ->
+            refreshDepartureTime(route)
+        }
+    }
+
+    private fun refreshDepartureTime(route: LastRoutesResponse) {
         val oldDepartureTime = LocalDateTime.parse(route.departureDateTime, dateTimeFormatter)
 
         // 1) 20분 이내 체크
@@ -91,7 +95,7 @@ class RouteDepartureTimeRefresher(
                 legs = updatedLegs
             )
 
-        lastRouteRedisCache.save(updatedRoute)
+        lastRouteAppender.append(updatedRoute)
     }
 
     private fun getWalkTimeBeforeThisLeg(
