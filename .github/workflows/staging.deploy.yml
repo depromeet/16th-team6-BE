@@ -21,18 +21,18 @@ jobs:
           echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
           ls -Rla ./16th-team6-BE-submodule
 
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          registry: docker.io
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_TOKEN }}
-
-      - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest .
-
-      - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest
+#      - name: Login to Docker Hub
+#        uses: docker/login-action@v3
+#        with:
+#          registry: docker.io
+#          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+#          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+#
+#      - name: Build Docker Image
+#        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest .
+#
+#      - name: Push Docker Image
+#        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest
 
   deploy:
     needs: build
@@ -86,5 +86,5 @@ jobs:
           script: |
             cd /home/atcha
             mv /home/atcha/deployment/staging/* /home/atcha/
-            sudo bash ./deploy.sh
+#            sudo bash ./deploy.sh
 
