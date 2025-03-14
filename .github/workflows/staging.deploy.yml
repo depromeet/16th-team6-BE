@@ -85,6 +85,8 @@ jobs:
 
           script: |
             cd /home/atcha
-#            mv /home/atcha/deployment/staging/* /home/atcha/
+            rm -rf /home/atcha/data
+            mv /home/atcha/deployment/staging/* /home/atcha/
+#            mv /home/atcha/deployment/staging/data/nginx/* /home/atcha/data/nginx
 #            sudo bash ./deploy.sh
 
