@@ -33,12 +33,12 @@ jobs:
         with:
           name: deployment-script
           path: ./deployment/staging/deploy.sh
-#
-#      - name: Build Docker Image
-#        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest .
-#
-#      - name: Push Docker Image
-#        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha:latest
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_staging:latest
 
   deploy:
     needs: build
