@@ -67,7 +67,7 @@ jobs:
           proxy_key: ${{ secrets.STAG_SSH_KEY }}
           proxy_port: 22
 
-          source: "./deployment/staging"
+          source: "./deployment/staging/*"
           target: /home/atcha/
 
       - name: SSH Jump Host to Staging Server and Deploy
