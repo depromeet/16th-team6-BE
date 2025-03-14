@@ -167,12 +167,12 @@ class TransitService(
 
     private fun filterAndDeduplicateItineraries(itineraries: List<Itinerary>): List<Itinerary> {
         return itineraries.filterNot { itinerary ->
-            val transitModes = itinerary.Legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
+            val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
-            val hasValidModes = itinerary.Legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
+            val hasValidModes = itinerary.legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
             !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
-            itinerary.Legs.joinToString("|") { leg ->
+            itinerary.legs.joinToString("|") { leg ->
                 "${leg.start.name}-${leg.end.name}-${leg.route ?: ""}"
             }
         }.values.toList()
@@ -180,7 +180,7 @@ class TransitService(
 
     private suspend fun calculateRoute(route: Itinerary): LastRoutesResponse? {
         // 1. 경로 내 대중교통 별 막차 시간 조회
-        val calculatedLegs = calculateLegLastArriveDateTimes(route.Legs) ?: return null
+        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
         // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
         val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
         // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
@@ -418,7 +418,7 @@ class TransitService(
             start = this.start,
             end = this.end,
             passStopList = this.passStopList?.stationList,
-            Step = this.steps,
+            step = this.steps,
             passShape = this.passShape?.linestring
         )
     }

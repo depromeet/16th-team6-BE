@@ -5,7 +5,6 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class LastRoutesResponse(
     val routeId: String,
@@ -18,12 +17,7 @@ data class LastRoutesResponse(
     val legs: List<LastRouteLeg>
 ) {
     fun getRemainingTime(): Int {
-        return Duration.between(getDepartureDateTime(), LocalDateTime.now()).toSeconds().toInt()
-    }
-
-    private fun getDepartureDateTime(): LocalDateTime {
-        val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-        return LocalDateTime.parse(departureDateTime, dateTimeFormatter)
+        return Duration.between(LocalDateTime.parse(departureDateTime), LocalDateTime.now()).toSeconds().toInt()
     }
 }
 
@@ -38,6 +32,6 @@ data class LastRouteLeg(
     val start: Location,
     val end: Location,
     val passStopList: List<Station>? = null,
-    val Step: List<Step>? = null,
+    val step: List<Step>? = null,
     val passShape: String? = null
 )

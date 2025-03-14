@@ -11,7 +11,7 @@ import java.time.Duration
 class LastRouteRedisCache(
     private val lastRouteRedisTemplate: RedisTemplate<String, LastRoutesResponse>
 ) : LastRouteCache {
-    fun processRoutes(action: (LastRoutesResponse) -> Unit) {
+    override fun processRoutes(action: (LastRoutesResponse) -> Unit) {
         val valueOps = lastRouteRedisTemplate.opsForValue()
 
         lastRouteRedisTemplate.execute { connection ->
