@@ -86,6 +86,6 @@ jobs:
           script: |
             cd /home/atcha
             mv /home/atcha/deployment/staging/* /home/atcha/
-            rm -rf deployment
+#            rm -rf deployment
             sudo bash ./deploy.sh
 
