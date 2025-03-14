@@ -3,12 +3,12 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.response
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
+import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
-import com.deepromeet.atcha.transit.domain.RouteId
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
@@ -73,7 +73,7 @@ data class BusRouteResponse(
 ) {
     fun toBusRoute(): BusRoute =
         BusRoute(
-            id = RouteId(busRouteId),
+            id = BusRouteId(busRouteId),
             name = busRouteAbrv
         )
 }
@@ -132,7 +132,7 @@ data class BusArrivalResponse(
             )
 
         return BusArrival(
-            routeId = RouteId(busRouteId),
+            busRouteId = BusRouteId(busRouteId),
             routeName = busRouteAbrv,
             busStationId = BusStationId(arsId),
             stationName = stNm,
