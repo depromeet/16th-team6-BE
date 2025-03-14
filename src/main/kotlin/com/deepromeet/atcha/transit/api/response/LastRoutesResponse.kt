@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.absoluteValue
 
 data class LastRoutesResponse(
     val routeId: String,
@@ -17,7 +18,7 @@ data class LastRoutesResponse(
     val legs: List<LastRouteLeg>
 ) {
     fun getRemainingTime(): Int {
-        return Duration.between(LocalDateTime.parse(departureDateTime), LocalDateTime.now()).toSeconds().toInt()
+        return Duration.between(LocalDateTime.parse(departureDateTime), LocalDateTime.now()).toSeconds().toInt().absoluteValue
     }
 }
 
