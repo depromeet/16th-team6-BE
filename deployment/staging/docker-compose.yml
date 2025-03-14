@@ -33,6 +33,9 @@ services:
       start_period: 30s
 
   nginx:
+    depends_on:
+      - atcha-green
+      - atcha-blue
     image: nginx:1.15-alpine
     container_name: nginx
     networks:
