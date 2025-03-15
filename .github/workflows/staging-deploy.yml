@@ -73,7 +73,7 @@ jobs:
       - name: SSH Jump Host to Staging Server and Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.HOST }} # Staging A or B 서버
+          host: ${{ env.HOST }}
           username: ${{ secrets.STAG_USERNAME }}
           key: ${{ secrets.STAG_SSH_KEY }}
           port: 22
