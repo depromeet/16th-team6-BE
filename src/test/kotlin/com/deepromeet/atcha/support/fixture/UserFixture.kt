@@ -15,14 +15,16 @@ object UserFixture {
                 127.0,
                 37.0
             ),
-        alertFrequencies: MutableSet<Int> = mutableSetOf(1, 5, 10)
+        alertFrequencies: MutableSet<Int> = mutableSetOf(1, 5, 10),
+        fcmToken: String = "TEST_FCMTOKEN"
     ): User =
         User(
             providerId = providerId,
             nickname = nickname,
             profileImageUrl = profileImageUrl,
             address = address,
-            alertFrequencies = alertFrequencies
+            alertFrequencies = alertFrequencies,
+            fcmToken = fcmToken
         )
 
     fun userToSignUpRequest(
@@ -34,6 +36,7 @@ object UserFixture {
             address = user.address.address,
             lat = user.address.lat,
             lon = user.address.lon,
-            alertFrequencies = user.alertFrequencies
+            alertFrequencies = user.alertFrequencies,
+            fcmToken = user.fcmToken
         )
 }

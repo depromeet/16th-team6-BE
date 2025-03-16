@@ -6,5 +6,6 @@ data class UserUpdateInfo(
     val address: String?,
     val lat: Double?,
     val log: Double?,
-    val alertFrequencies: Set<Int>?
+    val alertFrequencies: Set<Int>?,
+    val fcmToken: String?
 )
