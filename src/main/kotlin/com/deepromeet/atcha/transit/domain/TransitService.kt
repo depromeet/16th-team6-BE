@@ -31,7 +31,9 @@ class TransitService(
     private val regionIdentifier: RegionIdentifier,
     private val userReader: UserReader,
     private val lastRouteReader: LastRouteReader,
-    private val lastRouteAppender: LastRouteAppender
+    private val lastRouteAppender: LastRouteAppender,
+    private val lastRouteIndexReader: LastRouteIndexReader,
+    private val lastRouteIndexAppender: LastRouteIndexAppender
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -77,6 +79,7 @@ class TransitService(
         endLat: String?,
         endLon: String?
     ): List<LastRoutesResponse> {
+        // end 가 없는 경우, 사용자 집 주소 조회
         val end =
             if (endLat == null || endLon == null) {
                 Coordinate(
@@ -87,26 +90,22 @@ class TransitService(
                 Coordinate(endLat.toDouble(), endLon.toDouble())
             }
 
+        // 출발지와 도착지 경로가 redis 에 저장된 경우
+        lastRouteIndexReader.read(start, end).let { routeIds ->
+            if (routeIds.isNotEmpty()) {
+                return routeIds.map { routeId -> lastRouteReader.read(routeId) }
+            }
+        }
+
         // 서비스 지역인지 판별 -> 서비스 지역이 아니면 Exception 발생
         regionIdentifier.identify(start)
         regionIdentifier.identify(end)
 
         val today = LocalDate.now()
         val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-        val baseDate = today.format(dateFormatter)
+        val baseDate = today.format(dateFormatter) + "2300"
 
-        val allRoutes =
-            coroutineScope {
-                listOf("21", "22", "23")
-                    .map { hour ->
-                        async(Dispatchers.IO) {
-                            getItineraries(hour, baseDate, start, end)
-                        }
-                    }
-                    .awaitAll()
-                    .flatten()
-            }
-
+        val allRoutes = getItineraries(baseDate, start, end)
         val deduplicatedRoutes = filterAndDeduplicateItineraries(allRoutes)
 
         // 경로 막차 계산
@@ -129,18 +128,17 @@ class TransitService(
                 departureDateTime.isAfter(now)
             }
 
-        saveRoutesToRedis(filteredRoutes)
+        saveRouteIdsByStartEnd(start, end, filteredRoutes.map { it.routeId })
+        saveRoutesToCache(filteredRoutes)
 
         return sortedByMinTransfer(filteredRoutes)
     }
 
     private suspend fun getItineraries(
-        hour: String,
-        baseDate: String?,
+        baseDate: String,
         start: Coordinate,
         end: Coordinate
     ): List<Itinerary> {
-        val searchDttm = "$baseDate${hour}00"
         val response =
             withContext(Dispatchers.IO) {
                 tMapTransitClient.getRoutes(
@@ -149,8 +147,8 @@ class TransitService(
                         startY = start.lat.toString(),
                         endX = end.lon.toString(),
                         endY = end.lat.toString(),
-                        count = 20,
-                        searchDttm = searchDttm
+                        count = 10,
+                        searchDttm = baseDate
                     )
                 )
             }
@@ -169,7 +167,12 @@ class TransitService(
         return itineraries.filterNot { itinerary ->
             val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
-            val hasValidModes = itinerary.legs.any { it.mode == "WALK" || it.mode == "SUBWAY" || it.mode == "BUS" }
+            val hasValidModes =
+                itinerary.legs.any {
+                    it.mode == "WALK" ||
+                        (it.mode == "SUBWAY" && it.route != null && !it.route.contains("(급행)")) ||
+                        it.mode == "BUS"
+                }
             !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
             itinerary.legs.joinToString("|") { leg ->
@@ -187,7 +190,8 @@ class TransitService(
         val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
         // 4. 유효하지 않는 경로 제거 (leg.departureTime=null 인 경우)
         if (adjustedLegs.any { leg ->
-                (leg.mode == "SUBWAY" || leg.mode == "BUS") && leg.departureDateTime == null
+                (leg.mode == "SUBWAY" || leg.mode == "BUS") &&
+                    (leg.departureDateTime == null || leg.departureDateTime == "null")
             }
         ) {
             return null
@@ -209,34 +213,40 @@ class TransitService(
         )
     }
 
-    private fun calculateLegLastArriveDateTimes(Legs: List<Leg>): List<LastRouteLeg>? {
+    private suspend fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
         val calculatedLegs =
-            Legs.map { leg ->
-                val departureDateTime =
-                    when (leg.mode) {
-                        "SUBWAY" ->
-                            getLastTime(
-                                SubwayLine.fromRouteName(leg.route!!),
-                                leg.start.name,
-                                leg.end.name
-                            )?.departureTime?.toString()
+            coroutineScope {
+                legs.map { leg ->
+                    async(Dispatchers.IO) {
+                        val departureDateTime =
+                            when (leg.mode) {
+                                "SUBWAY" ->
+                                    getLastTime(
+                                        SubwayLine.fromRouteName(leg.route!!),
+                                        leg.start.name,
+                                        leg.end.name
+                                    )?.departureTime?.toString()
 
-                        "BUS" ->
-                            getBusArrivalInfo(
-                                leg.route!!.split(":")[1],
-                                leg.start.name.removeSuffix(),
-                                Coordinate(leg.start.lat, leg.start.lon)
-                            )?.lastTime?.toString()
+                                "BUS" ->
+                                    getBusArrivalInfo(
+                                        leg.route!!.split(":")[1],
+                                        leg.start.name.removeSuffix(),
+                                        Coordinate(leg.start.lat, leg.start.lon)
+                                    )?.lastTime?.toString()
 
-                        else -> null
+                                else -> null
+                            }
+                        leg.toLeg(departureDateTime)
                     }
-
-                // departureDateTime이 null일 수 있음
-                leg.toLeg(departureDateTime)
+                }.awaitAll().toList()
             }
 
         // null이 섞여있는 leg가 하나라도 있다면, 전체 경로 자체를 제거
-        return if (calculatedLegs.any { (it.mode == "BUS" || it.mode == "SUBWAY") && it.departureDateTime == null }) {
+        return if (calculatedLegs.any {
+                (it.mode == "BUS" || it.mode == "SUBWAY") &&
+                    (it.departureDateTime == null || it.departureDateTime == "null")
+            }
+        ) {
             null
         } else {
             calculatedLegs
@@ -317,8 +327,7 @@ class TransitService(
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
             val calculateBoardingTime = calculateBoardingTime(leg, adjustedDepartureTime, TimeDirection.BEFORE)
             adjustedLegs[i] = leg.copy(departureDateTime = calculateBoardingTime?.toString())
-            adjustBaseTime =
-                if (calculateBoardingTime == null) null else LocalDateTime.parse(calculateBoardingTime.toString())
+            adjustBaseTime = calculateBoardingTime?.let { LocalDateTime.parse(it.toString()) }
         }
 
         // 5. 기준점 뒤쪽 시간 재조정
@@ -429,7 +438,15 @@ class TransitService(
             compareBy({ it.transferCount }, { it.totalTime })
         )
 
-    private fun saveRoutesToRedis(routes: List<LastRoutesResponse>) {
+    private fun saveRouteIdsByStartEnd(
+        start: Coordinate,
+        end: Coordinate,
+        routeIds: List<String>
+    ) {
+        lastRouteIndexAppender.append(start, end, routeIds)
+    }
+
+    private fun saveRoutesToCache(routes: List<LastRoutesResponse>) {
         routes.forEach { route -> lastRouteAppender.append(route) }
     }
 
