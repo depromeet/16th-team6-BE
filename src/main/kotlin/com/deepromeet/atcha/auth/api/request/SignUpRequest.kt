@@ -7,7 +7,8 @@ data class SignUpRequest(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: Set<Int>
+    val alertFrequencies: Set<Int>,
+    val fcmToken: String
 ) {
     fun toSignUpInfo() =
         SignUpInfo(
@@ -15,6 +16,7 @@ data class SignUpRequest(
             address = address,
             lat = lat,
             lon = lon,
-            alertFrequencies = alertFrequencies
+            alertFrequencies = alertFrequencies,
+            fcmToken = fcmToken
         )
 }

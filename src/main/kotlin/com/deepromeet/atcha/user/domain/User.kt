@@ -27,6 +27,7 @@ class User(
     @CollectionTable(name = "user_alert_frequencies", joinColumns = [JoinColumn(name = "user_id")])
     @Column(name = "alert_frequencies")
     var alertFrequencies: MutableSet<Int> = mutableSetOf(),
+    var fcmToken: String,
     var isDeleted: Boolean = false
 ) {
     override fun equals(other: Any?): Boolean {
@@ -49,6 +50,7 @@ class User(
             "profileImageUrl='$profileImageUrl', " +
             "address=$address, " +
             "alertFrequencies=$alertFrequencies, " +
+            "fcmToken='$fcmToken', " +
             "isDeleted=$isDeleted)"
     }
 }
