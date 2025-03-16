@@ -9,7 +9,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class TransitService(
@@ -83,7 +82,11 @@ class TransitService(
         // 출발지와 도착지 경로가 redis 에 저장된 경우
         lastRouteIndexReader.read(start, end).let { routeIds ->
             if (routeIds.isNotEmpty()) {
-                return routeIds.map { routeId -> lastRouteReader.read(routeId) }
+                return lastRouteOperations.sortedByMinTransfer(
+                    lastRouteOperations.getFilteredRoutes(
+                        routeIds.map { routeId -> lastRouteReader.read(routeId) }
+                    )
+                )
             }
         }
 
@@ -107,8 +110,7 @@ class TransitService(
                     .filterNotNull()
             }
 
-        val now = LocalDateTime.now()
-        val filteredRoutes = lastRouteOperations.getFilteredRoutes(lastRoutesResponses, now)
+        val filteredRoutes = lastRouteOperations.getFilteredRoutes(lastRoutesResponses)
 
         saveRouteIdsByStartEnd(start, end, filteredRoutes.map { it.routeId })
         saveRoutesToCache(filteredRoutes)

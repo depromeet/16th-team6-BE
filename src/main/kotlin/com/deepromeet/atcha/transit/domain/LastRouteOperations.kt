@@ -326,12 +326,12 @@ class LastRouteOperations(
 
     private fun String.removeSuffix(): String = this.replace("(중)", "").trim()
 
-    fun getFilteredRoutes(
-        lastRoutesResponses: List<LastRoutesResponse>,
-        now: LocalDateTime?
-    ) = lastRoutesResponses.filter { response ->
-        val departureDateTime = LocalDateTime.parse(response.departureDateTime)
-        departureDateTime.isAfter(now)
+    fun getFilteredRoutes(lastRoutesResponses: List<LastRoutesResponse>): List<LastRoutesResponse> {
+        val now = LocalDateTime.now()
+        return lastRoutesResponses.filter { response ->
+            val departureDateTime = LocalDateTime.parse(response.departureDateTime)
+            departureDateTime.isAfter(now)
+        }
     }
 
     fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
