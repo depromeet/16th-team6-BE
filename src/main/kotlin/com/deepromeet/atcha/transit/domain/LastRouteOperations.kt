@@ -22,8 +22,8 @@ import java.util.UUID
 @Component
 class LastRouteOperations(
     private val tMapTransitClient: TMapTransitClient,
-    private val transitService: TransitService,
-    private val subwayManager: SubwayManager
+    private val subwayManager: SubwayManager,
+    private val busManager: BusManager
 ) {
     fun getItineraries(
         start: Coordinate,
@@ -113,17 +113,19 @@ class LastRouteOperations(
                         val departureDateTime =
                             when (leg.mode) {
                                 "SUBWAY" ->
-                                    transitService.getLastTime(
+                                    getLastTime(
                                         SubwayLine.fromRouteName(leg.route!!),
                                         leg.start.name,
                                         leg.end.name
                                     )?.departureTime?.toString()
 
                                 "BUS" ->
-                                    transitService.getBusArrivalInfo(
+                                    busManager.getArrivalInfo(
                                         leg.route!!.split(":")[1],
-                                        leg.start.name.removeSuffix(),
-                                        Coordinate(leg.start.lat, leg.start.lon)
+                                        BusStationMeta(
+                                            leg.start.name.removeSuffix(),
+                                            Coordinate(leg.start.lat, leg.start.lon)
+                                        )
                                     )?.lastTime?.toString()
 
                                 else -> null
@@ -143,6 +145,17 @@ class LastRouteOperations(
         } else {
             calculatedLegs
         }
+    }
+
+    private fun getLastTime(
+        subwayLine: SubwayLine,
+        startStationName: String,
+        endStationName: String
+    ): SubwayTime? {
+        val routes = subwayManager.getRoutes(subwayLine)
+        val startStation = subwayManager.getStation(subwayLine, startStationName)
+        val endStation = subwayManager.getStation(subwayLine, endStationName)
+        return subwayManager.getTimeTable(startStation, endStation, routes)?.getLastTime(endStation, routes)
     }
 
     private fun increaseWalkTime(legs: List<LastRouteLeg>): List<LastRouteLeg> {
@@ -264,10 +277,12 @@ class LastRouteOperations(
             }
 
             "BUS" ->
-                transitService.getBusArrivalInfo(
+                busManager.getArrivalInfo(
                     leg.route!!.split(":")[1],
-                    leg.start.name.removeSuffix(),
-                    Coordinate(leg.start.lat, leg.start.lon)
+                    BusStationMeta(
+                        leg.start.name.removeSuffix(),
+                        Coordinate(leg.start.lat, leg.start.lon)
+                    )
                 )?.getNearestTime(adjustedDepartureTime, direction)
 
             else -> null

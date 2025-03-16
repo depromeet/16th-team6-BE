@@ -14,7 +14,6 @@ import org.springframework.stereotype.Service
 class TransitService(
     private val taxiFareFetcher: TaxiFareFetcher,
     private val busManager: BusManager,
-    private val subwayManager: SubwayManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender,
     private val regionIdentifier: RegionIdentifier,
     private val userReader: UserReader,
@@ -41,17 +40,6 @@ class TransitService(
         end: Coordinate
     ): Fare {
         return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
-    }
-
-    fun getLastTime(
-        subwayLine: SubwayLine,
-        startStationName: String,
-        endStationName: String
-    ): SubwayTime? {
-        val routes = subwayManager.getRoutes(subwayLine)
-        val startStation = subwayManager.getStation(subwayLine, startStationName)
-        val endStation = subwayManager.getStation(subwayLine, endStationName)
-        return subwayManager.getTimeTable(startStation, endStation, routes)?.getLastTime(endStation, routes)
     }
 
     fun getRoute(routeId: String): LastRoutesResponse {

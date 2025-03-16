@@ -17,7 +17,7 @@ class LastRouteRedisCache(
         lastRouteRedisTemplate.execute { connection ->
             val scanOptions =
                 ScanOptions.scanOptions()
-                    .match("routes:*")
+                    .match("routes:last:*")
                     .count(1000)
                     .build()
 
