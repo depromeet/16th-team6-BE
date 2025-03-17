@@ -57,12 +57,39 @@ jobs:
             echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-      - name: Deploy to ${{ matrix.target }}
+      - uses: actions/checkout@v4
+      - name: Copy file via ssh password
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
+          proxy_username: ${{ secrets.PROD_USERNAME }}
+          proxy_key: ${{ secrets.PROD_SSH_KEY }}
+          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          source: "./deployment/prod/"
+          target: /home/atcha/
+
+      - name: SSH Jump Host to Prod Server and Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }}
-          username: ${{ secrets.PROD_APP_USERNAME }}
-          key: ${{ secrets.PROD_APP_KEY }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
+          proxy_username: ${{ secrets.PROD_USERNAME }}
+          proxy_key: ${{ secrets.PROD_SSH_KEY }}
+          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
+
           script: |
+            cd /home/atcha
+            rm -rf /home/atcha/data
+            mv /home/atcha/deployment/prod/* /home/atcha/
+            rm -rf /home/atcha/deployment
             sudo bash ./deploy.sh
