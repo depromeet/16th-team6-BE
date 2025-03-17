@@ -5,7 +5,7 @@ services:
   atcha-blue:
     networks:
       - app-tier
-    image: atchadockerhub/atcha-prod:latest
+    image: atchadockerhub/atcha_prod:latest
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
@@ -19,7 +19,7 @@ services:
   atcha-green:
     networks:
       - app-tier
-    image: atchadockerhub/atcha-prod:latest
+    image: atchadockerhub/atcha_prod:latest
     environment:
       - SPRING_PROFILES_ACTIVE=prod
     restart: always
