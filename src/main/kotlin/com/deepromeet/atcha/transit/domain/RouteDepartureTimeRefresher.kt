@@ -28,7 +28,7 @@ class RouteDepartureTimeRefresher(
         // 1) 20분 이내 체크
         val now = LocalDateTime.now()
         val minutesUntilDeparture = Duration.between(now, oldDepartureTime).toMinutes()
-        if (minutesUntilDeparture > 20) {
+        if (minutesUntilDeparture > 20 || minutesUntilDeparture < 0) {
             return
         }
 
