@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
-DEFAULT_CONF=" data/nginx/nginx.conf"
+DEFAULT_CONF="data/nginx/nginx.conf"
 MAX_RETRIES=30
 
 check_service() {
