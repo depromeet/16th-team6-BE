@@ -53,6 +53,11 @@ ensure_nginx_running() {
   fi
 }
 
+restart_nginx() {
+  echo "nginx 컨테이너를 재시작합니다."
+  docker compose restart nginx
+}
+
 if [ -z "$IS_BLUE" ]; then
   echo "### GREEN => BLUE ###"
 
@@ -71,7 +76,7 @@ if [ -z "$IS_BLUE" ]; then
   echo "4. nginx 재실행"
   ensure_nginx_running
   sudo cp data/nginx/nginx-blue.conf data/nginx/nginx.conf
-  sudo docker compose exec -it nginx nginx -s reload
+  restart_nginx
 
   echo "5. GREEN 컨테이너 중지 및 삭제"
   docker compose stop atcha-green
@@ -95,7 +100,7 @@ else
   echo "4. nginx 재실행"
   ensure_nginx_running
   sudo cp data/nginx/nginx-green.conf data/nginx/nginx.conf
-  sudo docker compose exec -it nginx nginx -s reload
+  restart_nginx
 
   echo "5. BLUE 컨테이너 중지 및 삭제"
   docker compose stop atcha-blue
