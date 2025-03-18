@@ -44,7 +44,7 @@ management:
     web:
       exposure:
         include: prometheus, health
-      base-path: /act-atcha
+      base-path: ${secret.prod.MANAGEMENT_BASE_PATH}
     jmx:
       exposure:
         exclude: "*"
