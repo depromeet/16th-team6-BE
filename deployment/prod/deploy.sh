@@ -75,7 +75,7 @@ if [ -z "$IS_BLUE" ]; then
 
   echo "4. nginx 재실행"
   ensure_nginx_running
-  sudo cp /home/atcha/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx.conf
+  sudo cp -f /home/atcha/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx.conf
   restart_nginx
 
   echo "5. GREEN 컨테이너 중지 및 삭제"
@@ -99,7 +99,7 @@ else
 
   echo "4. nginx 재실행"
   ensure_nginx_running
-  sudo cp /home/atcha/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx.conf
+  sudo cp -f /home/atcha/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx.conf
   restart_nginx
 
   echo "5. BLUE 컨테이너 중지 및 삭제"
