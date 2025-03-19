@@ -128,7 +128,11 @@ data class BusArrivalResponse(
     @JacksonXmlProperty(localName = "reride_Num1")
     val rerideNum1: Int,
     @JacksonXmlProperty(localName = "reride_Num2")
-    val rerideNum2: Int
+    val rerideNum2: Int,
+    @JacksonXmlProperty(localName = "vehId1")
+    val vehId1: String,
+    @JacksonXmlProperty(localName = "vehId2")
+    val vehId2: String
 ) {
     fun toBusArrival(): BusArrival {
         val realTimeBusArrivals =
@@ -139,7 +143,8 @@ data class BusArrivalResponse(
                     isLast = isLast1,
                     remainingTime = traTime1,
                     rerdieDiv = rerdieDiv1,
-                    rerideNum = rerideNum1
+                    rerideNum = rerideNum1,
+                    vehId = vehId1
                 ),
                 createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg2,
@@ -147,7 +152,8 @@ data class BusArrivalResponse(
                     isLast = isLast2,
                     remainingTime = traTime2,
                     rerdieDiv = rerdieDiv2,
-                    rerideNum = rerideNum2
+                    rerideNum = rerideNum2,
+                    vehId = vehId2
                 )
             )
 
@@ -172,7 +178,8 @@ data class BusArrivalResponse(
         isLast: String,
         remainingTime: String,
         rerdieDiv: Int,
-        rerideNum: Int
+        rerideNum: Int,
+        vehId: String
     ): RealTimeBusArrival {
         val busStatus = determineBusStatus(arrivalMessage)
 
@@ -200,6 +207,7 @@ data class BusArrivalResponse(
             }
 
         return RealTimeBusArrival(
+            vehicleId = vehId,
             busStatus = busStatus,
             remainingTime = remainingTime.toInt(),
             remainingStations = staOrd.toInt() - sectionOrder.toInt(),

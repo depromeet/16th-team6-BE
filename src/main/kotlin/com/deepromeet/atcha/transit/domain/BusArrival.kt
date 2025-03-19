@@ -43,6 +43,7 @@ data class BusArrival(
 }
 
 data class RealTimeBusArrival(
+    val vehicleId: String,
     val busStatus: BusStatus,
     val remainingTime: Int,
     val remainingStations: Int?,

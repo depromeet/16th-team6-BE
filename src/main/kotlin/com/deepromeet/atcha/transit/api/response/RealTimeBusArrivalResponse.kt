@@ -12,7 +12,9 @@ data class RealTimeBusArrivalResponse(
     val remainingStations: Int?,
     val isLast: Boolean?,
     val busCongestion: BusCongestion?,
-    val remainingSeats: Int?
+    val remainingSeats: Int?,
+    val expectedArrivalTime: String?,
+    val vehicleId: String?
 ) {
     constructor(realTimeBusArrival: RealTimeBusArrival) : this(
         realTimeBusArrival.busStatus,
@@ -20,6 +22,8 @@ data class RealTimeBusArrivalResponse(
         realTimeBusArrival.remainingStations,
         realTimeBusArrival.isLast,
         realTimeBusArrival.busCongestion,
-        realTimeBusArrival.remainingSeats
+        realTimeBusArrival.remainingSeats,
+        realTimeBusArrival.expectedArrivalTime?.toString(),
+        realTimeBusArrival.vehicleId
     )
 }

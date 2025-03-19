@@ -96,11 +96,13 @@ data class BusArrivalItem(
     val crowded1: Int,
     val crowded2: Int,
     val remainSeatCnt1: Int,
-    val remainSeatCnt2: Int
+    val remainSeatCnt2: Int,
+    val vehId1: Int,
+    val vehId2: Int
 ) {
     fun toRealTimeBussArrivals(): List<RealTimeBusArrival> {
-        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1)
-        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2)
+        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, vehId1)
+        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, vehId2)
         return listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
     }
 
@@ -149,7 +151,8 @@ data class BusArrivalItem(
     private fun createRealTimeArrivalInfo(
         predictTimeSec: Int?,
         crowded: Int,
-        remainSeatCnt: Int
+        remainSeatCnt: Int,
+        vehId: Int
     ): RealTimeBusArrival {
         val busCongestion =
             when (crowded) {
@@ -164,6 +167,7 @@ data class BusArrivalItem(
         val remainingSeats = if (busCongestion == BusCongestion.LOW && remainSeatCnt == 0) null else remainSeatCnt
 
         return RealTimeBusArrival(
+            vehicleId = vehId.toString(),
             busStatus = determineBusStatus(predictTimeSec),
             remainingTime = predictTimeSec ?: 0,
             remainingStations = null,
