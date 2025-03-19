@@ -14,7 +14,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class PublicSeoulBusStationInfoClient(
     private val publicBusClient: PublicSeoulBusStationInfoFeignClient,
-    private val publicBusRouteClient: PublicSeoulBusRouteFeignClient,
+    private val publicBusRouteClient: PublicSeoulBusRouteInfoFeignClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String
 ) : BusStationInfoClient {
@@ -52,7 +52,7 @@ class PublicSeoulBusStationInfoClient(
     override fun getByRoute(route: BusRoute): BusRouteStationList? {
         return try {
             val responses =
-                publicBusRouteClient.getStationsByRoute(serviceKey, route.id.value)
+                publicBusRouteClient.getStationsByRoute(route.id.value)
                     .msgBody
                     .itemList
                     ?: return null

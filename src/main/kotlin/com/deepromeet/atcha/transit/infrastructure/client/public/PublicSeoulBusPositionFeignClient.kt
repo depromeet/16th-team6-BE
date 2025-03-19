@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
-import com.deepromeet.atcha.common.feign.FeignConfig
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.BusPositionResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult

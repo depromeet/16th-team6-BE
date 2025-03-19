@@ -6,11 +6,14 @@ import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
+import com.deepromeet.atcha.transit.domain.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
+import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
@@ -258,6 +261,41 @@ data class BusPositionResponse(
             fullSectionDistance = fullSectDist?.toDouble() ?: 0.0,
             currentSectionDistance = sectDist.toDouble(),
             busCongestion = busCongestion
+        )
+    }
+}
+
+data class BusRouteInfoResponse(
+    @JacksonXmlProperty(localName = "busRouteAbrv")
+    val busRouteAbrv: String,
+    @JacksonXmlProperty(localName = "busRouteId")
+    val busRouteId: String,
+    @JacksonXmlProperty(localName = "stStationNm")
+    val stStationNm: String,
+    @JacksonXmlProperty(localName = "edStationNm")
+    val edStationNm: String,
+    @JacksonXmlProperty(localName = "term")
+    val term: String,
+    @JacksonXmlProperty(localName = "firstBusTm")
+    val firstBusTm: String,
+    @JacksonXmlProperty(localName = "lastBusTm")
+    val lastBusTm: String
+) {
+    fun toBusRouteInfo(): BusRouteInfo {
+        val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+
+        return BusRouteInfo(
+            startStationName = stStationNm,
+            endStationName = edStationNm,
+            serviceHours =
+                listOf(
+                    BusServiceHours(
+                        dailyType = DailyType.WEEKDAY,
+                        startTime = LocalDateTime.parse(firstBusTm, formatter),
+                        endTime = LocalDateTime.parse(lastBusTm, formatter),
+                        term = term.toIntOrNull() ?: 0
+                    )
+                )
         )
     }
 }

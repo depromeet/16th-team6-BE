@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestParam
     configuration = [PublicFeignConfig::class]
 )
 interface PublicSeoulBusRouteInfoFeignClient {
-
     @GetMapping("/getRouteInfo")
     fun getRouteInfo(
         @RequestParam busRouteId: String
