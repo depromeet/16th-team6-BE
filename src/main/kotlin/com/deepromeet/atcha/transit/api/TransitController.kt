@@ -8,7 +8,7 @@ import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
-import com.deepromeet.atcha.transit.api.response.BusRouteDetailResponse
+import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
@@ -50,12 +50,12 @@ class TransitController(
         )
     }
 
-    @GetMapping("/bus-routes")
-    fun getBusRouteDetail(
+    @GetMapping("/bus-routes/positions")
+    fun getBusRoutePositions(
         @ModelAttribute request: BusRouteRequest
-    ): ApiResponse<BusRouteDetailResponse> {
+    ): ApiResponse<BusRoutePositionResponse> {
         return ApiResponse.success(
-            BusRouteDetailResponse(transitService.getBusDetail(request.toBusRoute()))
+            BusRoutePositionResponse(transitService.getBusPositions(request.toBusRoute()))
         )
     }
 
