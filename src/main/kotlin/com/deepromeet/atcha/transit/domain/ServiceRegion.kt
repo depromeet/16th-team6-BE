@@ -12,4 +12,8 @@ enum class ServiceRegion(
                 ?: throw IllegalArgumentException("Invalid region name: $regionName")
         }
     }
+
+    fun isNotSupported(): Boolean {
+        return (this in listOf(SEOUL, GYEONGGI)).not()
+    }
 }

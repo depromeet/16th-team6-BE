@@ -7,4 +7,6 @@ interface BusStationInfoClient {
         station: BusStation,
         routeName: String
     ): BusRoute?
+
+    fun getByRoute(route: BusRoute): BusRouteStationList?
 }
