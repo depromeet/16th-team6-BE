@@ -1,14 +1,14 @@
 package com.deepromeet.atcha.transit.config
 
-import com.deepromeet.atcha.transit.domain.BusArrivalInfoFetcher
 import com.deepromeet.atcha.transit.domain.BusPositionFetcher
+import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
 import com.deepromeet.atcha.transit.domain.ServiceRegion
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiArrivalInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiBusPositionClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiRouteInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiStationInfoClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusArrivalInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusPositionClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusRouteInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusStationInfoClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -17,8 +17,8 @@ import org.springframework.context.annotation.Configuration
 class BusBeanConfig(
     private val seoulStationInfoClient: PublicSeoulBusStationInfoClient,
     private val gyeonggiStationInfoClient: PublicGyeonggiStationInfoClient,
-    private val seoulArrivalInfoClient: PublicSeoulBusArrivalInfoClient,
-    private val gyeonggiArrivalInfoClient: PublicGyeonggiArrivalInfoClient,
+    private val seoulArrivalInfoClient: PublicSeoulBusRouteInfoClient,
+    private val gyeonggiArrivalInfoClient: PublicGyeonggiRouteInfoClient,
     private val seoulPositionClient: PublicSeoulBusPositionClient,
     private val gyeonggiPositionClient: PublicGyeonggiBusPositionClient
 ) {
@@ -30,7 +30,7 @@ class BusBeanConfig(
         )
 
     @Bean
-    fun arrivalInfoClient(): Map<ServiceRegion, BusArrivalInfoFetcher> =
+    fun arrivalInfoClient(): Map<ServiceRegion, BusRouteInfoClient> =
         mapOf(
             ServiceRegion.SEOUL to seoulArrivalInfoClient,
             ServiceRegion.GYEONGGI to gyeonggiArrivalInfoClient

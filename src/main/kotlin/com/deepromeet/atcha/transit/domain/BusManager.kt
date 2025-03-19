@@ -9,7 +9,7 @@ val log = KotlinLogging.logger {}
 @Component
 class BusManager(
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
-    private val busArrivalInfoFetcherMap: Map<ServiceRegion, BusArrivalInfoFetcher>,
+    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val regionIdentifier: RegionIdentifier
 ) {
@@ -32,7 +32,7 @@ class BusManager(
                         " station=${station.busStationMeta.name}, routeName=$routeName"
                 )
                 ?: return null
-        return busArrivalInfoFetcherMap[region]?.getBusArrival(station, busRoute)
+        return busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
             .logIfNull(
                 "[NotFoundBusArrival] region=$region, " +
                     "station=${station.busStationMeta.name}, routeName=$routeName"
