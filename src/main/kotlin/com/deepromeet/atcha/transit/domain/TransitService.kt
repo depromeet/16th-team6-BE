@@ -61,6 +61,17 @@ class TransitService(
         return lastRouteReader.readRemainingTime(routeId)
     }
 
+    fun isBusStarted(
+        userId: Long,
+        routeName: String,
+        busStationMeta: BusStationMeta
+    ): Boolean {
+        // 1. 사용자 ID를 통해 등록된 알림에서 경로를 조회하여 예상 출발 시간을 가져옴
+        // 2. 버스 도착 정보를 조회
+        // 3. 버스 실시간 정보에서 2번째 버스의 예상 도착시간이 1번에서 가져온 예상 출발 시간과 비교하여 버스가 출발했는지 확인
+        return false
+    }
+
     suspend fun getLastRoutes(
         userId: Long,
         start: Coordinate,
