@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -55,7 +55,12 @@ class PublicGyeonggiRouteInfoClient(
         }
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteInfo {
-        TODO("Not yet implemented")
+    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
+        return publicGyeonggiRouteInfoFeignClient.getRouteInfo(
+            serviceKey,
+            route.id.value
+        ).response.msgBody
+            .busRouteInfoItem
+            .toBusRouteOperationInfo()
     }
 }

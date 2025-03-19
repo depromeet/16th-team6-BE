@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
@@ -30,11 +30,11 @@ class PublicSeoulBusRouteInfoClient(
         }
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteInfo? {
+    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo? {
         return publicSeoulBusRouteInfoFeignClient.getRouteInfo(route.id.value)
             .msgBody
             .itemList
             ?.get(0)
-            ?.toBusRouteInfo()
+            ?.toBusRouteOperationInfo()
     }
 }

@@ -7,7 +7,9 @@ import com.deepromeet.atcha.transit.domain.BusDirection
 import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
+import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
@@ -20,6 +22,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 data class PublicGyeonggiApiResponse<T>(
@@ -290,6 +293,22 @@ data class BusRouteInfoItem(
         )
     }
 
+    fun toBusRouteOperationInfo(): BusRouteOperationInfo {
+        return BusRouteOperationInfo(
+            startStationName = startStationName,
+            endStationName = endStationName,
+            serviceHours =
+                listOfNotNull(
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.UP, upLastTime, peekAlloc),
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.DOWN, downLastTime, peekAlloc),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.UP, satUpLastTime, satPeekAlloc),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.DOWN, satDownLastTime, satPeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, sunUpLastTime, sunPeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, sunDownLastTime, sunPeekAlloc)
+                )
+        )
+    }
+
     private fun getLastTime(
         dailyType: DailyType,
         busDirection: BusDirection
@@ -335,6 +354,39 @@ data class BusRouteInfoItem(
             }
 
         return LocalDateTime.of(date, localTime)
+    }
+
+    private fun createBusServiceHours(
+        dailyType: DailyType,
+        busDirection: BusDirection,
+        time: String?,
+        term: Int
+    ): BusServiceHours? {
+        if (time.isNullOrBlank()) return null
+
+        return BusServiceHours(
+            dailyType = dailyType,
+            busDirection = busDirection,
+            startTime = parseTime(time),
+            endTime = parseTime(time),
+            term = term
+        )
+    }
+
+    private fun parseTime(timeStr: String): LocalDateTime {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val localTime = LocalTime.parse(timeStr, formatter)
+            val date =
+                if (localTime.isBefore(LocalTime.of(3, 0))) {
+                    LocalDate.now().plusDays(1)
+                } else {
+                    LocalDate.now()
+                }
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("올바르지 않은 시간 형식입니다: $timeStr")
+        }
     }
 
     private fun getTerm(dailyType: DailyType): Int {

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 interface BusRouteInfoClient {
-    fun getBusRouteInfo(route: BusRoute): BusRouteInfo?
+    fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo?
 
     fun getBusArrival(
         station: BusStation,

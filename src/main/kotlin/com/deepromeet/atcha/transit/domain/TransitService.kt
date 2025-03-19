@@ -42,6 +42,10 @@ class TransitService(
         return BusRouteDetail(busRouteStationList, busPositions)
     }
 
+    fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
+        return busManager.getBusRouteOperationInfo(busRoute)
+    }
+
     fun getTaxiFare(
         start: Coordinate,
         end: Coordinate

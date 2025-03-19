@@ -4,12 +4,13 @@ import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
-import com.deepromeet.atcha.transit.api.request.BusRouteDetailRequest
+import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
 import com.deepromeet.atcha.transit.api.response.BusRouteDetailResponse
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.TransitService
 import org.springframework.web.bind.annotation.GetMapping
@@ -51,10 +52,19 @@ class TransitController(
 
     @GetMapping("/bus-routes")
     fun getBusRouteDetail(
-        @ModelAttribute request: BusRouteDetailRequest
+        @ModelAttribute request: BusRouteRequest
     ): ApiResponse<BusRouteDetailResponse> {
         return ApiResponse.success(
             BusRouteDetailResponse(transitService.getBusDetail(request.toBusRoute()))
+        )
+    }
+
+    @GetMapping("/bus-routes/operation-info")
+    fun getBusOperationInfo(
+        @ModelAttribute request: BusRouteRequest
+    ): ApiResponse<BusRouteOperationInfo> {
+        return ApiResponse.success(
+            transitService.getBusOperationInfo(request.toBusRoute())
         )
     }
 

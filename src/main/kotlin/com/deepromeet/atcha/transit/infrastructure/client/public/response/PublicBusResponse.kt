@@ -6,7 +6,7 @@ import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
 import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
@@ -281,10 +281,10 @@ data class BusRouteInfoResponse(
     @JacksonXmlProperty(localName = "lastBusTm")
     val lastBusTm: String
 ) {
-    fun toBusRouteInfo(): BusRouteInfo {
+    fun toBusRouteOperationInfo(): BusRouteOperationInfo {
         val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
 
-        return BusRouteInfo(
+        return BusRouteOperationInfo(
             startStationName = stStationNm,
             endStationName = edStationNm,
             serviceHours =

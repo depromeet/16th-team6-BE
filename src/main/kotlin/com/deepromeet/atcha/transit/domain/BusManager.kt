@@ -39,6 +39,11 @@ class BusManager(
             )
     }
 
+    fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
+        return busRouteInfoClientMap[route.serviceRegion]!!.getBusRouteInfo(route)
+            ?: throw TransitException.BusRouteOperationInfoFetchFailed
+    }
+
     fun getBusRouteStationList(busRoute: BusRoute): BusRouteStationList {
         return busStationInfoClientMap[busRoute.serviceRegion]!!.getByRoute(busRoute)
             ?: throw TransitException.BusRouteStationListFetchFailed
