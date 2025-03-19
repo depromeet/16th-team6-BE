@@ -55,11 +55,11 @@ class RouteDepartureTimeRefresher(
         val realTimeInfos = busArrival.realTimeInfo
         if (realTimeInfos.isEmpty()) return
 
-        val candidateTimes = mutableListOf<LocalDateTime>()
-        realTimeInfos.forEach { rt ->
-            val arrivalTime = rt.expectedArrivalTime ?: return@forEach
-            candidateTimes += arrivalTime
-            candidateTimes += arrivalTime.plusMinutes(busArrival.term.toLong())
+        val candidateTimes = realTimeInfos.mapNotNull { it.expectedArrivalTime }.take(2).toMutableList()
+
+        realTimeInfos.getOrNull(1)?.expectedArrivalTime?.let { secondBusArrivalTime ->
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong())
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong() * 2)
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
