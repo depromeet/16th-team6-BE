@@ -7,41 +7,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: create
-    properties:
-      hibernate:
-        show-sql: true
-        format_sql: true
-        default_batch_fetch_size: 100
-
-logging:
-  level:
-    com.deepromeet.seulseul: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-    feign: DEBUG
-    tracer: trace
-    org:
-      hibernate:
-        orm:
-          jdbc:
-            bind: trace
-        SQL: trace
-
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: FULL
 
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
-  api:
-    url: https://kapi.kakao.com/
-  oauth:
-    url: https://kauth.kakao.com/oauth
 
 tmap:
   api:
-    url: https://apis.openapi.sk.com
     app-key: ${secret.dev.TMAP_API_KEY}
 
 redis:
@@ -50,19 +21,10 @@ redis:
 
 open-api:
   api:
-    url:
-      bus: http://ws.bus.go.kr
-      gyeonggi-bus: http://apis.data.go.kr/6410000/busstationservice/v2
-      gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
-      gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
-      subway: http://apis.data.go.kr/1613000/SubwayInfoService
-      holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
 
 kric:
   api:
-    url:
-      subway: https://openapi.kric.go.kr/openapi/trainUseInfo
     service-key: ${secret.dev.KRIC_SERVICE_KEY}
 
 jwt:

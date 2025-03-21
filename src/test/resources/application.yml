@@ -3,3 +3,56 @@ spring:
     import: secret-env.yml
   profiles:
     active: test
+  jpa:
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    com.deepromeet.seulseul: DEBUG
+    org.springframework.cloud.openfeign: DEBUG
+    feign: DEBUG
+    tracer: trace
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+        SQL: trace
+
+feign:
+  client:
+    config:
+      default:
+        loggerLevel: FULL
+
+tmap:
+  api:
+    url: https://apis.openapi.sk.com
+
+kakao:
+  api:
+    url: https://kapi.kakao.com/
+  oauth:
+    url: https://kauth.kakao.com/oauth
+
+open-api:
+  api:
+    url:
+      bus: http://ws.bus.go.kr
+      bus-route: http://ws.bus.go.kr/api/rest/busRouteInfo
+      bus-postion: http://ws.bus.go.kr/api/rest/buspos
+      gyeonggi-bus: http://apis.data.go.kr/6410000/busstationservice/v2
+      gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
+      gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
+      gyeonggi-bus-position: http://apis.data.go.kr/6410000/buslocationservice/v2
+      subway: http://apis.data.go.kr/1613000/SubwayInfoService
+      holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
+
+kric:
+  api:
+    url:
+      subway: https://openapi.kric.go.kr/openapi/trainUseInfo
