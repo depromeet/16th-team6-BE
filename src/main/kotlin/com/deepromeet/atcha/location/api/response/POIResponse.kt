@@ -20,8 +20,15 @@ data class POIResponse(
                 lon = domain.location.coordinate.lon,
                 businessCategory = domain.businessCategory,
                 address = domain.address,
-                radius = domain.radius?.let { "${it}km" }
+                radius = domain.radius?.let { radiusToString(it) }
             )
+        }
+
+        private fun radiusToString(radius: Int): String {
+            if (radius < 1) {
+                return "${radius * 1000}m"
+            }
+            return "${radius}km"
         }
     }
 }

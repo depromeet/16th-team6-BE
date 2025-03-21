@@ -308,7 +308,9 @@ data class BusRouteInfoItem(
                     createBusServiceHours(DailyType.SATURDAY, BusDirection.UP, satUpLastTime, satPeekAlloc),
                     createBusServiceHours(DailyType.SATURDAY, BusDirection.DOWN, satDownLastTime, satPeekAlloc),
                     createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, sunUpLastTime, sunPeekAlloc),
-                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, sunDownLastTime, sunPeekAlloc)
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, sunDownLastTime, sunPeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, weUpLastTime, wePeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, weDownLastTime, wePeekAlloc)
                 )
         )
     }
@@ -333,10 +335,17 @@ data class BusRouteInfoItem(
                     }
                 }
 
-                DailyType.HOLIDAY -> {
+                DailyType.SUNDAY -> {
                     when (busDirection) {
                         BusDirection.UP -> sunUpLastTime
                         BusDirection.DOWN -> sunDownLastTime
+                    }
+                }
+
+                DailyType.HOLIDAY -> {
+                    when (busDirection) {
+                        BusDirection.UP -> weUpLastTime
+                        BusDirection.DOWN -> weDownLastTime
                     }
                 }
             } ?: throw IllegalArgumentException("막차 시간을 가져올 수 없습니다.")
@@ -397,7 +406,8 @@ data class BusRouteInfoItem(
         return when (dailyType) {
             DailyType.WEEKDAY -> peekAlloc
             DailyType.SATURDAY -> satPeekAlloc
-            DailyType.HOLIDAY -> sunPeekAlloc
+            DailyType.HOLIDAY -> wePeekAlloc
+            DailyType.SUNDAY -> sunPeekAlloc
         }
     }
 }
