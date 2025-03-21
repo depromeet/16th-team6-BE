@@ -19,7 +19,7 @@ class TMapLocationClient(
             keyword,
             currentCoordinate.lat,
             currentCoordinate.lon
-        ).toPOIs()
+        )?.toPOIs() ?: emptyList()
 
     override fun label(coordinate: Coordinate): Location =
         tMapLocationFeignClient.getReverseGeoLabel(

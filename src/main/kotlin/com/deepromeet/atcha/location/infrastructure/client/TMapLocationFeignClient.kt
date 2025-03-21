@@ -20,7 +20,7 @@ interface TMapLocationFeignClient {
         @RequestParam centerLon: Double,
         @RequestParam page: Int = 1,
         @RequestParam count: Int = 20
-    ): TMapPOIResponse
+    ): TMapPOIResponse?
 
     @GetMapping("/tmap/geo/reverseLabel")
     fun getReverseGeoLabel(
