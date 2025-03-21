@@ -12,6 +12,11 @@ data class Coordinate(
     val lat: Double,
     val lon: Double
 ) {
+    init {
+        require(lat in -90.0..90.0) { "잘못된 위도 값입니다: $lat (유효 범위: -90.0 ~ 90.0)" }
+        require(lon in -180.0..180.0) { "잘못된 경도 값입니다: $lon (유효 범위: -180.0 ~ 180.0)" }
+    }
+
     companion object {
         private const val EARTH_RADIUS_KM = 6371.0 // 지구 반지름 (km)
     }
