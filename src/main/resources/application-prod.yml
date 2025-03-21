@@ -52,9 +52,12 @@ open-api:
   api:
     url:
       bus: http://ws.bus.go.kr
+      bus-route: http://ws.bus.go.kr/api/rest/busRouteInfo
+      bus-postion: http://ws.bus.go.kr/api/rest/buspos
       gyeonggi-bus: http://apis.data.go.kr/6410000/busstationservice/v2
       gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
       gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
+      gyeonggi-bus-position: http://apis.data.go.kr/6410000/buslocationservice/v2
       subway: http://apis.data.go.kr/1613000/SubwayInfoService
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
     service-key: ${secret.prod.OPEN_API_SERVICE_KEY}

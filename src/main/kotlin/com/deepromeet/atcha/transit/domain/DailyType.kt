@@ -5,5 +5,6 @@ enum class DailyType(
 ) {
     WEEKDAY("01"),
     SATURDAY("02"),
+    SUNDAY("NONE"),
     HOLIDAY("03")
 }
