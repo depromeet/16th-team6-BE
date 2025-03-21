@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusRoute
+import com.deepromeet.atcha.transit.domain.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
 import com.deepromeet.atcha.transit.domain.BusStationMeta
@@ -13,6 +14,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class PublicGyeonggiStationInfoClient(
     private val publicGyeonggiBusStationInfoFeignClient: PublicGyeonggiBusStationInfoFeignClient,
+    private val publicGyeonggiRouteInfoFeignClient: PublicGyeonggiRouteInfoFeignClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String
 ) : BusStationInfoClient {
@@ -45,6 +47,24 @@ class PublicGyeonggiStationInfoClient(
         } catch (e: Exception) {
             log.warn(e) { "경기도 버스 노선 정보를 가져오는데 실패했습니다." }
             return null
+        }
+    }
+
+    override fun getByRoute(route: BusRoute): BusRouteStationList? {
+        return try {
+            val busRouteStationsResponse =
+                publicGyeonggiRouteInfoFeignClient.getRouteStationList(
+                    serviceKey,
+                    route.id.value
+                ).response.msgBody.busRouteStationList
+
+            BusRouteStationList(
+                busRouteStationsResponse.map { it.toBusRouteStation(route) },
+                busRouteStationsResponse.firstOrNull()?.turnSeq
+            )
+        } catch (e: Exception) {
+            log.warn(e) { "경기도 버스 노선 경유 정류소를 가져오는데 실패했습니다." }
+            null
         }
     }
 }

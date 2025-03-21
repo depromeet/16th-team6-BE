@@ -1,8 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.BusArrival
-import com.deepromeet.atcha.transit.domain.BusArrivalInfoFetcher
 import com.deepromeet.atcha.transit.domain.BusRoute
+import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -12,13 +13,13 @@ import org.springframework.stereotype.Component
 private val log = KotlinLogging.logger {}
 
 @Component
-class PublicGyeonggiArrivalInfoClient(
+class PublicGyeonggiRouteInfoClient(
     private val publicGyeonggiRouteInfoFeignClient: PublicGyeonggiRouteInfoFeignClient,
     private val publicGyeonggiBusArrivalInfoFeignClient: PublicGyeonggiBusArrivalInfoFeignClient,
     private val dailyTypeResolver: DailyTypeResolver,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String
-) : BusArrivalInfoFetcher {
+) : BusRouteInfoClient {
     override fun getBusArrival(
         station: BusStation,
         route: BusRoute
@@ -52,5 +53,14 @@ class PublicGyeonggiArrivalInfoClient(
             log.warn(e) { "경기도 버스 도착 정보를 가져오는데 실패했습니다." }
             return null
         }
+    }
+
+    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
+        return publicGyeonggiRouteInfoFeignClient.getRouteInfo(
+            serviceKey,
+            route.id.value
+        ).response.msgBody
+            .busRouteInfoItem
+            .toBusRouteOperationInfo()
     }
 }

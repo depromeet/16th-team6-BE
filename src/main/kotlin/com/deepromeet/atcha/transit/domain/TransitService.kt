@@ -31,8 +31,19 @@ class TransitService(
         routeName: String,
         stationName: String,
         coordinate: Coordinate
-    ): BusArrival? {
+    ): BusArrival {
         return busManager.getArrivalInfo(routeName, BusStationMeta(stationName, coordinate))
+            ?: throw TransitException.NotFoundBusArrival
+    }
+
+    fun getBusPositions(busRoute: BusRoute): BusRoutePositions {
+        val busRouteStationList = busManager.getBusRouteStationList(busRoute)
+        val busPositions = busManager.getBusPosition(busRoute)
+        return BusRoutePositions(busRouteStationList, busPositions)
+    }
+
+    fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
+        return busManager.getBusRouteOperationInfo(busRoute)
     }
 
     fun getTaxiFare(

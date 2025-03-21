@@ -2,20 +2,27 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.BusArrival
+import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusDirection
+import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.BusRouteStation
+import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
+import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusStationListDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 data class PublicGyeonggiApiResponse<T>(
@@ -68,6 +75,10 @@ data class PublicGyeonggiResponse<T>(
     data class BusArrivalInfoResponse(
         val busArrivalItem: BusArrivalItem
     )
+
+    data class BusLocationListResponse(
+        val busLocationList: List<BusLocationResponse>
+    )
 }
 
 data class BusArrivalItem(
@@ -81,11 +92,17 @@ data class BusArrivalItem(
     val stationNm2: String,
     val turnSeq: Int,
     val predictTimeSec1: Int?,
-    val predictTimeSec2: Int?
+    val predictTimeSec2: Int?,
+    val crowded1: Int,
+    val crowded2: Int,
+    val remainSeatCnt1: Int,
+    val remainSeatCnt2: Int,
+    val vehId1: Int,
+    val vehId2: Int
 ) {
     fun toRealTimeBussArrivals(): List<RealTimeBusArrival> {
-        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1)
-        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2)
+        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, vehId1)
+        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, vehId2)
         return listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
     }
 
@@ -131,12 +148,32 @@ data class BusArrivalItem(
         return (averageSecondPerStation * stationCount).toLong()
     }
 
-    private fun createRealTimeArrivalInfo(predictTimeSec: Int?): RealTimeBusArrival {
+    private fun createRealTimeArrivalInfo(
+        predictTimeSec: Int?,
+        crowded: Int,
+        remainSeatCnt: Int,
+        vehId: Int
+    ): RealTimeBusArrival {
+        val busCongestion =
+            when (crowded) {
+                0 -> BusCongestion.UNKNOWN
+                1 -> BusCongestion.LOW
+                2 -> BusCongestion.MEDIUM
+                3 -> BusCongestion.HIGH
+                4 -> BusCongestion.VERY_HIGH
+                else -> throw IllegalArgumentException("Unknown bus congestion: $crowded")
+            }
+
+        val remainingSeats = if (busCongestion == BusCongestion.LOW && remainSeatCnt == 0) null else remainSeatCnt
+
         return RealTimeBusArrival(
+            vehicleId = vehId.toString(),
             busStatus = determineBusStatus(predictTimeSec),
             remainingTime = predictTimeSec ?: 0,
             remainingStations = null,
-            isLast = null
+            isLast = null,
+            busCongestion = busCongestion,
+            remainingSeats = remainSeatCnt
         )
     }
 
@@ -161,6 +198,22 @@ data class GyeonggiBusRouteStation(
 ) {
     fun getDirection(): BusDirection {
         return if (stationSeq < turnSeq) BusDirection.DOWN else BusDirection.UP
+    }
+
+    fun toBusRouteStation(busRoute: BusRoute): BusRouteStation {
+        return BusRouteStation(
+            busRoute = busRoute,
+            busStation =
+                BusStation(
+                    id = BusStationId(stationId),
+                    busStationMeta =
+                        BusStationMeta(
+                            name = stationName,
+                            coordinate = Coordinate(y.toDouble(), x.toDouble())
+                        )
+                ),
+            order = stationSeq
+        )
     }
 }
 
@@ -189,7 +242,8 @@ data class GyeonggiBusRoute(
     fun toBusRoute(): BusRoute {
         return BusRoute(
             id = BusRouteId(routeId),
-            name = routeName
+            name = routeName,
+            serviceRegion = ServiceRegion.GYEONGGI
         )
     }
 }
@@ -229,13 +283,33 @@ data class BusRouteInfoItem(
         val lastTime = getLastTime(dailyType, busDirection)
         val term = getTerm(dailyType)
         return BusArrival(
-            busRouteId = BusRouteId(routeId),
-            routeName = routeName,
+            busRoute =
+                BusRoute(
+                    id = BusRouteId(routeId),
+                    name = routeName,
+                    serviceRegion = ServiceRegion.GYEONGGI
+                ),
             busStationId = BusStationId(busArrivalInfo.stationId),
             stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
             lastTime = lastTime.plusSeconds(busArrivalInfo.calculateTravelTimeFromStart(busStationList)),
             term = term,
             realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
+        )
+    }
+
+    fun toBusRouteOperationInfo(): BusRouteOperationInfo {
+        return BusRouteOperationInfo(
+            startStationName = startStationName,
+            endStationName = endStationName,
+            serviceHours =
+                listOfNotNull(
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.UP, upLastTime, peekAlloc),
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.DOWN, downLastTime, peekAlloc),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.UP, satUpLastTime, satPeekAlloc),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.DOWN, satDownLastTime, satPeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, sunUpLastTime, sunPeekAlloc),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, sunDownLastTime, sunPeekAlloc)
+                )
         )
     }
 
@@ -286,11 +360,75 @@ data class BusRouteInfoItem(
         return LocalDateTime.of(date, localTime)
     }
 
+    private fun createBusServiceHours(
+        dailyType: DailyType,
+        busDirection: BusDirection,
+        time: String?,
+        term: Int
+    ): BusServiceHours? {
+        if (time.isNullOrBlank()) return null
+
+        return BusServiceHours(
+            dailyType = dailyType,
+            busDirection = busDirection,
+            startTime = parseTime(time),
+            endTime = parseTime(time),
+            term = term
+        )
+    }
+
+    private fun parseTime(timeStr: String): LocalDateTime {
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("HH:mm")
+            val localTime = LocalTime.parse(timeStr, formatter)
+            val date =
+                if (localTime.isBefore(LocalTime.of(3, 0))) {
+                    LocalDate.now().plusDays(1)
+                } else {
+                    LocalDate.now()
+                }
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            throw IllegalArgumentException("올바르지 않은 시간 형식입니다: $timeStr")
+        }
+    }
+
     private fun getTerm(dailyType: DailyType): Int {
         return when (dailyType) {
             DailyType.WEEKDAY -> peekAlloc
             DailyType.SATURDAY -> satPeekAlloc
             DailyType.HOLIDAY -> sunPeekAlloc
         }
+    }
+}
+
+data class BusLocationResponse(
+    val crowded: Int,
+    val plateNo: String,
+    val remainSeatCnt: Int,
+    val routeId: Int,
+    val stationId: Int,
+    val stationSeq: Int,
+    val vehId: Int
+) {
+    fun toBusPosition(): BusPosition {
+        val busCongestion =
+            when (crowded) {
+                1 -> BusCongestion.LOW
+                2 -> BusCongestion.MEDIUM
+                3 -> BusCongestion.HIGH
+                4 -> BusCongestion.VERY_HIGH
+                else -> throw IllegalArgumentException("Unknown bus congestion: $crowded")
+            }
+
+        return BusPosition(
+            vehicleId = vehId.toString(),
+            sectionOrder = stationSeq,
+            vehicleNumber = plateNo,
+            fullSectionDistance = null,
+            currentSectionDistance = null,
+            busCongestion = busCongestion,
+            remainSeats = remainSeatCnt
+        )
     }
 }

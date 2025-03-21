@@ -4,10 +4,13 @@ import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
+import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
+import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
+import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
-import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.TransitService
 import org.springframework.web.bind.annotation.GetMapping
@@ -35,13 +38,33 @@ class TransitController(
     @GetMapping("/bus-arrival")
     fun getArrivalInfo(
         @ModelAttribute request: BusArrivalRequest
-    ): ApiResponse<List<RealTimeBusArrivalResponse>> {
+    ): ApiResponse<BusArrivalResponse> {
         return ApiResponse.success(
-            transitService.getBusArrivalInfo(
-                request.routeName,
-                request.stationName,
-                Coordinate(request.lat, request.lon)
-            )?.realTimeInfo?.map { RealTimeBusArrivalResponse(it) } ?: emptyList()
+            BusArrivalResponse(
+                transitService.getBusArrivalInfo(
+                    request.routeName,
+                    request.stationName,
+                    Coordinate(request.lat, request.lon)
+                )
+            )
+        )
+    }
+
+    @GetMapping("/bus-routes/positions")
+    fun getBusRoutePositions(
+        @ModelAttribute request: BusRouteRequest
+    ): ApiResponse<BusRoutePositionResponse> {
+        return ApiResponse.success(
+            BusRoutePositionResponse(transitService.getBusPositions(request.toBusRoute()))
+        )
+    }
+
+    @GetMapping("/bus-routes/operation-info")
+    fun getBusOperationInfo(
+        @ModelAttribute request: BusRouteRequest
+    ): ApiResponse<BusRouteOperationInfo> {
+        return ApiResponse.success(
+            transitService.getBusOperationInfo(request.toBusRoute())
         )
     }
 

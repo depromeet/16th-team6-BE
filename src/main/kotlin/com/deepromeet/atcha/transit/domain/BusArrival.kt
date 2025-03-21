@@ -3,13 +3,13 @@ package com.deepromeet.atcha.transit.domain
 import java.time.LocalDateTime
 
 data class BusArrival(
-    val busRouteId: BusRouteId,
-    val routeName: String,
+    val busRoute: BusRoute,
     val busStationId: BusStationId,
     val stationName: String,
     val lastTime: LocalDateTime,
     val term: Int,
     val realTimeInfo: List<RealTimeBusArrival>
+    // TODO: 버스 혼잡도(좌석수), 차량 번호 추가
 ) {
     fun getNearestTime(
         time: LocalDateTime,
@@ -43,10 +43,13 @@ data class BusArrival(
 }
 
 data class RealTimeBusArrival(
+    val vehicleId: String,
     val busStatus: BusStatus,
     val remainingTime: Int,
     val remainingStations: Int?,
-    val isLast: Boolean?
+    val isLast: Boolean?,
+    val busCongestion: BusCongestion?,
+    val remainingSeats: Int?
 ) {
     val expectedArrivalTime: LocalDateTime?
         get() =
@@ -54,7 +57,6 @@ data class RealTimeBusArrival(
                 BusStatus.OPERATING, BusStatus.SOON ->
                     LocalDateTime.now()
                         .plusSeconds(remainingTime.toLong())
-
                 else -> null
             }
 }
