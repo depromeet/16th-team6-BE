@@ -11,6 +11,11 @@ data class POIHistoryRequest(
     val businessCategory: String,
     val address: String
 ) {
+    init {
+        require(lat in -90.0..90.0) { "잘못된 위도 값입니다: $lat (유효 범위: -90.0 ~ 90.0)" }
+        require(lon in -180.0..180.0) { "잘못된 경도 값입니다: $lon (유효 범위: -180.0 ~ 180.0)" }
+    }
+
     fun toPOI(): POI {
         return POI(
             location =
