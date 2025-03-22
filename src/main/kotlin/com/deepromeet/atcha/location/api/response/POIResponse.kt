@@ -24,11 +24,11 @@ data class POIResponse(
             )
         }
 
-        private fun radiusToString(radius: Int): String {
+        private fun radiusToString(radius: Double): String {
             if (radius < 1) {
-                return "${radius * 1000}m"
+                return "${(radius * 1000).toInt()}m"
             }
-            return "${radius}km"
+            return "${radius.toInt()}km"
         }
     }
 }
