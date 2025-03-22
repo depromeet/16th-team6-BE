@@ -2,8 +2,8 @@ name: STAGING CD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ staging ]
+  pull_request: # TODO 추후 변경
+    branches: [ dev ]
 
 jobs:
   build:
@@ -71,7 +71,7 @@ jobs:
           target: /home/atcha/
 
       - name: SSH Jump Host to Staging Server and Deploy
-        uses: appleboy/ssh-action@master
+        uses: appleboy/ssh-action@v0.1.2
         with:
           host: ${{ env.HOST }}
           username: ${{ secrets.STAG_USERNAME }}
