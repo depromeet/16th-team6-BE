@@ -14,6 +14,7 @@ class LoggingInterceptor : HandlerInterceptor {
     companion object {
         private const val REQUEST_ID = "requestId"
         private const val REQUEST_TIME = "requestTime"
+        private val IGNORE_URI = listOf("/health")
         private val logger = KotlinLogging.logger {}
     }
 
@@ -25,6 +26,10 @@ class LoggingInterceptor : HandlerInterceptor {
         MDC.put(REQUEST_ID, UUID.randomUUID().toString().substring(0, 8))
         MDC.put(REQUEST_TIME, System.currentTimeMillis().toString())
 
+        if (IGNORE_URI.contains(request.requestURI)) {
+            return true
+        }
+
         logger.info { "REQUEST [${MDC.get(REQUEST_ID)}] [${request.method} ${request.requestURI}]" }
         return true
     }
@@ -35,6 +40,10 @@ class LoggingInterceptor : HandlerInterceptor {
         handler: Any,
         ex: Exception?
     ) {
+        if (IGNORE_URI.contains(request.requestURI)) {
+            return
+        }
+
         val duration = System.currentTimeMillis() - MDC.get(REQUEST_TIME).toLong()
         logger.info { "RESPONSE [${MDC.get(REQUEST_ID)}] [${request.method} ${request.requestURI}] [$duration ms]" }
     }
