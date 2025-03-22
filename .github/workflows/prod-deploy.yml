@@ -1,0 +1,68 @@
+name: PROD CD
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+env:
+  IMAGE_NAME: atcha
+  VERSION: ${{ github.sha }}
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+          token: ${{ secrets.SUBMODULE_TOKEN }}
+
+      - name: Debug - List submodule folder contents
+        run: |
+          echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
+          ls -Rla ./16th-team6-BE-submodule
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: docker.io
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      - name: Build Docker Image
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
+
+      - name: Push Docker Image
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [ "Prod A", "Prod B" ]
+    env:
+      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }} # TODO private ip 변경
+      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }}
+    steps:
+      - name: Set host variable based on target
+        id: set_host
+        run: |
+          if [ "${{ matrix.target }}" = "Prod A" ]; then
+            echo "HOST=${PROD_APP_A_IP}" >> $GITHUB_ENV
+          else
+            echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
+          fi
+
+      - name: Deploy to ${{ matrix.target }}
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ secrets.PROD_APP_USERNAME }}
+          key: ${{ secrets.PROD_APP_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+          script: |
+            sudo bash ./deploy.sh

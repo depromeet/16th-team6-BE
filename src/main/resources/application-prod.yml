@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${secret.prod.SPRING_DATABASE_HOST}:${secret.prod.SPRING_DATABASE_PORT}/${secret.prod.SPRING_DATABASE_NAME}?useSSL=false&allowPublicKeyRetrieval=true
+    username: ${secret.prod.SPRING_DATABASE_USERNAME}
+    password: ${secret.prod.SPRING_DATABASE_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+tmap:
+  api:
+    app-key: ${secret.prod.TMAP_API_KEY}
+
+redis:
+  host: ${secret.prod.REDIS_HOST}
+  port: ${secret.prod.REDIS_PORT}
+
+kakao:
+  client-id: ${secret.prod.OAUTH_KAKAO_CLIENT_ID}
+
+open-api:
+  api:
+    service-key: ${secret.prod.OPEN_API_SERVICE_KEY}
+
+kric:
+  api:
+    service-key: ${secret.prod.KRIC_SERVICE_KEY}
+
+jwt:
+  access:
+    secret: ${secret.prod.JWT_ACCESS_SECRET}
+  refresh:
+    secret: ${secret.prod.JWT_REFRESH_SECRET}

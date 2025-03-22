@@ -1,0 +1,25 @@
+config:
+  validation: true
+  warningsAsErrors: false
+
+build:
+  maxIssues: -1
+
+complexity:
+  ComplexInterface:
+    active: true
+  CyclomaticComplexMethod:
+    threshold: 10
+  LongParameterList:
+    functionThreshold: 5
+    constructorThreshold: 6
+  TooManyFunctions:
+    active: true
+
+performance:
+  SpreadOperator:
+    active: false
+
+style:
+  MagicNumber:
+    active: false

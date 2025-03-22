@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+
+kakao:
+  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
+
+tmap:
+  api:
+    app-key: ${secret.dev.TMAP_API_KEY}
+
+redis:
+  host: localhost
+  port: 6379
+
+open-api:
+  api:
+    service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+
+kric:
+  api:
+    service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+jwt:
+  access:
+    secret: ${secret.dev.JWT_ACCESS_SECRET}
+  refresh:
+    secret: ${secret.dev.JWT_REFRESH_SECRET}
