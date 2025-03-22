@@ -36,7 +36,7 @@ data class TMapPOIResponse(
                 Location(name, Coordinate(noorLat.toDouble(), noorLon.toDouble())),
                 getBusinessCategory(),
                 getLoadAddress(),
-                radius.toDouble().toInt()
+                radius.toDouble()
             )
         }
 

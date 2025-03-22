@@ -17,6 +17,9 @@ class LocationReader(
         currentCoordinate: Coordinate
     ): List<POI> {
         try {
+            if (keyword.isBlank()) {
+                return emptyList()
+            }
             return poiFinder.find(keyword, currentCoordinate)
         } catch (e: FeignException) {
             logger.error(e) { e.message }
