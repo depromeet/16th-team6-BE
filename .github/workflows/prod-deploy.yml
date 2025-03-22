@@ -71,11 +71,12 @@ jobs:
           proxy_key: ${{ secrets.PROD_SSH_KEY }}
           proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
 
+          timeout: 120s
           source: "./deployment/prod/"
           target: /home/atcha/
 
       - name: SSH Jump Host to Prod Server and Deploy
-        uses: appleboy/ssh-action@v0.1.2
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }}
           username: ${{ secrets.PROD_USERNAME }}
