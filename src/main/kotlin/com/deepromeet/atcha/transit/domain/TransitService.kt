@@ -65,7 +65,8 @@ class TransitService(
         userId: Long,
         start: Coordinate,
         endLat: String?,
-        endLon: String?
+        endLon: String?,
+        sortType: LastRouteSortType
     ): List<LastRoutesResponse> {
         // end 가 없는 경우, 사용자 집 주소 조회
         val end =
@@ -81,7 +82,8 @@ class TransitService(
         // 출발지와 도착지 경로가 redis 에 저장된 경우
         lastRouteIndexReader.read(start, end).let { routeIds ->
             if (routeIds.isNotEmpty()) {
-                return lastRouteOperations.sortedByMinTransfer(
+                return lastRouteOperations.sort(
+                    sortType,
                     lastRouteOperations.getFilteredRoutes(
                         routeIds.map { routeId -> lastRouteReader.read(routeId) }
                     )
@@ -114,7 +116,7 @@ class TransitService(
         saveRouteIdsByStartEnd(start, end, filteredRoutes.map { it.routeId })
         saveRoutesToCache(filteredRoutes)
 
-        return lastRouteOperations.sortedByMinTransfer(filteredRoutes)
+        return lastRouteOperations.sort(sortType, filteredRoutes)
     }
 
     private fun saveRouteIdsByStartEnd(
