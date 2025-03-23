@@ -10,7 +10,7 @@ private val logger = KotlinLogging.logger {}
 @Component
 class LocationReader(
     private val poiFinder: POIFinder,
-    private val reverseLabeler: ReverseLabeler
+    private val reverseGeocoder: ReverseGeocoder
 ) {
     fun readPOIs(
         keyword: String,
@@ -29,7 +29,7 @@ class LocationReader(
 
     fun read(coordinate: Coordinate): Location {
         try {
-            return reverseLabeler.label(coordinate)
+            return reverseGeocoder.geocode(coordinate)
         } catch (e: FeignException) {
             logger.error(e) { e.message }
             throw LocationException.FailedToReadLocation

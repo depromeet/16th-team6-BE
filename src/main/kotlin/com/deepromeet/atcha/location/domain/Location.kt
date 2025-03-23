@@ -5,5 +5,6 @@ import com.deepromeet.atcha.common.annotation.NoArg
 @NoArg
 data class Location(
     val name: String,
+    val address: String,
     val coordinate: Coordinate
 )
