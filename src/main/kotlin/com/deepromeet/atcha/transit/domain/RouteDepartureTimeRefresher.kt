@@ -1,6 +1,9 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.notification.domatin.NotificationManager
+import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
+import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.transit.api.response.LastRouteLeg
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import org.springframework.stereotype.Component
@@ -10,20 +13,23 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class RouteDepartureTimeRefresher(
-    private val lastRouteCache: LastRouteCache,
+    private val redisOperations: RouteNotificationRedisOperations,
     private val lastRouteAppender: LastRouteAppender,
-    private val busManager: BusManager
+    private val busManager: BusManager,
+    private val lastRouteReader: LastRouteReader,
+    private val notificationManager: NotificationManager
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     fun refresh() {
-        lastRouteCache.processRoutes { route ->
+        redisOperations.processRoutes { route ->
             refreshDepartureTime(route)
+            notificationManager.checkAndNotifyDelay(route)
         }
     }
 
-    private fun refreshDepartureTime(route: LastRoutesResponse) {
-        val oldDepartureTime = LocalDateTime.parse(route.departureDateTime, dateTimeFormatter)
+    private fun refreshDepartureTime(notification: UserNotification) {
+        val oldDepartureTime = LocalDateTime.parse(notification.updatedDepartureTime, dateTimeFormatter)
 
         // 1) 20분 이내 체크
         val now = LocalDateTime.now()
@@ -31,6 +37,8 @@ class RouteDepartureTimeRefresher(
         if (minutesUntilDeparture > 20 || minutesUntilDeparture < 0) {
             return
         }
+
+        val route = lastRouteReader.read(notification.routeId)
 
         // 2) 첫 번째 버스 구간 찾기
         val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return
@@ -96,6 +104,8 @@ class RouteDepartureTimeRefresher(
             )
 
         lastRouteAppender.append(updatedRoute)
+
+        redisOperations.updateDepartureNotification(notification, newDepartureTime)
     }
 
     private fun getWalkTimeBeforeThisLeg(

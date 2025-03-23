@@ -215,7 +215,7 @@ class LastRouteOperations(
         val adjustBaseIndex = if (isAllRideable) earliestTransitLeg.index else lastUnrideableIndex!!
 
         // 4. 기준점 앞쪽 시간 재조정
-        var adjustBaseTime = LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime!!) ?: null
+        var adjustBaseTime = adjustedLegs[adjustBaseIndex].departureDateTime?.let { LocalDateTime.parse(it) }
         for (i in adjustBaseIndex - 1 downTo 0) {
             val leg = adjustedLegs[i]
 
