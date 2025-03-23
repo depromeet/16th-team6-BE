@@ -98,7 +98,7 @@ class TransitController(
             transitService.getDepartureRemainingTime(routeId)
         )
 
-    @GetMapping("/last-routes/{lastRouteId}bus-started")
+    @GetMapping("/last-routes/{lastRouteId}/bus-started")
     fun isBusStarted(
         @PathVariable lastRouteId: String
     ): ApiResponse<Boolean> =
