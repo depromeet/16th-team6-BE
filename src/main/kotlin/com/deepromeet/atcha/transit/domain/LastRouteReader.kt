@@ -13,4 +13,13 @@ class LastRouteReader(
     }
 
     fun readRemainingTime(routeId: String): Int = read(routeId).calculateRemainingTime()
+
+    fun isTargetBus(
+        lastRouteId: String,
+        currentBus: RealTimeBusArrival?
+    ): Boolean {
+        currentBus ?: return false
+        val lastRoutesResponse = read(lastRouteId)
+        return lastRoutesResponse.isTargetBus(currentBus)
+    }
 }
