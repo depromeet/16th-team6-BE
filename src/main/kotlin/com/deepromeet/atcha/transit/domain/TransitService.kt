@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
@@ -22,8 +21,7 @@ class TransitService(
     private val lastRouteAppender: LastRouteAppender,
     private val lastRouteIndexReader: LastRouteIndexReader,
     private val lastRouteIndexAppender: LastRouteIndexAppender,
-    private val lastRouteOperations: LastRouteOperations,
-    private val notificationRedisCache: RouteNotificationRedisOperations
+    private val lastRouteOperations: LastRouteOperations
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -63,14 +61,14 @@ class TransitService(
     }
 
     // TODO: 두번째 도착 예정 버스인지 확인하고있음 -> 실제 차고지 출발 여부 확인으로 변경 필요
-    fun isBusStarted(
-        userId: Long,
-        routeName: String,
-        busStationMeta: BusStationMeta
-    ): Boolean {
-        val routeId = notificationRedisCache.findLastRouteIdByUserId(userId) ?: return false
-        val busArrival = busManager.getArrivalInfo(routeName, busStationMeta)
-        return lastRouteReader.isTargetBus(routeId, busArrival?.realTimeInfo?.get(2))
+    fun isBusStarted(lastRouteId: String): Boolean {
+        val lastRoute = lastRouteReader.read(lastRouteId)
+        val busArrival =
+            busManager.getArrivalInfo(
+                lastRoute.getFirstBus().getRouteName(),
+                lastRoute.getFirstBus().getStartStation()
+            )
+        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.getFirstBus()) ?: false
     }
 
     suspend fun getLastRoutes(
