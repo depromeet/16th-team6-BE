@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.location.api.controller
 
+import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.location.api.request.POIHistoryRequest
 import com.deepromeet.atcha.location.api.request.POISearchRequest
@@ -42,14 +43,19 @@ class LocationController(
     @PostMapping("/histories")
     @ResponseStatus(HttpStatus.CREATED)
     fun addRecentPOI(
+        @CurrentUser userId: Long,
         @RequestBody request: POIHistoryRequest
-    ) = locationService.addPOIHistory(request.toPOI())
+    ) = locationService.addPOIHistory(
+        userId,
+        request.toPOI()
+    )
 
     @GetMapping("/histories")
     fun getRecentPOIs(
+        @CurrentUser userId: Long,
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<List<POIResponse>> =
-        locationService.getPOIHistories(coordinate).let {
+        locationService.getPOIHistories(userId, coordinate).let {
             return ApiResponse.success(
                 it.map { poi -> POIResponse.from(poi) }
             )
@@ -58,10 +64,13 @@ class LocationController(
     @DeleteMapping("/history")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeRecentPOI(
+        @CurrentUser userId: Long,
         @RequestBody request: POIHistoryRequest
-    ) = locationService.removePOIHistory(request.toPOI())
+    ) = locationService.removePOIHistory(userId, request.toPOI())
 
     @DeleteMapping("/histories")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun clearRecentPOIs() = locationService.clearPOIHistories()
+    fun clearRecentPOIs(
+        @CurrentUser userId: Long
+    ) = locationService.clearPOIHistories(userId)
 }

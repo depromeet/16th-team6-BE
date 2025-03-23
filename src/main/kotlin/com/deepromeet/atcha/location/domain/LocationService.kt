@@ -3,8 +3,6 @@ package com.deepromeet.atcha.location.domain
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
-const val USER_ID = 1L; // TODO: 향후 JWT 토큰에서 추출
-
 @Service
 class LocationService(
     private val locationReader: LocationReader,
@@ -22,24 +20,33 @@ class LocationService(
         return locationReader.read(coordinate)
     }
 
-    fun addPOIHistory(poi: POI) {
-        val user = userReader.read(USER_ID)
+    fun addPOIHistory(
+        userId: Long,
+        poi: POI
+    ) {
+        val user = userReader.read(userId)
         poiHistoryManager.append(user, poi)
     }
 
-    fun getPOIHistories(currentCoordinate: Coordinate): List<POI> {
-        val user = userReader.read(USER_ID)
+    fun getPOIHistories(
+        userId: Long,
+        currentCoordinate: Coordinate
+    ): List<POI> {
+        val user = userReader.read(userId)
         val pois = poiHistoryManager.getAll(user)
         return pois.map { it.distanceTo(currentCoordinate) }
     }
 
-    fun removePOIHistory(poi: POI) {
-        val user = userReader.read(USER_ID)
+    fun removePOIHistory(
+        userId: Long,
+        poi: POI
+    ) {
+        val user = userReader.read(userId)
         poiHistoryManager.remove(user, poi)
     }
 
-    fun clearPOIHistories() {
-        val user = userReader.read(USER_ID)
+    fun clearPOIHistories(userId: Long) {
+        val user = userReader.read(userId)
         poiHistoryManager.clear(user)
     }
 }
