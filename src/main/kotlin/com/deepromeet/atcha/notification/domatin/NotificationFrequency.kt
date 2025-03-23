@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.notification.domatin
 
 enum class NotificationFrequency(val minutes: Long) {
+    ONE(1),
     FIVE(5),
     TEN(10),
     FIFTEEN(15),

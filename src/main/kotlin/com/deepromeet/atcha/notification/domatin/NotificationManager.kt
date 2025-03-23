@@ -1,10 +1,8 @@
 package com.deepromeet.atcha.notification.domatin
 
+import com.deepromeet.atcha.notification.infrastructure.fcm.FcmService
 import com.deepromeet.atcha.transit.domain.LastRouteReader
 import com.google.common.reflect.TypeToken
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.Message
-import com.google.firebase.messaging.Notification
 import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -14,7 +12,7 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class NotificationManager(
-    private val firebaseMessaging: FirebaseMessaging,
+    private val fcmService: FcmService,
     private val lastRouteReader: LastRouteReader,
     private val redisOperations: RouteNotificationRedisOperations
 ) {
@@ -46,11 +44,14 @@ class NotificationManager(
         isDelay: Boolean = false
     ) {
         val json = gson.toJson(lastRouteReader.read(notification.routeId))
-        val dataMap: Map<String, String> =
-            gson.fromJson(
-                json,
-                object : TypeToken<Map<String, String>>() {}.type
-            )
+        val dataMap: MutableMap<String, String> =
+            gson.fromJson(json, object : TypeToken<MutableMap<String, String>>() {}.type)
+        dataMap["type"] =
+            if (notification.notificationFrequency.minutes.toInt() == 1) {
+                "FULL_SCREEN_ALERT"
+            } else {
+                "PUSH_ALERT"
+            }
 
         val body =
             if (isDelay) {
@@ -78,6 +79,7 @@ class NotificationManager(
         val difference = calculateMinutesDifference(notification.notificationTime, currentMinute)
 
         return when (notification.notificationFrequency) {
+            NotificationFrequency.ONE -> "이제 출발 할 시간이에요. 막차를 타러 가볼까요? \uD83D\uDE8C" // TODO : 임의 추가. 변경 필요
             NotificationFrequency.FIVE ->
                 if (difference < NotificationFrequency.FIVE.minutes) {
                     "막차가 예상보다 일찍 출발해요! \uD83D\uDEA8 출발까지 단 ${notification}분!"
@@ -124,14 +126,14 @@ class NotificationManager(
     private fun sendFirebaseMessaging(
         token: String,
         dataMap: Map<String, String>,
-        body: String?
+        body: String
     ) {
-        val message =
-            Message.builder().setToken(token).setNotification(
-                Notification.builder().setTitle("앗차").setBody(body).build()
-            ).putAllData(dataMap).build()
-
-        logger.info("Sending push notification to $token with body: $body")
-        firebaseMessaging.send(message)
+        logger.info("Sending push notification to $token with body: $body and data: $dataMap")
+        fcmService.sendMessageTo(
+            targetToken = token,
+            title = "앗차",
+            body = body,
+            data = dataMap
+        )
     }
 }
