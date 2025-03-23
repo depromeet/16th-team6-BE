@@ -73,7 +73,15 @@ class TransitController(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRoutesResponse>> =
-        ApiResponse.success(transitService.getLastRoutes(id, request.toStart(), request.endLat, request.endLon))
+        ApiResponse.success(
+            transitService.getLastRoutes(
+                id,
+                request.toStart(),
+                request.endLat,
+                request.endLon,
+                request.sortType
+            )
+        )
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
