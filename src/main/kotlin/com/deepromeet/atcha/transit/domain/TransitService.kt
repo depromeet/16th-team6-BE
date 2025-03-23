@@ -31,10 +31,9 @@ class TransitService(
 
     fun getBusArrivalInfo(
         routeName: String,
-        stationName: String,
-        coordinate: Coordinate
+        busStationMeta: BusStationMeta
     ): BusArrival {
-        return busManager.getArrivalInfo(routeName, BusStationMeta(stationName, coordinate))
+        return busManager.getArrivalInfo(routeName, busStationMeta)
             ?: throw TransitException.NotFoundBusArrival
     }
 

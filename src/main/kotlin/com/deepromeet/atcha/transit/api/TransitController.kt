@@ -42,8 +42,7 @@ class TransitController(
             BusArrivalResponse(
                 transitService.getBusArrivalInfo(
                     request.routeName,
-                    request.stationName,
-                    Coordinate(request.lat, request.lon)
+                    request.toBusStationMeta()
                 )
             )
         )
