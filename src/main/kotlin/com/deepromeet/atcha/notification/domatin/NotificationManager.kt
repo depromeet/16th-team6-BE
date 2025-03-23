@@ -1,9 +1,6 @@
 package com.deepromeet.atcha.notification.domatin
 
 import com.deepromeet.atcha.notification.infrastructure.fcm.FcmService
-import com.deepromeet.atcha.transit.domain.LastRouteReader
-import com.google.common.reflect.TypeToken
-import com.google.gson.Gson
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -13,11 +10,9 @@ import java.time.format.DateTimeFormatter
 @Component
 class NotificationManager(
     private val fcmService: FcmService,
-    private val lastRouteReader: LastRouteReader,
     private val redisOperations: RouteNotificationRedisOperations
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-    private val gson = Gson()
     private val logger = LoggerFactory.getLogger(NotificationManager::class.java)
 
     fun checkAndNotifyDelay(notification: UserNotification) {
@@ -43,9 +38,7 @@ class NotificationManager(
         notification: UserNotification,
         isDelay: Boolean = false
     ) {
-        val json = gson.toJson(lastRouteReader.read(notification.routeId))
-        val dataMap: MutableMap<String, String> =
-            gson.fromJson(json, object : TypeToken<MutableMap<String, String>>() {}.type)
+        val dataMap = mutableMapOf<String, String>()
         dataMap["type"] =
             if (notification.notificationFrequency.minutes.toInt() == 1) {
                 "FULL_SCREEN_ALERT"
