@@ -12,6 +12,7 @@ import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.TransitService
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -97,17 +98,12 @@ class TransitController(
             transitService.getDepartureRemainingTime(routeId)
         )
 
-    @GetMapping("/last-routes/bus-started")
+    @GetMapping("/last-routes/{lastRouteId}bus-started")
     fun isBusStarted(
-        @CurrentUser id: Long,
-        @ModelAttribute request: BusArrivalRequest
+        @PathVariable lastRouteId: String
     ): ApiResponse<Boolean> =
         ApiResponse.success(
-            transitService.isBusStarted(
-                id,
-                request.routeName,
-                request.toBusStationMeta()
-            )
+            transitService.isBusStarted(lastRouteId)
         )
 
     @GetMapping("/batch")

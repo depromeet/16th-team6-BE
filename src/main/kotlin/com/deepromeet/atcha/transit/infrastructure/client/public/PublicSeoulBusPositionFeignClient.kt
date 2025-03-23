@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam
 
 @FeignClient(
     name = "public-seoul-bus-position",
-    url = "\${open-api.api.url.bus-postion}",
+    url = "\${open-api.api.url.bus-position}",
     configuration = [PublicFeignConfig::class]
 )
 interface PublicSeoulBusPositionFeignClient {
