@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
-import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
 import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
@@ -43,8 +42,7 @@ class TransitController(
             BusArrivalResponse(
                 transitService.getBusArrivalInfo(
                     request.routeName,
-                    request.stationName,
-                    Coordinate(request.lat, request.lon)
+                    request.toBusStationMeta()
                 )
             )
         )
@@ -97,6 +95,19 @@ class TransitController(
     ): ApiResponse<Int> =
         ApiResponse.success(
             transitService.getDepartureRemainingTime(routeId)
+        )
+
+    @GetMapping("/last-routes/bus-started")
+    fun isBusStarted(
+        @CurrentUser id: Long,
+        @ModelAttribute request: BusArrivalRequest
+    ): ApiResponse<Boolean> =
+        ApiResponse.success(
+            transitService.isBusStarted(
+                id,
+                request.routeName,
+                request.toBusStationMeta()
+            )
         )
 
     @GetMapping("/batch")

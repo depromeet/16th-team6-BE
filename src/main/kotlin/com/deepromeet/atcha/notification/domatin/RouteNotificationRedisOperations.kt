@@ -125,4 +125,11 @@ class RouteNotificationRedisOperations(
             )
         }
     }
+
+    fun findLastRouteIdByUserId(userId: Long): String? {
+        val pattern = "notification:$userId:*"
+        val keys = routeNotificationRedisTemplate.keys(pattern)
+
+        return keys.firstOrNull()?.split(":")?.get(2)
+    }
 }
