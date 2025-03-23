@@ -90,6 +90,19 @@ class TransitController(
             transitService.getDepartureRemainingTime(routeId)
         )
 
+    @GetMapping("/last-routes/bus-started")
+    fun isBusStarted(
+        @CurrentUser id: Long,
+        @ModelAttribute request: BusArrivalRequest
+    ): ApiResponse<Boolean> =
+        ApiResponse.success(
+            transitService.isBusStarted(
+                id,
+                request.routeName,
+                request.toBusStationMeta()
+            )
+        )
+
     @GetMapping("/batch")
     fun batch(): ApiResponse<Unit> {
         transitService.init()
