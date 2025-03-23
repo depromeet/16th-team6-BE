@@ -19,7 +19,7 @@ data class POIResponse(
                 lat = domain.location.coordinate.lat,
                 lon = domain.location.coordinate.lon,
                 businessCategory = domain.businessCategory,
-                address = domain.address,
+                address = domain.location.address,
                 radius = domain.radius?.let { radiusToString(it) }
             )
         }
