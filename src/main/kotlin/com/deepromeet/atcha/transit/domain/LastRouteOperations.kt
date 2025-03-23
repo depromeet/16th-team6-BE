@@ -349,8 +349,21 @@ class LastRouteOperations(
         }
     }
 
-    fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
+    fun sort(
+        sortType: LastRouteSortType,
+        routes: List<LastRoutesResponse>
+    ): List<LastRoutesResponse> {
+        return when (sortType) {
+            LastRouteSortType.MINIMUM_TRANSFERS -> sortedByMinTransfer(routes)
+            LastRouteSortType.DEPARTURE_TIME_DESC -> sortedByDepartureTimeDesc(routes)
+        }
+    }
+
+    private fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
         routes.sortedWith(
             compareBy({ it.transferCount }, { it.totalTime })
         )
+
+    private fun sortedByDepartureTimeDesc(routes: List<LastRoutesResponse>) =
+        routes.sortedByDescending { it.departureDateTime }
 }
