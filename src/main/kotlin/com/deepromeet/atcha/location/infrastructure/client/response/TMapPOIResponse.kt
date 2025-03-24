@@ -33,10 +33,13 @@ data class TMapPOIResponse(
     ) {
         fun toPOI(): POI {
             return POI(
-                Location(name, Coordinate(noorLat.toDouble(), noorLon.toDouble())),
+                Location(
+                    name,
+                    getLoadAddress(),
+                    Coordinate(noorLat.toDouble(), noorLon.toDouble())
+                ),
                 getBusinessCategory(),
-                getLoadAddress(),
-                radius.toDouble().toInt()
+                radius.toDouble()
             )
         }
 

@@ -33,10 +33,10 @@ jobs:
           password: ${{ secrets.DOCKER_HUB_TOKEN }}
 
       - name: Build Docker Image
-        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest .
+        run: docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_prod:latest .
 
       - name: Push Docker Image
-        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/$IMAGE_NAME:latest
+        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_prod:latest
 
   deploy:
     needs: build
@@ -45,7 +45,7 @@ jobs:
       matrix:
         target: [ "Prod A", "Prod B" ]
     env:
-      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }} # TODO private ip 변경
+      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }}
       PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }}
     steps:
       - name: Set host variable based on target
@@ -57,12 +57,40 @@ jobs:
             echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
           fi
 
-      - name: Deploy to ${{ matrix.target }}
+      - uses: actions/checkout@v4
+      - name: Copy file via ssh password
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ env.HOST }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
+          port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
+          proxy_username: ${{ secrets.PROD_USERNAME }}
+          proxy_key: ${{ secrets.PROD_SSH_KEY }}
+          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          timeout: 120s
+          source: "./deployment/prod/"
+          target: /home/atcha/
+
+      - name: SSH Jump Host to Prod Server and Deploy
         uses: appleboy/ssh-action@master
         with:
           host: ${{ env.HOST }}
-          username: ${{ secrets.PROD_APP_USERNAME }}
-          key: ${{ secrets.PROD_APP_KEY }}
+          username: ${{ secrets.PROD_USERNAME }}
+          key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
+
+          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
+          proxy_username: ${{ secrets.PROD_USERNAME }}
+          proxy_key: ${{ secrets.PROD_SSH_KEY }}
+          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
+
           script: |
+            cd /home/atcha
+            rm -rf /home/atcha/data
+            mv /home/atcha/deployment/prod/* /home/atcha/
+            rm -rf /home/atcha/deployment
             sudo bash ./deploy.sh

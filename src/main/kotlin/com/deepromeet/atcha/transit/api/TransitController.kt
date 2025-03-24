@@ -2,19 +2,20 @@ package com.deepromeet.atcha.transit.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
-import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
+import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
-import com.deepromeet.atcha.transit.api.request.SubwayLastTimeRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
+import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
+import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
-import com.deepromeet.atcha.transit.domain.BusArrival
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
-import com.deepromeet.atcha.transit.domain.SubwayLine
-import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.TransitService
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 
@@ -34,36 +35,36 @@ class TransitController(
             )
         )
 
-    @GetMapping("/arrival")
+    @GetMapping("/bus-arrival")
     fun getArrivalInfo(
         @ModelAttribute request: BusArrivalRequest
-    ): ApiResponse<BusArrival?> {
+    ): ApiResponse<BusArrivalResponse> {
         return ApiResponse.success(
-            transitService.getBusArrivalInfo(
-                request.routeName,
-                request.stationName,
-                Coordinate(request.lat, request.lon)
+            BusArrivalResponse(
+                transitService.getBusArrivalInfo(
+                    request.routeName,
+                    request.toBusStationMeta()
+                )
             )
         )
     }
 
-    @GetMapping("/last-time")
-    fun getLastTime(
-        @ModelAttribute request: SubwayLastTimeRequest
-    ): ApiResponse<SubwayTime?> {
+    @GetMapping("/bus-routes/positions")
+    fun getBusRoutePositions(
+        @ModelAttribute request: BusRouteRequest
+    ): ApiResponse<BusRoutePositionResponse> {
         return ApiResponse.success(
-            transitService.getLastTime(
-                SubwayLine.fromRouteName(request.routeName),
-                request.startStationName,
-                request.endStationName
-            )
+            BusRoutePositionResponse(transitService.getBusPositions(request.toBusRoute()))
         )
     }
 
-    @GetMapping("/batch")
-    fun batch(): ApiResponse<Unit> {
-        transitService.init()
-        return ApiResponse.success(Unit)
+    @GetMapping("/bus-routes/operation-info")
+    fun getBusOperationInfo(
+        @ModelAttribute request: BusRouteRequest
+    ): ApiResponse<BusRouteOperationInfo> {
+        return ApiResponse.success(
+            transitService.getBusOperationInfo(request.toBusRoute())
+        )
     }
 
     @GetMapping("/last-routes")
@@ -71,5 +72,43 @@ class TransitController(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRoutesResponse>> =
-        ApiResponse.success(transitService.getLastRoutes(id, request.toStart(), request.endLat, request.endLon))
+        ApiResponse.success(
+            transitService.getLastRoutes(
+                id,
+                request.toStart(),
+                request.endLat,
+                request.endLon,
+                request.sortType
+            )
+        )
+
+    @GetMapping("/last-routes/{routeId}")
+    fun getLastRoute(
+        @PathVariable routeId: String
+    ): ApiResponse<LastRoutesResponse> =
+        ApiResponse.success(
+            transitService.getRoute(routeId)
+        )
+
+    @GetMapping("/last-routes/{routeId}/departure-remaining")
+    fun getDepartureRemainingTime(
+        @PathVariable routeId: String
+    ): ApiResponse<Int> =
+        ApiResponse.success(
+            transitService.getDepartureRemainingTime(routeId)
+        )
+
+    @GetMapping("/last-routes/{lastRouteId}/bus-started")
+    fun isBusStarted(
+        @PathVariable lastRouteId: String
+    ): ApiResponse<Boolean> =
+        ApiResponse.success(
+            transitService.isBusStarted(lastRouteId)
+        )
+
+    @GetMapping("/batch")
+    fun batch(): ApiResponse<Unit> {
+        transitService.init()
+        return ApiResponse.success(Unit)
+    }
 }

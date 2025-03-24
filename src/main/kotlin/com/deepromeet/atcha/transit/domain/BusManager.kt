@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.exception.TransitException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -8,7 +9,8 @@ val log = KotlinLogging.logger {}
 @Component
 class BusManager(
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
-    private val busArrivalInfoFetcherMap: Map<ServiceRegion, BusArrivalInfoFetcher>,
+    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
+    private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val regionIdentifier: RegionIdentifier
 ) {
     fun getArrivalInfo(
@@ -30,11 +32,25 @@ class BusManager(
                         " station=${station.busStationMeta.name}, routeName=$routeName"
                 )
                 ?: return null
-        return busArrivalInfoFetcherMap[region]?.getBusArrival(station, busRoute)
+        return busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
             .logIfNull(
                 "[NotFoundBusArrival] region=$region, " +
                     "station=${station.busStationMeta.name}, routeName=$routeName"
             )
+    }
+
+    fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
+        return busRouteInfoClientMap[route.serviceRegion]!!.getBusRouteInfo(route)
+            ?: throw TransitException.BusRouteOperationInfoFetchFailed
+    }
+
+    fun getBusRouteStationList(busRoute: BusRoute): BusRouteStationList {
+        return busStationInfoClientMap[busRoute.serviceRegion]!!.getByRoute(busRoute)
+            ?: throw TransitException.BusRouteStationListFetchFailed
+    }
+
+    fun getBusPosition(busRoute: BusRoute): List<BusPosition> {
+        return busPositionFetcherMap[busRoute.serviceRegion]!!.fetch(busRoute.id)
     }
 }
 

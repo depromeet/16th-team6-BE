@@ -68,4 +68,14 @@ class RedisConfig(
     ): RedisTemplate<String, UserNotification> {
         return createRedisTemplate(redisConnectionFactory, UserNotification::class.java)
     }
+
+    @Bean
+    fun lastRouteIndexRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, String> {
+        val template = RedisTemplate<String, String>()
+        template.connectionFactory = redisConnectionFactory
+        template.keySerializer = StringRedisSerializer()
+        template.valueSerializer = StringRedisSerializer()
+        template.afterPropertiesSet()
+        return template
+    }
 }

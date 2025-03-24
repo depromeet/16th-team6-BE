@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.infrastructure
+package com.deepromeet.atcha.notification.infrastructure.fcm
 
 import com.google.firebase.FirebaseApp
 import com.google.firebase.messaging.FirebaseMessaging

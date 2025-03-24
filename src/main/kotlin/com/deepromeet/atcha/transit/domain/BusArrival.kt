@@ -1,10 +1,11 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.api.response.LastRouteLeg
 import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 
 data class BusArrival(
-    val routeId: RouteId,
-    val routeName: String,
+    val busRoute: BusRoute,
     val busStationId: BusStationId,
     val stationName: String,
     val lastTime: LocalDateTime,
@@ -40,13 +41,20 @@ data class BusArrival(
             }
         }
     }
+
+    fun getFirstBus(): RealTimeBusArrival? = realTimeInfo.getOrNull(0)
+
+    fun getSecondBus(): RealTimeBusArrival? = realTimeInfo.getOrNull(1)
 }
 
 data class RealTimeBusArrival(
+    val vehicleId: String,
     val busStatus: BusStatus,
     val remainingTime: Int,
-    val remainingStations: Int,
-    val isLast: Boolean?
+    val remainingStations: Int?,
+    val isLast: Boolean?,
+    val busCongestion: BusCongestion?,
+    val remainingSeats: Int?
 ) {
     val expectedArrivalTime: LocalDateTime?
         get() =
@@ -54,7 +62,12 @@ data class RealTimeBusArrival(
                 BusStatus.OPERATING, BusStatus.SOON ->
                     LocalDateTime.now()
                         .plusSeconds(remainingTime.toLong())
-
                 else -> null
             }
+
+    fun isTargetBus(targetBus: LastRouteLeg): Boolean {
+        val targetBusDepartureTime = LocalDateTime.parse(targetBus.departureDateTime ?: return false)
+        val diffMinutes = ChronoUnit.MINUTES.between(targetBusDepartureTime, expectedArrivalTime)
+        return kotlin.math.abs(diffMinutes) <= 5
+    }
 }
