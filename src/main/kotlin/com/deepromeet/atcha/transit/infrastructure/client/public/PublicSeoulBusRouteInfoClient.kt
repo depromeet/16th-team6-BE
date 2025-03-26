@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.toBusRouteOperationInfo
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -13,7 +14,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class PublicSeoulBusRouteInfoClient(
     private val publicSeoulBusArrivalInfoFeignClient: PublicSeoulBusArrivalInfoFeignClient,
-    private val publicSeoulBusRouteInfoFeignClient: PublicSeoulBusRouteInfoFeignClient
+    private val seoulBusOperationFeignClient: SeoulBusOperationFeignClient
 ) : BusRouteInfoClient {
     override fun getBusArrival(
         station: BusStation,
@@ -31,10 +32,6 @@ class PublicSeoulBusRouteInfoClient(
     }
 
     override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo? {
-        return publicSeoulBusRouteInfoFeignClient.getRouteInfo(route.id.value)
-            .msgBody
-            .itemList
-            ?.get(0)
-            ?.toBusRouteOperationInfo()
+        return seoulBusOperationFeignClient.getBusOperationInfo(route.id.value).toBusRouteOperationInfo()
     }
 }

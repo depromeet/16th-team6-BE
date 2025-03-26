@@ -7,6 +7,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        show-sql: false
+        format_sql: false
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: WARN
+        orm:
+          jdbc:
+            bind: WARN
 
 tmap:
   api:
@@ -32,3 +46,27 @@ jwt:
     secret: ${secret.prod.JWT_ACCESS_SECRET}
   refresh:
     secret: ${secret.prod.JWT_REFRESH_SECRET}
+
+server:
+  port: 8080
+
+management:
+  server:
+    port: ${secret.prod.MANAGEMENT_PORT}
+
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+      base-path: ${secret.prod.MANAGEMENT_BASE_PATH}
+    jmx:
+      exposure:
+        exclude: "*"
+    access:
+      default: none
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      show-components: never

@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.transit.api.response
 
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
@@ -23,6 +25,10 @@ data class LastRoutesResponse(
             LocalDateTime.now()
         ).toSeconds().toInt().absoluteValue
     }
+
+    fun getFirstBus(): LastRouteLeg {
+        return legs.first { it.mode == "BUS" }
+    }
 }
 
 data class LastRouteLeg(
@@ -38,4 +44,15 @@ data class LastRouteLeg(
     val passStopList: List<Station>? = null,
     val step: List<Step>? = null,
     val passShape: String? = null
-)
+) {
+    fun resolveRouteName(): String {
+        return route!!.split(":")[1]
+    }
+
+    fun resolveStartStation(): BusStationMeta {
+        return BusStationMeta(
+            start.name,
+            Coordinate(start.lat, start.lon)
+        )
+    }
+}

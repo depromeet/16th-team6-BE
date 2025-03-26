@@ -1,7 +1,8 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.infrastructure.scheduler
 
-import com.google.firebase.messaging.FirebaseMessaging
-import com.google.firebase.messaging.Message
+import com.deepromeet.atcha.notification.domatin.NotificationManager
+import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
+import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
@@ -11,12 +12,17 @@ import java.time.format.DateTimeFormatter
 @Component
 class NotificationScheduler(
     private val redisOperations: RouteNotificationRedisOperations,
-    private val firebaseMessaging: FirebaseMessaging
+    private val routeDepartureTimeRefresher: RouteDepartureTimeRefresher,
+    private val notificationManager: NotificationManager
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 
-    @Scheduled(fixedRate = 60000) // 1분(60000ms) 간격으로 실행
+    @Scheduled(cron = "0 * 0-3,21-23 * * ?")
     fun checkAndSendNotifications() {
+        // 알림 업데이트
+        routeDepartureTimeRefresher.refresh()
+
+        // 현재 시간 기준으로 분 단위 알림 확인 -> 전송 -> 삭제
         val now = LocalDateTime.now()
         val currentMinute = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
         logger.info("Checking notifications for time: $currentMinute")
@@ -26,27 +32,12 @@ class NotificationScheduler(
 
         notifications.forEach { notification ->
             try {
-                sendPushNotification(notification)
+                notificationManager.sendPushNotification(notification)
                 redisOperations.deleteNotification(notification)
                 logger.info("Successfully sent notification to token: ${notification.notificationToken}")
             } catch (e: Exception) {
                 logger.error("Failed to send notification: ${e.message}", e)
             }
         }
-    }
-
-    private fun sendPushNotification(notification: UserNotification) {
-        val message =
-            Message.builder()
-                .setToken(notification.notificationToken)
-                .setNotification(
-                    com.google.firebase.messaging.Notification.builder()
-                        .setTitle("앗차")
-                        .setBody("출발하기 ${notification.notificationFrequency}분 전입니다.")
-                        .build()
-                )
-                .build()
-
-        firebaseMessaging.send(message)
     }
 }

@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
-import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
 import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
@@ -13,6 +12,7 @@ import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.TransitService
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -43,8 +43,7 @@ class TransitController(
             BusArrivalResponse(
                 transitService.getBusArrivalInfo(
                     request.routeName,
-                    request.stationName,
-                    Coordinate(request.lat, request.lon)
+                    request.toBusStationMeta()
                 )
             )
         )
@@ -73,7 +72,15 @@ class TransitController(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRoutesResponse>> =
-        ApiResponse.success(transitService.getLastRoutes(id, request.toStart(), request.endLat, request.endLon))
+        ApiResponse.success(
+            transitService.getLastRoutes(
+                id,
+                request.toStart(),
+                request.endLat,
+                request.endLon,
+                request.sortType
+            )
+        )
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
@@ -89,6 +96,14 @@ class TransitController(
     ): ApiResponse<Int> =
         ApiResponse.success(
             transitService.getDepartureRemainingTime(routeId)
+        )
+
+    @GetMapping("/last-routes/{lastRouteId}/bus-started")
+    fun isBusStarted(
+        @PathVariable lastRouteId: String
+    ): ApiResponse<Boolean> =
+        ApiResponse.success(
+            transitService.isBusStarted(lastRouteId)
         )
 
     @GetMapping("/batch")

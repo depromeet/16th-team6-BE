@@ -29,10 +29,9 @@ class TransitService(
 
     fun getBusArrivalInfo(
         routeName: String,
-        stationName: String,
-        coordinate: Coordinate
+        busStationMeta: BusStationMeta
     ): BusArrival {
-        return busManager.getArrivalInfo(routeName, BusStationMeta(stationName, coordinate))
+        return busManager.getArrivalInfo(routeName, busStationMeta)
             ?: throw TransitException.NotFoundBusArrival
     }
 
@@ -61,11 +60,23 @@ class TransitService(
         return lastRouteReader.readRemainingTime(routeId)
     }
 
+    // TODO: 두번째 도착 예정 버스인지 확인하고있음 -> 실제 차고지 출발 여부 확인으로 변경 필요
+    fun isBusStarted(lastRouteId: String): Boolean {
+        val lastRoute = lastRouteReader.read(lastRouteId)
+        val busArrival =
+            busManager.getArrivalInfo(
+                lastRoute.getFirstBus().resolveRouteName(),
+                lastRoute.getFirstBus().resolveStartStation()
+            )
+        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.getFirstBus()) ?: false
+    }
+
     suspend fun getLastRoutes(
         userId: Long,
         start: Coordinate,
         endLat: String?,
-        endLon: String?
+        endLon: String?,
+        sortType: LastRouteSortType
     ): List<LastRoutesResponse> {
         // end 가 없는 경우, 사용자 집 주소 조회
         val end =
@@ -81,7 +92,8 @@ class TransitService(
         // 출발지와 도착지 경로가 redis 에 저장된 경우
         lastRouteIndexReader.read(start, end).let { routeIds ->
             if (routeIds.isNotEmpty()) {
-                return lastRouteOperations.sortedByMinTransfer(
+                return lastRouteOperations.sort(
+                    sortType,
                     lastRouteOperations.getFilteredRoutes(
                         routeIds.map { routeId -> lastRouteReader.read(routeId) }
                     )
@@ -114,7 +126,7 @@ class TransitService(
         saveRouteIdsByStartEnd(start, end, filteredRoutes.map { it.routeId })
         saveRoutesToCache(filteredRoutes)
 
-        return lastRouteOperations.sortedByMinTransfer(filteredRoutes)
+        return lastRouteOperations.sort(sortType, filteredRoutes)
     }
 
     private fun saveRouteIdsByStartEnd(

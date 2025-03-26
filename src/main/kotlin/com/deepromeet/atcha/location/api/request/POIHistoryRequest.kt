@@ -16,14 +16,14 @@ data class POIHistoryRequest(
             location =
                 Location(
                     name = name,
+                    address = address,
                     coordinate =
                         Coordinate(
                             lat = lat,
                             lon = lon
                         )
                 ),
-            businessCategory = businessCategory,
-            address = address
+            businessCategory = businessCategory
         )
     }
 }

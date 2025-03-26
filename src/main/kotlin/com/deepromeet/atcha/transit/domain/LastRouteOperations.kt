@@ -215,7 +215,7 @@ class LastRouteOperations(
         val adjustBaseIndex = if (isAllRideable) earliestTransitLeg.index else lastUnrideableIndex!!
 
         // 4. 기준점 앞쪽 시간 재조정
-        var adjustBaseTime = LocalDateTime.parse(adjustedLegs[adjustBaseIndex].departureDateTime!!) ?: null
+        var adjustBaseTime = adjustedLegs[adjustBaseIndex].departureDateTime?.let { LocalDateTime.parse(it) }
         for (i in adjustBaseIndex - 1 downTo 0) {
             val leg = adjustedLegs[i]
 
@@ -349,8 +349,21 @@ class LastRouteOperations(
         }
     }
 
-    fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
+    fun sort(
+        sortType: LastRouteSortType,
+        routes: List<LastRoutesResponse>
+    ): List<LastRoutesResponse> {
+        return when (sortType) {
+            LastRouteSortType.MINIMUM_TRANSFERS -> sortedByMinTransfer(routes)
+            LastRouteSortType.DEPARTURE_TIME_DESC -> sortedByDepartureTimeDesc(routes)
+        }
+    }
+
+    private fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
         routes.sortedWith(
             compareBy({ it.transferCount }, { it.totalTime })
         )
+
+    private fun sortedByDepartureTimeDesc(routes: List<LastRoutesResponse>) =
+        routes.sortedByDescending { it.departureDateTime }
 }
