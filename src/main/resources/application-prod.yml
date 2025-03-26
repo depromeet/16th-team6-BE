@@ -7,6 +7,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        show-sql: false
+        format_sql: false
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: WARN
+        orm:
+          jdbc:
+            bind: WARN
 
 tmap:
   api:
