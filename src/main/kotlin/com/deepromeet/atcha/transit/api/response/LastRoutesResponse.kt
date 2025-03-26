@@ -45,11 +45,11 @@ data class LastRouteLeg(
     val step: List<Step>? = null,
     val passShape: String? = null
 ) {
-    fun getRouteName(): String {
+    fun resolveRouteName(): String {
         return route!!.split(":")[1]
     }
 
-    fun getStartStation(): BusStationMeta {
+    fun resolveStartStation(): BusStationMeta {
         return BusStationMeta(
             start.name,
             Coordinate(start.lat, start.lon)

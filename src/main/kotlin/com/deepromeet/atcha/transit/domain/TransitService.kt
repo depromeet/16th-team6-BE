@@ -65,8 +65,8 @@ class TransitService(
         val lastRoute = lastRouteReader.read(lastRouteId)
         val busArrival =
             busManager.getArrivalInfo(
-                lastRoute.getFirstBus().getRouteName(),
-                lastRoute.getFirstBus().getStartStation()
+                lastRoute.getFirstBus().resolveRouteName(),
+                lastRoute.getFirstBus().resolveStartStation()
             )
         return busArrival?.getSecondBus()?.isTargetBus(lastRoute.getFirstBus()) ?: false
     }
