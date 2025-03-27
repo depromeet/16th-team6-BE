@@ -27,7 +27,7 @@ data class LastRoutesResponse(
         ).toSeconds().toInt().absoluteValue
     }
 
-    fun getFirstBus(): LastRouteLeg {
+    fun findFirstBus(): LastRouteLeg {
         return legs.first { it.mode == "BUS" }
     }
 }
