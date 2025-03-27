@@ -99,6 +99,7 @@ class LastRouteOperations(
             totalTime = totalTime.toInt(),
             totalWalkTime = route.totalWalkTime,
             transferCount = route.transferCount,
+            totalWorkDistance = route.totalWalkDistance,
             totalDistance = route.totalDistance,
             pathType = 0,
             legs = adjustedLegs
