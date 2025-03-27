@@ -21,7 +21,6 @@ redis:
 
 open-api:
   api:
-    url:
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
 
 kric:
