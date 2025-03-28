@@ -7,6 +7,20 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        show-sql: false
+        format_sql: false
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    org:
+      hibernate:
+        SQL: WARN
+        orm:
+          jdbc:
+            bind: WARN
 
 tmap:
   api:
@@ -30,8 +44,10 @@ kric:
 jwt:
   access:
     secret: ${secret.prod.JWT_ACCESS_SECRET}
+    expiration: ${secret.prod.JWT_ACCESS_EXPIRATION_MS}
   refresh:
     secret: ${secret.prod.JWT_REFRESH_SECRET}
+    expiration: ${secret.prod.JWT_REFRESH_EXPIRATION_MS}
 
 server:
   port: 8080

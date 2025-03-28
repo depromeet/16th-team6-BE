@@ -14,6 +14,7 @@ data class LastRoutesResponse(
     val departureDateTime: String,
     val totalTime: Int,
     val totalWalkTime: Int,
+    val totalWorkDistance: Int,
     val transferCount: Int,
     val totalDistance: Int,
     val pathType: Int,
@@ -26,7 +27,7 @@ data class LastRoutesResponse(
         ).toSeconds().toInt().absoluteValue
     }
 
-    fun getFirstBus(): LastRouteLeg {
+    fun findFirstBus(): LastRouteLeg {
         return legs.first { it.mode == "BUS" }
     }
 }
@@ -45,11 +46,11 @@ data class LastRouteLeg(
     val step: List<Step>? = null,
     val passShape: String? = null
 ) {
-    fun getRouteName(): String {
+    fun resolveRouteName(): String {
         return route!!.split(":")[1]
     }
 
-    fun getStartStation(): BusStationMeta {
+    fun resolveStartStation(): BusStationMeta {
         return BusStationMeta(
             start.name,
             Coordinate(start.lat, start.lon)

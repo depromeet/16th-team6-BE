@@ -65,10 +65,10 @@ class TransitService(
         val lastRoute = lastRouteReader.read(lastRouteId)
         val busArrival =
             busManager.getArrivalInfo(
-                lastRoute.getFirstBus().getRouteName(),
-                lastRoute.getFirstBus().getStartStation()
+                lastRoute.findFirstBus().resolveRouteName(),
+                lastRoute.findFirstBus().resolveStartStation()
             )
-        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.getFirstBus()) ?: false
+        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
     }
 
     suspend fun getLastRoutes(
