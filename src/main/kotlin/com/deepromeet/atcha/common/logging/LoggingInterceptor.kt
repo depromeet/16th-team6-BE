@@ -23,14 +23,12 @@ class LoggingInterceptor : HandlerInterceptor {
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
-        MDC.put(REQUEST_ID, UUID.randomUUID().toString().substring(0, 8))
-        MDC.put(REQUEST_TIME, System.currentTimeMillis().toString())
-
         if (IGNORE_URI.contains(request.requestURI)) {
             return true
         }
 
-        logger.info { "REQUEST [${MDC.get(REQUEST_ID)}] [${request.method} ${request.requestURI}]" }
+        MDC.put(REQUEST_ID, UUID.randomUUID().toString().substring(0, 8))
+        MDC.put(REQUEST_TIME, System.currentTimeMillis().toString())
         return true
     }
 
@@ -45,6 +43,12 @@ class LoggingInterceptor : HandlerInterceptor {
         }
 
         val duration = System.currentTimeMillis() - MDC.get(REQUEST_TIME).toLong()
-        logger.info { "RESPONSE [${MDC.get(REQUEST_ID)}] [${request.method} ${request.requestURI}] [$duration ms]" }
+        val status =
+            when (response.status / 100) {
+                2, 3 -> "SUCCESS"
+                else -> "FAIL"
+            }
+
+        logger.info { "[${MDC.get(REQUEST_ID)}] [$status] [${request.method} ${request.requestURI}] [$duration ms]" }
     }
 }
