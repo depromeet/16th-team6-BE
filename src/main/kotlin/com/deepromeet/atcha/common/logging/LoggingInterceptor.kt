@@ -14,7 +14,7 @@ class LoggingInterceptor : HandlerInterceptor {
     companion object {
         private const val REQUEST_ID = "requestId"
         private const val REQUEST_TIME = "requestTime"
-        private val IGNORE_URI = listOf("/health")
+        private val IGNORE_URI = "/health"
         private val logger = KotlinLogging.logger {}
     }
 
@@ -23,7 +23,7 @@ class LoggingInterceptor : HandlerInterceptor {
         response: HttpServletResponse,
         handler: Any
     ): Boolean {
-        if (IGNORE_URI.contains(request.requestURI)) {
+        if (request.requestURI.contains(IGNORE_URI)) {
             return true
         }
 
@@ -38,7 +38,7 @@ class LoggingInterceptor : HandlerInterceptor {
         handler: Any,
         ex: Exception?
     ) {
-        if (IGNORE_URI.contains(request.requestURI)) {
+        if (request.requestURI.contains(IGNORE_URI)) {
             return
         }
 
