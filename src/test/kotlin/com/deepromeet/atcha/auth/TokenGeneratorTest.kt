@@ -21,11 +21,20 @@ class TokenGeneratorTest(
 ) {
     private val accessSecret = "dGVzdEFjY2Vzc1NlY3JldEtasdleVZhbHVlMTIzNDU2Nzg="
     private val refreshSecret = "dGVzdFJmZXNoU2VjcmV0S2V5asdVmFsdWUxMjM0NTY3OA=="
+    private val accessExpiration = "1800000"
+    private val refreshExpiration = "1800000"
     private lateinit var tokenGenerator: TokenGenerator
 
     @BeforeEach
     fun setUpTokenGenerator() {
-        tokenGenerator = TokenGenerator(accessSecret, refreshSecret, tokenBlacklist)
+        tokenGenerator =
+            TokenGenerator(
+                accessSecret,
+                refreshSecret,
+                accessExpiration,
+                refreshExpiration,
+                tokenBlacklist
+            )
     }
 
     @Test
@@ -63,13 +72,13 @@ class TokenGeneratorTest(
     }
 
     @Test
-    fun `유효하지 않은 토큰`() {
+    fun `만료된 토큰 사용지 에러가 발생한다`() {
         // given
         val userId = 100L
         val tokenInfo = tokenGenerator.generateTokens(userId)
 
         // when
-        tokenGenerator.expireToken(tokenInfo.accessToken, TokenType.ACCESS)
+        tokenGenerator.expireToken(tokenInfo.accessToken)
 
         // then
         Assertions.assertThatThrownBy { tokenGenerator.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
