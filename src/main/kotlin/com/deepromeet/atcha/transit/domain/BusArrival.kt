@@ -42,8 +42,6 @@ data class BusArrival(
         }
     }
 
-    fun getFirstBus(): RealTimeBusArrival? = realTimeInfo.getOrNull(0)
-
     fun getSecondBus(): RealTimeBusArrival? = realTimeInfo.getOrNull(1)
 }
 

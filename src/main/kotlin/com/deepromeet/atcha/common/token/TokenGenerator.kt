@@ -16,6 +16,10 @@ class TokenGenerator(
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
     private val refreshSecret: String,
+    @Value("\${jwt.access.expiration}")
+    private val accessExpiration: String,
+    @Value("\${jwt.refresh.expiration}")
+    private val refreshExpiration: String,
     private val blacklist: TokenBlacklist
 ) {
     private val tokenKeyMap =
@@ -66,15 +70,12 @@ class TokenGenerator(
 
     fun expireTokensWithRefreshToken(refreshToken: String) {
         val accessToken = getAccessTokenByRefreshToken(refreshToken)
-        expireToken(accessToken, TokenType.ACCESS)
-        expireToken(refreshToken, TokenType.REFRESH)
+        expireToken(accessToken)
+        expireToken(refreshToken)
     }
 
-    fun expireToken(
-        token: String,
-        tokenType: TokenType
-    ) {
-        blacklist.add(token, tokenType)
+    fun expireToken(token: String) {
+        blacklist.add(token)
     }
 
     private fun getAccessTokenByRefreshToken(refreshToken: String): String {
@@ -101,7 +102,7 @@ class TokenGenerator(
             .setSubject(userId.toString())
             .setIssuedAt(now)
             .setId(UUID.randomUUID().toString())
-            .setExpiration(Date(now.time + TokenType.ACCESS.expirationMills))
+            .setExpiration(Date(now.time + accessExpiration.toLong()))
             .signWith(tokenKeyMap.get(TokenType.ACCESS))
             .compact()
     }
@@ -116,7 +117,7 @@ class TokenGenerator(
             .setIssuedAt(now)
             .claim(TokenType.ACCESS.name, accessToken)
             .setId(UUID.randomUUID().toString())
-            .setExpiration(Date(now.time + TokenType.REFRESH.expirationMills))
+            .setExpiration(Date(now.time + refreshExpiration.toLong()))
             .signWith(tokenKeyMap.get(TokenType.REFRESH))
             .compact()
     }

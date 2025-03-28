@@ -44,8 +44,10 @@ kric:
 jwt:
   access:
     secret: ${secret.prod.JWT_ACCESS_SECRET}
+    expiration: ${secret.prod.JWT_ACCESS_EXPIRATION_MS}
   refresh:
     secret: ${secret.prod.JWT_REFRESH_SECRET}
+    expiration: ${secret.prod.JWT_REFRESH_EXPIRATION_MS}
 
 server:
   port: 8080

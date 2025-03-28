@@ -30,5 +30,7 @@ kric:
 jwt:
   access:
     secret: ${secret.staging.JWT_ACCESS_SECRET}
+    expiration: ${secret.staging.JWT_ACCESS_EXPIRATION_MS}
   refresh:
     secret: ${secret.staging.JWT_REFRESH_SECRET}
+    expiration: ${secret.staging.JWT_REFRESH_EXPIRATION_MS}

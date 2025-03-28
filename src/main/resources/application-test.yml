@@ -41,5 +41,7 @@ kric:
 jwt:
   access:
     secret: ${secret.dev.JWT_ACCESS_SECRET}
+    expiration: ${secret.dev.JWT_ACCESS_EXPIRATION_MS}
   refresh:
     secret: ${secret.dev.JWT_REFRESH_SECRET}
+    expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
