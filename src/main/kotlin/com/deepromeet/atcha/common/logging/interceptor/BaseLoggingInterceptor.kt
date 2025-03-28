@@ -11,7 +11,7 @@ abstract class BaseLoggingInterceptor : HandlerInterceptor {
     companion object {
         const val REQUEST_ID = "requestId"
         const val REQUEST_TIME = "requestTime"
-        val IGNORE_URI = "/health"
+        const val IGNORE_URI = "/health"
         val logger = KotlinLogging.logger {}
     }
 
