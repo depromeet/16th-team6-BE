@@ -11,7 +11,7 @@ data class BusArrivalRequest(
 ) {
     fun toBusStationMeta() =
         BusStationMeta(
-            routeName,
+            stationName,
             Coordinate(lat, lon)
         )
 }
