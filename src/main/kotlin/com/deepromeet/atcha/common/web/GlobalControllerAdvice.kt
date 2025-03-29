@@ -22,19 +22,13 @@ class GlobalControllerAdvice {
     ): ResponseEntity<ApiResponse<Unit>> = handle(exception, request)
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-    fun handleHttpRequestMethodNotSupportedException(
-        httpException: HttpRequestMethodNotSupportedException,
-        request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    fun handleHttpRequestMethodNotSupportedException(request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
         val exception = RequestException.NoMatchedMethod
         return handle(exception, request)
     }
 
     @ExceptionHandler(NoResourceFoundException::class)
-    fun handleNoResourceFoundException(
-        httpException: NoResourceFoundException,
-        request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    fun handleNoResourceFoundException(request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
         val exception = RequestException.NoMatchedResource
         return handle(exception, request)
     }
