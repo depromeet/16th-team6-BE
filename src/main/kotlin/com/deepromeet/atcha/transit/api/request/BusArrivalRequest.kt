@@ -14,4 +14,8 @@ data class BusArrivalRequest(
             stationName,
             Coordinate(lat, lon)
         )
+
+    fun toRouteName(): String {
+        return routeName.split(":")[1]
+    }
 }

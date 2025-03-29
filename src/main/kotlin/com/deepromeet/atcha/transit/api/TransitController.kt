@@ -42,7 +42,7 @@ class TransitController(
         return ApiResponse.success(
             BusArrivalResponse(
                 transitService.getBusArrivalInfo(
-                    request.routeName,
+                    request.toRouteName(),
                     request.toBusStationMeta()
                 )
             )
