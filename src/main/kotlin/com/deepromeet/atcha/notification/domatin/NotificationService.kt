@@ -11,7 +11,8 @@ import java.time.format.DateTimeFormatter
 class NotificationService(
     private val redisOperations: RouteNotificationRedisOperations,
     private val lastRouteReader: LastRouteReader,
-    private val userReader: UserReader
+    private val userReader: UserReader,
+    private val notificationManager: NotificationManager
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
@@ -50,5 +51,11 @@ class NotificationService(
     ) {
         val user = userReader.read(id)
         redisOperations.deleteNotification(user.id, request.lastRouteId)
+    }
+
+    fun test(id: Long) {
+        val user = userReader.read(id)
+        val notificationToken = user.fcmToken
+        notificationManager.sendPushNotificationForTest(notificationToken)
     }
 }

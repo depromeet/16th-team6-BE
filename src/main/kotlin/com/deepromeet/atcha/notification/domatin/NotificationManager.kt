@@ -56,6 +56,14 @@ class NotificationManager(
         sendFirebaseMessaging(notification.notificationToken, dataMap, body)
     }
 
+    // TODO 안드 테스트용 (추후 삭제)
+    fun sendPushNotificationForTest(notificationToken: String) {
+        val dataMap = mutableMapOf<String, String>()
+        dataMap["type"] = "FULL_SCREEN_ALERT"
+        val body = createDelayMessage()
+        sendFirebaseMessaging(notificationToken, dataMap, body)
+    }
+
     private fun createDelayMessage(): String =
         listOf(
             "좋은 소식! 막차가 예상보다 늦게 출발해요. 조금 더 머물러도 돼요!",
