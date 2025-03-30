@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class NotificationManager(
     private val fcmService: FcmService,
-    private val redisOperations: RouteNotificationRedisOperations
+    private val routeNotificationOperations: RouteNotificationRedisOperations
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     private val logger = LoggerFactory.getLogger(NotificationManager::class.java)
@@ -21,17 +21,23 @@ class NotificationManager(
 
         if (minutesDifference >= 10 && !notification.isDelayNotified) {
             sendPushNotification(notification = notification, isDelay = true)
-            redisOperations.updateDelayNotificationFlags(notification)
+            routeNotificationOperations.updateDelayNotificationFlags(notification)
         }
     }
 
-    private fun calculateMinutesDifference(
-        controlTime: String,
-        treatmentTime: String
-    ): Long {
-        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
-        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
-        return Duration.between(control, treatment).toMinutes()
+    fun findNotificationsByMinutes(currentMinute: String): List<UserNotification> =
+        routeNotificationOperations.findNotificationsByMinute(currentMinute)
+
+    fun deleteNotification(notification: UserNotification) =
+        routeNotificationOperations.deleteNotification(
+            notification
+        )
+
+    fun sendAndDeleteNotification(notification: UserNotification): Boolean {
+        return routeNotificationOperations.handleNotificationWithLock(notification) {
+            sendPushNotification(notification)
+            deleteNotification(notification)
+        }
     }
 
     fun sendPushNotification(
@@ -70,6 +76,16 @@ class NotificationManager(
         val body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0"
         sendFirebaseMessaging(notificationToken, dataMap, body)
     }
+
+    private fun calculateMinutesDifference(
+        controlTime: String,
+        treatmentTime: String
+    ): Long {
+        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
+        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
+        return Duration.between(control, treatment).toMinutes()
+    }
+
 
     private fun createDelayMessage(): String =
         listOf(
