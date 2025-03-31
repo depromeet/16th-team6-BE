@@ -67,7 +67,6 @@ class NotificationService(
         val user = userReader.read(id)
         val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
         if (distance > 1.0) {
-            println("===========================$distance===========================")
             val notificationToken = user.fcmToken
             notificationManager.sendSuggestPushNotification(notificationToken)
         }
