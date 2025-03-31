@@ -91,26 +91,32 @@ class RouteNotificationRedisOperations(
         return notifications
     }
 
+    fun hasNotification(userNotification: UserNotification): Boolean =
+        routeNotificationRedisTemplate.hasKey(
+            getKey(userNotification.userId, userNotification.routeId)
+        )
+
     fun handleNotificationWithLock(
         userNotification: UserNotification,
-        action: (UserNotification) -> Unit
+        action: (UserNotification) -> Boolean
     ): Boolean {
         val lockKey =
             getLockKey(userNotification.userId, userNotification.routeId, userNotification.notificationFrequency)
         val lockValue = UUID.randomUUID().toString()
-        log.info { "$lockKey Lock 획득에 시도." }
-        val lockAcquire = lockValueOps.setIfAbsent(lockKey, lockValue, duration)
+        val lockAcquire = lockValueOps.setIfAbsent(lockKey, lockValue, Duration.ofMillis(3000))
         if (lockAcquire == true) {
+            log.info { "$lockKey Lock 획득에 성공." }
+            var result = false
             try {
-                action(userNotification)
+                result = action(userNotification)
             } finally {
                 val currentValue = lockValueOps.get(lockKey)
+
                 if (currentValue == lockValue) {
                     lockRedisTemplate.delete(lockKey)
                 }
             }
-            log.info { "$lockKey Lock 획득에 성공." }
-            return true
+            return result
         } else {
             log.warn { "$lockKey Lock 획득에 실패했습니다." }
             return false

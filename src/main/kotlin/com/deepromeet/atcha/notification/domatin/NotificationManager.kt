@@ -28,22 +28,24 @@ class NotificationManager(
     fun findNotificationsByMinutes(currentMinute: String): List<UserNotification> =
         routeNotificationOperations.findNotificationsByMinute(currentMinute)
 
-    fun deleteNotification(notification: UserNotification) =
-        routeNotificationOperations.deleteNotification(
-            notification
-        )
-
     fun sendAndDeleteNotification(notification: UserNotification): Boolean {
         return routeNotificationOperations.handleNotificationWithLock(notification) {
-            sendPushNotification(notification)
-            deleteNotification(notification)
+            if (sendPushNotification(notification)) {
+                deleteNotification(notification)
+                true
+            } else {
+                false
+            }
         }
     }
 
     fun sendPushNotification(
         notification: UserNotification,
         isDelay: Boolean = false
-    ) {
+    ): Boolean {
+        if (!routeNotificationOperations.hasNotification(notification)) {
+            return false
+        }
         val dataMap = mutableMapOf<String, String>()
         dataMap["type"] =
             if (notification.notificationFrequency.minutes.toInt() == 1) {
@@ -60,7 +62,13 @@ class NotificationManager(
             }
 
         sendFirebaseMessaging(notification.notificationToken, dataMap, body)
+        return true
     }
+
+    fun deleteNotification(notification: UserNotification) =
+        routeNotificationOperations.deleteNotification(
+            notification
+        )
 
     // TODO 안드 테스트용 (추후 삭제)
     fun sendPushNotificationForTest(notificationToken: String) {
