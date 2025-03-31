@@ -59,13 +59,19 @@ class LastRouteOperations(
         return itineraries.filterNot { itinerary ->
             val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
+            val hasTrain = itinerary.legs.any { it.mode == "TRAIN" }
+            val hasExpressSubway =
+                itinerary.legs.any {
+                    it.mode == "SUBWAY" && it.route != null && it.route.contains("(급행)")
+                }
             val hasValidModes =
                 itinerary.legs.any {
                     it.mode == "WALK" ||
                         (it.mode == "SUBWAY" && it.route != null && !it.route.contains("(급행)")) ||
                         it.mode == "BUS"
                 }
-            !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
+            hasTrain || hasExpressSubway || !hasValidModes ||
+                (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
             itinerary.legs.joinToString("|") { leg ->
                 "${leg.start.name}-${leg.end.name}-${leg.route ?: ""}"
