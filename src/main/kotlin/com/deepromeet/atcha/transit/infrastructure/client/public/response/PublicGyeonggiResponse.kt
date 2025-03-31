@@ -22,14 +22,20 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 data class PublicGyeonggiApiResponse<T>(
     val response: PublicGyeonggiResponse<T>
 )
 
+data class GyeonggiMsgHeader(
+    val queryTime: String = "",
+    val resultCode: String = "00",
+    val resultMessage: String = ""
+)
+
 data class PublicGyeonggiResponse<T>(
+    val msgHeader: GyeonggiMsgHeader = GyeonggiMsgHeader(),
     val msgBody: T
 ) {
     data class BusRouteListResponse(
@@ -255,6 +261,16 @@ data class BusRouteInfoItem(
     val endStationName: String,
     val turnStID: String,
     val turnStNm: String,
+    // 첫차 시간 필드
+    val upFirstTime: String?,
+    val downFirstTime: String?,
+    val satUpFirstTime: String?,
+    val satDownFirstTime: String?,
+    val sunUpFirstTime: String?,
+    val sunDownFirstTime: String?,
+    val weUpFirstTime: String?,
+    val weDownFirstTime: String?,
+    // 막차 시간 필드
     val upLastTime: String?,
     val downLastTime: String?,
     val satUpLastTime: String?,
@@ -272,14 +288,24 @@ data class BusRouteInfoItem(
     val sunPeekAlloc: Int,
     val sunNPeekAlloc: Int
 ) {
+    // 버스 시간 타입 정의
+    enum class BusTimeType {
+        FIRST,
+        LAST
+    }
+
     fun toBusArrival(
         dailyType: DailyType,
         busDirection: BusDirection,
         busArrivalInfo: BusArrivalItem,
         busStationList: PublicGyeonggiResponse.BusRouteStationListResponse
     ): BusArrival {
-        val lastTime = getLastTime(dailyType, busDirection)
+        val firstTime = getBusTime(dailyType, busDirection, BusTimeType.FIRST)
+        val lastTime = getBusTime(dailyType, busDirection, BusTimeType.LAST)
         val term = getTerm(dailyType)
+
+        val travelTimeFromStart = busArrivalInfo.calculateTravelTimeFromStart(busStationList)
+
         return BusArrival(
             busRoute =
                 BusRoute(
@@ -289,7 +315,8 @@ data class BusRouteInfoItem(
                 ),
             busStationId = BusStationId(busArrivalInfo.stationId),
             stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
-            lastTime = lastTime.plusSeconds(busArrivalInfo.calculateTravelTimeFromStart(busStationList)),
+            firstTime = firstTime.plusSeconds(travelTimeFromStart),
+            lastTime = lastTime.plusSeconds(travelTimeFromStart),
             term = term,
             realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
         )
@@ -301,103 +328,103 @@ data class BusRouteInfoItem(
             endStationName = endStationName,
             serviceHours =
                 listOfNotNull(
-                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.UP, upLastTime, peekAlloc),
-                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.DOWN, downLastTime, peekAlloc),
-                    createBusServiceHours(DailyType.SATURDAY, BusDirection.UP, satUpLastTime, satPeekAlloc),
-                    createBusServiceHours(DailyType.SATURDAY, BusDirection.DOWN, satDownLastTime, satPeekAlloc),
-                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, sunUpLastTime, sunPeekAlloc),
-                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, sunDownLastTime, sunPeekAlloc),
-                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP, weUpLastTime, wePeekAlloc),
-                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN, weDownLastTime, wePeekAlloc)
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.UP),
+                    createBusServiceHours(DailyType.WEEKDAY, BusDirection.DOWN),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.UP),
+                    createBusServiceHours(DailyType.SATURDAY, BusDirection.DOWN),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.UP),
+                    createBusServiceHours(DailyType.HOLIDAY, BusDirection.DOWN)
                 )
         )
     }
 
-    private fun getLastTime(
-        dailyType: DailyType,
-        busDirection: BusDirection
-    ): LocalDateTime {
-        val timeStr: String =
-            when (dailyType) {
-                DailyType.WEEKDAY -> {
-                    when (busDirection) {
-                        BusDirection.UP -> upLastTime
-                        BusDirection.DOWN -> downLastTime
-                    }
-                }
-
-                DailyType.SATURDAY -> {
-                    when (busDirection) {
-                        BusDirection.UP -> satUpLastTime
-                        BusDirection.DOWN -> satDownLastTime
-                    }
-                }
-
-                DailyType.SUNDAY -> {
-                    when (busDirection) {
-                        BusDirection.UP -> sunUpLastTime
-                        BusDirection.DOWN -> sunDownLastTime
-                    }
-                }
-
-                DailyType.HOLIDAY -> {
-                    when (busDirection) {
-                        BusDirection.UP -> weUpLastTime
-                        BusDirection.DOWN -> weDownLastTime
-                    }
-                }
-            } ?: throw IllegalArgumentException("막차 시간을 가져올 수 없습니다.")
-
-        val localTime =
-            try {
-                LocalTime.parse(timeStr)
-            } catch (e: Exception) {
-                throw IllegalArgumentException(
-                    "올바르지 않은 시간 형식입니다."
-                )
-            }
-
-        val date =
-            if (localTime.isBefore(LocalTime.of(3, 0))) {
-                LocalDate.now().plusDays(1)
-            } else {
-                LocalDate.now()
-            }
-
-        return LocalDateTime.of(date, localTime)
-    }
-
-    private fun createBusServiceHours(
+    // 통합된 시간 조회 함수
+    private fun getBusTime(
         dailyType: DailyType,
         busDirection: BusDirection,
-        time: String?,
-        term: Int
-    ): BusServiceHours? {
-        if (time.isNullOrBlank()) return null
+        timeType: BusTimeType
+    ): LocalDateTime {
+        val timeStr: String =
+            getTimeString(dailyType, busDirection, timeType)
+                ?: throw IllegalArgumentException("첫차 또는 막차 시간을 가져올 수 없습니다.")
 
-        return BusServiceHours(
-            dailyType = dailyType,
-            busDirection = busDirection,
-            startTime = parseTime(time),
-            endTime = parseTime(time),
-            term = term
-        )
+        return parseTime(timeStr)
     }
 
+    private fun getTimeString(
+        dailyType: DailyType,
+        busDirection: BusDirection,
+        timeType: BusTimeType
+    ): String? {
+        return when (dailyType) {
+            DailyType.WEEKDAY -> {
+                when (busDirection) {
+                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) upFirstTime else upLastTime
+                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) downFirstTime else downLastTime
+                }
+            }
+            DailyType.SATURDAY -> {
+                when (busDirection) {
+                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) satUpFirstTime else satUpLastTime
+                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) satDownFirstTime else satDownLastTime
+                }
+            }
+            DailyType.SUNDAY -> {
+                when (busDirection) {
+                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) sunUpFirstTime else sunUpLastTime
+                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) sunDownFirstTime else sunDownLastTime
+                }
+            }
+            DailyType.HOLIDAY -> {
+                when (busDirection) {
+                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) weUpFirstTime else weUpLastTime
+                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) weDownFirstTime else weDownLastTime
+                }
+            }
+        }
+    }
+
+    // 시간 문자열 파싱 함수
     private fun parseTime(timeStr: String): LocalDateTime {
-        return try {
-            val formatter = DateTimeFormatter.ofPattern("HH:mm")
-            val localTime = LocalTime.parse(timeStr, formatter)
+        try {
+            val localTime = LocalTime.parse(timeStr)
             val date =
                 if (localTime.isBefore(LocalTime.of(3, 0))) {
                     LocalDate.now().plusDays(1)
                 } else {
                     LocalDate.now()
                 }
-            LocalDateTime.of(date, localTime)
+            return LocalDateTime.of(date, localTime)
         } catch (e: Exception) {
             throw IllegalArgumentException("올바르지 않은 시간 형식입니다: $timeStr")
         }
+    }
+
+    // 서비스 시간 생성 함수
+    private fun createBusServiceHours(
+        dailyType: DailyType,
+        busDirection: BusDirection
+    ): BusServiceHours? {
+        val firstTimeStr = getTimeString(dailyType, busDirection, BusTimeType.FIRST)
+        val lastTimeStr = getTimeString(dailyType, busDirection, BusTimeType.LAST)
+
+        if (firstTimeStr.isNullOrBlank() || lastTimeStr.isNullOrBlank()) return null
+
+        val term =
+            when (dailyType) {
+                DailyType.WEEKDAY -> peekAlloc
+                DailyType.SATURDAY -> satPeekAlloc
+                DailyType.SUNDAY -> sunPeekAlloc
+                DailyType.HOLIDAY -> wePeekAlloc
+            }
+
+        return BusServiceHours(
+            dailyType = dailyType,
+            busDirection = busDirection,
+            startTime = parseTime(firstTimeStr),
+            endTime = parseTime(lastTimeStr),
+            term = term
+        )
     }
 
     private fun getTerm(dailyType: DailyType): Int {
