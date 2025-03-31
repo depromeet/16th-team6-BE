@@ -166,6 +166,7 @@ data class BusArrivalResponse(
                 ),
             busStationId = BusStationId(arsId),
             stationName = stNm,
+            firstTime = parseDateTime(firstTm),
             lastTime = parseDateTime(lastTm),
             term = term.toInt(),
             realTimeInfo = realTimeBusArrivals

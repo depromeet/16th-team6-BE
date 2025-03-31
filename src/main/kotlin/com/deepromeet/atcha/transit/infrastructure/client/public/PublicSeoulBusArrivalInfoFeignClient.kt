@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam
 interface PublicSeoulBusArrivalInfoFeignClient {
     @GetMapping("/api/rest/arrive/getArrInfoByRouteAll")
     fun getArrivalInfoByRoute(
-        @RequestParam busRouteId: String
+        @RequestParam busRouteId: String,
+        @RequestParam serviceKey: String
     ): ServiceResult<BusArrivalResponse>
 }
