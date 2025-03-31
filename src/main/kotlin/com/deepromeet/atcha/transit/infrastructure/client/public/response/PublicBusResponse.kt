@@ -75,13 +75,13 @@ data class StationResponse(
 data class BusRouteResponse(
     @JacksonXmlProperty(localName = "busRouteId")
     val busRouteId: String,
-    @JacksonXmlProperty(localName = "busRouteAbrv")
-    val busRouteAbrv: String
+    @JacksonXmlProperty(localName = "busRouteNm")
+    val busRouteNm: String
 ) {
     fun toBusRoute(): BusRoute =
         BusRoute(
             id = BusRouteId(busRouteId),
-            name = busRouteAbrv,
+            name = busRouteNm,
             serviceRegion = ServiceRegion.SEOUL
         )
 }
