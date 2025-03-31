@@ -65,7 +65,7 @@ class PublicSubwayInfoClient(
                 items
             )
         } catch (e: Exception) {
-            log.warn(e) { "지하철 시간표를 가져오는데 실패했습니다." }
+            log.warn(e) { "지하철 시간표 정보를 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}" }
             return null
         }
     }

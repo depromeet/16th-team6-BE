@@ -81,9 +81,10 @@ class TransitService(
         // end 가 없는 경우, 사용자 집 주소 조회
         val end =
             if (endLat == null || endLon == null) {
+                val user = userReader.read(userId)
                 Coordinate(
-                    userReader.read(userId).address.lat,
-                    userReader.read(userId).address.lon
+                    user.address.lat,
+                    user.address.lon
                 )
             } else {
                 Coordinate(endLat.toDouble(), endLon.toDouble())

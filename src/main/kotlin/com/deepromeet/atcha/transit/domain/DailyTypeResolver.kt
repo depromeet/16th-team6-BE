@@ -6,7 +6,8 @@ import java.time.LocalDate
 
 @Component
 class DailyTypeResolver(
-    private val holidayFetcher: HolidayFetcher
+    private val holidayFetcher: HolidayFetcher,
+    private val holidayCache: HolidayCache
 ) {
     fun resolve(date: LocalDate = LocalDate.now()): DailyType {
         return when {
@@ -18,7 +19,10 @@ class DailyTypeResolver(
     }
 
     private fun isHoliday(date: LocalDate): Boolean {
-        val holidays = holidayFetcher.fetch(date.year)
-        return holidays.contains(date)
+        return holidayCache.getHolidays(date.year)?.contains(date) ?: run {
+            val holidays = holidayFetcher.fetch(date.year)
+            holidayCache.cacheHolidays(holidays)
+            holidays.contains(date)
+        }
     }
 }

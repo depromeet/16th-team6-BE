@@ -54,16 +54,14 @@ data class PublicGyeonggiResponse<T>(
             stationName: String,
             staOrder: Int
         ): GyeonggiBusRouteStation {
-            if (stationName.contains("미정차")) {
-                stationName.replace("미정차", "")
-            }
+            val newStationName = stationName.replace("(미정차)", "")
 
             val station =
                 busRouteStationList
-                    .filter { it.stationName.contains(stationName) }
+                    .filter { it.stationName.contains(newStationName) }
                     .minByOrNull { abs(staOrder - it.stationSeq) }
 
-            requireNotNull(station) { "Station not found: $stationName" }
+            requireNotNull(station) { "Station not found: $newStationName" }
             return station
         }
     }

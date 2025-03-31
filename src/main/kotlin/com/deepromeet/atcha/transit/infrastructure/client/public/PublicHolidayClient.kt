@@ -19,10 +19,10 @@ class PublicHolidayClient(
             val response = publicHolidayFeignClient.getPublicHoliday(serviceKey, year)
             return response.body
                 .items
-                ?.map { it.toLocalDate() }
-                .orEmpty()
+                .item
+                .map { it.toLocalDate() }
         } catch (e: Exception) {
-            log.warn(e) { "공휴일 정보를 가져오는데 실패했습니다." }
+            log.warn(e) { "공휴일 정보를 가져오는데 실패했습니다 - $year" }
             return emptyList()
         }
     }
