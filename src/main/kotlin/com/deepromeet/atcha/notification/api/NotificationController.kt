@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.notification.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.notification.domatin.NotificationService
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -31,8 +32,21 @@ class NotificationController(
     fun test(
         @CurrentUser id: Long
     ) = notificationService.test(id)
+
+    @PostMapping("/suggest")
+    fun suggestRouteNotification(
+        @CurrentUser id: Long,
+        @RequestBody request: SuggestNotificationRequest
+    ) = notificationService.suggestRouteNotification(id, request.toCoordinate())
 }
 
 data class NotificationRequest(
     val lastRouteId: String
 )
+
+data class SuggestNotificationRequest(
+    val lat: Double,
+    val lon: Double
+) {
+    fun toCoordinate() = Coordinate(lat, lon)
+}
