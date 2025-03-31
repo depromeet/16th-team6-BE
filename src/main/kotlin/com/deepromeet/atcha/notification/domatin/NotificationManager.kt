@@ -94,7 +94,6 @@ class NotificationManager(
         return Duration.between(control, treatment).toMinutes()
     }
 
-
     private fun createDelayMessage(): String =
         listOf(
             "좋은 소식! 막차가 예상보다 늦게 출발해요. 조금 더 머물러도 돼요!",
