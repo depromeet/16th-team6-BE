@@ -33,6 +33,7 @@ open-api:
       subway: http://apis.data.go.kr/1613000/SubwayInfoService
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+    spare-key: ${secret.dev.OPEN_API_SPARE_KEY}
 
 kric:
   api:
