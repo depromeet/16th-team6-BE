@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.notification.domatin
 
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.notification.api.NotificationRequest
 import com.deepromeet.atcha.transit.domain.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
@@ -57,5 +58,17 @@ class NotificationService(
         val user = userReader.read(id)
         val notificationToken = user.fcmToken
         notificationManager.sendPushNotificationForTest(notificationToken)
+    }
+
+    fun suggestRouteNotification(
+        id: Long,
+        coordinate: Coordinate
+    ) {
+        val user = userReader.read(id)
+        val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
+        if (distance > 1.0) {
+            val notificationToken = user.fcmToken
+            notificationManager.sendSuggestPushNotification(notificationToken)
+        }
     }
 }

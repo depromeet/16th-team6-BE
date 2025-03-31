@@ -64,6 +64,13 @@ class NotificationManager(
         sendFirebaseMessaging(notificationToken, dataMap, body)
     }
 
+    fun sendSuggestPushNotification(notificationToken: String) {
+        val dataMap = mutableMapOf<String, String>()
+        dataMap["type"] = "PUSH_ALERT"
+        val body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0"
+        sendFirebaseMessaging(notificationToken, dataMap, body)
+    }
+
     private fun createDelayMessage(): String =
         listOf(
             "좋은 소식! 막차가 예상보다 늦게 출발해요. 조금 더 머물러도 돼요!",
