@@ -36,6 +36,7 @@ kakao:
 open-api:
   api:
     service-key: ${secret.prod.OPEN_API_SERVICE_KEY}
+    spare-key : ${secret.dev.OPEN_API_SPARE_KEY}
 
 kric:
   api:
