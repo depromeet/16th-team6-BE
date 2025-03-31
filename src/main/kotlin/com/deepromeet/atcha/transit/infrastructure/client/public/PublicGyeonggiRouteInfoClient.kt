@@ -6,6 +6,7 @@ import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
+import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -18,31 +19,59 @@ class PublicGyeonggiRouteInfoClient(
     private val publicGyeonggiBusArrivalInfoFeignClient: PublicGyeonggiBusArrivalInfoFeignClient,
     private val dailyTypeResolver: DailyTypeResolver,
     @Value("\${open-api.api.service-key}")
-    private val serviceKey: String
+    private val serviceKey: String,
+    @Value("\${open-api.api.spare-key}")
+    private val spareKey: String
 ) : BusRouteInfoClient {
     override fun getBusArrival(
         station: BusStation,
         route: BusRoute
     ): BusArrival? {
         try {
+            // 1. 노선 정보 가져오기
             val busRouteInfo =
-                publicGyeonggiRouteInfoFeignClient.getRouteInfo(
-                    serviceKey,
-                    route.id.value
-                ).response.msgBody.busRouteInfoItem
+                ApiClientUtils.callApiWithRetry(
+                    primaryKey = serviceKey,
+                    spareKey = spareKey,
+                    apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value) },
+                    isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                    processResult = { response -> response.response.msgBody.busRouteInfoItem },
+                    errorMessage = "경기도 노선 정보를 가져오는데 실패했습니다."
+                ) ?: return null
+
+            // 2. 노선 정류장 목록 가져오기
             val busRouteStations =
-                publicGyeonggiRouteInfoFeignClient.getRouteStationList(
-                    serviceKey,
-                    route.id.value
-                ).response.msgBody
+                ApiClientUtils.callApiWithRetry(
+                    primaryKey = serviceKey,
+                    spareKey = spareKey,
+                    apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value) },
+                    isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                    processResult = { response -> response.response.msgBody },
+                    errorMessage = "경기도 노선 정류장 목록을 가져오는데 실패했습니다."
+                ) ?: return null
+
+            // 3. 정류장 정보 찾기
             val stationInfo = busRouteStations.getStation(station.id)
+
+            // 4. 도착 정보 가져오기
             val arrivalInfo =
-                publicGyeonggiBusArrivalInfoFeignClient.getArrivalInfo(
-                    serviceKey,
-                    station.id.value,
-                    route.id.value,
-                    stationInfo.stationSeq.toString()
-                ).response.msgBody.busArrivalItem
+                ApiClientUtils.callApiWithRetry(
+                    primaryKey = serviceKey,
+                    spareKey = spareKey,
+                    apiCall = { key ->
+                        publicGyeonggiBusArrivalInfoFeignClient.getArrivalInfo(
+                            key,
+                            station.id.value,
+                            route.id.value,
+                            stationInfo.stationSeq.toString()
+                        )
+                    },
+                    isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                    processResult = { response -> response.response.msgBody.busArrivalItem },
+                    errorMessage = "경기도 버스 도착 정보를 가져오는데 실패했습니다."
+                ) ?: return null
+
+            // 5. 버스 도착 정보 변환
             return busRouteInfo.toBusArrival(
                 dailyTypeResolver.resolve(),
                 stationInfo.getDirection(),
@@ -55,12 +84,16 @@ class PublicGyeonggiRouteInfoClient(
         }
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
-        return publicGyeonggiRouteInfoFeignClient.getRouteInfo(
-            serviceKey,
-            route.id.value
-        ).response.msgBody
-            .busRouteInfoItem
-            .toBusRouteOperationInfo()
+    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo? {
+        return ApiClientUtils.callApiWithRetry(
+            primaryKey = serviceKey,
+            spareKey = spareKey,
+            apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value) },
+            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+            processResult = { response ->
+                response.response.msgBody.busRouteInfoItem.toBusRouteOperationInfo()
+            },
+            errorMessage = "경기도 노선 운행 정보를 가져오는데 실패했습니다."
+        )
     }
 }
