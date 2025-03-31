@@ -30,6 +30,13 @@ class RedisConfig(
         return LettuceConnectionFactory(host, port)
     }
 
+    @Bean
+    fun lockRedisTemplate(): RedisTemplate<String, String> {
+        val template = RedisTemplate<String, String>()
+        template.connectionFactory = redisConnectionFactory()
+        return template
+    }
+
     fun <T> createRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory,
         clazz: Class<T>
