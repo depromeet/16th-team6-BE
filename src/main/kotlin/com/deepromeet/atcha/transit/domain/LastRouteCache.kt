@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRoutes
 
 interface LastRouteCache {
-    fun cache(route: LastRoutesResponse)
+    fun cache(route: LastRoutes)
 
-    fun get(routeId: String): LastRoutesResponse?
+    fun get(routeId: String): LastRoutes?
 }

@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.api.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.BusStationMeta
+import com.deepromeet.atcha.transit.domain.LastRoutesResponse
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
@@ -9,7 +10,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.absoluteValue
 
-data class LastRoutesResponse(
+data class LastRoutes(
     val routeId: String,
     val departureDateTime: String,
     val totalTime: Int,
@@ -29,6 +30,20 @@ data class LastRoutesResponse(
 
     fun findFirstBus(): LastRouteLeg {
         return legs.first { it.mode == "BUS" }
+    }
+
+    fun toLastRoutesResponse(): LastRoutesResponse {
+        return LastRoutesResponse(
+            routeId,
+            departureDateTime,
+            totalTime,
+            totalWalkTime,
+            totalWorkDistance,
+            transferCount,
+            totalDistance,
+            pathType,
+            legs
+        )
     }
 }
 

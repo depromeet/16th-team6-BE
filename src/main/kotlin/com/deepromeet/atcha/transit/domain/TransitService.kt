@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
 import kotlinx.coroutines.Dispatchers
@@ -52,7 +52,7 @@ class TransitService(
         return taxiFareFetcher.fetch(start, end) ?: Fare(0)
     }
 
-    fun getRoute(routeId: String): LastRoutesResponse {
+    fun getRoute(routeId: String): LastRoutes {
         return lastRouteReader.read(routeId)
     }
 
@@ -77,18 +77,9 @@ class TransitService(
         endLat: String?,
         endLon: String?,
         sortType: LastRouteSortType
-    ): List<LastRoutesResponse> {
+    ): List<LastRoutes> {
         // end 가 없는 경우, 사용자 집 주소 조회
-        val end =
-            if (endLat == null || endLon == null) {
-                val user = userReader.read(userId)
-                Coordinate(
-                    user.address.lat,
-                    user.address.lon
-                )
-            } else {
-                Coordinate(endLat.toDouble(), endLon.toDouble())
-            }
+        val end = getDeparture(endLat, endLon, userId)
 
         // 출발지와 도착지 경로가 redis 에 저장된 경우
         lastRouteIndexReader.read(start, end).let { routeIds ->
@@ -96,7 +87,9 @@ class TransitService(
                 return lastRouteOperations.sort(
                     sortType,
                     lastRouteOperations.getFilteredRoutes(
-                        routeIds.map { routeId -> lastRouteReader.read(routeId) }
+                        routeIds.map { routeId ->
+                            lastRouteReader.read(routeId)
+                        }
                     )
                 )
             }
@@ -130,6 +123,20 @@ class TransitService(
         return lastRouteOperations.sort(sortType, filteredRoutes)
     }
 
+    private fun getDeparture(
+        endLat: String?,
+        endLon: String?,
+        userId: Long
+    ) = if (endLat == null || endLon == null) {
+        val user = userReader.read(userId)
+        Coordinate(
+            user.address.lat,
+            user.address.lon
+        )
+    } else {
+        Coordinate(endLat.toDouble(), endLon.toDouble())
+    }
+
     private fun saveRouteIdsByStartEnd(
         start: Coordinate,
         end: Coordinate,
@@ -138,7 +145,7 @@ class TransitService(
         lastRouteIndexAppender.append(start, end, routeIds)
     }
 
-    private fun saveRoutesToCache(routes: List<LastRoutesResponse>) {
+    private fun saveRoutesToCache(routes: List<LastRoutes>) {
         routes.forEach { route -> lastRouteAppender.append(route) }
     }
 }

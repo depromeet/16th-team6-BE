@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.deepromeet.atcha.transit.exception.TransitException
 import org.springframework.stereotype.Component
 
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class LastRouteReader(
     private val lastRouteCache: LastRouteCache
 ) {
-    fun read(routeId: String): LastRoutesResponse {
+    fun read(routeId: String): LastRoutes {
         return lastRouteCache.get(routeId) ?: throw TransitException.NotFoundRoute
     }
 

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.common.redis
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -73,8 +73,8 @@ class ProdRedisConfig(
     @Bean
     fun lastRoutesResponseRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, LastRoutesResponse> {
-        return createRedisTemplate(redisConnectionFactory, LastRoutesResponse::class.java)
+    ): RedisTemplate<String, LastRoutes> {
+        return createRedisTemplate(redisConnectionFactory, LastRoutes::class.java)
     }
 
     @Bean
