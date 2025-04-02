@@ -49,7 +49,7 @@ class TransitService(
         start: Coordinate,
         end: Coordinate
     ): Fare {
-        return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
+        return taxiFareFetcher.fetch(start, end) ?: Fare(0)
     }
 
     fun getRoute(routeId: String): LastRoutesResponse {
