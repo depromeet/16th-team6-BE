@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.notification.domatin
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.notification.api.NotificationRequest
 import com.deepromeet.atcha.transit.domain.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service

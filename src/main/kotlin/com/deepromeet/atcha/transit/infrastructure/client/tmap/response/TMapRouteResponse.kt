@@ -1,11 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 
-import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.LastRouteLeg
-import com.deepromeet.atcha.transit.domain.LastRouteLocation
-import com.deepromeet.atcha.transit.domain.LastRouteStation
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
-import java.time.LocalDateTime
 
 data class TMapRouteResponse(
     val metaData: MetaData?,
@@ -89,22 +84,7 @@ data class Leg(
     val passShape: PassShape?,
     // 대중교통 구간 정류장 정보
     val passStopList: PassStopList?
-) {
-    fun toLastRouteLeg(departureDateTime: LocalDateTime): LastRouteLeg {
-        return LastRouteLeg(
-            distance = distance,
-            sectionTime = sectionTime,
-            departureDateTime = departureDateTime,
-            mode = mode,
-            route = route,
-            start = start.toLastLocation(),
-            end = end.toLastLocation(),
-            passStopList = passStopList?.stationList?.map { it.toLastRouteStation() },
-            step = steps,
-            passShape = passShape?.linestring
-        )
-    }
-}
+)
 
 data class Lane(
     // 이동수단 운행 여부 (1: 운행 중, 0: 운행 종료)
@@ -126,18 +106,7 @@ data class Location(
     val lon: Double,
     // 정류장 명칭
     val name: String
-) {
-    fun toLastLocation(): LastRouteLocation {
-        return LastRouteLocation(
-            stationName = name,
-            coordinate =
-                Coordinate(
-                    lat = lat,
-                    lon = lon
-                )
-        )
-    }
-}
+)
 
 data class Step(
     // 도보 이동 거리 (m)
@@ -170,13 +139,4 @@ data class Station(
     val lon: String,
     // 위도
     val lat: String
-) {
-    fun toLastRouteStation(): LastRouteStation {
-        return LastRouteStation(
-            index = index,
-            stationName = stationName,
-            lon = lon,
-            lat = lat
-        )
-    }
-}
+)
