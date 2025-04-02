@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
 import kotlinx.coroutines.Dispatchers

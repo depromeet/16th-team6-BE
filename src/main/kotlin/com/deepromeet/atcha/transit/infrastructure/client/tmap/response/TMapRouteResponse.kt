@@ -32,7 +32,8 @@ data class Itinerary(
     // 총 보행 소요 시간 (초)
     val totalWalkTime: Int,
     val fare: KakaoFare,
-    val legs: List<Leg>
+    val legs: List<Leg>,
+    val pathType: Int
 )
 
 data class TMapFare(
