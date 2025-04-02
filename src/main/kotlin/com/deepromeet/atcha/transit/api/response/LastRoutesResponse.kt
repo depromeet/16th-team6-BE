@@ -1,6 +1,6 @@
-package com.deepromeet.atcha.transit.domain
+package com.deepromeet.atcha.transit.api.response
 
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
+import com.deepromeet.atcha.transit.domain.LastRouteLeg
 
 data class LastRoutesResponse(
     val routeId: String,

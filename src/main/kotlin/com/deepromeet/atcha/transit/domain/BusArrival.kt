@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 

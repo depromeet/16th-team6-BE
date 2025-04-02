@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.deepromeet.atcha.transit.exception.TransitException
 import org.springframework.stereotype.Component
 

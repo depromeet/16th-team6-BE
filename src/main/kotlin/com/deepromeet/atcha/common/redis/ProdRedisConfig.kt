@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.common.redis
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.transit.api.response.LastRoutes
+import com.deepromeet.atcha.transit.domain.LastRoutes
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature

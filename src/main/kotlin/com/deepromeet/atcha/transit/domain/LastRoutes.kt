@@ -1,8 +1,7 @@
-package com.deepromeet.atcha.transit.api.response
+package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.BusStationMeta
-import com.deepromeet.atcha.transit.domain.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step

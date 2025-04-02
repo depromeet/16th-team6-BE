@@ -1,8 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
-import com.deepromeet.atcha.transit.api.response.LastRoutes
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
@@ -107,7 +105,7 @@ class LastRouteOperations(
             transferCount = route.transferCount,
             totalWorkDistance = route.totalWalkDistance,
             totalDistance = route.totalDistance,
-            pathType = 0,
+            pathType = route.pathType,
             legs = adjustedLegs
         )
     }
