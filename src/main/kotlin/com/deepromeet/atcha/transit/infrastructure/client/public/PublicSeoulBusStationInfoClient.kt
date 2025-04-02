@@ -43,7 +43,7 @@ class PublicSeoulBusStationInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
-            apiCall = { key -> publicBusClient.getRouteByStation(station.id.value, key) },
+            apiCall = { key -> publicBusClient.getRouteByStation(station.busStationNumber.value, key) },
             isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
             processResult = { response ->
                 val busRoutes = response.msgBody.itemList?.map { it.toBusRoute() }
