@@ -13,6 +13,7 @@ import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
+import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
@@ -193,6 +194,7 @@ data class BusArrivalItem(
 data class GyeonggiBusRouteStation(
     val regionName: String,
     val stationId: String,
+    val mobileNo: String = "0",
     val stationName: String,
     val x: String,
     val y: String,
@@ -210,6 +212,7 @@ data class GyeonggiBusRouteStation(
             busStation =
                 BusStation(
                     id = BusStationId(stationId),
+                    busStationNumber = BusStationNumber(mobileNo.trim()),
                     busStationMeta =
                         BusStationMeta(
                             name = stationName,
@@ -221,8 +224,9 @@ data class GyeonggiBusRouteStation(
     }
 }
 
-class GyeonggiBusStation(
+data class GyeonggiBusStation(
     val stationId: String,
+    val mobileNo: String,
     val stationName: String,
     val x: String,
     val y: String
@@ -230,6 +234,7 @@ class GyeonggiBusStation(
     fun toBusStation(): BusStation {
         return BusStation(
             id = BusStationId(stationId),
+            busStationNumber = BusStationNumber(mobileNo),
             busStationMeta =
                 BusStationMeta(
                     name = stationName,
