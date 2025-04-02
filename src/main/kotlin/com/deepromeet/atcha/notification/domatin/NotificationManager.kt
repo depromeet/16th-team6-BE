@@ -156,13 +156,16 @@ class NotificationManager(
 
     private fun sendFirebaseMessaging(
         token: String,
-        dataMap: Map<String, String>,
+        dataMap: MutableMap<String, String>,
         body: String
     ) {
         logger.info("Sending push notification to $token with body: $body and data: $dataMap")
+        val title = "앗차"
+        dataMap["title"] = title
+        dataMap["body"] = body
         fcmService.sendMessageTo(
             targetToken = token,
-            title = "앗차",
+            title = title,
             body = body,
             data = dataMap
         )

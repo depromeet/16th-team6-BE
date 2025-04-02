@@ -32,7 +32,7 @@ class PublicSeoulBusRouteInfoClient(
             apiCall = { key -> publicSeoulBusArrivalInfoFeignClient.getArrivalInfoByRoute(route.id.value, key) },
             isLimitExceeded = { response -> ApiClientUtils.isSeoulApiLimitExceeded(response) },
             processResult = { response ->
-                val findResult = response.msgBody.itemList?.find { it.arsId == station.id.value }
+                val findResult = response.msgBody.itemList?.find { it.arsId == station.busStationNumber.value }
                 findResult?.toBusArrival()
             },
             errorMessage = "서울시 버스 도착 정보를 가져오는데 실패했습니다."

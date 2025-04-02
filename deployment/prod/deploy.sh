@@ -2,7 +2,7 @@
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
 DEFAULT_CONF="data/nginx/nginx.conf"
-MAX_RETRIES=30
+MAX_RETRIES=60
 
 check_service() {
   local RETRIES=0
