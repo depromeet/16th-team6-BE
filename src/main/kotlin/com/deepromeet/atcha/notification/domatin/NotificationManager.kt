@@ -160,9 +160,12 @@ class NotificationManager(
         body: String
     ) {
         logger.info("Sending push notification to $token with body: $body and data: $dataMap")
+        val title = "앗차"
+        dataMap.plus("title" to title)
+        dataMap.plus("body" to body)
         fcmService.sendMessageTo(
             targetToken = token,
-            title = "앗차",
+            title = title,
             body = body,
             data = dataMap
         )
