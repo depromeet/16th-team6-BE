@@ -84,13 +84,9 @@ class LastRouteOperations(
                             "SUBWAY" -> {
                                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
-                                val (routesDeferred, startDeferred, endDeferred) =
-                                    coroutineScope {
-                                        val routes = async { subwayManager.getRoutes(subwayLine) }
-                                        val start = async { subwayManager.getStation(subwayLine, leg.start.name) }
-                                        val end = async { subwayManager.getStation(subwayLine, leg.end.name) }
-                                        Triple(routes, start, end)
-                                    }
+                                val routesDeferred = async { subwayManager.getRoutes(subwayLine) }
+                                val startDeferred = async { subwayManager.getStation(subwayLine, leg.start.name) }
+                                val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
 
                                 val routes = routesDeferred.await()
                                 val startStation = startDeferred.await()
@@ -133,7 +129,6 @@ class LastRouteOperations(
                 }.awaitAll()
             }
 
-        // 🚨 하나라도 null 또는 "null"이면 전체 무효
         return if (calculatedLegs.any {
                 (it.mode == "BUS" || it.mode == "SUBWAY") &&
                     (it.departureDateTime == null || it.departureDateTime == "null")

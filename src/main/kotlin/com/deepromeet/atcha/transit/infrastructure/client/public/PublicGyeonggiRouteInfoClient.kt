@@ -32,7 +32,6 @@ class PublicGyeonggiRouteInfoClient(
     ): BusArrival? =
         runBlocking {
             try {
-                // 코루틴 스코프 내에서 비동기 작업 수행
                 coroutineScope {
                     // 1. 노선 정보 가져오기 - 비동기
                     val busRouteInfoDeferred =
