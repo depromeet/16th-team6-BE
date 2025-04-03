@@ -53,7 +53,7 @@ jobs:
 
           timeout: 120s
           source: "./deployment/dev/"
-          target: /home/root/
+          target: /root
 
       - name: Run
         uses: appleboy/ssh-action@master
@@ -63,4 +63,4 @@ jobs:
           password: ${{ secrets.REMOTE_SSH_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            ./deploy.sh
+            bash ./deploy.sh
