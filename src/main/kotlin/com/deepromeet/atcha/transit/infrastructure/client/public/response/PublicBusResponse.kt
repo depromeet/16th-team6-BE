@@ -12,6 +12,7 @@ import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
+import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
@@ -59,7 +60,8 @@ data class StationResponse(
 ) {
     fun toBusStation(): BusStation =
         BusStation(
-            id = BusStationId(arsId),
+            id = BusStationId(stId),
+            busStationNumber = BusStationNumber(arsId),
             busStationMeta =
                 BusStationMeta(
                     name = stNm,
@@ -75,13 +77,13 @@ data class StationResponse(
 data class BusRouteResponse(
     @JacksonXmlProperty(localName = "busRouteId")
     val busRouteId: String,
-    @JacksonXmlProperty(localName = "busRouteAbrv")
-    val busRouteAbrv: String
+    @JacksonXmlProperty(localName = "busRouteNm")
+    val busRouteNm: String
 ) {
     fun toBusRoute(): BusRoute =
         BusRoute(
             id = BusRouteId(busRouteId),
-            name = busRouteAbrv,
+            name = busRouteNm,
             serviceRegion = ServiceRegion.SEOUL
         )
 }
@@ -166,6 +168,7 @@ data class BusArrivalResponse(
                 ),
             busStationId = BusStationId(arsId),
             stationName = stNm,
+            firstTime = parseDateTime(firstTm),
             lastTime = parseDateTime(lastTm),
             term = term.toInt(),
             realTimeInfo = realTimeBusArrivals
@@ -319,6 +322,8 @@ data class BusRouteStationResponse(
     val arsId: String,
     @JacksonXmlProperty(localName = "stationNm")
     val stationNm: String,
+    @JacksonXmlProperty(localName = "station")
+    val station: String,
     @JacksonXmlProperty(localName = "gpsX")
     val gpsX: String,
     @JacksonXmlProperty(localName = "gpsY")
@@ -337,7 +342,8 @@ data class BusRouteStationResponse(
             order = seq.toInt(),
             busStation =
                 BusStation(
-                    id = BusStationId(arsId),
+                    id = BusStationId(station),
+                    busStationNumber = BusStationNumber(arsId),
                     busStationMeta =
                         BusStationMeta(
                             name = stationNm,

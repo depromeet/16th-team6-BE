@@ -1,8 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
@@ -59,13 +57,19 @@ class LastRouteOperations(
         return itineraries.filterNot { itinerary ->
             val transitModes = itinerary.legs.filter { it.mode == "SUBWAY" || it.mode == "BUS" }
             val busCountExcludingFirst = transitModes.drop(1).count { it.mode == "BUS" }
+            val hasTrain = itinerary.legs.any { it.mode == "TRAIN" }
+            val hasExpressSubway =
+                itinerary.legs.any {
+                    it.mode == "SUBWAY" && it.route != null && it.route.contains("(급행)")
+                }
             val hasValidModes =
                 itinerary.legs.any {
                     it.mode == "WALK" ||
                         (it.mode == "SUBWAY" && it.route != null && !it.route.contains("(급행)")) ||
                         it.mode == "BUS"
                 }
-            !hasValidModes || (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
+            hasTrain || hasExpressSubway || !hasValidModes ||
+                (transitModes.size >= 3 && busCountExcludingFirst >= 2) || transitModes.size >= 5
         }.associateBy { itinerary ->
             itinerary.legs.joinToString("|") { leg ->
                 "${leg.start.name}-${leg.end.name}-${leg.route ?: ""}"
@@ -73,7 +77,7 @@ class LastRouteOperations(
         }.values.toList()
     }
 
-    suspend fun calculateRoute(route: Itinerary): LastRoutesResponse? {
+    suspend fun calculateRoute(route: Itinerary): LastRoutes? {
         // 1. 경로 내 대중교통 별 막차 시간 조회
         val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
         // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
@@ -93,7 +97,7 @@ class LastRouteOperations(
         // 6. 총 소요 시간 계산
         val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
 
-        return LastRoutesResponse(
+        return LastRoutes(
             routeId = UUID.randomUUID().toString(),
             departureDateTime = departureDateTime.toString(),
             totalTime = totalTime.toInt(),
@@ -101,7 +105,7 @@ class LastRouteOperations(
             transferCount = route.transferCount,
             totalWorkDistance = route.totalWalkDistance,
             totalDistance = route.totalDistance,
-            pathType = 0,
+            pathType = route.pathType,
             legs = adjustedLegs
         )
     }
@@ -342,9 +346,9 @@ class LastRouteOperations(
 
     private fun String.removeSuffix(): String = this.replace("(중)", "").trim()
 
-    fun getFilteredRoutes(lastRoutesResponses: List<LastRoutesResponse>): List<LastRoutesResponse> {
+    fun getFilteredRoutes(lastRoutes: List<LastRoutes>): List<LastRoutes> {
         val now = LocalDateTime.now()
-        return lastRoutesResponses.filter { response ->
+        return lastRoutes.filter { response ->
             val departureDateTime = LocalDateTime.parse(response.departureDateTime)
             departureDateTime.isAfter(now)
         }
@@ -352,19 +356,18 @@ class LastRouteOperations(
 
     fun sort(
         sortType: LastRouteSortType,
-        routes: List<LastRoutesResponse>
-    ): List<LastRoutesResponse> {
+        routes: List<LastRoutes>
+    ): List<LastRoutes> {
         return when (sortType) {
             LastRouteSortType.MINIMUM_TRANSFERS -> sortedByMinTransfer(routes)
             LastRouteSortType.DEPARTURE_TIME_DESC -> sortedByDepartureTimeDesc(routes)
         }
     }
 
-    private fun sortedByMinTransfer(routes: List<LastRoutesResponse>) =
+    private fun sortedByMinTransfer(routes: List<LastRoutes>) =
         routes.sortedWith(
             compareBy({ it.transferCount }, { it.totalTime })
         )
 
-    private fun sortedByDepartureTimeDesc(routes: List<LastRoutesResponse>) =
-        routes.sortedByDescending { it.departureDateTime }
+    private fun sortedByDepartureTimeDesc(routes: List<LastRoutes>) = routes.sortedByDescending { it.departureDateTime }
 }

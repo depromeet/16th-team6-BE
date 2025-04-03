@@ -1,7 +1,9 @@
 package com.deepromeet.atcha.notification.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
+import com.deepromeet.atcha.notification.domatin.NotificationRequest
 import com.deepromeet.atcha.notification.domatin.NotificationService
+import com.deepromeet.atcha.notification.domatin.SuggestNotificationRequest
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
@@ -25,8 +27,16 @@ class NotificationController(
         @CurrentUser id: Long,
         @ModelAttribute request: NotificationRequest
     ) = notificationService.deleteRouteNotification(id, request)
-}
 
-data class NotificationRequest(
-    val lastRouteId: String
-)
+    // todo 안드 테스트용 (추후 삭제_
+    @PostMapping("/test")
+    fun test(
+        @CurrentUser id: Long
+    ) = notificationService.test(id)
+
+    @PostMapping("/suggest")
+    fun suggestRouteNotification(
+        @CurrentUser id: Long,
+        @RequestBody request: SuggestNotificationRequest
+    ) = notificationService.suggestRouteNotification(id, request.toCoordinate())
+}

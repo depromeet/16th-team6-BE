@@ -11,7 +11,11 @@ data class BusArrivalRequest(
 ) {
     fun toBusStationMeta() =
         BusStationMeta(
-            routeName,
+            stationName,
             Coordinate(lat, lon)
         )
+
+    fun toRouteName(): String {
+        return routeName.split(":")[1]
+    }
 }

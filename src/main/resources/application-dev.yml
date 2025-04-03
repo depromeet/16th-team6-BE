@@ -18,10 +18,12 @@ tmap:
 redis:
   host: redis
   port: 6379
+  password: ${secret.dev.REDIS_PASSWORD}
 
 open-api:
   api:
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+    spare-key : ${secret.dev.OPEN_API_SPARE_KEY}
 
 kric:
   api:

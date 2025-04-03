@@ -1,22 +1,48 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.Duration
 import java.time.LocalDateTime
+import kotlin.math.absoluteValue
 
 data class LastRoutes(
     val routeId: String,
-    val departureDateTime: LocalDateTime,
+    val departureDateTime: String,
     val totalTime: Int,
     val totalWalkTime: Int,
+    val totalWorkDistance: Int,
     val transferCount: Int,
     val totalDistance: Int,
     val pathType: Int,
     val legs: List<LastRouteLeg>
 ) {
-    fun getRemainingTime(): Int {
-        return Duration.between(departureDateTime, LocalDateTime.now()).toSeconds().toInt()
+    fun calculateRemainingTime(): Int {
+        return Duration.between(
+            LocalDateTime.parse(departureDateTime),
+            LocalDateTime.now()
+        ).toSeconds().toInt().absoluteValue
+    }
+
+    fun findFirstBus(): LastRouteLeg {
+        return legs.first { it.mode == "BUS" }
+    }
+
+    fun toLastRoutesResponse(): LastRoutesResponse {
+        return LastRoutesResponse(
+            routeId,
+            departureDateTime,
+            totalTime,
+            totalWalkTime,
+            totalWorkDistance,
+            transferCount,
+            totalDistance,
+            pathType,
+            legs
+        )
     }
 }
 
@@ -24,27 +50,24 @@ data class LastRouteLeg(
     val distance: Int,
     val sectionTime: Int,
     val mode: String,
-    val departureDateTime: LocalDateTime? = null,
+    val departureDateTime: String? = null,
     val route: String? = null,
-    val start: LastRouteLocation,
-    val end: LastRouteLocation,
-    val passStopList: List<LastRouteStation>? = null,
+    val type: String? = null,
+    val service: String? = null,
+    val start: Location,
+    val end: Location,
+    val passStopList: List<Station>? = null,
     val step: List<Step>? = null,
     val passShape: String? = null
-)
+) {
+    fun resolveRouteName(): String {
+        return route!!.split(":")[1]
+    }
 
-data class LastRouteLocation(
-    val stationName: String,
-    val coordinate: Coordinate
-)
-
-data class LastRouteStation(
-    // 순번
-    val index: Int,
-    // 정류장 명칭
-    val stationName: String,
-    // 경도
-    val lon: String,
-    // 위도
-    val lat: String
-)
+    fun resolveStartStation(): BusStationMeta {
+        return BusStationMeta(
+            start.name,
+            Coordinate(start.lat, start.lon)
+        )
+    }
+}

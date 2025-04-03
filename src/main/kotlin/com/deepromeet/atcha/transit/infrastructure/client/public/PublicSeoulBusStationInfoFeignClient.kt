@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.RequestParam
 interface PublicSeoulBusStationInfoFeignClient {
     @GetMapping("/api/rest/stationinfo/getStationByName")
     fun getStationInfoByName(
-        @RequestParam stSrch: String
+        @RequestParam stSrch: String,
+        @RequestParam serviceKey: String
     ): ServiceResult<StationResponse>
 
     @GetMapping("/api/rest/stationinfo/getRouteByStation")
     fun getRouteByStation(
-        @RequestParam arsId: String
+        @RequestParam arsId: String,
+        @RequestParam serviceKey: String
     ): ServiceResult<BusRouteResponse>
 }

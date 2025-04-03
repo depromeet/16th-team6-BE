@@ -11,8 +11,8 @@ import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
 import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.LastRoutes
 import com.deepromeet.atcha.transit.domain.TransitService
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -42,7 +42,7 @@ class TransitController(
         return ApiResponse.success(
             BusArrivalResponse(
                 transitService.getBusArrivalInfo(
-                    request.routeName,
+                    request.toRouteName(),
                     request.toBusStationMeta()
                 )
             )
@@ -79,13 +79,13 @@ class TransitController(
                 request.endLat,
                 request.endLon,
                 request.sortType
-            )
+            ).map { it.toLastRoutesResponse() }
         )
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String
-    ): ApiResponse<LastRoutesResponse> =
+    ): ApiResponse<LastRoutes> =
         ApiResponse.success(
             transitService.getRoute(routeId)
         )

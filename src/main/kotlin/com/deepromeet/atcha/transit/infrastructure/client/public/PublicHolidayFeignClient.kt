@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.HolidayResponse
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicXMLResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -13,10 +12,10 @@ import org.springframework.web.bind.annotation.RequestParam
     configuration = [PublicFeignConfig::class]
 )
 interface PublicHolidayFeignClient {
-    @GetMapping("/getRestDeInfo")
+    @GetMapping("/getRestDeInfo", produces = ["application/xml"], consumes = ["application/xml"])
     fun getPublicHoliday(
         @RequestParam serviceKey: String,
         @RequestParam solYear: Int,
         @RequestParam numOfRows: Int = 100
-    ): PublicXMLResponse<HolidayResponse>
+    ): HolidayResponse
 }

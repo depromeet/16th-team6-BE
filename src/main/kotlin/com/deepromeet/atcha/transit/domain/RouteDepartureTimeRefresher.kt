@@ -4,8 +4,6 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.notification.domatin.NotificationManager
 import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -109,7 +107,7 @@ class RouteDepartureTimeRefresher(
     }
 
     private fun getWalkTimeBeforeThisLeg(
-        route: LastRoutesResponse,
+        route: LastRoutes,
         busLeg: LastRouteLeg
     ): Int {
         var totalWalkTime = 0

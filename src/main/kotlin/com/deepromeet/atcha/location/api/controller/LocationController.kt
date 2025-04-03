@@ -64,9 +64,8 @@ class LocationController(
     @DeleteMapping("/history")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeRecentPOI(
-        @CurrentUser userId: Long,
-        @RequestBody request: POIHistoryRequest
-    ) = locationService.removePOIHistory(userId, request.toPOI())
+        @ModelAttribute request: POIHistoryRequest
+    ) = locationService.removePOIHistory(1, request.toPOI())
 
     @DeleteMapping("/histories")
     @ResponseStatus(HttpStatus.NO_CONTENT)
