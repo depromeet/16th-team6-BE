@@ -2,7 +2,7 @@ name: DEV CD
 
 on:
   workflow_dispatch:
-  pull_request:
+  push:
     branches: [ dev ]
 
 env:
