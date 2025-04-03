@@ -11,6 +11,10 @@ import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicJsonResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -45,55 +49,73 @@ class PublicSubwayInfoClient(
         )
     }
 
-    override fun getTimeTable(
+    override suspend fun getTimeTable(
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
     ): SubwayTimeTable? {
-        try {
-            val subwayStations = subwayStationRepository.findByRouteCode(startStation.routeCode)
+        return try {
+            val (stationsDeferred, scheduleDeferred) =
+                coroutineScope {
+                    val stations =
+                        async(Dispatchers.IO) {
+                            subwayStationRepository.findByRouteCode(startStation.routeCode)
+                        }
 
-            val scheduleItems =
-                ApiClientUtils.callApiWithRetry(
-                    primaryKey = serviceKey,
-                    spareKey = spareKey,
-                    apiCall = { key ->
-                        subwayInfoFeignClient.getStationSchedule(
-                            key,
-                            startStation.id.value,
-                            dailyType.code,
-                            direction.code
-                        )
-                    },
-                    isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
-                    processResult = { response ->
-                        response.response.body.items?.item
-                            ?.filter { it.endSubwayStationNm != null }
-                            ?: emptyList()
-                    },
-                    errorMessage = "지하철 시간표 정보를 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}"
-                ) ?: return null
+                    val schedule =
+                        async(Dispatchers.IO) {
+                            ApiClientUtils.callApiWithRetry(
+                                primaryKey = serviceKey,
+                                spareKey = spareKey,
+                                apiCall = { key ->
+                                    subwayInfoFeignClient.getStationSchedule(
+                                        key,
+                                        startStation.id.value,
+                                        dailyType.code,
+                                        direction.code
+                                    )
+                                },
+                                isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
+                                processResult = { response ->
+                                    response.response.body.items?.item
+                                        ?.filter { it.endSubwayStationNm != null }
+                                        ?: emptyList()
+                                },
+                                errorMessage =
+                                    "지하철 시간표 정보를 가져오는데 실패했습니다 " +
+                                        "- ${startStation.id} ${dailyType.code} ${direction.code}"
+                            )
+                        }
 
-            // API 호출 성공 후 데이터 변환 처리
+                    stations to schedule
+                }
+
+            val subwayStations = stationsDeferred.await()
+            val scheduleItems = scheduleDeferred.await() ?: return null
+
             val timeTableItems =
-                scheduleItems.parallelStream()
-                    .map {
-                        val finalStation =
-                            subwayStations.find { station -> station.name == it.endSubwayStationNm }
-                                ?: throw TransitException.NotFoundSubwayStation
-                        it.toDomain(finalStation)
-                    }
-                    .toList()
+                coroutineScope {
+                    scheduleItems.map { item ->
+                        async {
+                            val finalStation =
+                                subwayStations.find { station -> station.name == item.endSubwayStationNm }
+                                    ?: throw TransitException.NotFoundSubwayStation
+                            item.toDomain(finalStation)
+                        }
+                    }.awaitAll()
+                }
 
-            return SubwayTimeTable(
+            SubwayTimeTable(
                 startStation,
                 dailyType,
                 direction,
                 timeTableItems
             )
         } catch (e: Exception) {
-            log.warn(e) { "지하철 시간표 정보를 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}" }
-            return null
+            log.warn(e) {
+                "지하철 시간표 정보를 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}"
+            }
+            null
         }
     }
 

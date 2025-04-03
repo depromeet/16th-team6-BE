@@ -3,6 +3,9 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 
 @Service
@@ -27,11 +30,12 @@ class TransitService(
             ?: throw TransitException.NotFoundBusArrival
     }
 
-    fun getBusPositions(busRoute: BusRoute): BusRoutePositions {
-        val busRouteStationList = busManager.getBusRouteStationList(busRoute)
-        val busPositions = busManager.getBusPosition(busRoute)
-        return BusRoutePositions(busRouteStationList, busPositions)
-    }
+    suspend fun getBusPositions(busRoute: BusRoute): BusRoutePositions =
+        coroutineScope {
+            val stationListDeferred = async(Dispatchers.IO) { busManager.getBusRouteStationList(busRoute) }
+            val positionsDeferred = async(Dispatchers.IO) { busManager.getBusPosition(busRoute) }
+            BusRoutePositions(stationListDeferred.await(), positionsDeferred.await())
+        }
 
     fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
         return busManager.getBusRouteOperationInfo(busRoute)

@@ -50,7 +50,7 @@ class TransitController(
     }
 
     @GetMapping("/bus-routes/positions")
-    fun getBusRoutePositions(
+    suspend fun getBusRoutePositions(
         @ModelAttribute request: BusRouteRequest
     ): ApiResponse<BusRoutePositionResponse> {
         return ApiResponse.success(

@@ -5,11 +5,8 @@ import com.deepromeet.atcha.transit.domain.BusPositionFetcher
 import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils.isGyeonggiApiLimitExceeded
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class PublicGyeonggiBusPositionClient(

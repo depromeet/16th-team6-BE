@@ -6,11 +6,8 @@ import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class PublicGyeonggiStationInfoClient(

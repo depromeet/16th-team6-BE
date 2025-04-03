@@ -83,9 +83,19 @@ class LastRouteOperations(
                         when (leg.mode) {
                             "SUBWAY" -> {
                                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
-                                val routes = subwayManager.getRoutes(subwayLine)
-                                val startStation = subwayManager.getStation(subwayLine, leg.start.name)
-                                val endStation = subwayManager.getStation(subwayLine, leg.end.name)
+
+                                val (routesDeferred, startDeferred, endDeferred) =
+                                    coroutineScope {
+                                        val routes = async { subwayManager.getRoutes(subwayLine) }
+                                        val start = async { subwayManager.getStation(subwayLine, leg.start.name) }
+                                        val end = async { subwayManager.getStation(subwayLine, leg.end.name) }
+                                        Triple(routes, start, end)
+                                    }
+
+                                val routes = routesDeferred.await()
+                                val startStation = startDeferred.await()
+                                val endStation = endDeferred.await()
+
                                 val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
 
                                 val departureDateTime = timeTable?.getLastTime(endStation, routes)?.departureTime
@@ -93,8 +103,10 @@ class LastRouteOperations(
                                     timeTable?.let {
                                         TransitTime.SubwayTimeInfo(timeTable)
                                     } ?: TransitTime.NoTimeTable
+
                                 leg.toLastRouteLeg(departureDateTime, transitTime)
                             }
+
                             "BUS" -> {
                                 val routeId = leg.route!!.split(":")[1]
                                 val stationMeta =
@@ -114,13 +126,14 @@ class LastRouteOperations(
 
                                 leg.toLastRouteLeg(departureDateTime, transitTime)
                             }
+
                             else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
                         }
                     }
-                }.awaitAll().toList()
+                }.awaitAll()
             }
 
-        // null이 섞여있는 leg가 하나라도 있다면, 전체 경로 자체를 제거
+        // 🚨 하나라도 null 또는 "null"이면 전체 무효
         return if (calculatedLegs.any {
                 (it.mode == "BUS" || it.mode == "SUBWAY") &&
                     (it.departureDateTime == null || it.departureDateTime == "null")
@@ -304,27 +317,4 @@ class LastRouteOperations(
     }
 
     private fun String.removeSuffix(): String = this.replace("(중)", "").trim()
-
-    fun sort(
-        sortType: LastRouteSortType,
-        lastRoutes: List<LastRoute>
-    ): List<LastRoute> {
-        val now = LocalDateTime.now()
-        val upcomingRoutes =
-            lastRoutes.filter {
-                LocalDateTime.parse(it.departureDateTime).isAfter(now)
-            }
-
-        return when (sortType) {
-            LastRouteSortType.MINIMUM_TRANSFERS -> sortedByMinTransfer(upcomingRoutes)
-            LastRouteSortType.DEPARTURE_TIME_DESC -> sortedByDepartureTimeDesc(upcomingRoutes)
-        }
-    }
-
-    private fun sortedByMinTransfer(routes: List<LastRoute>) =
-        routes.sortedWith(
-            compareBy({ it.transferCount }, { it.totalTime })
-        )
-
-    private fun sortedByDepartureTimeDesc(routes: List<LastRoute>) = routes.sortedByDescending { it.departureDateTime }
 }

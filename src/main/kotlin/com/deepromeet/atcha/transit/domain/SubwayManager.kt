@@ -26,17 +26,15 @@ class SubwayManager(
             ?: throw TransitException.NotFoundSubwayStation
     }
 
-    fun getTimeTable(
+    suspend fun getTimeTable(
         startStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
     ): SubwayTimeTable? {
-        val timeTable =
-            subwayInfoClient.getTimeTable(
-                startStation,
-                dailyTypeResolver.resolve(),
-                SubwayDirection.resolve(routes, startStation, endStation)
-            )
-        return timeTable
+        return subwayInfoClient.getTimeTable(
+            startStation,
+            dailyTypeResolver.resolve(),
+            SubwayDirection.resolve(routes, startStation, endStation)
+        )
     }
 }
