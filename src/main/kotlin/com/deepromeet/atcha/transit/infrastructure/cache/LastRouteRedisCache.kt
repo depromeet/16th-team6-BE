@@ -1,20 +1,20 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.LastRouteCache
-import com.deepromeet.atcha.transit.domain.LastRoutes
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
 class LastRouteRedisCache(
-    private val lastRouteRedisTemplate: RedisTemplate<String, LastRoutes>
+    private val lastRouteRedisTemplate: RedisTemplate<String, LastRoute>
 ) : LastRouteCache {
-    override fun get(routeId: String): LastRoutes? {
+    override fun get(routeId: String): LastRoute? {
         return lastRouteRedisTemplate.opsForValue().get(getKey(routeId))
     }
 
-    override fun cache(route: LastRoutes) {
+    override fun cache(route: LastRoute) {
         lastRouteRedisTemplate.opsForValue().set(getKey(route.routeId), route, Duration.ofHours(12))
     }
 

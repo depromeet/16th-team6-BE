@@ -107,7 +107,7 @@ class RouteDepartureTimeRefresher(
     }
 
     private fun getWalkTimeBeforeThisLeg(
-        route: LastRoutes,
+        route: LastRoute,
         busLeg: LastRouteLeg
     ): Int {
         var totalWalkTime = 0
