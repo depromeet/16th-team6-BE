@@ -2,6 +2,9 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 val log = KotlinLogging.logger {}
@@ -44,14 +47,23 @@ class BusManager(
             ?: throw TransitException.BusRouteOperationInfoFetchFailed
     }
 
-    fun getBusRouteStationList(busRoute: BusRoute): BusRouteStationList {
-        return busStationInfoClientMap[busRoute.serviceRegion]!!.getByRoute(busRoute)
-            ?: throw TransitException.BusRouteStationListFetchFailed
-    }
+    suspend fun getBusPositions(busRoute: BusRoute): BusRoutePositions =
+        coroutineScope {
+            val stationListDeferred =
+                async(Dispatchers.IO) {
+                    busStationInfoClientMap[busRoute.serviceRegion]!!
+                        .getByRoute(busRoute)
+                        ?: throw TransitException.BusRouteStationListFetchFailed
+                }
 
-    fun getBusPosition(busRoute: BusRoute): List<BusPosition> {
-        return busPositionFetcherMap[busRoute.serviceRegion]!!.fetch(busRoute.id)
-    }
+            val positionsDeferred =
+                async(Dispatchers.IO) {
+                    busPositionFetcherMap[busRoute.serviceRegion]!!
+                        .fetch(busRoute.id)
+                }
+
+            BusRoutePositions(stationListDeferred.await(), positionsDeferred.await())
+        }
 }
 
 fun <T> T?.logIfNull(message: String): T? {
