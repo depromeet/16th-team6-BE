@@ -9,10 +9,10 @@ env:
   VERSION: ${{ github.sha }}
 
 jobs:
-  build:
-    name: Build
-    runs-on: ubuntu-latest
-    steps:
+#  build:
+#    name: Build
+#    runs-on: ubuntu-latest
+#    steps:
 #      - name: Checkout # TODO 추후 수정
 #        uses: actions/checkout@v4 # git 레파지토리를 클론하는것과 같음
 #        with:
