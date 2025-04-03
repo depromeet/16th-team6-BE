@@ -38,7 +38,7 @@ jobs:
 #        run: docker push ${{ secrets.DOCKER_HUB_USERNAME }}/atcha_dev:latest
 
   deploy:
-#    needs: build
+#    needs: build  #TODO 추후 수정
     name: Deploy
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +53,7 @@ jobs:
 
           timeout: 120s
           source: "./deployment/dev/"
-          target: /root/test
+          target: /root
 
       - name: Run
         uses: appleboy/ssh-action@master
@@ -63,4 +63,7 @@ jobs:
           password: ${{ secrets.REMOTE_SSH_PASSWORD }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
+            rm -rf /root/data
+            mv /root/deployment/dev/* /root/
+            rm -rf /root/deployment
             bash ./deploy.sh
