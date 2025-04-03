@@ -203,7 +203,8 @@ data class GyeonggiBusRouteStation(
     val turnYn: String
 ) {
     fun getDirection(): BusDirection {
-        return if (stationSeq < turnSeq) BusDirection.DOWN else BusDirection.UP
+        // 경기도는 기점 -> 종점은 상행, 종점 -> 기점은 하행
+        return if (stationSeq < turnSeq) BusDirection.UP else BusDirection.DOWN
     }
 
     fun toBusRouteStation(busRoute: BusRoute): BusRouteStation {
@@ -361,32 +362,40 @@ data class BusRouteInfoItem(
         busDirection: BusDirection,
         timeType: BusTimeType
     ): String? {
-        return when (dailyType) {
-            DailyType.WEEKDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) upFirstTime else upLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) downFirstTime else downLastTime
+        val requestedTime =
+            when (dailyType) {
+                DailyType.WEEKDAY -> {
+                    when (busDirection) {
+                        BusDirection.UP -> if (timeType == BusTimeType.FIRST) upFirstTime else upLastTime
+                        BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) downFirstTime else downLastTime
+                    }
+                }
+                DailyType.SATURDAY -> {
+                    when (busDirection) {
+                        BusDirection.UP -> if (timeType == BusTimeType.FIRST) satUpFirstTime else satUpLastTime
+                        BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) satDownFirstTime else satDownLastTime
+                    }
+                }
+                DailyType.SUNDAY -> {
+                    when (busDirection) {
+                        BusDirection.UP -> if (timeType == BusTimeType.FIRST) sunUpFirstTime else sunUpLastTime
+                        BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) sunDownFirstTime else sunDownLastTime
+                    }
+                }
+                DailyType.HOLIDAY -> {
+                    when (busDirection) {
+                        BusDirection.UP -> if (timeType == BusTimeType.FIRST) weUpFirstTime else weUpLastTime
+                        BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) weDownFirstTime else weDownLastTime
+                    }
                 }
             }
-            DailyType.SATURDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) satUpFirstTime else satUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) satDownFirstTime else satDownLastTime
-                }
-            }
-            DailyType.SUNDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) sunUpFirstTime else sunUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) sunDownFirstTime else sunDownLastTime
-                }
-            }
-            DailyType.HOLIDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) weUpFirstTime else weUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) weDownFirstTime else weDownLastTime
-                }
-            }
+
+        // downTime이 "0"이라면 대응되는 upTime을 반환
+        if (busDirection == BusDirection.DOWN && requestedTime == "0") {
+            return getTimeString(dailyType, BusDirection.UP, timeType)
         }
+
+        return requestedTime
     }
 
     // 시간 문자열 파싱 함수
