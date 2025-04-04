@@ -16,7 +16,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo
 sealed class TransitTime {
     data class SubwayTimeInfo(val timeTable: SubwayTimeTable) : TransitTime()
 
-    data class BusTimeInfo(val arrivalInfo: BusArrival) : TransitTime()
+    data class BusTimeInfo(val arrivalInfo: BusTimeTable) : TransitTime()
 
     data object NoTimeTable : TransitTime()
 }

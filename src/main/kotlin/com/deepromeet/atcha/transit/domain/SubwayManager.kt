@@ -10,7 +10,8 @@ class SubwayManager(
     private val subwayStationRepository: SubwayStationRepository,
     private val subwayInfoClient: SubwayInfoClient,
     private val dailyTypeResolver: DailyTypeResolver,
-    private val subwayBranchRepository: SubwayBranchRepository
+    private val subwayBranchRepository: SubwayBranchRepository,
+    private val subwayTimeTableCache: SubwayTimeTableCache
 ) {
     fun getRoutes(subwayLine: SubwayLine) =
         subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
@@ -31,10 +32,15 @@ class SubwayManager(
         endStation: SubwayStation,
         routes: List<Route>
     ): SubwayTimeTable? {
-        return subwayInfoClient.getTimeTable(
-            startStation,
-            dailyTypeResolver.resolve(),
-            SubwayDirection.resolve(routes, startStation, endStation)
-        )
+        val dailyType = dailyTypeResolver.resolve()
+        val direction = SubwayDirection.resolve(routes, startStation, endStation)
+
+        subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
+            return it
+        }
+
+        return subwayInfoClient.getTimeTable(startStation, dailyType, direction)?.also { timeTable ->
+            subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
+        }
     }
 }

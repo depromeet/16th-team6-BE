@@ -6,7 +6,7 @@ import jakarta.persistence.Id
 @Entity
 class SubwayStation(
     @Id
-    val id: SubwayStationId,
+    val id: SubwayStationId? = null,
     val stationCode: String,
     val name: String,
     val routeName: String,

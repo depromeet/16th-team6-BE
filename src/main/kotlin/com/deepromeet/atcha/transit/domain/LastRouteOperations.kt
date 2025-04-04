@@ -110,12 +110,12 @@ class LastRouteOperations(
                                         leg.start.name.removeSuffix(),
                                         Coordinate(leg.start.lat, leg.start.lon)
                                     )
-                                val arrivalInfo = busManager.getArrivalInfo(routeId, stationMeta)
+                                val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
 
-                                val departureDateTime = arrivalInfo?.lastTime
+                                val departureDateTime = busTimeInfo?.lastTime
                                 val transitTime =
-                                    if (arrivalInfo != null) {
-                                        TransitTime.BusTimeInfo(arrivalInfo)
+                                    if (busTimeInfo != null) {
+                                        TransitTime.BusTimeInfo(busTimeInfo)
                                     } else {
                                         TransitTime.NoTimeTable
                                     }
@@ -252,7 +252,7 @@ class LastRouteOperations(
                 leg.transitTime.timeTable.findNearestTime(adjustedDepartureTime, direction).departureTime
             }
             is TransitTime.BusTimeInfo ->
-                leg.transitTime.arrivalInfo.getNearestTime(adjustedDepartureTime, direction)
+                leg.transitTime.arrivalInfo.calculateNearestTime(adjustedDepartureTime, direction)
             TransitTime.NoTimeTable -> null
         }
 

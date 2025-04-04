@@ -14,7 +14,8 @@ class BusManager(
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
-    private val regionIdentifier: RegionIdentifier
+    private val regionIdentifier: RegionIdentifier,
+    private val busTimeTableCache: BusTimeTableCache
 ) {
     fun getArrivalInfo(
         routeName: String,
@@ -35,11 +36,25 @@ class BusManager(
                         " station=${station.busStationMeta.name}, routeName=$routeName"
                 )
                 ?: return null
-        return busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
-            .logIfNull(
-                "[NotFoundBusArrival] region=$region, " +
-                    "station=${station.busStationMeta.name}, routeName=$routeName"
-            )
+        val busArrival =
+            busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
+                .logIfNull(
+                    "[NotFoundBusArrival] region=$region, " +
+                        "station=${station.busStationMeta.name}, routeName=$routeName"
+                )
+        if (busArrival != null) {
+            busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
+        }
+
+        return busArrival
+    }
+
+    fun getBusTimeInfo(
+        routeName: String,
+        busStationMeta: BusStationMeta
+    ): BusTimeTable? {
+        return busTimeTableCache.get(routeName, busStationMeta)
+            ?: getArrivalInfo(routeName, busStationMeta)?.busTimeTable
     }
 
     fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
