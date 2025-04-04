@@ -15,15 +15,19 @@ import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusStationListDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import kotlin.math.abs
+
+val log = KotlinLogging.logger {}
 
 data class PublicGyeonggiApiResponse<T>(
     val response: PublicGyeonggiResponse<T>
@@ -169,8 +173,6 @@ data class BusArrivalItem(
                 else -> throw IllegalArgumentException("Unknown bus congestion: $crowded")
             }
 
-        val remainingSeats = if (busCongestion == BusCongestion.LOW && remainSeatCnt == 0) null else remainSeatCnt
-
         return RealTimeBusArrival(
             vehicleId = vehId.toString(),
             busStatus = determineBusStatus(predictTimeSec),
@@ -203,7 +205,8 @@ data class GyeonggiBusRouteStation(
     val turnYn: String
 ) {
     fun getDirection(): BusDirection {
-        return if (stationSeq < turnSeq) BusDirection.DOWN else BusDirection.UP
+        // 경기도는 기점 -> 종점은 상행, 종점 -> 기점은 하행
+        return if (stationSeq < turnSeq) BusDirection.UP else BusDirection.DOWN
     }
 
     fun toBusRouteStation(busRoute: BusRoute): BusRouteStation {
@@ -320,9 +323,12 @@ data class BusRouteInfoItem(
                 ),
             busStationId = BusStationId(busArrivalInfo.stationId),
             stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
-            firstTime = firstTime.plusSeconds(travelTimeFromStart),
-            lastTime = lastTime.plusSeconds(travelTimeFromStart),
-            term = term,
+            busTimeTable =
+                BusTimeTable(
+                    firstTime = firstTime?.plusSeconds(travelTimeFromStart),
+                    lastTime = lastTime?.plusSeconds(travelTimeFromStart),
+                    term = term
+                ),
             realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
         )
     }
@@ -348,7 +354,7 @@ data class BusRouteInfoItem(
         dailyType: DailyType,
         busDirection: BusDirection,
         timeType: BusTimeType
-    ): LocalDateTime {
+    ): LocalDateTime? {
         val timeStr: String =
             getTimeString(dailyType, busDirection, timeType)
                 ?: throw IllegalArgumentException("첫차 또는 막차 시간을 가져올 수 없습니다.")
@@ -389,8 +395,12 @@ data class BusRouteInfoItem(
         }
     }
 
-    // 시간 문자열 파싱 함수
-    private fun parseTime(timeStr: String): LocalDateTime {
+    private fun parseTime(timeStr: String?): LocalDateTime? {
+        if (timeStr == "0" || timeStr == null) {
+            log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 값이 '0' 입니다." }
+            return null
+        }
+
         try {
             val localTime = LocalTime.parse(timeStr)
             val date =
@@ -401,6 +411,7 @@ data class BusRouteInfoItem(
                 }
             return LocalDateTime.of(date, localTime)
         } catch (e: Exception) {
+            log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 파싱 오류: $timeStr" }
             throw IllegalArgumentException("올바르지 않은 시간 형식입니다: $timeStr")
         }
     }

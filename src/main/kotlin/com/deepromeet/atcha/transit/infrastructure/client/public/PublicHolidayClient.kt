@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.domain.HolidayFetcher
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.HolidayResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -16,12 +15,15 @@ class PublicHolidayClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : HolidayFetcher {
     override fun fetch(year: Int): List<LocalDate> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicHolidayFeignClient.getPublicHoliday(key, year) },
             isLimitExceeded = { response -> isHolidayApiLimitExceeded(response) },
             processResult = { response ->
