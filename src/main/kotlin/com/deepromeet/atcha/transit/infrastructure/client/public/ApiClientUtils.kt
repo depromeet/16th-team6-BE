@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.infrastructure.client.common
+package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicGyeonggiApiResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
@@ -15,6 +15,7 @@ object ApiClientUtils {
      *
      * @param primaryKey 기본 API 키
      * @param spareKey 예비 API 키
+     * @param realLastKey 실제 마지막 API 키
      * @param apiCall API 호출 함수
      * @param isLimitExceeded API 제한 초과 여부 확인 함수
      * @param processResult API 결과 처리 함수
@@ -24,6 +25,7 @@ object ApiClientUtils {
     fun <T, R> callApiWithRetry(
         primaryKey: String,
         spareKey: String,
+        realLastKey: String,
         apiCall: (String) -> T,
         isLimitExceeded: (T) -> Boolean,
         processResult: (T) -> R,
@@ -40,10 +42,15 @@ object ApiClientUtils {
                 // 예비 키로 재시도
                 val retryResponse = apiCall(spareKey)
                 if (isLimitExceeded(retryResponse)) {
-                    log.error { "예비 API 키도 제한되었습니다. 요청을 처리할 수 없습니다." }
-                    return null
+                    log.warn { "예비 API 키도 제한되었습니다. 찐막키로 재시도합니다" }
+                    // 찐막 키로 재시도
+                    val lastResponse = apiCall(realLastKey)
+                    if (isLimitExceeded(lastResponse)) {
+                        log.warn { "찐막키도 제한되었습니다. 망했다고 볼 수 있습니다." }
+                        return null
+                    }
+                    return processResult(lastResponse)
                 }
-
                 return processResult(retryResponse)
             }
 

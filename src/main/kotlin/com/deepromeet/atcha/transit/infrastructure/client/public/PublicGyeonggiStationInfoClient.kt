@@ -5,7 +5,6 @@ import com.deepromeet.atcha.transit.domain.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
 import com.deepromeet.atcha.transit.domain.BusStationMeta
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -16,12 +15,15 @@ class PublicGyeonggiStationInfoClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : BusStationInfoClient {
     override fun getStationByName(info: BusStationMeta): BusStation? {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationList(key, info.name) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
@@ -39,6 +41,7 @@ class PublicGyeonggiStationInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationRouteList(key, station.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
@@ -54,6 +57,7 @@ class PublicGyeonggiStationInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->

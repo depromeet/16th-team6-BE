@@ -6,7 +6,6 @@ import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -24,7 +23,9 @@ class PublicGyeonggiRouteInfoClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : BusRouteInfoClient {
     override fun getBusArrival(
         station: BusStation,
@@ -39,6 +40,7 @@ class PublicGyeonggiRouteInfoClient(
                             ApiClientUtils.callApiWithRetry(
                                 primaryKey = serviceKey,
                                 spareKey = spareKey,
+                                realLastKey = realLastKey,
                                 apiCall = {
                                         key ->
                                     publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value)
@@ -55,6 +57,7 @@ class PublicGyeonggiRouteInfoClient(
                             ApiClientUtils.callApiWithRetry(
                                 primaryKey = serviceKey,
                                 spareKey = spareKey,
+                                realLastKey = realLastKey,
                                 apiCall = {
                                         key ->
                                     publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
@@ -77,6 +80,7 @@ class PublicGyeonggiRouteInfoClient(
                         ApiClientUtils.callApiWithRetry(
                             primaryKey = serviceKey,
                             spareKey = spareKey,
+                            realLastKey = realLastKey,
                             apiCall = { key ->
                                 publicGyeonggiBusArrivalInfoFeignClient.getArrivalInfo(
                                     key,
@@ -108,6 +112,7 @@ class PublicGyeonggiRouteInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->

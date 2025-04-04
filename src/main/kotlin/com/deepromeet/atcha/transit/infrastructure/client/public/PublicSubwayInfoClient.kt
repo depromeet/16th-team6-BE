@@ -7,7 +7,6 @@ import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicJsonResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -27,7 +26,9 @@ class PublicSubwayInfoClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : SubwayInfoClient {
     fun getSubwayStationByName(
         stationName: String,
@@ -36,6 +37,7 @@ class PublicSubwayInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> subwayInfoFeignClient.getStationByName(key, stationName) },
             isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
             processResult = { response ->
@@ -67,10 +69,11 @@ class PublicSubwayInfoClient(
                             ApiClientUtils.callApiWithRetry(
                                 primaryKey = serviceKey,
                                 spareKey = spareKey,
+                                realLastKey = realLastKey,
                                 apiCall = { key ->
                                     subwayInfoFeignClient.getStationSchedule(
                                         key,
-                                        startStation.id.value,
+                                        startStation.id!!.value,
                                         dailyType.code,
                                         direction.code
                                     )
