@@ -84,9 +84,11 @@ class LastRouteOperations(
                             "SUBWAY" -> {
                                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
-                                val routesDeferred = async { subwayManager.getRoutes(subwayLine) }
-                                val startDeferred = async { subwayManager.getStation(subwayLine, leg.start.name) }
-                                val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
+                                val routesDeferred = async(Dispatchers.IO) { subwayManager.getRoutes(subwayLine) }
+                                val startDeferred =
+                                    async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.start.name) }
+                                val endDeferred =
+                                    async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.end.name) }
 
                                 val routes = routesDeferred.await()
                                 val startStation = startDeferred.await()

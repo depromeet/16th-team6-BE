@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitException
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -25,7 +26,7 @@ class LastRouteReader(
             return@coroutineScope if (routeIds.isNotEmpty()) {
                 val routes =
                     routeIds
-                        .map { id -> async { read(id) } }
+                        .map { id -> async(Dispatchers.IO) { read(id) } }
                         .awaitAll()
                 routes
             } else {

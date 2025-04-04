@@ -99,7 +99,7 @@ class PublicSubwayInfoClient(
             val timeTableItems =
                 coroutineScope {
                     scheduleItems.map { item ->
-                        async {
+                        async(Dispatchers.IO) {
                             val finalStation =
                                 subwayStations.find { station -> station.name == item.endSubwayStationNm }
                                     ?: throw TransitException.NotFoundSubwayStation

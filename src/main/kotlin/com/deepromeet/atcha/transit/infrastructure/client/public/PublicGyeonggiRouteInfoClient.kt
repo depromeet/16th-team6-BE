@@ -7,6 +7,7 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
@@ -36,7 +37,7 @@ class PublicGyeonggiRouteInfoClient(
                 coroutineScope {
                     // 1. 노선 정보 가져오기 - 비동기
                     val busRouteInfoDeferred =
-                        async {
+                        async(Dispatchers.IO) {
                             ApiClientUtils.callApiWithRetry(
                                 primaryKey = serviceKey,
                                 spareKey = spareKey,
@@ -53,7 +54,7 @@ class PublicGyeonggiRouteInfoClient(
 
                     // 2. 노선 정류장 목록 가져오기 - 비동기
                     val busRouteStationsDeferred =
-                        async {
+                        async(Dispatchers.IO) {
                             ApiClientUtils.callApiWithRetry(
                                 primaryKey = serviceKey,
                                 spareKey = spareKey,
