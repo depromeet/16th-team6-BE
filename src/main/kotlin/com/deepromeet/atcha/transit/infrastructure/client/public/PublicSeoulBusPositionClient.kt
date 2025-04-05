@@ -3,8 +3,7 @@ package com.deepromeet.atcha.transit.infrastructure.client.public
 import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.BusPositionFetcher
 import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils.isSeoulApiLimitExceeded
+import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils.isSeoulApiLimitExceeded
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -14,12 +13,15 @@ class PublicSeoulBusPositionClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : BusPositionFetcher {
     override fun fetch(routeId: BusRouteId): List<BusPosition> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicSeoulBusPositionClient.getBusPosByRtid(key, routeId.value) },
             isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
             processResult = { response ->

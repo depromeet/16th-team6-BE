@@ -5,9 +5,12 @@ services:
   atcha-blue:
     networks:
       - app-tier
-    image: atchadockerhub/atcha:latest
+    depends_on:
+      - redis
+      - mysql
+    image: atchadockerhub/atcha_dev:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=dev
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
@@ -19,9 +22,12 @@ services:
   atcha-green:
     networks:
       - app-tier
-    image: atchadockerhub/atcha:latest
+    depends_on:
+      - redis
+      - mysql
+    image: atchadockerhub/atcha_dev:latest
     environment:
-      - SPRING_PROFILES_ACTIVE=prod
+      - SPRING_PROFILES_ACTIVE=dev
     restart: always
     healthcheck:
       test: "curl -f http://localhost:8080/health || exit 1"
@@ -30,7 +36,34 @@ services:
       retries: 3
       start_period: 30s
 
+  redis:
+    container_name: atcha-redis
+    networks:
+      - app-tier
+    image: redis:latest
+    ports:
+      - "6379:6379"
+
+  mysql:
+    image: mysql:8.0
+    container_name: atcha-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${SPRING_DATABASE_NAME}
+      MYSQL_USER: ${SPRING_DATABASE_USERNAME}
+      MYSQL_PASSWORD: ${SPRING_DATABASE_PASSWORD}
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./mysql:/var/lib/mysql
+    networks:
+      - app-tier
+
   nginx:
+    depends_on:
+      - atcha-green
+      - atcha-blue
     image: nginx:1.15-alpine
     container_name: nginx
     networks:
@@ -43,3 +76,4 @@ services:
     ports:
       - "80:80"
     command: "/bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & nginx -g \"daemon off;\"'"
+

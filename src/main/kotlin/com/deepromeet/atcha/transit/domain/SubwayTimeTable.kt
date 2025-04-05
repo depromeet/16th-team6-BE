@@ -11,7 +11,7 @@ data class SubwayTimeTable(
     val schedule: List<SubwayTime>
 ) {
     fun getLastTime(
-        endStation: SubwayStation,
+        destinationStation: SubwayStation,
         routes: List<Route>
     ): SubwayTime? =
         schedule
@@ -20,7 +20,7 @@ data class SubwayTimeTable(
                     ?.isAfter(LocalDateTime.of(it.departureTime.toLocalDate(), LocalTime.of(21, 0)))
                     ?: false
             }
-            .filter { isReachable(startStation, endStation, it.finalStation, routes) }
+            .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
             .maxWithOrNull(compareBy(nullsLast()) { it.departureTime })
 
     fun findNearestTime(
@@ -31,15 +31,15 @@ data class SubwayTimeTable(
             TimeDirection.AFTER -> {
                 schedule
                     .filter { it.departureTime?.isAfter(time) ?: false }
-                    .minByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
+                    .minByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
             }
 
             TimeDirection.BEFORE -> {
                 schedule
                     .filter { it.departureTime?.isBefore(time) ?: false }
-                    .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
+                    .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
             }
-        } ?: throw TransitException.NotFoundBusTime
+        } ?: throw TransitException.NotFoundTime
 
     private fun isReachable(
         startStation: SubwayStation,

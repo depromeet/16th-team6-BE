@@ -1,7 +1,6 @@
-package com.deepromeet.atcha.transit.api.response
+package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
@@ -9,7 +8,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import kotlin.math.absoluteValue
 
-data class LastRoutesResponse(
+data class LastRoute(
     val routeId: String,
     val departureDateTime: String,
     val totalTime: Int,
@@ -44,7 +43,8 @@ data class LastRouteLeg(
     val end: Location,
     val passStopList: List<Station>? = null,
     val step: List<Step>? = null,
-    val passShape: String? = null
+    val passShape: String? = null,
+    val transitTime: TransitTime
 ) {
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
@@ -55,5 +55,21 @@ data class LastRouteLeg(
             start.name,
             Coordinate(start.lat, start.lon)
         )
+    }
+}
+
+fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
+    val now = LocalDateTime.now()
+    val upcomingRoutes =
+        this.filter {
+            LocalDateTime.parse(it.departureDateTime).isAfter(now)
+        }
+
+    return when (sortType) {
+        LastRouteSortType.MINIMUM_TRANSFERS ->
+            upcomingRoutes.sortedWith(
+                compareBy({ it.transferCount }, { it.totalTime })
+            )
+        LastRouteSortType.DEPARTURE_TIME_DESC -> upcomingRoutes.sortedByDescending { it.departureDateTime }
     }
 }

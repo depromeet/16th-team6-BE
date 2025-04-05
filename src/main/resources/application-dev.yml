@@ -24,6 +24,7 @@ open-api:
   api:
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
     spare-key : ${secret.dev.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
 
 kric:
   api:
@@ -36,3 +37,24 @@ jwt:
   refresh:
     secret: ${secret.dev.JWT_REFRESH_SECRET}
     expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
+
+management:
+  server:
+    port: ${secret.dev.MANAGEMENT_PORT}
+
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+      base-path: ${secret.dev.MANAGEMENT_BASE_PATH}
+    jmx:
+      exposure:
+        exclude: "*"
+    access:
+      default: none
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      show-components: never

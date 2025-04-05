@@ -5,7 +5,6 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
-import com.deepromeet.atcha.transit.infrastructure.client.common.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.toBusRouteOperationInfo
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -20,7 +19,9 @@ class PublicSeoulBusRouteInfoClient(
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
-    private val spareKey: String
+    private val spareKey: String,
+    @Value("\${open-api.api.real-last-key}")
+    private val realLastKey: String
 ) : BusRouteInfoClient {
     override fun getBusArrival(
         station: BusStation,
@@ -29,6 +30,7 @@ class PublicSeoulBusRouteInfoClient(
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
+            realLastKey = realLastKey,
             apiCall = { key -> publicSeoulBusArrivalInfoFeignClient.getArrivalInfoByRoute(route.id.value, key) },
             isLimitExceeded = { response -> ApiClientUtils.isSeoulApiLimitExceeded(response) },
             processResult = { response ->

@@ -14,6 +14,7 @@ import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
@@ -168,9 +169,12 @@ data class BusArrivalResponse(
                 ),
             busStationId = BusStationId(arsId),
             stationName = stNm,
-            firstTime = parseDateTime(firstTm),
-            lastTime = parseDateTime(lastTm),
-            term = term.toInt(),
+            busTimeTable =
+                BusTimeTable(
+                    firstTime = parseDateTime(firstTm),
+                    lastTime = parseDateTime(lastTm),
+                    term = term.toInt()
+                ),
             realTimeInfo = realTimeBusArrivals
         )
     }
@@ -188,8 +192,8 @@ data class BusArrivalResponse(
 
         val busCongestion =
             when (rerdieDiv) {
-                0 -> null
-                2 -> null
+                0 -> BusCongestion.UNKNOWN
+                2 -> BusCongestion.UNKNOWN
                 4 ->
                     when (rerideNum) {
                         0 -> BusCongestion.UNKNOWN
@@ -203,9 +207,9 @@ data class BusArrivalResponse(
 
         val remainingSeats =
             when (rerdieDiv) {
-                0 -> null
+                0 -> 0
                 2 -> rerideNum
-                4 -> null
+                4 -> 0
                 else -> throw IllegalArgumentException("Unknown rerdieDiv: $rerdieDiv")
             }
 
@@ -228,8 +232,12 @@ data class BusArrivalResponse(
             else -> BusStatus.OPERATING
         }
 
-    private fun parseDateTime(dateTimeString: String): LocalDateTime =
-        LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    private fun parseDateTime(dateTimeString: String): LocalDateTime {
+        if (dateTimeString.length == 10) {
+            return LocalDateTime.parse(dateTimeString + "000000", DATE_TIME_FORMATTER)
+        }
+        return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    }
 
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")

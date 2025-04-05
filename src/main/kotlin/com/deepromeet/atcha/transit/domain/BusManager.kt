@@ -2,6 +2,9 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 val log = KotlinLogging.logger {}
@@ -11,7 +14,8 @@ class BusManager(
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
-    private val regionIdentifier: RegionIdentifier
+    private val regionIdentifier: RegionIdentifier,
+    private val busTimeTableCache: BusTimeTableCache
 ) {
     fun getArrivalInfo(
         routeName: String,
@@ -32,11 +36,25 @@ class BusManager(
                         " station=${station.busStationMeta.name}, routeName=$routeName"
                 )
                 ?: return null
-        return busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
-            .logIfNull(
-                "[NotFoundBusArrival] region=$region, " +
-                    "station=${station.busStationMeta.name}, routeName=$routeName"
-            )
+        val busArrival =
+            busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
+                .logIfNull(
+                    "[NotFoundBusArrival] region=$region, " +
+                        "station=${station.busStationMeta.name}, routeName=$routeName"
+                )
+        if (busArrival != null) {
+            busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
+        }
+
+        return busArrival
+    }
+
+    fun getBusTimeInfo(
+        routeName: String,
+        busStationMeta: BusStationMeta
+    ): BusTimeTable? {
+        return busTimeTableCache.get(routeName, busStationMeta)
+            ?: getArrivalInfo(routeName, busStationMeta)?.busTimeTable
     }
 
     fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
@@ -44,14 +62,23 @@ class BusManager(
             ?: throw TransitException.BusRouteOperationInfoFetchFailed
     }
 
-    fun getBusRouteStationList(busRoute: BusRoute): BusRouteStationList {
-        return busStationInfoClientMap[busRoute.serviceRegion]!!.getByRoute(busRoute)
-            ?: throw TransitException.BusRouteStationListFetchFailed
-    }
+    suspend fun getBusPositions(busRoute: BusRoute): BusRoutePositions =
+        coroutineScope {
+            val stationListDeferred =
+                async(Dispatchers.IO) {
+                    busStationInfoClientMap[busRoute.serviceRegion]!!
+                        .getByRoute(busRoute)
+                        ?: throw TransitException.BusRouteStationListFetchFailed
+                }
 
-    fun getBusPosition(busRoute: BusRoute): List<BusPosition> {
-        return busPositionFetcherMap[busRoute.serviceRegion]!!.fetch(busRoute.id)
-    }
+            val positionsDeferred =
+                async(Dispatchers.IO) {
+                    busPositionFetcherMap[busRoute.serviceRegion]!!
+                        .fetch(busRoute.id)
+                }
+
+            BusRoutePositions(stationListDeferred.await(), positionsDeferred.await())
+        }
 }
 
 fun <T> T?.logIfNull(message: String): T? {

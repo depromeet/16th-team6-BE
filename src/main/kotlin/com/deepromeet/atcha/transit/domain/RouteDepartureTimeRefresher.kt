@@ -4,8 +4,6 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.notification.domatin.NotificationManager
 import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.transit.api.response.LastRouteLeg
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -66,8 +64,8 @@ class RouteDepartureTimeRefresher(
         val candidateTimes = realTimeInfos.mapNotNull { it.expectedArrivalTime }.take(2).toMutableList()
 
         realTimeInfos.getOrNull(1)?.expectedArrivalTime?.let { secondBusArrivalTime ->
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong())
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong() * 2)
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong())
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong() * 2)
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
@@ -109,7 +107,7 @@ class RouteDepartureTimeRefresher(
     }
 
     private fun getWalkTimeBeforeThisLeg(
-        route: LastRoutesResponse,
+        route: LastRoute,
         busLeg: LastRouteLeg
     ): Int {
         var totalWalkTime = 0
