@@ -232,8 +232,12 @@ data class BusArrivalResponse(
             else -> BusStatus.OPERATING
         }
 
-    private fun parseDateTime(dateTimeString: String): LocalDateTime =
-        LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    private fun parseDateTime(dateTimeString: String): LocalDateTime {
+        if (dateTimeString.length == 10) {
+            LocalDateTime.parse(dateTimeString + "00", DATE_TIME_FORMATTER)
+        }
+        return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    }
 
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
