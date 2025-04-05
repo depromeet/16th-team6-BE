@@ -234,7 +234,7 @@ data class BusArrivalResponse(
 
     private fun parseDateTime(dateTimeString: String): LocalDateTime {
         if (dateTimeString.length == 10) {
-            return LocalDateTime.parse(dateTimeString + "000000", DATE_TIME_FORMATTER)
+            return LocalDateTime.parse(dateTimeString + "0000", DATE_TIME_FORMATTER)
         }
         return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
     }
