@@ -251,7 +251,7 @@ class LastRouteOperations(
     ): LocalDateTime? =
         when (leg.transitTime) {
             is TransitTime.SubwayTimeInfo -> {
-                leg.transitTime.timeTable.findNearestTime(adjustedDepartureTime, direction).departureTime
+                leg.transitTime.timeTable.findNearestTime(adjustedDepartureTime, direction)?.departureTime
             }
             is TransitTime.BusTimeInfo ->
                 leg.transitTime.arrivalInfo.calculateNearestTime(adjustedDepartureTime, direction)
