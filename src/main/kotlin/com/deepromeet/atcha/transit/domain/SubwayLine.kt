@@ -23,6 +23,7 @@ enum class SubwayLine(
     GYEONGGANG(listOf("경강선", "경강"), "K5"),
     AIRPORT(listOf("공항철도", "공항"), "A1"),
     WEST_SEA(listOf("서해선", "서해"), "WS"),
+    SINLIM(listOf("신림선", "신림"), "L1"),
 
     // 신분당선 (원본 "신분당선"과 "신분당" 버전)
     SINBUNDANG(listOf("신분당선", "신분당"), "D1"),

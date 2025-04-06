@@ -16,9 +16,7 @@ class SubwayStationBatchAppender(
         }
 
         val stationListsByLine =
-            SubwayLine.entries.associate { line ->
-                line to subwayStationFetcher.fetch(line.lnCd)
-            }
+            SubwayLine.entries.associateWith { line -> subwayStationFetcher.fetch(line.lnCd) }
 
         val allStations = stationListsByLine.values.flatten()
         subwayStationRepository.saveAll(allStations)
