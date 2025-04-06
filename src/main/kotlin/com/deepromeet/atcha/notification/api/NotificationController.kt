@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.notification.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
-import com.deepromeet.atcha.notification.domatin.NotificationRequest
+import com.deepromeet.atcha.notification.api.request.NotificationRequest
 import com.deepromeet.atcha.notification.domatin.NotificationService
 import com.deepromeet.atcha.notification.domatin.SuggestNotificationRequest
 import org.springframework.web.bind.annotation.DeleteMapping
