@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.notification.domatin
 
-interface NotificationRepository {
+interface UserNotificationRepository {
     fun save(
         userNotification: UserNotification,
-        notificationFrequency: NotificationFrequency
+        userNotificationFrequency: UserNotificationFrequency
     )
 
     fun findById(

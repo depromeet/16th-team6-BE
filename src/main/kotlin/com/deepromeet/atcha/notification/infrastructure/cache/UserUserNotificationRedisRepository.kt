@@ -1,24 +1,24 @@
 package com.deepromeet.atcha.notification.infrastructure.cache
 
-import com.deepromeet.atcha.notification.domatin.NotificationFrequency
-import com.deepromeet.atcha.notification.domatin.NotificationRepository
 import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
+import com.deepromeet.atcha.notification.domatin.UserNotificationRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class NotificationRedisRepository(
+class UserUserNotificationRedisRepository(
     private val userNotificationRedisTemplate: RedisTemplate<String, UserNotification>
-) : NotificationRepository {
+) : UserNotificationRepository {
     private val duration = Duration.ofHours(12)
     private val hashOps = userNotificationRedisTemplate.opsForHash<String, UserNotification>()
 
     override fun save(
         userNotification: UserNotification,
-        notificationFrequency: NotificationFrequency
+        userNotificationFrequency: UserNotificationFrequency
     ) {
-        hashOps.put(getKey(userNotification), notificationFrequency.name, userNotification)
+        hashOps.put(getKey(userNotification), userNotificationFrequency.name, userNotification)
         hashOps.apply { userNotificationRedisTemplate.expire(getKey(userNotification), duration) }
     }
 

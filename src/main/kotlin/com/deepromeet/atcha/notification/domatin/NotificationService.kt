@@ -10,7 +10,8 @@ import java.time.LocalDateTime
 class NotificationService(
     private val lastRouteReader: LastRouteReader,
     private val userReader: UserReader,
-    private val notificationAppender: NotificationAppender,
+    private val userNotificationAppender: UserNotificationAppender,
+    private val messagingManager: MessagingManager,
     private val notificationManager: NotificationManager
 ) {
     fun addRouteNotification(
@@ -26,7 +27,7 @@ class NotificationService(
         user.alertFrequencies.forEach { minute ->
             val notificationTime = departureTime.minusMinutes(minute.toLong())
             if (notificationTime.isAfter(LocalDateTime.now())) {
-                val frequency = NotificationFrequency.fromMinutes(minute)
+                val frequency = UserNotificationFrequency.fromMinutes(minute)
                 val userNotification =
                     UserNotification(
                         frequency = frequency,
@@ -36,7 +37,7 @@ class NotificationService(
                         routeId = lastRouteId,
                         userId = user.id
                     )
-                notificationAppender.saveUserNotification(userNotification, frequency)
+                userNotificationAppender.saveUserNotification(userNotification, frequency)
             }
         }
     }
@@ -46,13 +47,7 @@ class NotificationService(
         lastRouteId: String
     ) {
         val user = userReader.read(id)
-        notificationAppender.deleteUserNotification(user.id, lastRouteId)
-    }
-
-    fun test(id: Long) {
-        val user = userReader.read(id)
-        val notificationToken = user.fcmToken
-        notificationManager.sendPushNotificationForTest(notificationToken)
+        userNotificationAppender.deleteUserNotification(user.id, lastRouteId)
     }
 
     fun suggestRouteNotification(
@@ -62,8 +57,17 @@ class NotificationService(
         val user = userReader.read(id)
         val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
         if (distance > 1.0) {
-            val notificationToken = user.fcmToken
-            notificationManager.sendSuggestPushNotification(notificationToken)
+            val token = user.fcmToken
+            val suggestNotification = notificationManager.getSuggestNotification()
+            val messaging = Messaging(suggestNotification, token)
+            messagingManager.send(messaging)
         }
+    }
+
+    fun test(id: Long) {
+        val token = userReader.read(id).fcmToken
+        val suggestNotification = notificationManager.getSuggestNotification()
+        val messaging = Messaging(suggestNotification, token)
+        messagingManager.send(messaging)
     }
 }

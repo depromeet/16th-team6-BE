@@ -23,7 +23,7 @@ class NotificationServiceTest : BaseServiceTest() {
         notificationService.addRouteNotification(user.id, lastRoute.routeId)
 
         // then
-        val result = notificationReader.findById(user.id, lastRoute.routeId)
+        val result = userNotificationReader.findById(user.id, lastRoute.routeId)
         Assertions.assertThat(result).hasSize(user.alertFrequencies.size)
     }
 
@@ -34,14 +34,14 @@ class NotificationServiceTest : BaseServiceTest() {
         val lastRoute = LastRouteFixture.create()
         lastRouteAppender.append(lastRoute)
         notificationService.addRouteNotification(user.id, lastRoute.routeId)
-        var result = notificationReader.findById(user.id, lastRoute.routeId)
+        var result = userNotificationReader.findById(user.id, lastRoute.routeId)
         Assertions.assertThat(result.size).isGreaterThan(0)
 
         // when
         notificationService.deleteRouteNotification(user.id, lastRoute.routeId)
 
         // then
-        result = notificationReader.findById(user.id, lastRoute.routeId)
+        result = userNotificationReader.findById(user.id, lastRoute.routeId)
         Assertions.assertThat(result.size).isEqualTo(0)
     }
 }

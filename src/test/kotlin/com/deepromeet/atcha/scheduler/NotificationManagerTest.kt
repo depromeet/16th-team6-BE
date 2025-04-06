@@ -33,7 +33,7 @@ class NotificationManagerTest : BaseServiceTest() {
 
     @Test
     fun `동시에 푸시 알림을 요청해도 하나만 성공한다`() {
-        `when`(fcmService.sendMessageTo(anyString(), anyString(), anyString(), anyMap())).thenReturn("")
+        `when`(fcmService.send(anyString(), anyString(), anyString(), anyMap())).thenReturn("")
         val notification = UserNotificationFixture.create()
         val threadCount = 1000
         val latch = CountDownLatch(threadCount)
@@ -43,7 +43,7 @@ class NotificationManagerTest : BaseServiceTest() {
         redisOperations.saveNotification(
             notification.userId,
             notification.lastRouteId,
-            notification.notificationFrequency,
+            notification.userNotificationFrequency,
             notification
         )
         repeat(threadCount) {

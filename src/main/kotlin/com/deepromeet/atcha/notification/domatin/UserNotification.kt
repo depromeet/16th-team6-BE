@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 data class UserNotification(
-    val notificationFrequency: NotificationFrequency,
+    val userNotificationFrequency: UserNotificationFrequency,
     val initialDepartureTime: String,
     val updatedDepartureTime: String,
     val notificationTime: String,
@@ -18,14 +18,14 @@ data class UserNotification(
     }
 
     constructor(
-        frequency: NotificationFrequency,
+        frequency: UserNotificationFrequency,
         notificationToken: String,
         notificationTime: LocalDateTime,
         departureTime: LocalDateTime,
         routeId: String,
         userId: Long
     ) : this(
-        notificationFrequency = frequency,
+        userNotificationFrequency = frequency,
         notificationToken = notificationToken,
         notificationTime = notificationTime.format(dateTimeFormatter),
         initialDepartureTime = departureTime.format(dateTimeFormatter),

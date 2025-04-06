@@ -25,10 +25,10 @@ class RouteNotificationRedisOperations(
     fun saveNotification(
         userId: Long,
         lastRouteId: String,
-        notificationFrequency: NotificationFrequency,
+        userNotificationFrequency: UserNotificationFrequency,
         userNotification: UserNotification
     ) = hashOps
-        .put(getKey(userId, lastRouteId), notificationFrequency.name, userNotification)
+        .put(getKey(userId, lastRouteId), userNotificationFrequency.name, userNotification)
         .also { routeNotificationRedisTemplate.expire(getKey(userId, lastRouteId), duration) }
 
 //    fun deleteNotification(
@@ -92,7 +92,11 @@ class RouteNotificationRedisOperations(
         action: (UserNotification) -> Boolean
     ): Boolean {
         val lockKey =
-            getLockKey(userNotification.userId, userNotification.lastRouteId, userNotification.notificationFrequency)
+            getLockKey(
+                userNotification.userId,
+                userNotification.lastRouteId,
+                userNotification.userNotificationFrequency
+            )
         val lockValue = UUID.randomUUID().toString()
         val lockAcquire = lockValueOps.setIfAbsent(lockKey, lockValue, Duration.ofMillis(3000))
         if (lockAcquire == true) {
@@ -120,7 +124,7 @@ class RouteNotificationRedisOperations(
             saveNotification(
                 userId = delayedNotification.userId,
                 lastRouteId = delayedNotification.lastRouteId,
-                notificationFrequency = delayedNotification.notificationFrequency,
+                userNotificationFrequency = delayedNotification.userNotificationFrequency,
                 userNotification = updatedNotification
             )
         }
@@ -137,14 +141,14 @@ class RouteNotificationRedisOperations(
                 delayedNotification.copy(
                     updatedDepartureTime = newDepartureTime.format(dateTimeFormatter),
                     notificationTime =
-                        newDepartureTime.minusMinutes(delayedNotification.notificationFrequency.minutes)
+                        newDepartureTime.minusMinutes(delayedNotification.userNotificationFrequency.minutes)
                             .format(dateTimeFormatter)
                 )
 
             saveNotification(
                 userId = delayedNotification.userId,
                 lastRouteId = delayedNotification.lastRouteId,
-                notificationFrequency = delayedNotification.notificationFrequency,
+                userNotificationFrequency = delayedNotification.userNotificationFrequency,
                 userNotification = updatedNotification
             )
         }
@@ -158,6 +162,6 @@ class RouteNotificationRedisOperations(
     private fun getLockKey(
         userId: Long,
         lastRouteId: String,
-        frequency: NotificationFrequency
+        frequency: UserNotificationFrequency
     ) = "lock:notification:$userId:$lastRouteId:$frequency"
 }
