@@ -5,7 +5,6 @@ import com.deepromeet.atcha.transit.domain.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Service
 class NotificationService(
@@ -14,8 +13,6 @@ class NotificationService(
     private val userReader: UserReader,
     private val notificationManager: NotificationManager
 ) {
-    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-
     fun addRouteNotification(
         id: Long,
         request: NotificationRequest
@@ -32,11 +29,10 @@ class NotificationService(
                 val frequency = NotificationFrequency.fromMinutes(minute)
                 val userNotification =
                     UserNotification(
-                        notificationFrequency = frequency,
+                        frequency = frequency,
                         notificationToken = notificationToken,
-                        notificationTime = notificationDateTime.format(dateTimeFormatter),
-                        initialDepartureTime = departureTime.format(dateTimeFormatter),
-                        updatedDepartureTime = departureTime.format(dateTimeFormatter),
+                        notificationTime = notificationDateTime,
+                        departureTime = departureTime,
                         routeId = request.lastRouteId,
                         userId = user.id
                     )
