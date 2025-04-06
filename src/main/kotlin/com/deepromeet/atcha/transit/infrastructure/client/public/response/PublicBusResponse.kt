@@ -232,9 +232,9 @@ data class BusArrivalResponse(
             else -> BusStatus.OPERATING
         }
 
-    private fun parseDateTime(dateTimeString: String): LocalDateTime {
+    private fun parseDateTime(dateTimeString: String): LocalDateTime? {
         if (dateTimeString.length == 10) {
-            return LocalDateTime.parse(dateTimeString + "0000", DATE_TIME_FORMATTER)
+            return null
         }
         return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
     }
