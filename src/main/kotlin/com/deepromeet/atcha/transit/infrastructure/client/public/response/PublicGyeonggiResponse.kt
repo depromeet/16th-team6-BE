@@ -357,7 +357,7 @@ data class BusRouteInfoItem(
     ): LocalDateTime? {
         val timeStr: String =
             getTimeString(dailyType, busDirection, timeType)
-                ?: throw IllegalArgumentException("첫차 또는 막차 시간을 가져올 수 없습니다.")
+                ?: throw IllegalArgumentException("첫차 또는 막차 시간을 가져올 수 없습니다. $routeName($routeId) - $dailyType - $busDirection")
 
         return parseTime(timeStr)
     }
