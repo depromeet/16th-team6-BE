@@ -27,9 +27,6 @@ class NotificationManager(
         }
     }
 
-    fun findNotificationsByMinutes(currentMinute: String): List<UserNotification> =
-        routeNotificationOperations.findNotificationsByMinute(currentMinute)
-
     fun sendAndDeleteNotification(notification: UserNotification): Boolean {
         return routeNotificationOperations.handleNotificationWithLock(notification) {
             if (sendPushNotification(notification)) {
