@@ -24,7 +24,7 @@ class PublicGyeonggiStationInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationList(key, info.name) },
+            apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationList(key, info.resolveName()) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
                 val busStations = response.response.msgBody.busStationList.map { it.toBusStation() }
