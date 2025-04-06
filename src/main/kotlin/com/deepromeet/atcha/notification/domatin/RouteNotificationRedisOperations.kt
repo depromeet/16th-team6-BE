@@ -31,12 +31,12 @@ class RouteNotificationRedisOperations(
         .put(getKey(userId, lastRouteId), notificationFrequency.name, userNotification)
         .also { routeNotificationRedisTemplate.expire(getKey(userId, lastRouteId), duration) }
 
-    fun deleteNotification(
-        userId: Long,
-        lastRouteId: String
-    ) {
-        routeNotificationRedisTemplate.delete(getKey(userId, lastRouteId))
-    }
+//    fun deleteNotification(
+//        userId: Long,
+//        lastRouteId: String
+//    ) {
+//        routeNotificationRedisTemplate.delete(getKey(userId, lastRouteId))
+//    }
 
     fun findNotificationsByMinute(currentMinute: String): List<UserNotification> {
         val notifications = mutableListOf<UserNotification>()
@@ -52,15 +52,6 @@ class RouteNotificationRedisOperations(
             }
         }
         return notifications
-    }
-
-    fun deleteNotification(notification: UserNotification) {
-        val key = getKey(notification.userId, notification.routeId)
-        hashOps.delete(key, notification.notificationFrequency.name)
-        val remaining = hashOps.entries(key)
-        if (remaining.isEmpty()) {
-            routeNotificationRedisTemplate.delete(key)
-        }
     }
 
     fun processRoutes(action: (UserNotification) -> Unit) {
@@ -93,7 +84,7 @@ class RouteNotificationRedisOperations(
 
     fun hasNotification(userNotification: UserNotification): Boolean =
         routeNotificationRedisTemplate.hasKey(
-            getKey(userNotification.userId, userNotification.routeId)
+            getKey(userNotification.userId, userNotification.lastRouteId)
         )
 
     fun handleNotificationWithLock(
@@ -101,7 +92,7 @@ class RouteNotificationRedisOperations(
         action: (UserNotification) -> Boolean
     ): Boolean {
         val lockKey =
-            getLockKey(userNotification.userId, userNotification.routeId, userNotification.notificationFrequency)
+            getLockKey(userNotification.userId, userNotification.lastRouteId, userNotification.notificationFrequency)
         val lockValue = UUID.randomUUID().toString()
         val lockAcquire = lockValueOps.setIfAbsent(lockKey, lockValue, Duration.ofMillis(3000))
         if (lockAcquire == true) {
@@ -124,11 +115,11 @@ class RouteNotificationRedisOperations(
     }
 
     fun updateDelayNotificationFlags(notification: UserNotification) {
-        findNotification(notification.userId, notification.routeId).forEach { delayedNotification ->
+        findNotification(notification.userId, notification.lastRouteId).forEach { delayedNotification ->
             val updatedNotification = delayedNotification.copy(isDelayNotified = true)
             saveNotification(
                 userId = delayedNotification.userId,
-                lastRouteId = delayedNotification.routeId,
+                lastRouteId = delayedNotification.lastRouteId,
                 notificationFrequency = delayedNotification.notificationFrequency,
                 userNotification = updatedNotification
             )
@@ -140,7 +131,7 @@ class RouteNotificationRedisOperations(
         newDepartureTime: LocalDateTime
     ) {
         val userId = notification.userId
-        val lastRouteId = notification.routeId
+        val lastRouteId = notification.lastRouteId
         findNotification(userId, lastRouteId).forEach { delayedNotification ->
             val updatedNotification =
                 delayedNotification.copy(
@@ -152,7 +143,7 @@ class RouteNotificationRedisOperations(
 
             saveNotification(
                 userId = delayedNotification.userId,
-                lastRouteId = delayedNotification.routeId,
+                lastRouteId = delayedNotification.lastRouteId,
                 notificationFrequency = delayedNotification.notificationFrequency,
                 userNotification = updatedNotification
             )

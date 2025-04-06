@@ -8,45 +8,45 @@ import java.time.LocalDateTime
 
 @Service
 class NotificationService(
-    private val redisOperations: RouteNotificationRedisOperations,
     private val lastRouteReader: LastRouteReader,
     private val userReader: UserReader,
+    private val notificationAppender: NotificationAppender,
     private val notificationManager: NotificationManager
 ) {
     fun addRouteNotification(
         id: Long,
-        request: NotificationRequest
+        lastRouteId: String
     ) {
-        val route = lastRouteReader.read(request.lastRouteId)
+        val route = lastRouteReader.read(lastRouteId)
         val departureTime = LocalDateTime.parse(route.departureDateTime)
 
         val user = userReader.read(id)
         val notificationToken = user.fcmToken
 
         user.alertFrequencies.forEach { minute ->
-            val notificationDateTime = departureTime.minusMinutes(minute.toLong())
-            if (notificationDateTime.isAfter(LocalDateTime.now())) {
+            val notificationTime = departureTime.minusMinutes(minute.toLong())
+            if (notificationTime.isAfter(LocalDateTime.now())) {
                 val frequency = NotificationFrequency.fromMinutes(minute)
                 val userNotification =
                     UserNotification(
                         frequency = frequency,
                         notificationToken = notificationToken,
-                        notificationTime = notificationDateTime,
+                        notificationTime = notificationTime,
                         departureTime = departureTime,
-                        routeId = request.lastRouteId,
+                        routeId = lastRouteId,
                         userId = user.id
                     )
-                redisOperations.saveNotification(user.id, request.lastRouteId, frequency, userNotification)
+                notificationAppender.saveUserNotification(userNotification, frequency)
             }
         }
     }
 
     fun deleteRouteNotification(
         id: Long,
-        request: NotificationRequest
+        lastRouteId: String
     ) {
         val user = userReader.read(id)
-        redisOperations.deleteNotification(user.id, request.lastRouteId)
+        notificationAppender.deleteUserNotification(user.id, lastRouteId)
     }
 
     fun test(id: Long) {

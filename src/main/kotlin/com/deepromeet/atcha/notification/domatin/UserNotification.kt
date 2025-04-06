@@ -9,7 +9,7 @@ data class UserNotification(
     val updatedDepartureTime: String,
     val notificationTime: String,
     val notificationToken: String,
-    val routeId: String,
+    val lastRouteId: String,
     val isDelayNotified: Boolean = false,
     val userId: Long
 ) {
@@ -30,7 +30,7 @@ data class UserNotification(
         notificationTime = notificationTime.format(dateTimeFormatter),
         initialDepartureTime = departureTime.format(dateTimeFormatter),
         updatedDepartureTime = departureTime.format(dateTimeFormatter),
-        routeId = routeId,
+        lastRouteId = routeId,
         userId = userId
     )
 }

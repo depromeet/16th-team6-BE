@@ -10,7 +10,8 @@ import java.time.format.DateTimeFormatter
 @Component
 class NotificationManager(
     private val fcmService: FcmService,
-    private val routeNotificationOperations: RouteNotificationRedisOperations
+    private val routeNotificationOperations: RouteNotificationRedisOperations,
+    private val notificationAppender: NotificationAppender
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     private val logger = LoggerFactory.getLogger(NotificationManager::class.java)
@@ -31,7 +32,7 @@ class NotificationManager(
     fun sendAndDeleteNotification(notification: UserNotification): Boolean {
         return routeNotificationOperations.handleNotificationWithLock(notification) {
             if (sendPushNotification(notification)) {
-                deleteNotification(notification)
+                notificationAppender.deleteUserNotification(notification.userId, notification.lastRouteId)
                 true
             } else {
                 false
@@ -64,11 +65,6 @@ class NotificationManager(
         sendFirebaseMessaging(notification.notificationToken, dataMap, body)
         return true
     }
-
-    fun deleteNotification(notification: UserNotification) =
-        routeNotificationOperations.deleteNotification(
-            notification
-        )
 
     // TODO 안드 테스트용 (추후 삭제)
     fun sendPushNotificationForTest(notificationToken: String) {

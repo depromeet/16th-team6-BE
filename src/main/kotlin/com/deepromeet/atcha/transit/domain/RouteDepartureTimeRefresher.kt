@@ -36,7 +36,7 @@ class RouteDepartureTimeRefresher(
             return
         }
 
-        val route = lastRouteReader.read(notification.routeId)
+        val route = lastRouteReader.read(notification.lastRouteId)
 
         // 2) 첫 번째 버스 구간 찾기
         val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return

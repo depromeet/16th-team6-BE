@@ -42,7 +42,7 @@ class NotificationManagerTest : BaseServiceTest() {
 
         redisOperations.saveNotification(
             notification.userId,
-            notification.routeId,
+            notification.lastRouteId,
             notification.notificationFrequency,
             notification
         )

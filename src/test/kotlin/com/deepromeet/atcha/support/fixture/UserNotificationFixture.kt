@@ -23,7 +23,7 @@ object UserNotificationFixture {
         updatedDepartureTime = updatedDepartureTime,
         notificationTime = notificationTime,
         notificationToken = notificationToken,
-        routeId = routeId,
+        lastRouteId = routeId,
         isDelayNotified = isDelayNotified,
         userId = userId
     )

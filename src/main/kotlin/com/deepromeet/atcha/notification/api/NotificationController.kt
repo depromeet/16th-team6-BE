@@ -20,13 +20,13 @@ class NotificationController(
     fun addRouteNotification(
         @CurrentUser id: Long,
         @RequestBody request: NotificationRequest
-    ) = notificationService.addRouteNotification(id, request)
+    ) = notificationService.addRouteNotification(id, request.lastRouteId)
 
     @DeleteMapping("/route")
     fun deleteRouteNotification(
         @CurrentUser id: Long,
         @ModelAttribute request: NotificationRequest
-    ) = notificationService.deleteRouteNotification(id, request)
+    ) = notificationService.deleteRouteNotification(id, request.lastRouteId)
 
     // todo 안드 테스트용 (추후 삭제_
     @PostMapping("/test")
