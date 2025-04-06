@@ -11,6 +11,10 @@ interface UserNotificationRepository {
         routeId: String
     ): List<UserNotification>
 
+    fun findByTime(time: String): List<UserNotification>
+
+    fun hasNotification(userNotification: UserNotification): Boolean
+
     fun delete(
         userId: Long,
         routeId: String

@@ -58,7 +58,7 @@ class NotificationService(
         val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
         if (distance > 1.0) {
             val token = user.fcmToken
-            val suggestNotification = notificationManager.getSuggestNotification()
+            val suggestNotification = notificationManager.createSuggestNotification()
             val messaging = Messaging(suggestNotification, token)
             messagingManager.send(messaging)
         }
@@ -66,7 +66,7 @@ class NotificationService(
 
     fun test(id: Long) {
         val token = userReader.read(id).fcmToken
-        val suggestNotification = notificationManager.getSuggestNotification()
+        val suggestNotification = notificationManager.createSuggestNotification()
         val messaging = Messaging(suggestNotification, token)
         messagingManager.send(messaging)
     }

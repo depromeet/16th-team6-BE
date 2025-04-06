@@ -11,7 +11,8 @@ import java.time.format.DateTimeFormatter
 class NotificationManager(
     private val fcmService: FcmService,
     private val routeNotificationOperations: RouteNotificationRedisOperations,
-    private val userNotificationAppender: UserNotificationAppender
+    private val userNotificationAppender: UserNotificationAppender,
+    private val userNotificationReader: UserNotificationReader
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
     private val logger = LoggerFactory.getLogger(NotificationManager::class.java)
@@ -44,7 +45,8 @@ class NotificationManager(
         notification: UserNotification,
         isDelay: Boolean = false
     ): Boolean {
-        if (!routeNotificationOperations.hasNotification(notification)) {
+        userNotificationReader
+        if (!userNotificationReader.hasNotification(notification)) {
             return false
         }
         val dataMap = mutableMapOf<String, String>()
@@ -66,7 +68,28 @@ class NotificationManager(
         return true
     }
 
-    fun getSuggestNotification(): Notification {
+    fun createPushNotification(
+        notification: UserNotification,
+        isDelay: Boolean = false
+    ): Notification {
+        val dataMap = mutableMapOf<String, String>()
+        dataMap["type"] =
+            if (notification.userNotificationFrequency.minutes.toInt() == 1) {
+                "FULL_SCREEN_ALERT"
+            } else {
+                "PUSH_ALERT"
+            }
+
+        val body =
+            if (isDelay) {
+                createDelayMessage()
+            } else {
+                createDepartureMessage(notification)
+            }
+        return Notification(body = body, dataMap = dataMap)
+    }
+
+    fun createSuggestNotification(): Notification {
         val dataMap = mutableMapOf<String, String>()
         dataMap["type"] = "PUSH_ALERT"
         return Notification(

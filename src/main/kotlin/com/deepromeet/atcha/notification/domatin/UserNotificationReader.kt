@@ -10,4 +10,9 @@ class UserNotificationReader(
         userId: Long,
         routeId: String
     ): List<UserNotification> = userNotificationRepository.findById(userId, routeId)
+
+    fun findByTime(currentTime: String): List<UserNotification> = userNotificationRepository.findByTime(currentTime)
+
+    fun hasNotification(userNotification: UserNotification): Boolean =
+        userNotificationRepository.hasNotification(userNotification)
 }
