@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.notification.domatin
 
+import java.time.LocalDateTime
+
 interface UserNotificationRepository {
     fun save(userNotification: UserNotification)
 
@@ -12,9 +14,10 @@ interface UserNotificationRepository {
 
     fun updateDelayNotificationFlags(userNotification: UserNotification)
 
-//    fun getLockWithUserNotification(
-//        userNotification: UserNotification,
-//    ): Boolean
+    fun updateNotificationDepartureTime(
+        userNotification: UserNotification,
+        newDepartureTime: LocalDateTime
+    )
 
     fun findByTime(time: String): List<UserNotification>
 

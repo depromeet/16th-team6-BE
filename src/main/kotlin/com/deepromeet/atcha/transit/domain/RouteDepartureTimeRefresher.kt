@@ -3,7 +3,6 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.notification.domatin.MessagingManager
 import com.deepromeet.atcha.notification.domatin.NotificationContentManager
-import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
 import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.notification.domatin.UserNotificationAppender
 import com.deepromeet.atcha.notification.domatin.UserNotificationReader
@@ -14,7 +13,6 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class RouteDepartureTimeRefresher(
-    private val redisOperations: RouteNotificationRedisOperations,
     private val userNotificationReader: UserNotificationReader,
     private val userNotificationAppender: UserNotificationAppender,
     private val lastRouteAppender: LastRouteAppender,
@@ -23,6 +21,8 @@ class RouteDepartureTimeRefresher(
     private val notificationContentManager: NotificationContentManager,
     private val messagingManager: MessagingManager
 ) {
+    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+
     fun refresh() {
         userNotificationReader.findAll().forEach { userNotification ->
             refreshDepartureTime(userNotification)
@@ -36,17 +36,6 @@ class RouteDepartureTimeRefresher(
             }
         }
     }
-
-    private fun calculateDiffMinutes(
-        controlTime: String,
-        treatmentTime: String
-    ): Long {
-        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
-        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
-        return Duration.between(control, treatment).toMinutes()
-    }
-
-    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     private fun refreshDepartureTime(notification: UserNotification) {
         val oldDepartureTime = LocalDateTime.parse(notification.updatedDepartureTime, dateTimeFormatter)
@@ -124,8 +113,16 @@ class RouteDepartureTimeRefresher(
             )
 
         lastRouteAppender.append(updatedRoute)
+        userNotificationAppender.updateDepartureNotification(notification, newDepartureTime)
+    }
 
-        redisOperations.updateDepartureNotification(notification, newDepartureTime)
+    private fun calculateDiffMinutes(
+        controlTime: String,
+        treatmentTime: String
+    ): Long {
+        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
+        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
+        return Duration.between(control, treatment).toMinutes()
     }
 
     private fun getWalkTimeBeforeThisLeg(
