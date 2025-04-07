@@ -8,7 +8,7 @@ data class UserNotification(
     val initialDepartureTime: String,
     val updatedDepartureTime: String,
     val notificationTime: String,
-    val notificationToken: String,
+    val token: String,
     val lastRouteId: String,
     val isDelayNotified: Boolean = false,
     val userId: Long
@@ -19,14 +19,14 @@ data class UserNotification(
 
     constructor(
         frequency: UserNotificationFrequency,
-        notificationToken: String,
+        token: String,
         notificationTime: LocalDateTime,
         departureTime: LocalDateTime,
         routeId: String,
         userId: Long
     ) : this(
         userNotificationFrequency = frequency,
-        notificationToken = notificationToken,
+        token = token,
         notificationTime = notificationTime.format(dateTimeFormatter),
         initialDepartureTime = departureTime.format(dateTimeFormatter),
         updatedDepartureTime = departureTime.format(dateTimeFormatter),

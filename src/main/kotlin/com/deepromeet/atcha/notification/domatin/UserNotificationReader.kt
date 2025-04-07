@@ -13,6 +13,8 @@ class UserNotificationReader(
 
     fun findByTime(currentTime: String): List<UserNotification> = userNotificationRepository.findByTime(currentTime)
 
+    fun findAll(): List<UserNotification> = userNotificationRepository.findAll()
+
     fun hasNotification(userNotification: UserNotification): Boolean =
         userNotificationRepository.hasNotification(userNotification)
 }

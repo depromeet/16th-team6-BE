@@ -12,7 +12,7 @@ class NotificationService(
     private val userReader: UserReader,
     private val userNotificationAppender: UserNotificationAppender,
     private val messagingManager: MessagingManager,
-    private val notificationManager: NotificationManager
+    private val notificationContentManager: NotificationContentManager
 ) {
     fun addRouteNotification(
         id: Long,
@@ -31,13 +31,13 @@ class NotificationService(
                 val userNotification =
                     UserNotification(
                         frequency = frequency,
-                        notificationToken = notificationToken,
+                        token = notificationToken,
                         notificationTime = notificationTime,
                         departureTime = departureTime,
                         routeId = lastRouteId,
                         userId = user.id
                     )
-                userNotificationAppender.saveUserNotification(userNotification, frequency)
+                userNotificationAppender.saveUserNotification(userNotification)
             }
         }
     }
@@ -58,16 +58,8 @@ class NotificationService(
         val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
         if (distance > 1.0) {
             val token = user.fcmToken
-            val suggestNotification = notificationManager.createSuggestNotification()
-            val messaging = Messaging(suggestNotification, token)
-            messagingManager.send(messaging)
+            val suggestNotification = notificationContentManager.createSuggestNotification()
+            messagingManager.send(suggestNotification, token)
         }
-    }
-
-    fun test(id: Long) {
-        val token = userReader.read(id).fcmToken
-        val suggestNotification = notificationManager.createSuggestNotification()
-        val messaging = Messaging(suggestNotification, token)
-        messagingManager.send(messaging)
     }
 }

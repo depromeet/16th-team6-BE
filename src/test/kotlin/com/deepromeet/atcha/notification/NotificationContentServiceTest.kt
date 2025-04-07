@@ -8,7 +8,7 @@ import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 
-class NotificationServiceTest : BaseServiceTest() {
+class NotificationContentServiceTest : BaseServiceTest() {
     @Autowired
     private lateinit var notificationService: NotificationService
 

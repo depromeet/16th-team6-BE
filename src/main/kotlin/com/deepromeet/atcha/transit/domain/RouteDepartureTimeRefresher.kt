@@ -1,9 +1,12 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.notification.domatin.NotificationManager
+import com.deepromeet.atcha.notification.domatin.MessagingManager
+import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
 import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.notification.domatin.UserNotificationAppender
+import com.deepromeet.atcha.notification.domatin.UserNotificationReader
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -12,19 +15,38 @@ import java.time.format.DateTimeFormatter
 @Component
 class RouteDepartureTimeRefresher(
     private val redisOperations: RouteNotificationRedisOperations,
+    private val userNotificationReader: UserNotificationReader,
+    private val userNotificationAppender: UserNotificationAppender,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader,
-    private val notificationManager: NotificationManager
+    private val notificationContentManager: NotificationContentManager,
+    private val messagingManager: MessagingManager
 ) {
-    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-
     fun refresh() {
-        redisOperations.processRoutes { route ->
-            refreshDepartureTime(route)
-            notificationManager.checkAndNotifyDelay(route)
+        userNotificationReader.findAll().forEach { userNotification ->
+            refreshDepartureTime(userNotification)
+            val diffMinutes =
+                calculateDiffMinutes(userNotification.initialDepartureTime, userNotification.updatedDepartureTime)
+            if (diffMinutes >= 10 && !userNotification.isDelayNotified) {
+                val notificationContent =
+                    notificationContentManager.createDelayPushNotification(userNotification)
+                messagingManager.send(notificationContent, userNotification.token)
+                userNotificationAppender.updateDelayNotificationFlags(userNotification)
+            }
         }
     }
+
+    private fun calculateDiffMinutes(
+        controlTime: String,
+        treatmentTime: String
+    ): Long {
+        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
+        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
+        return Duration.between(control, treatment).toMinutes()
+    }
+
+    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     private fun refreshDepartureTime(notification: UserNotification) {
         val oldDepartureTime = LocalDateTime.parse(notification.updatedDepartureTime, dateTimeFormatter)

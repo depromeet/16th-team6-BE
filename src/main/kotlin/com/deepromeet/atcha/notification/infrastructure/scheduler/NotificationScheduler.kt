@@ -2,7 +2,7 @@ package com.deepromeet.atcha.notification.infrastructure.scheduler
 
 import com.deepromeet.atcha.notification.domatin.Messaging
 import com.deepromeet.atcha.notification.domatin.MessagingManager
-import com.deepromeet.atcha.notification.domatin.NotificationManager
+import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotificationReader
 import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
 import org.slf4j.LoggerFactory
@@ -16,7 +16,7 @@ class NotificationScheduler(
     private val routeDepartureTimeRefresher: RouteDepartureTimeRefresher,
     private val userNotificationReader: UserNotificationReader,
     private val messagingManager: MessagingManager,
-    private val notificationManager: NotificationManager
+    private val notificationContentManager: NotificationContentManager
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 
@@ -36,10 +36,10 @@ class NotificationScheduler(
         notifications.forEach { userNotification ->
             try {
                 // TODO 이미 보낸 푸시 알림 처리
-                val pushNotification = notificationManager.createPushNotification(userNotification)
-                val messaging = Messaging(pushNotification, userNotification.notificationToken)
+                val pushNotification = notificationContentManager.createPushNotification(userNotification)
+                val messaging = Messaging(pushNotification, userNotification.token)
                 messagingManager.send(messaging)
-                logger.info("Successfully sent userNotification to token: ${userNotification.notificationToken}")
+                logger.info("Successfully sent userNotification to token: ${userNotification.token}")
             } catch (e: Exception) {
                 logger.error("Failed to send userNotification: ${e.message}", e)
             }

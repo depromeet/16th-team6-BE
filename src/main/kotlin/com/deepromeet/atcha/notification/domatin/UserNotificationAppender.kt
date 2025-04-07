@@ -6,10 +6,16 @@ import org.springframework.stereotype.Component
 class UserNotificationAppender(
     private val userNotificationRepository: UserNotificationRepository
 ) {
-    fun saveUserNotification(
-        userNotification: UserNotification,
-        userNotificationFrequency: UserNotificationFrequency
-    ) = userNotificationRepository.save(userNotification, userNotificationFrequency)
+    fun saveUserNotification(userNotification: UserNotification) = userNotificationRepository.save(userNotification)
+
+    fun updateDelayNotificationFlags(userNotification: UserNotification) =
+        userNotificationRepository.updateDelayNotificationFlags(
+            userNotification
+        )
+
+//    fun getLockWithUserNotification(userNotification: UserNotification): UserNotification {
+//        userNotificationRepository.
+//    }
 
     fun deleteUserNotification(
         userId: Long,

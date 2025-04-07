@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.notification.infrastructure.cache
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
 import com.deepromeet.atcha.notification.domatin.UserNotificationRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
@@ -9,18 +8,18 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 
 @Component
-class UserUserNotificationRedisRepository(
+class UserNotificationRedisRepository(
+    private val lockRedisTemplate: RedisTemplate<String, String>,
     private val userNotificationRedisTemplate: RedisTemplate<String, UserNotification>
 ) : UserNotificationRepository {
     private val duration = Duration.ofHours(12)
+    private val lockExpireMills = 2000L
     private val hashOps = userNotificationRedisTemplate.opsForHash<String, UserNotification>()
+    private val lockOps = lockRedisTemplate.opsForValue()
     private val scanOptions = ScanOptions.scanOptions().match("notification:*").count(1000).build()
 
-    override fun save(
-        userNotification: UserNotification,
-        userNotificationFrequency: UserNotificationFrequency
-    ) {
-        hashOps.put(getKey(userNotification), userNotificationFrequency.name, userNotification)
+    override fun save(userNotification: UserNotification) {
+        hashOps.put(getKey(userNotification), userNotification.userNotificationFrequency.name, userNotification)
         hashOps.apply { userNotificationRedisTemplate.expire(getKey(userNotification), duration) }
     }
 
@@ -31,6 +30,23 @@ class UserUserNotificationRedisRepository(
         hashOps.values(
             getKey(userId, routeId)
         )
+
+    override fun findAll(): List<UserNotification> {
+        val result = mutableListOf<UserNotification>()
+        userNotificationRedisTemplate.scan(scanOptions).use { cursor ->
+            while (cursor.hasNext()) {
+                val key = cursor.next()
+                val values = hashOps.values(key)
+                result.addAll(values)
+            }
+        }
+        return result
+    }
+
+    override fun updateDelayNotificationFlags(userNotification: UserNotification) {
+        val updateUserNotification = userNotification.copy(isDelayNotified = true)
+        save(updateUserNotification)
+    }
 
     override fun findByTime(time: String): List<UserNotification> {
         val notifications = mutableListOf<UserNotification>()
@@ -65,4 +81,8 @@ class UserUserNotificationRedisRepository(
         userId: Long,
         lastRouteId: String
     ) = "notification:$userId:$lastRouteId"
+
+    private fun getLockKey(userNotification: UserNotification) =
+        "lock:notification:${userNotification.userId}:${userNotification.lastRouteId}:" +
+            "${userNotification.userNotificationFrequency}"
 }

@@ -6,10 +6,10 @@ data class Messaging(
     val token: String,
     val dataMap: Map<String, String> = emptyMap()
 ) {
-    constructor(notification: Notification, token: String) : this(
-        notification.title,
-        notification.body,
+    constructor(notificationContent: NotificationContent, token: String) : this(
+        notificationContent.title,
+        notificationContent.body,
         token,
-        notification.dataMap
+        notificationContent.dataMap
     )
 }

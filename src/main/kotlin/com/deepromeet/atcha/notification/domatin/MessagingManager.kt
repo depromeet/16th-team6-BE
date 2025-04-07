@@ -9,4 +9,11 @@ class MessagingManager(
     fun send(messaging: Messaging) {
         messagingProvider.send(messaging)
     }
+
+    fun send(
+        notificationContent: NotificationContent,
+        token: String
+    ) {
+        messagingProvider.send(Messaging(notificationContent, token))
+    }
 }
