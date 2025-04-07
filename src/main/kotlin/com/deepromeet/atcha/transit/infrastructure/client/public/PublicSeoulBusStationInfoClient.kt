@@ -28,7 +28,7 @@ class PublicSeoulBusStationInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicBusClient.getStationInfoByName(info.name, key) },
+            apiCall = { key -> publicBusClient.getStationInfoByName(info.resolveName(), key) },
             isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
             processResult = { response ->
                 val busStations = response.msgBody.itemList?.map { it.toBusStation() }

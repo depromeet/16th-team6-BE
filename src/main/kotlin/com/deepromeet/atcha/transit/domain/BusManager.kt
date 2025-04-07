@@ -26,7 +26,7 @@ class BusManager(
             busStationInfoClientMap[region]?.getStationByName(busStationMeta)
                 .logIfNull(
                     "[NotFoundBusStation] region=$region," +
-                        " station=${busStationMeta.name}"
+                        " station=${busStationMeta.resolveName()}"
                 )
                 ?: return null
         val busRoute =
