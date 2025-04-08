@@ -31,8 +31,6 @@ class NotificationScheduler(
         // 현재 시간 기준으로 분 단위 알림 확인 -> 전송 -> 삭제
         val now = LocalDateTime.now()
         val currentMinute = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
-        logger.info("Checking notifications for time: $currentMinute")
-
         val notifications = userNotificationReader.findByTime(currentMinute)
         logger.info("Found ${notifications.size} notifications to send")
 
