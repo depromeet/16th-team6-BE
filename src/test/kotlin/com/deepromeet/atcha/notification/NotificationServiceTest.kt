@@ -13,9 +13,9 @@ class NotificationServiceTest : BaseServiceTest() {
     private lateinit var notificationService: NotificationService
 
     @Test
-    fun `알림을 추가한다`() {
+    fun `경로를 알림으로 등록한다`() {
         // given
-        val user = UserFixture.create(alertFrequencies = 1L)
+        val user = UserFixture.create(alertFrequencies = mutableSetOf(1))
         val lastRoute = LastRouteFixture.create()
         userAppender.save(user)
         lastRouteAppender.append(lastRoute)
@@ -24,6 +24,27 @@ class NotificationServiceTest : BaseServiceTest() {
         notificationService.addRouteNotification(user.id, lastRoute.routeId)
 
         // then
-        Assertions.assertThat(userNotificationReader.findById(user.id, lastRoute.routeId)).isEqualTo(lastRoute)
+        val userNotifications = userNotificationReader.findById(user.id, lastRoute.routeId)
+        org.junit.jupiter.api.Assertions.assertAll(
+            { Assertions.assertThat(userNotifications).hasSize(1) },
+            { Assertions.assertThat(userNotifications.get(0).lastRouteId).isEqualTo(lastRoute.routeId) }
+        )
+    }
+
+    @Test
+    fun `등록된 알림을 삭제한다`() {
+        // given
+        val user = UserFixture.create(alertFrequencies = mutableSetOf(1))
+        val lastRoute = LastRouteFixture.create()
+        userAppender.save(user)
+        lastRouteAppender.append(lastRoute)
+        notificationService.addRouteNotification(user.id, lastRoute.routeId)
+
+        // when
+        notificationService.deleteRouteNotification(user.id, lastRoute.routeId)
+
+        // then
+        val userNotifications = userNotificationReader.findById(user.id, lastRoute.routeId)
+        Assertions.assertThat(userNotifications).hasSize(0)
     }
 }
