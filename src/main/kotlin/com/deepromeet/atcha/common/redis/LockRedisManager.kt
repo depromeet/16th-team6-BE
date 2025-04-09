@@ -6,10 +6,13 @@ import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.UUID
+import kotlin.concurrent.thread
 
 @Component
 class LockRedisManager(
-    private val lockRedisTemplate: RedisTemplate<String, String>
+    private val lockRedisTemplate: RedisTemplate<String, String>,
+    private val lockReleaseScript: RedisScript<Long>,
+    private val lockExtendScript: RedisScript<Long>
 ) {
     private val valueOps = lockRedisTemplate.opsForValue()
     private val log = KotlinLogging.logger {}
@@ -19,27 +22,47 @@ class LockRedisManager(
         action: () -> Boolean
     ): Boolean {
         val lockValue = UUID.randomUUID().toString()
-        val lockAcquire = valueOps.setIfAbsent(lockKey, lockValue, Duration.ofMillis(1000))
-        if (lockAcquire == true) {
-            var result = false
-            try {
-                log.info { "$lockKey Lock acquire = $result." }
-                result = action()
-            } finally {
-                val script =
-                    RedisScript.of<String>(
-                        """
-                    if redis.call("get", KEYS[1]) == ARGV[1] then
-                        return redis.call("del", KEYS[1])
-                    else
-                        return 0
-                    end
-                """
-                    )
-                lockRedisTemplate.execute(script, listOf(lockKey), lockValue)
-            }
-            return result
+        val ttl = Duration.ofMillis(600)
+
+        val lockAcquire = valueOps.setIfAbsent(lockKey, lockValue, ttl)
+        if (lockAcquire == false) {
+            return false
         }
-        return false
+        log.info { "✅$lockKey Successfully acquired lock!" }
+
+        var result = false
+        var keepExtending = true
+
+        val watchdogThread =
+            thread(start = true, isDaemon = true) {
+                while (keepExtending) {
+                    Thread.sleep(500)
+                    val ttlMillis = ttl.toMillis().toString()
+
+                    val lockExtendResult =
+                        lockRedisTemplate.execute(
+                            lockExtendScript,
+                            listOf(lockKey),
+                            lockValue,
+                            ttlMillis
+                        )
+                    if (lockExtendResult == 1L) {
+                        log.info { "\uD83C\uDF00 $lockKey Lock extended by ${ttlMillis}ms." }
+                        continue
+                    }
+                    log.warn { "❌$lockKey Failed to extend lock" }
+                    keepExtending = false
+                }
+            }
+
+        try {
+            result = action()
+        } finally {
+            keepExtending = false
+            watchdogThread.join()
+            lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
+            log.info { "⭐️$lockKey Releasing lock." }
+        }
+        return result
     }
 }

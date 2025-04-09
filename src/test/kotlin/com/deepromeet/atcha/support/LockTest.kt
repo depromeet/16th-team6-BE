@@ -28,9 +28,12 @@ class LockTest : BaseServiceTest() {
                     redisLockRedisManager.processWithLock(
                         "lock:test"
                     ) {
+                        Thread.sleep(2000)
                         successCount.incrementAndGet()
                         true
                     }
+                } catch (e: Exception) {
+                    println(e.message)
                 } finally {
                     latch.countDown()
                 }

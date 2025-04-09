@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -35,8 +36,43 @@ class DefaultRedisConfig(
     @Bean
     fun lockRedisTemplate(): RedisTemplate<String, String> {
         val template = RedisTemplate<String, String>()
-        template.connectionFactory = redisConnectionFactory()
+        template.setConnectionFactory(redisConnectionFactory())
+
+        val stringSerializer = StringRedisSerializer()
+
+        template.keySerializer = stringSerializer
+        template.valueSerializer = stringSerializer
+        template.hashKeySerializer = stringSerializer
+        template.hashValueSerializer = stringSerializer
+
+        template.afterPropertiesSet()
         return template
+    }
+
+    @Bean
+    fun lockReleaseScript(): RedisScript<Long> {
+        val script =
+            """
+            if redis.call("get", KEYS[1]) == ARGV[1] then
+                return redis.call("del", KEYS[1])
+            else
+                return 0
+            end
+            """.trimIndent()
+        return RedisScript.of(script, Long::class.java)
+    }
+
+    @Bean
+    fun lockExtendScript(): RedisScript<Long> {
+        val script =
+            """
+            if redis.call("get", KEYS[1]) == ARGV[1] then
+                return redis.call("pexpire", KEYS[1], tonumber(ARGV[2]))
+            else
+                return 0
+            end
+            """.trimIndent()
+        return RedisScript.of(script, Long::class.java)
     }
 
     fun <T> createRedisTemplate(
