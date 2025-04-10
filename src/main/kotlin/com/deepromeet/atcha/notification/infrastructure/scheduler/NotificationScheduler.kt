@@ -36,7 +36,7 @@ class NotificationScheduler(
 
         notifications.forEach { userNotification ->
             val sendSuccess =
-                lockRedisManager.processWithLock(getSchedulerLockKey(userNotification)) {
+                lockRedisManager.processWithCoroutineLock(getSchedulerLockKey(userNotification)) {
                     try {
                         val pushNotification = notificationContentManager.createPushNotification(userNotification)
                         val messaging = Messaging(pushNotification, userNotification.token)
