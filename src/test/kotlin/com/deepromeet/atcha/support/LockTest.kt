@@ -39,4 +39,21 @@ class LockTest : BaseServiceTest() {
         latch.await()
         Assertions.assertThat(successCount.get()).isEqualTo(1)
     }
+
+    @Test
+    fun `내부 작업이 오래걸리면 TTL을 연장한다`() {
+        // given
+        val expectedActionDuration = 500L
+        val actualActionDuration = 500L + 2000L
+
+        // when
+        val result =
+            redisLockRedisManager.processWithCoroutineLock("lock:test:ttl", expectedActionDuration) {
+                Thread.sleep(actualActionDuration)
+                true
+            }
+
+        // then
+        Assertions.assertThat(result).isEqualTo(true)
+    }
 }

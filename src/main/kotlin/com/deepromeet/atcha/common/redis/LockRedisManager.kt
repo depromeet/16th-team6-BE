@@ -1,6 +1,10 @@
 package com.deepromeet.atcha.common.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
@@ -8,11 +12,15 @@ import java.time.Duration
 import java.util.UUID
 import kotlin.concurrent.thread
 
+private const val SUCCESS = 1L
+private const val BUFF_RATIO = 1.5
+private const val WATCHDOG_SLEEP_RATIO = 2
+
 @Component
 class LockRedisManager(
     private val lockRedisTemplate: RedisTemplate<String, String>,
     private val lockReleaseScript: RedisScript<Long>,
-    private val lockExtendScript: RedisScript<Long>
+    private val lockRefreshScript: RedisScript<Long>
 ) {
     private val valueOps = lockRedisTemplate.opsForValue()
     private val log = KotlinLogging.logger {}
@@ -41,12 +49,12 @@ class LockRedisManager(
 
                     val lockExtendResult =
                         lockRedisTemplate.execute(
-                            lockExtendScript,
+                            lockRefreshScript,
                             listOf(lockKey),
                             lockValue,
                             ttlMillis
                         )
-                    if (lockExtendResult == 1L) {
+                    if (lockExtendResult == SUCCESS) {
                         log.info { "\uD83C\uDF00 $lockKey Lock extended by ${ttlMillis}ms." }
                         continue
                     }
@@ -64,5 +72,64 @@ class LockRedisManager(
             log.info { "⭐️$lockKey Releasing lock." }
         }
         return result
+    }
+
+    fun processWithCoroutineLock(
+        lockKey: String,
+        expectedActionDurationMillis: Long = 600L,
+        action: () -> Boolean
+    ): Boolean {
+        val lockValue = UUID.randomUUID().toString()
+        log.info { "🏈$lockKey Try to acquire lock" }
+
+        val lockAcquire =
+            valueOps.setIfAbsent(
+                lockKey,
+                lockValue,
+                Duration.ofMillis((expectedActionDurationMillis * BUFF_RATIO).toLong())
+            )
+        if (lockAcquire == false) {
+            return false
+        }
+        log.info { "✅$lockKey Successfully acquired lock!" }
+
+        var watchdogJob =
+            CoroutineScope(Dispatchers.Default).launch {
+                watchAndRefreshTtl(lockKey, lockValue, expectedActionDurationMillis)
+            }
+
+        var result = false
+        runBlocking {
+            try {
+                result = action()
+            } finally {
+                watchdogJob.cancel()
+            }
+        }
+        return result
+    }
+
+    private fun watchAndRefreshTtl(
+        lockKey: String,
+        lockValue: String,
+        expectedActionDurationMillis: Long
+    ) {
+        val sleepMills = expectedActionDurationMillis / WATCHDOG_SLEEP_RATIO
+
+        while (true) {
+            Thread.sleep(sleepMills)
+            val lockRefreshResult =
+                lockRedisTemplate.execute(
+                    lockRefreshScript,
+                    listOf(lockKey),
+                    lockValue,
+                    (expectedActionDurationMillis * BUFF_RATIO).toLong().toString()
+                )
+            if (lockRefreshResult == SUCCESS) {
+                log.info { "\uD83C\uDF00 $lockKey Lock extended by ${expectedActionDurationMillis}ms." }
+            } else {
+                log.warn { "❌$lockKey Failed to extend lock" }
+            }
+        }
     }
 }
