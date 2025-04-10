@@ -104,6 +104,8 @@ class LockRedisManager(
                 result = action()
             } finally {
                 watchdogJob.cancel()
+                lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
+                log.info { "⭐️$lockKey Releasing lock." }
             }
         }
         return result
