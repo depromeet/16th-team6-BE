@@ -44,7 +44,7 @@ class LockTest : BaseServiceTest() {
     fun `내부 작업이 오래걸리면 TTL을 연장한다`() {
         // given
         val expectedActionDuration = 500L
-        val actualActionDuration = 500L + 2000L
+        val actualActionDuration = expectedActionDuration + 1000L
 
         // when
         val result =

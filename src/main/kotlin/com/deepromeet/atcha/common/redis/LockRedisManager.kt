@@ -3,6 +3,7 @@ package com.deepromeet.atcha.common.redis
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.springframework.data.redis.core.RedisTemplate
@@ -80,17 +81,8 @@ class LockRedisManager(
         action: () -> Boolean
     ): Boolean {
         val lockValue = UUID.randomUUID().toString()
-        log.info { "🏈$lockKey Try to acquire lock" }
 
-        val lockAcquire =
-            valueOps.setIfAbsent(
-                lockKey,
-                lockValue,
-                Duration.ofMillis((expectedActionDurationMillis * BUFF_RATIO).toLong())
-            )
-        if (lockAcquire == false) {
-            return false
-        }
+        if (!acquireLock(lockKey, lockValue, expectedActionDurationMillis)) return false
         log.info { "✅$lockKey Successfully acquired lock!" }
 
         var watchdogJob =
@@ -103,13 +95,22 @@ class LockRedisManager(
             try {
                 result = action()
             } finally {
-                watchdogJob.cancel()
-                lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
-                log.info { "⭐️$lockKey Releasing lock." }
+                releaseLock(watchdogJob, lockKey, lockValue)
             }
         }
         return result
     }
+
+    private fun acquireLock(
+        lockKey: String,
+        lockValue: String,
+        expectedActionDurationMillis: Long
+    ): Boolean =
+        valueOps.setIfAbsent(
+            lockKey,
+            lockValue,
+            Duration.ofMillis((expectedActionDurationMillis * BUFF_RATIO).toLong())
+        ) == true
 
     private fun watchAndRefreshTtl(
         lockKey: String,
@@ -133,5 +134,15 @@ class LockRedisManager(
                 log.warn { "❌$lockKey Failed to extend lock" }
             }
         }
+    }
+
+    private fun releaseLock(
+        watchdogJob: Job,
+        lockKey: String,
+        lockValue: String
+    ) {
+        watchdogJob.cancel()
+        lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
+        log.info { "⭐️$lockKey Releasing lock." }
     }
 }
