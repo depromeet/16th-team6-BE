@@ -117,29 +117,6 @@ class LockRedisManager(
             Duration.ofMillis((expectedActionDurationMillis * BUFF_RATIO).toLong())
         ) == true
 
-//    private fun watchAndRefreshTtl(
-//        lockKey: String,
-//        lockValue: String,
-//        expectedActionDurationMillis: Long
-//    ) {
-//        val sleepMills = expectedActionDurationMillis / WATCHDOG_SLEEP_RATIO
-//        while (true) {
-//            Thread.sleep(sleepMills)
-//            val lockRefreshResult =
-//                lockRedisTemplate.execute(
-//                    lockRefreshScript,
-//                    listOf(lockKey),
-//                    lockValue,
-//                    (expectedActionDurationMillis * BUFF_RATIO).toLong().toString()
-//                )
-//            if (lockRefreshResult == SUCCESS) {
-//                log.info { "\uD83C\uDF00 $lockKey Lock extended by ${expectedActionDurationMillis}ms." }
-//            } else {
-//                log.warn { "❌$lockKey Failed to extend lock" }
-//            }
-//        }
-//    }
-
     private fun watchAndRefreshTtl(
         lockKey: String,
         lockValue: String,

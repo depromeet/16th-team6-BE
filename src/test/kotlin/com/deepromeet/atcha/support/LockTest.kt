@@ -22,7 +22,7 @@ class LockTest : BaseServiceTest() {
             executor.submit {
                 try {
                     redisLockRedisManager.processWithLock(
-                        "lock:test"
+                        "lock:test:concurrent"
                     ) {
                         Thread.sleep(2000)
                         successCount.incrementAndGet()
