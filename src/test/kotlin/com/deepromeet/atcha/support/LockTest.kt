@@ -49,6 +49,7 @@ class LockTest : BaseServiceTest() {
         // when
         val result =
             redisLockRedisManager.processWithCoroutineLock("lock:test:ttl", expectedActionDuration) {
+                println(Thread.currentThread().name)
                 Thread.sleep(actualActionDuration)
                 true
             }
