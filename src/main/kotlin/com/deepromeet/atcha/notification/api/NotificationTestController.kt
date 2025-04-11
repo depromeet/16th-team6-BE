@@ -6,6 +6,7 @@ import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.infrastructure.scheduler.NotificationScheduler
 import com.deepromeet.atcha.user.domain.UserReader
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
@@ -21,12 +22,13 @@ class NotificationTestController(
     private val notificationScheduler: NotificationScheduler
 ) {
     // todo 안드 테스트용 (추후 삭제_
-    @PostMapping("/push")
+    @PostMapping("/push/{type}")
     fun testNotification(
-        @CurrentUser id: Long
+        @CurrentUser id: Long,
+        @PathVariable type: String
     ) {
         val token = userReader.read(id).fcmToken
-        val suggestNotification = notificationContentManager.createSuggestNotification()
+        val suggestNotification = notificationContentManager.createTestNotification(type)
         log.info {
             "Sending push notification to" +
                 " $token with body: ${suggestNotification.body} and data: ${suggestNotification.dataMap}"
