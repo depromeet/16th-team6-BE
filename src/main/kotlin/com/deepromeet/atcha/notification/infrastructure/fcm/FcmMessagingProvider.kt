@@ -1,30 +1,27 @@
 package com.deepromeet.atcha.notification.infrastructure.fcm
 
+import com.deepromeet.atcha.notification.domatin.Messaging
+import com.deepromeet.atcha.notification.domatin.MessagingProvider
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.Message
 import com.google.firebase.messaging.Notification
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
-@Service
-class FcmService(
+@Component
+class FcmMessagingProvider(
     private val firebaseMessaging: FirebaseMessaging
-) {
-    fun send(
-        targetToken: String,
-        title: String,
-        body: String,
-        data: Map<String, String>
-    ): String {
+) : MessagingProvider {
+    override fun send(messaging: Messaging): String {
         val message =
             Message.builder()
-                .setToken(targetToken)
+                .setToken(messaging.token)
                 .setNotification(
                     Notification.builder()
-                        .setTitle(title)
-                        .setBody(body)
+                        .setTitle(messaging.title)
+                        .setBody(messaging.body)
                         .build()
                 )
-                .putAllData(data)
+                .putAllData(messaging.dataMap)
                 .build()
 
         return firebaseMessaging.send(message)
