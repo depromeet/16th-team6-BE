@@ -23,18 +23,13 @@ class NotificationContentManager {
 
     private fun getDataMap(notification: UserNotification): MutableMap<String, String> {
         val dataMap = mutableMapOf<String, String>()
-        dataMap["type"] =
-            if (notification.userNotificationFrequency.minutes.toInt() == 1) {
-                "FULL_SCREEN_ALERT"
-            } else {
-                "PUSH_ALERT"
-            }
+        dataMap["type"] = NotificationType.getByFrequency(notification.userNotificationFrequency).toString()
         return dataMap
     }
 
     fun createSuggestNotification(): NotificationContent {
         val dataMap = mutableMapOf<String, String>()
-        dataMap["type"] = "PUSH_ALERT"
+        dataMap["type"] = NotificationType.PUSH_ALERT.toString()
         return NotificationContent(
             body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0",
             dataMap = dataMap
