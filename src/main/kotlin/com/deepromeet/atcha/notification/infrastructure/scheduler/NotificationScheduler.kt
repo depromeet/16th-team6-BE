@@ -43,14 +43,14 @@ class NotificationScheduler(
                         messagingManager.send(messaging)
                         true
                     } catch (e: Exception) {
-                        logger.error("Notification Exception: ${e.message}", e)
+                        logger.warn("Notification Exception: ${e.message}", e)
                         false
                     }
                 }
             if (sendSuccess) {
                 logger.info("Successfully sent userNotification to token: ${userNotification.token}")
             } else {
-                logger.error("Failed to send userNotification to token: ${userNotification.token}")
+                logger.warn("Failed to send userNotification to token: ${userNotification.token}")
             }
         }
     }
