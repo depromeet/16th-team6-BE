@@ -39,6 +39,8 @@ class NotificationContentManager {
     fun createTestNotification(type: String): NotificationContent {
         val dataMap = mutableMapOf<String, String>()
         dataMap["type"] = NotificationType.getByValue(type).toString()
+        dataMap["title"] = "앗차"
+        dataMap["body"] = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0"
 
         return NotificationContent(
             body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0",
