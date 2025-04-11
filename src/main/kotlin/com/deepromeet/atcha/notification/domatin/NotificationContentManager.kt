@@ -10,34 +10,38 @@ class NotificationContentManager {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     fun createPushNotification(notification: UserNotification): NotificationContent {
-        val dataMap = getDataMap(notification)
+        val notificationType = NotificationType.getByFrequency(notification.userNotificationFrequency)
         val body = createDepartureMessage(notification)
-        return NotificationContent(body = body, dataMap = dataMap)
+        return createNotificationContent(notificationType, body)
     }
 
     fun createDelayPushNotification(notification: UserNotification): NotificationContent {
-        val dataMap = getDataMap(notification)
+        val notificationType = NotificationType.getByFrequency(notification.userNotificationFrequency)
         val body = createDelayMessage()
-        return NotificationContent(body = body, dataMap = dataMap)
-    }
-
-    private fun getDataMap(notification: UserNotification): MutableMap<String, String> {
-        val dataMap = mutableMapOf<String, String>()
-        dataMap["type"] =
-            if (notification.userNotificationFrequency.minutes.toInt() == 1) {
-                "FULL_SCREEN_ALERT"
-            } else {
-                "PUSH_ALERT"
-            }
-        return dataMap
+        return createNotificationContent(notificationType, body)
     }
 
     fun createSuggestNotification(): NotificationContent {
-        val dataMap = mutableMapOf<String, String>()
-        dataMap["type"] = "PUSH_ALERT"
+        val notificationType = NotificationType.PUSH_ALERT
+        val body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0"
+        return createNotificationContent(notificationType, body)
+    }
+
+    fun createTestNotification(type: String): NotificationContent {
+        val notificationType = NotificationType.getByValue(type)
+        val body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0"
+        return createNotificationContent(notificationType, body)
+    }
+
+    private fun createNotificationContent(
+        notificationType: NotificationType,
+        body: String
+    ): NotificationContent {
+        val defaultTitle = "앗차"
         return NotificationContent(
-            body = "지금 밖이세요? 막차 알림 등록하고 편히 귀가하세요. \uD83C\uDFE0",
-            dataMap = dataMap
+            title = defaultTitle,
+            body = body,
+            dataMap = mutableMapOf("type" to notificationType.toString(), "body" to body, "title" to defaultTitle)
         )
     }
 
@@ -56,7 +60,7 @@ class NotificationContentManager {
         val diffMinutes = calculateDiffMinutes(notification.notificationTime, currentMinute)
 
         return when (notification.userNotificationFrequency) {
-            UserNotificationFrequency.ONE -> "이제 출발 할 시간이에요. 막차를 타러 가볼까요? \uD83D\uDE8C" // TODO : 임의 추가. 변경 필요
+            UserNotificationFrequency.ONE -> "이제 출발 할 시간이에요. 막차를 타러 가볼까요? \uD83D\uDE8C"
             UserNotificationFrequency.FIVE ->
                 if (diffMinutes < UserNotificationFrequency.FIVE.minutes) {
                     "막차가 예상보다 일찍 출발해요! \uD83D\uDEA8 출발까지 단 ${notification}분!"
