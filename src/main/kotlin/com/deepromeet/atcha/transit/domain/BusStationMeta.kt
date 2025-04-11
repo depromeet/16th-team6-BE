@@ -7,6 +7,8 @@ data class BusStationMeta(
     val coordinate: Coordinate
 ) {
     fun resolveName(): String {
-        return name.replace("(지하)", "")
+        return name
+            .replace("(지하)", "")
+            .replace("(중)", "")
     }
 }
