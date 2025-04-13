@@ -57,3 +57,9 @@ kric:
   api:
     url:
       subway: https://openapi.kric.go.kr/openapi/trainUseInfo
+
+redis:
+  stream:
+    notification:
+      key: "stream:notification"
+      group: "notification-group"

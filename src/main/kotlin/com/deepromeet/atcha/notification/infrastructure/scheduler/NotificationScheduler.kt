@@ -1,11 +1,11 @@
 package com.deepromeet.atcha.notification.infrastructure.scheduler
 
 import com.deepromeet.atcha.common.redis.LockRedisManager
-import com.deepromeet.atcha.notification.domatin.Messaging
 import com.deepromeet.atcha.notification.domatin.MessagingManager
 import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.notification.domatin.UserNotificationReader
+import com.deepromeet.atcha.notification.domatin.UserNotificationStreamProducer
 import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
 import org.slf4j.LoggerFactory
 import org.springframework.scheduling.annotation.Scheduled
@@ -19,7 +19,8 @@ class NotificationScheduler(
     private val userNotificationReader: UserNotificationReader,
     private val messagingManager: MessagingManager,
     private val notificationContentManager: NotificationContentManager,
-    private val lockRedisManager: LockRedisManager
+    private val lockRedisManager: LockRedisManager,
+    private val userNotificationStreamProducer: UserNotificationStreamProducer
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 
@@ -33,26 +34,27 @@ class NotificationScheduler(
         val currentMinute = now.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"))
         val notifications = userNotificationReader.findByTime(currentMinute)
         logger.info("Found ${notifications.size} notifications to send")
+        userNotificationStreamProducer.produceAll(notifications)
 
-        notifications.forEach { userNotification ->
-            val sendSuccess =
-                lockRedisManager.processWithCoroutineLock(getSchedulerLockKey(userNotification)) {
-                    try {
-                        val pushNotification = notificationContentManager.createPushNotification(userNotification)
-                        val messaging = Messaging(pushNotification, userNotification.token)
-                        messagingManager.send(messaging)
-                        true
-                    } catch (e: Exception) {
-                        logger.warn("Notification Exception: ${e.message}", e)
-                        false
-                    }
-                }
-            if (sendSuccess) {
-                logger.info("Successfully sent userNotification to token: ${userNotification.token}")
-            } else {
-                logger.warn("Failed to send userNotification to token: ${userNotification.token}")
-            }
-        }
+//        notifications.forEach { userNotification ->
+//            val sendSuccess =
+//                lockRedisManager.processWithCoroutineLock(getSchedulerLockKey(userNotification)) {
+//                    try {
+//                        val pushNotification = notificationContentManager.createPushNotification(userNotification)
+//                        val messaging = Messaging(pushNotification, userNotification.token)
+//                        messagingManager.send(messaging)
+//                        true
+//                    } catch (e: Exception) {
+//                        logger.warn("Notification Exception: ${e.message}", e)
+//                        false
+//                    }
+//                }
+//            if (sendSuccess) {
+//                logger.info("Successfully sent userNotification to token: ${userNotification.token}")
+//            } else {
+//                logger.warn("Failed to send userNotification to token: ${userNotification.token}")
+//            }
+//        }
     }
 
     private fun getSchedulerLockKey(userNotification: UserNotification) =
