@@ -11,7 +11,7 @@ data class UserInfoResponse(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: Set<Int>,
+    val alertFrequencies: MutableSet<Int>,
     val appVersion: String
 ) {
     companion object {

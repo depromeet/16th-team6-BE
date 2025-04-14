@@ -10,7 +10,7 @@ data class UserInfoUpdateResponse(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: Set<Int>
+    val alertFrequencies: MutableSet<Int>
 ) {
     companion object {
         fun from(domain: User) =
