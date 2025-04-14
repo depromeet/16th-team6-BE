@@ -12,7 +12,7 @@ import jakarta.persistence.Id
 class AppVersion(
     @Id @GeneratedValue(strategy = GenerationType.AUTO)
     val id: Long = 0,
-    val version: String,
+    var version: String,
     @Enumerated(EnumType.STRING)
     val platform: Platform
 ) : BaseTimeEntity() {

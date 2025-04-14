@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.user
 
+import com.deepromeet.atcha.app.domain.AppVersionAppender
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
@@ -26,7 +27,9 @@ class UserControllerTest(
     @Autowired
     private val userReader: UserReader,
     @Autowired
-    private val userAppender: UserAppender
+    private val userAppender: UserAppender,
+    @Autowired
+    private val appVersionAppender: AppVersionAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
     var user: User = UserFixture.create()
@@ -36,6 +39,7 @@ class UserControllerTest(
         user = userAppender.save(user)
         val generateToken = tokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
+        appVersionAppender.createAppVersion("test v1.0.0")
     }
 
     @Test
