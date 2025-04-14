@@ -8,7 +8,7 @@ data class UserInfoUpdateRequest(
     val address: String? = null,
     val lat: Double? = null,
     val log: Double? = null,
-    val alertFrequencies: Set<Int>? = null,
+    val alertFrequencies: MutableSet<Int>? = null,
     val fcmToken: String? = null
 ) {
     fun toUpdateUserInfo(): UserUpdateInfo {

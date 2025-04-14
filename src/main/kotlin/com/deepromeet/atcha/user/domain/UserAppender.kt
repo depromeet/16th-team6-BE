@@ -33,7 +33,7 @@ class UserAppender(
     ): User {
         userUpdateInfo.nickname?.let { user.nickname = it }
         userUpdateInfo.profileImageUrl?.let { user.profileImageUrl = it }
-
+        userUpdateInfo.alertFrequencies?.let { user.alertFrequencies = it }
         userUpdateInfo.address?.let { user.address.address = it }
         userUpdateInfo.lat?.let { user.address.lat = it }
         userUpdateInfo.log?.let { user.address.lon = it }

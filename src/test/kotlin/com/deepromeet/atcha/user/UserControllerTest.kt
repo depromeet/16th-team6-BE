@@ -61,7 +61,7 @@ class UserControllerTest(
     fun `회원 정보 수정`() {
         // given
         val userInfoUpdateRequest =
-            UserInfoUpdateRequest("새로운 닉네임")
+            UserInfoUpdateRequest("새로운 닉네임", alertFrequencies = mutableSetOf(2))
 
         // when
         RestAssured.given().log().all()
@@ -76,6 +76,7 @@ class UserControllerTest(
 
         // then
         assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
+        assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
     }
 
     @Test
