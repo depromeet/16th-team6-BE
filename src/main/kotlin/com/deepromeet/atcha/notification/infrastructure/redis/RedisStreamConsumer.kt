@@ -1,7 +1,10 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
+import com.deepromeet.atcha.notification.domatin.Messaging
 import com.deepromeet.atcha.notification.domatin.MessagingProvider
 import com.deepromeet.atcha.notification.domatin.NotificationContentManager
+import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.fasterxml.jackson.databind.ObjectMapper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -24,6 +27,7 @@ class RedisStreamConsumer(
     private val messagingProvider: MessagingProvider,
     private val redisTemplate: RedisTemplate<String, String>,
     private val notificationContentManager: NotificationContentManager,
+    private val objectMapper: ObjectMapper,
     @Value("\${redis.stream.notification.key}")
     private val streamKey: String,
     @Value("\${redis.stream.notification.group}")
@@ -57,14 +61,19 @@ class RedisStreamConsumer(
             val messages =
                 streamOps.read(
                     Consumer.from(groupName, streamKey),
-                    StreamReadOptions.empty().block(Duration.ofSeconds(1)),
+                    StreamReadOptions.empty()
+                        .block(Duration.ofSeconds(1)),
                     StreamOffset.create(streamKey, ReadOffset.lastConsumed())
                 )
             messages?.forEach { message ->
-//                notificationContentManager.createPushNotification(message)
-//                messagingProvider.send()
+                val json = message.value["payload"]
+                val userNotification = objectMapper.readValue(json, UserNotification::class.java)
+                val content = notificationContentManager.createPushNotification(userNotification)
+                val messaging = Messaging(content, userNotification.token)
+                messagingProvider.send(messaging)
             }
         } catch (e: Exception) {
+            log.warn(e.message, e)
         }
     }
 }
