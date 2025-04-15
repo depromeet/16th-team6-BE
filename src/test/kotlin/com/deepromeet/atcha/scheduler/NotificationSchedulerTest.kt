@@ -54,7 +54,7 @@ class NotificationSchedulerTest : BaseServiceTest() {
 
     @Test
     fun `동시에 푸시 알림을 요청해도 하나만 성공한다`() {
-        `when`(messagingProvider.send(any<Messaging>())).thenReturn("")
+        `when`(messagingProvider.send(any<Messaging>())).thenReturn(true)
         val notification = UserNotificationFixture.create(userNotificationFrequency = UserNotificationFrequency.ONE)
         val threadCount = 2
         val latch = CountDownLatch(threadCount)

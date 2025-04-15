@@ -62,3 +62,5 @@ redis:
     notification:
       key: "stream:notification"
       group: "notification-group"
+      dead-letter:
+        key: "stream:notification:dead-letter"

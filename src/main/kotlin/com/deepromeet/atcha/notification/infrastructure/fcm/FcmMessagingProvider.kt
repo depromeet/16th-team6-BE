@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 class FcmMessagingProvider(
     private val firebaseMessaging: FirebaseMessaging
 ) : MessagingProvider {
-    override fun send(messaging: Messaging): String {
+    override fun send(messaging: Messaging): Boolean {
         val message =
             Message.builder()
                 .setToken(messaging.token)
@@ -24,6 +24,11 @@ class FcmMessagingProvider(
                 .putAllData(messaging.dataMap)
                 .build()
 
-        return firebaseMessaging.send(message)
+        try {
+            firebaseMessaging.send(message)
+            return true
+        } catch (e: Exception) {
+            throw e
+        }
     }
 }

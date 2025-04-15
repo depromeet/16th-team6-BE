@@ -33,4 +33,13 @@ data class UserNotification(
         lastRouteId = routeId,
         userId = userId
     )
+
+    override fun toString(): String {
+        return "UserNotification(userNotificationFrequency=$userNotificationFrequency, " +
+            "initialDepartureTime='$initialDepartureTime', " +
+            "updatedDepartureTime='$updatedDepartureTime', " +
+            "notificationTime='$notificationTime', " +
+            "token='$token', lastRouteId='$lastRouteId', " +
+            "isDelayNotified=$isDelayNotified, userId=$userId)"
+    }
 }
