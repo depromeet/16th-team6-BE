@@ -34,7 +34,7 @@ class RedisStreamProducer(
                 .ofMap(
                     mapOf(
                         PAYLOAD to objectMapper.writeValueAsString(userNotification),
-                        RETRY_COUNT to retryCount
+                        RETRY_COUNT to retryCount.toString()
                     )
                 )
                 .withStreamKey(key)
@@ -54,7 +54,7 @@ class RedisStreamProducer(
                 .ofMap(
                     mapOf(
                         PAYLOAD to objectMapper.writeValueAsString(userNotification),
-                        RETRY_COUNT to retryCount
+                        RETRY_COUNT to retryCount.toString()
                     )
                 )
                 .withStreamKey(deadLetterKey)

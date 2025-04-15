@@ -119,7 +119,7 @@ class NotificationSchedulerTest : BaseServiceTest() {
         `when`(messagingProvider.send(any<Messaging>())).thenAnswer {
             latch.countDown()
             successCount.incrementAndGet()
-            "ok"
+            true
         }
         val lastRoute = LastRouteFixture.create()
         val notificationA =
@@ -139,7 +139,7 @@ class NotificationSchedulerTest : BaseServiceTest() {
         notificationScheduler.checkAndSendNotifications()
 
         // when
-        redisStreamConsumer.startConsumer()
+        redisStreamConsumer.consumeStreamMessages()
         latch.await(3, TimeUnit.SECONDS)
 
         // then

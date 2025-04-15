@@ -3,13 +3,16 @@ package com.deepromeet.atcha.notification.api
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.notification.domatin.MessagingManager
 import com.deepromeet.atcha.notification.domatin.NotificationContentManager
-import com.deepromeet.atcha.notification.infrastructure.scheduler.NotificationScheduler
+import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
+import com.deepromeet.atcha.notification.infrastructure.redis.RedisStreamProducer
 import com.deepromeet.atcha.user.domain.UserReader
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import java.time.LocalDateTime
 
 private val log = KotlinLogging.logger {}
 
@@ -19,7 +22,7 @@ class NotificationTestController(
     private val userReader: UserReader,
     private val notificationContentManager: NotificationContentManager,
     private val messagingManager: MessagingManager,
-    private val notificationScheduler: NotificationScheduler
+    private val redisStreamProducer: RedisStreamProducer
 ) {
     // todo 안드 테스트용 (추후 삭제_
     @PostMapping("/push/{type}")
@@ -39,5 +42,17 @@ class NotificationTestController(
     @PostMapping("/scheduler")
     fun testSchedulerNotification(
         @CurrentUser id: Long
-    ) = notificationScheduler.checkAndSendNotifications()
+    ) {
+        val user = userReader.read(id)
+        val userNotification =
+            UserNotification(
+                UserNotificationFrequency.ONE,
+                user.fcmToken,
+                LocalDateTime.now(),
+                LocalDateTime.now().plusMinutes(1),
+                "test-id",
+                user.id
+            )
+        redisStreamProducer.produce(userNotification)
+    }
 }
