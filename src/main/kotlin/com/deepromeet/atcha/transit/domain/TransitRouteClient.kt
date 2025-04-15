@@ -6,7 +6,7 @@ import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import org.springframework.stereotype.Component
-import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -20,9 +20,9 @@ class TransitRouteClient(
     ): List<Itinerary> {
         validateServiceRegion(start, end)
 
-        val today = LocalDate.now()
-        val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-        val baseDate = today.format(dateFormatter) + "2300"
+        val today = LocalDateTime.now()
+        val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMddHHmm")
+        val baseDate = today.format(dateFormatter)
 
         val response =
             tMapTransitClient.getRoutes(
@@ -66,6 +66,7 @@ class TransitRouteClient(
                             hasValidModes = true
                         }
                     }
+
                     "BUS" -> {
                         transitCount++
                         if (!isFirstTransit) {
@@ -74,6 +75,7 @@ class TransitRouteClient(
                         hasValidModes = true
                         isFirstTransit = false
                     }
+
                     "TRAIN" -> hasTrain = true
                 }
             }

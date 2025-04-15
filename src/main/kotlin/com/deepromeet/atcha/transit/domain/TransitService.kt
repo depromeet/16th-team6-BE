@@ -66,9 +66,9 @@ class TransitService(
         sortType: LastRouteSortType
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes.sort(sortType)
-        }
+//        lastRouteReader.read(start, destination)?.let { routes ->
+//            return routes.sort(sortType)
+//        }
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
         return lastRouteOperations
             .calculateRoutes(start, destination, itineraries)

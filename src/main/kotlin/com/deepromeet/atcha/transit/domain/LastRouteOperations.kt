@@ -76,60 +76,60 @@ class LastRouteOperations(
     }
 
     private suspend fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
-        val calculatedLegs =
-            coroutineScope {
-                legs.map { leg ->
-                    async(Dispatchers.IO) {
-                        when (leg.mode) {
-                            "SUBWAY" -> {
-                                val subwayLine = SubwayLine.fromRouteName(leg.route!!)
+        var currentDepartureTime = LocalDateTime.now().plusMinutes(5)
 
+        val calculatedLegs = mutableListOf<LastRouteLeg>()
+
+        for (leg in legs) {
+            val result =
+                when (leg.mode) {
+                    "SUBWAY" -> {
+                        val subwayLine = SubwayLine.fromRouteName(leg.route!!)
+                        val (routes, startStation, endStation) =
+                            coroutineScope {
                                 val routesDeferred = async(Dispatchers.IO) { subwayManager.getRoutes(subwayLine) }
                                 val startDeferred =
                                     async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.start.name) }
                                 val endDeferred =
                                     async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.end.name) }
 
-                                val routes = routesDeferred.await()
-                                val startStation = startDeferred.await()
-                                val endStation = endDeferred.await()
-
-                                val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
-
-                                val departureDateTime = timeTable?.getLastTime(endStation, routes)?.departureTime
-                                val transitTime =
-                                    timeTable?.let {
-                                        TransitTime.SubwayTimeInfo(timeTable)
-                                    } ?: TransitTime.NoTimeTable
-
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
+                                Triple(routesDeferred.await(), startDeferred.await(), endDeferred.await())
                             }
 
-                            "BUS" -> {
-                                val routeId = leg.route!!.split(":")[1]
-                                val stationMeta =
-                                    BusStationMeta(
-                                        leg.start.name.removeSuffix(),
-                                        Coordinate(leg.start.lat, leg.start.lon)
-                                    )
-                                val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
+                        val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                        val transitTime =
+                            timeTable?.let {
+                                TransitTime.SubwayTimeInfo(it)
+                            } ?: TransitTime.NoTimeTable
 
-                                val departureDateTime = busTimeInfo?.lastTime
-                                val transitTime =
-                                    if (busTimeInfo != null) {
-                                        TransitTime.BusTimeInfo(busTimeInfo)
-                                    } else {
-                                        TransitTime.NoTimeTable
-                                    }
-
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
-                            }
-
-                            else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
-                        }
+                        leg.toLastRouteLeg(currentDepartureTime, transitTime)
                     }
-                }.awaitAll()
-            }
+
+                    "BUS" -> {
+                        val routeId = leg.route!!.split(":")[1]
+                        val stationMeta =
+                            BusStationMeta(
+                                leg.start.name.removeSuffix(),
+                                Coordinate(leg.start.lat, leg.start.lon)
+                            )
+                        val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
+
+                        val transitTime =
+                            busTimeInfo?.let {
+                                TransitTime.BusTimeInfo(it)
+                            } ?: TransitTime.NoTimeTable
+
+                        leg.toLastRouteLeg(currentDepartureTime, transitTime)
+                    }
+
+                    else -> {
+                        leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
+                    }
+                }
+
+            calculatedLegs.add(result)
+            currentDepartureTime = currentDepartureTime.plusSeconds(leg.sectionTime.toLong())
+        }
 
         return if (calculatedLegs.any {
                 (it.mode == "BUS" || it.mode == "SUBWAY") &&
@@ -253,8 +253,10 @@ class LastRouteOperations(
             is TransitTime.SubwayTimeInfo -> {
                 leg.transitTime.timeTable.findNearestTime(adjustedDepartureTime, direction)?.departureTime
             }
+
             is TransitTime.BusTimeInfo ->
                 leg.transitTime.arrivalInfo.calculateNearestTime(adjustedDepartureTime, direction)
+
             TransitTime.NoTimeTable -> null
         }
 
