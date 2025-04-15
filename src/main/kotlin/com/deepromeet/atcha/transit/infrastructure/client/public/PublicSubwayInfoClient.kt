@@ -10,10 +10,6 @@ import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicJsonResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -51,61 +47,46 @@ class PublicSubwayInfoClient(
         )
     }
 
-    override suspend fun getTimeTable(
+    override fun getTimeTable(
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
     ): SubwayTimeTable? {
         return try {
-            val (stationsDeferred, scheduleDeferred) =
-                coroutineScope {
-                    val stations =
-                        async(Dispatchers.IO) {
-                            subwayStationRepository.findByRouteCode(startStation.routeCode)
-                        }
+            // 순차적으로 처리 (코루틴 병렬 처리 제거)
+            val subwayStations = subwayStationRepository.findByRouteCode(startStation.routeCode)
 
-                    val schedule =
-                        async(Dispatchers.IO) {
-                            ApiClientUtils.callApiWithRetry(
-                                primaryKey = serviceKey,
-                                spareKey = spareKey,
-                                realLastKey = realLastKey,
-                                apiCall = { key ->
-                                    subwayInfoFeignClient.getStationSchedule(
-                                        key,
-                                        startStation.id!!.value,
-                                        dailyType.code,
-                                        direction.code
-                                    )
-                                },
-                                isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
-                                processResult = { response ->
-                                    response.response.body.items?.item
-                                        ?.filter { it.endSubwayStationNm != null }
-                                        ?: emptyList()
-                                },
-                                errorMessage =
-                                    "지하철 시간표 정보를 가져오는데 실패했습니다 " +
-                                        "- ${startStation.id} ${dailyType.code} ${direction.code}"
-                            )
-                        }
+            val scheduleItems =
+                ApiClientUtils.callApiWithRetry(
+                    primaryKey = serviceKey,
+                    spareKey = spareKey,
+                    realLastKey = realLastKey,
+                    apiCall = { key ->
+                        subwayInfoFeignClient.getStationSchedule(
+                            key,
+                            startStation.id!!.value,
+                            dailyType.code,
+                            direction.code
+                        )
+                    },
+                    isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
+                    processResult = { response ->
+                        response.response.body.items?.item
+                            ?.filter { it.endSubwayStationNm != null }
+                            ?: emptyList()
+                    },
+                    errorMessage =
+                        "지하철 시간표 정보를 가져오는데 실패했습니다 " +
+                            "- ${startStation.id} ${dailyType.code} ${direction.code}"
+                ) ?: return null
 
-                    stations to schedule
-                }
-
-            val subwayStations = stationsDeferred.await()
-            val scheduleItems = scheduleDeferred.await() ?: return null
-
+            // 비동기 맵 대신 일반 맵 사용
             val timeTableItems =
-                coroutineScope {
-                    scheduleItems.map { item ->
-                        async(Dispatchers.IO) {
-                            val finalStation =
-                                subwayStations.find { station -> station.name == item.endSubwayStationNm }
-                                    ?: throw TransitException.NotFoundSubwayStation
-                            item.toDomain(finalStation)
-                        }
-                    }.awaitAll()
+                scheduleItems.map { item ->
+                    val finalStation =
+                        subwayStations.find { station -> station.name == item.endSubwayStationNm }
+                            ?: throw TransitException.NotFoundSubwayStation
+                    item.toDomain(finalStation)
                 }
 
             SubwayTimeTable(

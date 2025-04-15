@@ -27,7 +27,7 @@ class SubwayManager(
             ?: throw TransitException.NotFoundSubwayStation
     }
 
-    suspend fun getTimeTable(
+    fun getTimeTable(
         startStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
@@ -35,12 +35,10 @@ class SubwayManager(
         val dailyType = dailyTypeResolver.resolve()
         val direction = SubwayDirection.resolve(routes, startStation, endStation)
 
-        subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
-            return it
-        }
+//        subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
+//            return it
+//        }
 
-        return subwayInfoClient.getTimeTable(startStation, dailyType, direction)?.also { timeTable ->
-            subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
-        }
+        return subwayInfoClient.getTimeTable(startStation, dailyType, direction)
     }
 }
