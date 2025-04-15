@@ -11,8 +11,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.boot.context.event.ApplicationReadyEvent
-import org.springframework.context.event.EventListener
 import org.springframework.data.redis.connection.stream.Consumer
 import org.springframework.data.redis.connection.stream.ReadOffset
 import org.springframework.data.redis.connection.stream.StreamOffset
@@ -37,8 +35,7 @@ class RedisStreamConsumer(
     private val log = LoggerFactory.getLogger(javaClass)
     private var consumerJob: Job? = null
 
-    @EventListener(ApplicationReadyEvent::class)
-    @Scheduled(cron = "0 0 20 * * *")
+    @Scheduled(cron = "0 0 13 * * *")
     fun startConsumer() {
         consumerJob =
             CoroutineScope(Dispatchers.IO).launch {
@@ -50,7 +47,7 @@ class RedisStreamConsumer(
             }
     }
 
-    @Scheduled(cron = "0 0 3 * * *")
+    @Scheduled(cron = "0 0 13 30 * *")
     fun stopConsumer() {
         consumerJob?.cancel()
         log.info("👻 Consumer 동작 종료")

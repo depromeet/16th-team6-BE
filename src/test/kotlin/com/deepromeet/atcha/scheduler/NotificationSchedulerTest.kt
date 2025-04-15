@@ -4,6 +4,7 @@ import com.deepromeet.atcha.notification.domatin.Messaging
 import com.deepromeet.atcha.notification.domatin.MessagingProvider
 import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
 import com.deepromeet.atcha.notification.domatin.UserNotificationRepository
+import com.deepromeet.atcha.notification.infrastructure.redis.RedisStreamConsumer
 import com.deepromeet.atcha.notification.infrastructure.redis.RedisStreamInitializer
 import com.deepromeet.atcha.notification.infrastructure.scheduler.NotificationScheduler
 import com.deepromeet.atcha.support.BaseServiceTest
@@ -24,6 +25,8 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean
 import java.time.Duration
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicInteger
 
 class NotificationSchedulerTest : BaseServiceTest() {
     @Autowired
@@ -37,6 +40,9 @@ class NotificationSchedulerTest : BaseServiceTest() {
 
     @Autowired
     private lateinit var redisStreamInitializer: RedisStreamInitializer
+
+    @Autowired
+    private lateinit var redisStreamConsumer: RedisStreamConsumer
 
     @MockitoBean
     private lateinit var messagingProvider: MessagingProvider
@@ -89,10 +95,9 @@ class NotificationSchedulerTest : BaseServiceTest() {
         userNotificationRepository.save(notificationB)
         notificationScheduler.checkAndSendNotifications()
 
+        // when
         val streamKey = "stream:notification"
         val groupName = "notification-group"
-
-        // when
         val result =
             redisTemplate.opsForStream<String, String>()
                 .read(
@@ -105,5 +110,40 @@ class NotificationSchedulerTest : BaseServiceTest() {
 
         // then
         Assertions.assertThat(result).hasSize(2)
+    }
+
+    @Test
+    fun `등록된 알림을 전송한다`() {
+        // given
+        val latch = CountDownLatch(2)
+        val successCount = AtomicInteger(0)
+        `when`(messagingProvider.send(any<Messaging>())).thenAnswer {
+            latch.countDown()
+            successCount.incrementAndGet()
+            "ok"
+        }
+        val lastRoute = LastRouteFixture.create()
+        val notificationA =
+            UserNotificationFixture.create(
+                userNotificationFrequency = UserNotificationFrequency.ONE,
+                routeId = lastRoute.routeId
+            )
+        val notificationB =
+            UserNotificationFixture.create(
+                userNotificationFrequency = UserNotificationFrequency.TEN,
+                routeId = lastRoute.routeId
+            )
+
+        lastRouteAppender.append(lastRoute)
+        userNotificationRepository.save(notificationA)
+        userNotificationRepository.save(notificationB)
+        notificationScheduler.checkAndSendNotifications()
+
+        // when
+        redisStreamConsumer.startConsumer()
+        latch.await(3, TimeUnit.SECONDS)
+
+        // then
+        Assertions.assertThat(successCount.get()).isEqualTo(2)
     }
 }
