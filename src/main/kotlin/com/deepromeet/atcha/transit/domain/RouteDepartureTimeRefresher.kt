@@ -1,9 +1,11 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.notification.domatin.NotificationManager
-import com.deepromeet.atcha.notification.domatin.RouteNotificationRedisOperations
+import com.deepromeet.atcha.notification.domatin.MessagingManager
+import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.notification.domatin.UserNotificationAppender
+import com.deepromeet.atcha.notification.domatin.UserNotificationReader
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -11,18 +13,27 @@ import java.time.format.DateTimeFormatter
 
 @Component
 class RouteDepartureTimeRefresher(
-    private val redisOperations: RouteNotificationRedisOperations,
+    private val userNotificationReader: UserNotificationReader,
+    private val userNotificationAppender: UserNotificationAppender,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader,
-    private val notificationManager: NotificationManager
+    private val notificationContentManager: NotificationContentManager,
+    private val messagingManager: MessagingManager
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
     fun refresh() {
-        redisOperations.processRoutes { route ->
-            refreshDepartureTime(route)
-            notificationManager.checkAndNotifyDelay(route)
+        userNotificationReader.findAll().forEach { userNotification ->
+            refreshDepartureTime(userNotification)
+            val diffMinutes =
+                calculateDiffMinutes(userNotification.initialDepartureTime, userNotification.updatedDepartureTime)
+            if (diffMinutes >= 10 && !userNotification.isDelayNotified) {
+                val notificationContent =
+                    notificationContentManager.createDelayPushNotification(userNotification)
+                messagingManager.send(notificationContent, userNotification.token)
+                userNotificationAppender.updateDelayNotificationFlags(userNotification)
+            }
         }
     }
 
@@ -36,7 +47,7 @@ class RouteDepartureTimeRefresher(
             return
         }
 
-        val route = lastRouteReader.read(notification.routeId)
+        val route = lastRouteReader.read(notification.lastRouteId)
 
         // 2) 첫 번째 버스 구간 찾기
         val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return
@@ -64,8 +75,8 @@ class RouteDepartureTimeRefresher(
         val candidateTimes = realTimeInfos.mapNotNull { it.expectedArrivalTime }.take(2).toMutableList()
 
         realTimeInfos.getOrNull(1)?.expectedArrivalTime?.let { secondBusArrivalTime ->
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong())
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.term.toLong() * 2)
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong())
+            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong() * 2)
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
@@ -102,12 +113,20 @@ class RouteDepartureTimeRefresher(
             )
 
         lastRouteAppender.append(updatedRoute)
+        userNotificationAppender.updateDepartureNotification(notification, newDepartureTime)
+    }
 
-        redisOperations.updateDepartureNotification(notification, newDepartureTime)
+    private fun calculateDiffMinutes(
+        controlTime: String,
+        treatmentTime: String
+    ): Long {
+        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
+        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
+        return Duration.between(control, treatment).toMinutes()
     }
 
     private fun getWalkTimeBeforeThisLeg(
-        route: LastRoutes,
+        route: LastRoute,
         busLeg: LastRouteLeg
     ): Int {
         var totalWalkTime = 0

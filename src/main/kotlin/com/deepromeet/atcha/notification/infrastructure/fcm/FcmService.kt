@@ -9,11 +9,11 @@ import org.springframework.stereotype.Service
 class FcmService(
     private val firebaseMessaging: FirebaseMessaging
 ) {
-    fun sendMessageTo(
+    fun send(
         targetToken: String,
         title: String,
         body: String,
-        data: Map<String, String> = emptyMap()
+        data: Map<String, String>
     ): String {
         val message =
             Message.builder()

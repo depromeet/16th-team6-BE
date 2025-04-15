@@ -3,10 +3,6 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,12 +10,9 @@ class TransitService(
     private val taxiFareFetcher: TaxiFareFetcher,
     private val busManager: BusManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender,
-    private val regionIdentifier: RegionIdentifier,
     private val userReader: UserReader,
+    private val transitRouteClient: TransitRouteClient,
     private val lastRouteReader: LastRouteReader,
-    private val lastRouteAppender: LastRouteAppender,
-    private val lastRouteIndexReader: LastRouteIndexReader,
-    private val lastRouteIndexAppender: LastRouteIndexAppender,
     private val lastRouteOperations: LastRouteOperations
 ) {
     fun init() {
@@ -34,11 +27,7 @@ class TransitService(
             ?: throw TransitException.NotFoundBusArrival
     }
 
-    fun getBusPositions(busRoute: BusRoute): BusRoutePositions {
-        val busRouteStationList = busManager.getBusRouteStationList(busRoute)
-        val busPositions = busManager.getBusPosition(busRoute)
-        return BusRoutePositions(busRouteStationList, busPositions)
-    }
+    suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
 
     fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
         return busManager.getBusRouteOperationInfo(busRoute)
@@ -51,7 +40,7 @@ class TransitService(
         return taxiFareFetcher.fetch(start, end) ?: Fare(0)
     }
 
-    fun getRoute(routeId: String): LastRoutes {
+    fun getRoute(routeId: String): LastRoute {
         return lastRouteReader.read(routeId)
     }
 
@@ -73,78 +62,16 @@ class TransitService(
     suspend fun getLastRoutes(
         userId: Long,
         start: Coordinate,
-        endLat: String?,
-        endLon: String?,
+        end: Coordinate?,
         sortType: LastRouteSortType
-    ): List<LastRoutes> {
-        // end 가 없는 경우, 사용자 집 주소 조회
-        val end = getDeparture(endLat, endLon, userId)
-
-        // 출발지와 도착지 경로가 redis 에 저장된 경우
-        lastRouteIndexReader.read(start, end).let { routeIds ->
-            if (routeIds.isNotEmpty()) {
-                return lastRouteOperations.sort(
-                    sortType,
-                    lastRouteOperations.getFilteredRoutes(
-                        routeIds.map { routeId ->
-                            lastRouteReader.read(routeId)
-                        }
-                    )
-                )
-            }
+    ): List<LastRoute> {
+        val destination = end ?: userReader.read(userId).getHomeCoordinate()
+        lastRouteReader.read(start, destination)?.let { routes ->
+            return routes.sort(sortType)
         }
-
-        // 서비스 지역인지 판별 -> 서비스 지역이 아니면 Exception 발생
-        regionIdentifier.identify(start)
-        regionIdentifier.identify(end)
-
-        // 막차 조회
-        val allRoutes = lastRouteOperations.getItineraries(start, end)
-        val deduplicatedRoutes = lastRouteOperations.filterAndDeduplicateItineraries(allRoutes)
-
-        val lastRoutesResponses =
-            coroutineScope {
-                deduplicatedRoutes
-                    .map { route ->
-                        async(Dispatchers.Default) {
-                            lastRouteOperations.calculateRoute(route)
-                        }
-                    }
-                    .awaitAll()
-                    .filterNotNull()
-            }
-
-        val filteredRoutes = lastRouteOperations.getFilteredRoutes(lastRoutesResponses)
-
-        saveRouteIdsByStartEnd(start, end, filteredRoutes.map { it.routeId })
-        saveRoutesToCache(filteredRoutes)
-
-        return lastRouteOperations.sort(sortType, filteredRoutes)
-    }
-
-    private fun getDeparture(
-        endLat: String?,
-        endLon: String?,
-        userId: Long
-    ) = if (endLat == null || endLon == null) {
-        val user = userReader.read(userId)
-        Coordinate(
-            user.address.lat,
-            user.address.lon
-        )
-    } else {
-        Coordinate(endLat.toDouble(), endLon.toDouble())
-    }
-
-    private fun saveRouteIdsByStartEnd(
-        start: Coordinate,
-        end: Coordinate,
-        routeIds: List<String>
-    ) {
-        lastRouteIndexAppender.append(start, end, routeIds)
-    }
-
-    private fun saveRoutesToCache(routes: List<LastRoutes>) {
-        routes.forEach { route -> lastRouteAppender.append(route) }
+        val itineraries = transitRouteClient.fetchItineraries(start, destination)
+        return lastRouteOperations
+            .calculateRoutes(start, destination, itineraries)
+            .sort(sortType)
     }
 }

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.common.redis
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.transit.domain.LastRoutes
+import com.deepromeet.atcha.transit.domain.LastRoute
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -14,6 +14,7 @@ import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.connection.RedisConnectionFactory
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
 import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
@@ -35,8 +36,43 @@ class DefaultRedisConfig(
     @Bean
     fun lockRedisTemplate(): RedisTemplate<String, String> {
         val template = RedisTemplate<String, String>()
-        template.connectionFactory = redisConnectionFactory()
+        template.setConnectionFactory(redisConnectionFactory())
+
+        val stringSerializer = StringRedisSerializer()
+
+        template.keySerializer = stringSerializer
+        template.valueSerializer = stringSerializer
+        template.hashKeySerializer = stringSerializer
+        template.hashValueSerializer = stringSerializer
+
+        template.afterPropertiesSet()
         return template
+    }
+
+    @Bean
+    fun lockReleaseScript(): RedisScript<Long> {
+        val script =
+            """
+            if redis.call("get", KEYS[1]) == ARGV[1] then
+                return redis.call("del", KEYS[1])
+            else
+                return 0
+            end
+            """.trimIndent()
+        return RedisScript.of(script, Long::class.java)
+    }
+
+    @Bean
+    fun lockRefreshScript(): RedisScript<Long> {
+        val script =
+            """
+            if redis.call("get", KEYS[1]) == ARGV[1] then
+                return redis.call("pexpire", KEYS[1], tonumber(ARGV[2]))
+            else
+                return 0
+            end
+            """.trimIndent()
+        return RedisScript.of(script, Long::class.java)
     }
 
     fun <T> createRedisTemplate(
@@ -67,8 +103,8 @@ class DefaultRedisConfig(
     @Bean
     fun lastRoutesResponseRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, LastRoutes> {
-        return createRedisTemplate(redisConnectionFactory, LastRoutes::class.java)
+    ): RedisTemplate<String, LastRoute> {
+        return createRedisTemplate(redisConnectionFactory, LastRoute::class.java)
     }
 
     @Bean

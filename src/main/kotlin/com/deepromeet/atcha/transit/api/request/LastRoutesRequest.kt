@@ -11,4 +11,12 @@ data class LastRoutesRequest(
     val sortType: LastRouteSortType = LastRouteSortType.MINIMUM_TRANSFERS
 ) {
     fun toStart(): Coordinate = Coordinate(startLat.toDouble(), startLon.toDouble())
+
+    fun toEnd(): Coordinate? {
+        return if (endLat != null && endLon != null) {
+            Coordinate(endLat.toDouble(), endLon.toDouble())
+        } else {
+            null
+        }
+    }
 }
