@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.infrastructure.cache
+package com.deepromeet.atcha.notification.infrastructure.redis
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.notification.domatin.UserNotificationRepository

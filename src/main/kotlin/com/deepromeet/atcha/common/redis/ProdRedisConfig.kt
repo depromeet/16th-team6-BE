@@ -66,22 +66,6 @@ class ProdRedisConfig(
         return RedisScript.of(script, Long::class.java)
     }
 
-    @Bean
-    fun lockRedisTemplate(): RedisTemplate<String, String> {
-        val template = RedisTemplate<String, String>()
-        template.setConnectionFactory(redisConnectionFactory())
-
-        val stringSerializer = StringRedisSerializer()
-
-        template.keySerializer = stringSerializer
-        template.valueSerializer = stringSerializer
-        template.hashKeySerializer = stringSerializer
-        template.hashValueSerializer = stringSerializer
-
-        template.afterPropertiesSet()
-        return template
-    }
-
     fun <T> createRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory,
         clazz: Class<T>
@@ -119,15 +103,5 @@ class ProdRedisConfig(
         redisConnectionFactory: RedisConnectionFactory
     ): RedisTemplate<String, UserNotification> {
         return createRedisTemplate(redisConnectionFactory, UserNotification::class.java)
-    }
-
-    @Bean
-    fun lastRouteIndexRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, String> {
-        val template = RedisTemplate<String, String>()
-        template.connectionFactory = redisConnectionFactory
-        template.keySerializer = StringRedisSerializer()
-        template.valueSerializer = StringRedisSerializer()
-        template.afterPropertiesSet()
-        return template
     }
 }
