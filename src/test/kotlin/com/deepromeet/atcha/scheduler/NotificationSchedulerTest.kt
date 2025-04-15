@@ -50,7 +50,6 @@ class NotificationSchedulerTest : BaseServiceTest() {
     @BeforeEach
     fun initStream() {
         redisStreamInitializer.afterPropertiesSet()
-        println("DONW")
     }
 
     @Test
