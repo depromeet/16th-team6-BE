@@ -3,11 +3,9 @@ package com.deepromeet.atcha.common.logging.interceptor
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.MDC
-import org.springframework.context.annotation.Profile
-import org.springframework.stereotype.Component
 
-//@Component
-//@Profile("prod")
+// @Component
+// @Profile("prod")
 class ProdLoggingInterceptor : BaseLoggingInterceptor() {
     override fun afterCompletion(
         request: HttpServletRequest,

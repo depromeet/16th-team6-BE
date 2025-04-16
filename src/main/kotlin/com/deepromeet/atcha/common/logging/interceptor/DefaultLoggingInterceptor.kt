@@ -3,12 +3,10 @@ package com.deepromeet.atcha.common.logging.interceptor
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.slf4j.MDC
-import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component
 import org.springframework.web.util.ContentCachingRequestWrapper
 
 @Component
-//@Profile("dev", "staging", "local", "test")
 class DefaultLoggingInterceptor : BaseLoggingInterceptor() {
     override fun afterCompletion(
         request: HttpServletRequest,
