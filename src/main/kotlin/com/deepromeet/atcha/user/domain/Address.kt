@@ -36,6 +36,4 @@ class Address(
         result = 31 * result + lon.hashCode()
         return result
     }
-
-
 }
