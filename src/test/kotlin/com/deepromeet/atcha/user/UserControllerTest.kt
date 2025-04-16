@@ -61,7 +61,15 @@ class UserControllerTest(
     fun `회원 정보 수정`() {
         // given
         val userInfoUpdateRequest =
-            UserInfoUpdateRequest("새로운 닉네임", alertFrequencies = mutableSetOf(2))
+            UserInfoUpdateRequest(
+                nickname = "새로운 닉네임",
+                alertFrequencies = mutableSetOf(2),
+                profileImageUrl = "new",
+                address = "new",
+                lat = 37.99,
+                lon = 127.99,
+                fcmToken = "new"
+            )
 
         // when
         RestAssured.given().log().all()
@@ -77,6 +85,11 @@ class UserControllerTest(
         // then
         assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
+        assertThat(findUser.profileImageUrl).isEqualTo(userInfoUpdateRequest.profileImageUrl)
+        assertThat(findUser.address.address).isEqualTo(userInfoUpdateRequest.address)
+        assertThat(findUser.address.lat).isEqualTo(userInfoUpdateRequest.lat)
+        assertThat(findUser.address.lon).isEqualTo(userInfoUpdateRequest.lon)
+        assertThat(findUser.fcmToken).isEqualTo(userInfoUpdateRequest.fcmToken)
     }
 
     @Test
