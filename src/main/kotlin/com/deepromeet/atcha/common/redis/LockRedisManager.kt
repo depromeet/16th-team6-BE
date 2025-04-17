@@ -20,11 +20,11 @@ private const val WATCHDOG_SLEEP_RATIO = 2
 
 @Component
 class LockRedisManager(
-    private val lockRedisTemplate: RedisTemplate<String, String>,
+    private val redisTemplate: RedisTemplate<String, String>,
     private val lockReleaseScript: RedisScript<Long>,
     private val lockRefreshScript: RedisScript<Long>
 ) {
-    private val valueOps = lockRedisTemplate.opsForValue()
+    private val valueOps = redisTemplate.opsForValue()
     private val log = KotlinLogging.logger {}
 
     fun processWithLock(
@@ -50,7 +50,7 @@ class LockRedisManager(
                     val ttlMillis = ttl.toMillis().toString()
 
                     val lockExtendResult =
-                        lockRedisTemplate.execute(
+                        redisTemplate.execute(
                             lockRefreshScript,
                             listOf(lockKey),
                             lockValue,
@@ -70,7 +70,7 @@ class LockRedisManager(
         } finally {
             keepExtending = false
             watchdogThread.join()
-            lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
+            redisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
             log.info { "⭐️$lockKey Releasing lock." }
         }
         return result
@@ -127,7 +127,7 @@ class LockRedisManager(
             while (true) {
                 Thread.sleep(sleepMills)
                 val lockRefreshResult =
-                    lockRedisTemplate.execute(
+                    redisTemplate.execute(
                         lockRefreshScript,
                         listOf(lockKey),
                         lockValue,
@@ -150,7 +150,7 @@ class LockRedisManager(
         lockValue: String
     ) {
         watchdogJob.cancel()
-        lockRedisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
+        redisTemplate.execute(lockReleaseScript, listOf(lockKey), lockValue)
         log.info { "⭐️$lockKey Releasing lock." }
     }
 }
