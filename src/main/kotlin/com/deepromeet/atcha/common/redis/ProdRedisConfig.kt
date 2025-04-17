@@ -54,7 +54,7 @@ class ProdRedisConfig(
     }
 
     @Bean
-    fun lockExtendScript(): RedisScript<Long> {
+    fun lockRefreshScript(): RedisScript<Long> {
         val script =
             """
             if redis.call("get", KEYS[1]) == ARGV[1] then
