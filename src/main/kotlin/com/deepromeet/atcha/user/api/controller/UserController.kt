@@ -1,9 +1,11 @@
 package com.deepromeet.atcha.user.api.controller
 
+import com.deepromeet.atcha.app.domain.AppService
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
+import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
 import com.deepromeet.atcha.user.domain.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -17,23 +19,25 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api")
 class UserController(
-    private val userService: UserService
+    private val userService: UserService,
+    private val appService: AppService
 ) {
     @GetMapping("/members/me")
     fun getUserInfo(
         @CurrentUser id: Long
     ): ApiResponse<UserInfoResponse> {
         val user = userService.getUser(id)
-        return ApiResponse.success(UserInfoResponse.from(user))
+        val appVersion = appService.getAppVersion()
+        return ApiResponse.success(UserInfoResponse.from(user, appVersion))
     }
 
     @PutMapping("/members/me")
     fun updateUserInfo(
         @CurrentUser id: Long,
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
-    ): ApiResponse<UserInfoResponse> {
+    ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateUser(id, userInfoUpdateRequest.toUpdateUserInfo())
-        return ApiResponse.success(UserInfoResponse.from(result))
+        return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
     @DeleteMapping("/members/me")
