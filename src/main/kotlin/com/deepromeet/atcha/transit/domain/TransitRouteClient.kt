@@ -49,11 +49,11 @@ class TransitRouteClient(
     private fun filterValidItineraries(itineraries: List<Itinerary>): List<Itinerary> {
         fun isValidItinerary(itinerary: Itinerary): Boolean {
             var hasValidModes = false
-            var hasTrain = false
             var hasExpressSubway = false
             var busCount = 0
             var transitCount = 0
             var isFirstTransit = true
+            var hasInvalid = false
 
             for (leg in itinerary.legs) {
                 when (leg.mode) {
@@ -74,11 +74,14 @@ class TransitRouteClient(
                         hasValidModes = true
                         isFirstTransit = false
                     }
-                    "TRAIN" -> hasTrain = true
+                    else -> {
+                        hasInvalid = true
+                        break
+                    }
                 }
             }
 
-            return !hasTrain &&
+            return !hasInvalid &&
                 !hasExpressSubway &&
                 hasValidModes &&
                 busCount <= 2 &&
