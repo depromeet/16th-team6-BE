@@ -19,6 +19,8 @@ import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.net.InetAddress
 import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 private const val PAYLOAD = "payload"
 
@@ -49,13 +51,20 @@ class RedisStreamConsumer(
                 StreamOffset.create(streamKey, ReadOffset.lastConsumed())
             )
         messages?.forEach { message ->
-            val messaging = createMessaging(message)
+            val json = message.value[PAYLOAD]
+            val userNotification = objectMapper.readValue(json, UserNotification::class.java)
+
+            // ① 전송 시각이 아니면 패스 (ACK 하지 않아 다시 대기)
+            if (!shouldSend(userNotification)) return@forEach
+
+            // ② 전송 시각이면 메시지 생성 후 전송
+            val messaging = createMessaging(userNotification)
             if (messagingProvider.send(messaging)) {
                 log.info("⭐️알림 전송 성공")
-                streamOps.acknowledge(streamKey, groupName, message.id)
-                return@forEach
+                streamOps.acknowledge(streamKey, groupName, message.id) // ACK → 스트림에서 삭제
+            } else {
+                log.info("⚠️️알림 전송 실패")
             }
-            log.info("⚠️️알림 전송 실패")
         }
     }
 
@@ -90,24 +99,24 @@ class RedisStreamConsumer(
 
         claimedMessages.forEach { message ->
             val json = message.value[PAYLOAD]
-            runCatching {
-                objectMapper.readValue(json, UserNotification::class.java)
-            }.getOrElse {
-                streamOps.add(deadLetterKey, mapOf(PAYLOAD to json))
-                streamOps.acknowledge(streamKey, groupName, message.id)
-                return@forEach
-            }
+            val userNotification =
+                runCatching {
+                    objectMapper.readValue(json, UserNotification::class.java)
+                }.getOrElse {
+                    streamOps.add(deadLetterKey, mapOf(PAYLOAD to json))
+                    streamOps.acknowledge(streamKey, groupName, message.id)
+                    return@forEach
+                }
 
-            val messaging = createMessaging(message)
+            if (!shouldSend(userNotification)) return@forEach
+
+            val messaging = createMessaging(userNotification)
             val success = runCatching { messagingProvider.send(messaging) }.getOrElse { false }
-
             handleDeadLetter(success, message, json)
         }
     }
 
-    private fun createMessaging(message: MapRecord<String, String, String>): Messaging {
-        val json = message.value[PAYLOAD]
-        val userNotification = objectMapper.readValue(json, UserNotification::class.java)
+    private fun createMessaging(userNotification: UserNotification): Messaging {
         val content = notificationContentManager.createPushNotification(userNotification)
         val messaging = Messaging(content, userNotification.token)
         return messaging
@@ -124,5 +133,16 @@ class RedisStreamConsumer(
             streamOps.add(deadLetterKey, mapOf(PAYLOAD to json))
             streamOps.acknowledge(streamKey, groupName, message.id)
         }
+    }
+
+    private fun shouldSend(notification: UserNotification): Boolean {
+        val target =
+            LocalDateTime.parse(
+                notification.notificationTime,
+                DateTimeFormatter.ISO_LOCAL_DATE_TIME
+            )
+
+        val diffMinutes = Duration.between(LocalDateTime.now(), target).toMinutes()
+        return diffMinutes in 0..1 && !notification.isDelayNotified
     }
 }
