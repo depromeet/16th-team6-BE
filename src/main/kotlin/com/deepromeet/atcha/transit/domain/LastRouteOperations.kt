@@ -278,7 +278,6 @@ class LastRouteOperations(
     ): Long {
         val lastTransitIndex = adjustedLegs.indexOfLast { it.mode != "WALK" }
         val lastTransit = adjustedLegs[lastTransitIndex]
-
         val lastTransitDepartureTime = LocalDateTime.parse(lastTransit.departureDateTime!!)
         var arrivalTime = lastTransitDepartureTime.plusSeconds(lastTransit.sectionTime.toLong())
 
