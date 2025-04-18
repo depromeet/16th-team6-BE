@@ -77,12 +77,6 @@ class AuthService(
     @Transactional
     fun logout(refreshToken: String) {
         tokenGenerator.validateToken(refreshToken, TokenType.REFRESH)
-        val userId = tokenGenerator.getUserIdByToken(refreshToken, TokenType.REFRESH)
-
-        val userProvider = userProviderReader.read(userId)
-        val authProvider = authProviders.getAuthProvider(userProvider.provider)
-        authProvider.logout(userProvider.provider)
-
         tokenGenerator.expireTokensWithRefreshToken(refreshToken)
     }
 
