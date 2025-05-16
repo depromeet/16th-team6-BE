@@ -81,6 +81,20 @@ class TransitController(
             ).map { LastRouteResponse(it) }
         )
 
+    @GetMapping("/v2/last-routes")
+    suspend fun getLastRoutes_v2(
+        @CurrentUser id: Long,
+        @ModelAttribute request: LastRoutesRequest
+    ): ApiResponse<List<LastRouteResponse>> =
+        ApiResponse.success(
+            transitService.getLastRoutes_v2(
+                id,
+                request.toStart(),
+                request.toEnd(),
+                request.sortType
+            ).map { LastRouteResponse(it) }
+        )
+
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String

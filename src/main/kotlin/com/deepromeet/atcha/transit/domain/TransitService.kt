@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -72,6 +73,33 @@ class TransitService(
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
         return lastRouteOperations
             .calculateRoutes(start, destination, itineraries)
+            .sort(sortType)
+    }
+
+    suspend fun getLastRoutes_v2(
+        userId: Long,
+        start: Coordinate,
+        end: Coordinate?,
+        sortType: LastRouteSortType
+    ): List<LastRoute> {
+        val destination = end ?: userReader.read(userId).getHomeCoordinate()
+        lastRouteReader.read(start, destination)?.let { routes ->
+            return routes.sort(sortType)
+        }
+        val itineraries = transitRouteClient.fetchItineraries_v2(start, destination)
+        return lastRouteOperations
+            .calculateRoutes(start, destination, itineraries.map {
+                Itinerary(
+                    it.totalTime,
+                    it.transferCount,
+                    it.totalWalkDistance,
+                    it.totalDistance,
+                    it.totalWalkTime,
+                    it.fare,
+                    it.legs,
+                    it.pathType,
+                )
+            })
             .sort(sortType)
     }
 }
