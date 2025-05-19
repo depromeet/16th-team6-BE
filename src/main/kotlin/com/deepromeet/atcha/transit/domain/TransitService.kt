@@ -66,11 +66,19 @@ class TransitService(
         end: Coordinate?,
         sortType: LastRouteSortType
     ): List<LastRoute> {
+        //목적지 설정 안 하면 집 주소임
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
+
+        // 캐시에서 조회, 있을 경우 해당 경로를 리턴
+        // TODO - 준원 : 현재 캐시에서 같은 출발지와 목적지만 캐싱처리가 되는데, 버스 번호에 따라서 할 수 있는지 체크해보기
         lastRouteReader.read(start, destination)?.let { routes ->
             return routes.sort(sortType)
         }
+
+        // 캐시에서 조회가 안 될 경우, Tmap API를 통해서 경로를 조회
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
+
+
         return lastRouteOperations
             .calculateRoutes(start, destination, itineraries)
             .sort(sortType)

@@ -21,7 +21,10 @@ class BusManager(
         routeName: String,
         busStationMeta: BusStationMeta
     ): BusArrival? {
+//        지역 정보 TMap에서 가져옴
         val region = regionIdentifier.identify(busStationMeta.coordinate)
+
+//        버스 정류장 정보를 '지역'을 키 값으로 가져옴
         val station =
             busStationInfoClientMap[region]?.getStationByName(busStationMeta)
                 .logIfNull(
@@ -53,6 +56,7 @@ class BusManager(
         routeName: String,
         busStationMeta: BusStationMeta
     ): BusTimeTable? {
+//        캐시에 있으면 가져옴
         return busTimeTableCache.get(routeName, busStationMeta)
             ?: getArrivalInfo(routeName, busStationMeta)?.busTimeTable
     }

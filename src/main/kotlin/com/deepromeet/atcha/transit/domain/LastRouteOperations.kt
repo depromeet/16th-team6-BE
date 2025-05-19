@@ -82,18 +82,22 @@ class LastRouteOperations(
                     async(Dispatchers.IO) {
                         when (leg.mode) {
                             "SUBWAY" -> {
+                                // 지하철 노선 조회
                                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
+                                // 정류장 정보 조회
                                 val routesDeferred = async(Dispatchers.IO) { subwayManager.getRoutes(subwayLine) }
                                 val startDeferred =
                                     async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.start.name) }
                                 val endDeferred =
                                     async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.end.name) }
 
+//                                정류장 정보를 모두 가져온 후 처리 시작
                                 val routes = routesDeferred.await()
                                 val startStation = startDeferred.await()
                                 val endStation = endDeferred.await()
 
+//                                지하철 시간표 조회
                                 val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
 
                                 val departureDateTime = timeTable?.getLastTime(endStation, routes)?.departureTime
