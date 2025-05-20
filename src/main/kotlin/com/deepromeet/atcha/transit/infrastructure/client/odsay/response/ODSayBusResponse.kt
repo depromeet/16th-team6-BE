@@ -9,7 +9,9 @@ import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 data class ODSayBusArrivalResponse(
@@ -30,7 +32,7 @@ data class ODSayStationResponse(
     var CID: Long,
     var cityName: String,
     var arsID: String,
-    var businfo: ODSayBusinfoResponse
+    var businfo: List<ODSayBusinfoResponse> = emptyList()
 )
 
 data class ODSayBusinfoResponse(
@@ -51,7 +53,7 @@ data class ODSayBusStationInfoResponseResult(
     var stationCityCode: String,
     var arsID: String,
     var lane: List<ODSayLaneResponse>,
-    var localStations: List<ODSayLocalStationResponse>
+    var localStations: List<ODSayLocalStationResponse> = emptyList()
 )
 
 data class ODSayLaneResponse(
@@ -99,7 +101,20 @@ data class ODSayLaneResponse(
 
     // TODO : "xx:xx" -> LocalDateTime 변환, Util로 옮기기
     fun toBusArrivalTime(time: String): LocalDateTime {
-        return LocalDateTime.parse(time, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
+        val formatter = DateTimeFormatter.ofPattern("HH:mm")
+        val overDay = time.substring(0, 2).toInt() > 24
+        val checkTime =
+            if (overDay) {
+                "0" + time.substring(0, 2).toInt().minus(24).toString() + time.substring(2)
+            } else {
+                time
+            }
+        var localTime = LocalTime.parse(checkTime, formatter)
+        if (overDay) {
+            return LocalDateTime.of(LocalDate.now(), localTime)
+                .plusDays(1)
+        }
+        return LocalDateTime.of(LocalDate.now(), localTime)
     }
 }
 

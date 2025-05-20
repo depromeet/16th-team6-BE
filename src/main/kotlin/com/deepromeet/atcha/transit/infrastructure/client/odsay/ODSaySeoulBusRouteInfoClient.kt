@@ -23,9 +23,6 @@ class ODSaySeoulBusRouteInfoClient(
         station: BusStation,
         route: BusRoute
     ): BusArrival? {
-        println("오딧세이 들어옴 ㅋㅋ__________________________")
-        println("station : $station")
-        println("route : $route")
 //        1. 정류장에 경유하는 노선(대중교통 정류장 검색)
 //        v1/api/searchStation
 //        결과 중 result > station > arsID
@@ -37,7 +34,7 @@ class ODSaySeoulBusRouteInfoClient(
 //        busNo를 가져와서 BusRoute에서 비교해서 버스 노선(버스 하나)을 결정
 //        result > lane > busLocalBlID == BusRoute.BusRouteId
 //        busNo == BusRoute.name
-
+        println("1111111111")
         // 버스 정류장 정보 가져오기
         var busStation =
             ApiClientUtils.callApiWithRetry(
@@ -46,12 +43,13 @@ class ODSaySeoulBusRouteInfoClient(
                 realLastKey = realLastKey,
                 apiCall = { key -> oDSayBusFeignClient.getStationByStationName(key, station.busStationMeta.name) },
 //            TODO : 여기 오류 났을 때 경우 추가하기
-                isLimitExceeded = { response -> throw IllegalStateException("ODSay에서 정류장 정보를 가져오는데 실패했습니다.") },
+                isLimitExceeded = { response -> false },
                 processResult = { response ->
                     response.result.station.find { it.arsID.equals(station.busStationNumber.value) }
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
-            ) ?: throw IllegalStateException("ODSay에서 정류장 정보를 가져오는데 실패했습니다.")
+            ) ?: return null
+        println("222222")
 
         // 막차 시간 가져오기
         var busLanResponse =
@@ -61,17 +59,18 @@ class ODSaySeoulBusRouteInfoClient(
                 realLastKey = realLastKey,
                 apiCall = { key -> oDSayBusFeignClient.getStationInfoBystationID(key, busStation.stationID) },
 //            TODO : 여기 오류 났을 때 경우 추가하기
-                isLimitExceeded = { response -> throw IllegalStateException("ODSay에서 정류장 정보를 가져오는데 실패했습니다.") },
+                isLimitExceeded = { response -> false },
                 processResult = { response ->
 //                가져온 버스정류장 상세 정보에서 레인을 일치 시켜야함.
 //                1. busNo와 route의 name을 비교해서
 //                2. busNo은 중복될 수 있어서 busLocalBlID를 비교함
-                    response.result.lane.find { it.busLocalBlID.equals(route.id) }
+                    response.result.lane.find { it.busLocalBlID == route.id.value }
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
-            ) ?: throw IllegalStateException("ODSay에서 정류장 정보를 가져오는데 실패했습니다.")
+            ) ?: return null
+        println("3333333")
 
-        println("__________________________")
+        println("완료!! __________________________")
         println("${busLanResponse.busNo} 버스 막차 시간 : ${busLanResponse.busLastTime}")
 
         return busLanResponse.toBusArrival()

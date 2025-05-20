@@ -85,11 +85,15 @@ class BusManager(
 //        얘만 오딧세이로 바꾸면 되긴 함
         var busArrival =
             busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
-                ?: oDSaySeoulBusRouteInfoClient.getBusArrival(station, busRoute)
-                    .logIfNull(
-                        "[ODSay NotFoundBusArrival] region=$region, " +
-                            "station=${station.busStationMeta.name}, routeName=$routeName"
-                    )
+                ?.busTimeTable?.lastTime?.let {
+                    oDSaySeoulBusRouteInfoClient.getBusArrival(station, busRoute)
+                        .logIfNull(
+                            "[ODSay NotFoundBusArrival] region=$region, " +
+                                "station=${station.busStationMeta.name}, routeName=$routeName"
+                        )
+                }
+
+//        TODO : ㅇㅇㅇㅇㅇㅇㅇㅇ 여기부터 트러블 슈팅 시작. null로 나오는 중임
         if (busArrival != null) {
             busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
         }
