@@ -50,7 +50,7 @@ class TransitRouteClient(
         return filterValidItineraries(response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError)
     }
 
-    fun fetchItineraries_v2(
+    fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
     ): List<ODSayItinerary> {
@@ -79,7 +79,7 @@ class TransitRouteClient(
             }
         }
 
-        return filterValidItineraries_v2(response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError)
+        return filterValidItinerariesV2(response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError)
     }
 
     private fun filterValidItineraries(itineraries: List<Itinerary>): List<Itinerary> {
@@ -127,7 +127,7 @@ class TransitRouteClient(
         return itineraries.filter { itinerary -> isValidItinerary(itinerary) }
     }
 
-    private fun filterValidItineraries_v2(itineraries: List<ODSayItinerary>): List<ODSayItinerary> {
+    private fun filterValidItinerariesV2(itineraries: List<ODSayItinerary>): List<ODSayItinerary> {
         fun isValidItinerary(odSayItinerary: ODSayItinerary): Boolean {
             var hasValidModes = false
             var hasExpressSubway = false

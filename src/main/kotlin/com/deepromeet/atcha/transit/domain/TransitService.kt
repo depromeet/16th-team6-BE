@@ -28,6 +28,14 @@ class TransitService(
             ?: throw TransitException.NotFoundBusArrival
     }
 
+    fun getBusArrivalInfoV2(
+        routeName: String,
+        busStationMeta: BusStationMeta
+    ): BusArrival {
+        return busManager.getArrivalInfoV2(routeName, busStationMeta)
+            ?: throw TransitException.NotFoundBusArrival
+    }
+
     suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
 
     fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
@@ -66,7 +74,7 @@ class TransitService(
         end: Coordinate?,
         sortType: LastRouteSortType
     ): List<LastRoute> {
-        //목적지 설정 안 하면 집 주소임
+        // 목적지 설정 안 하면 집 주소임
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
 
         // 캐시에서 조회, 있을 경우 해당 경로를 리턴
@@ -78,13 +86,12 @@ class TransitService(
         // 캐시에서 조회가 안 될 경우, Tmap API를 통해서 경로를 조회
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
 
-
         return lastRouteOperations
             .calculateRoutes(start, destination, itineraries)
             .sort(sortType)
     }
 
-    suspend fun getLastRoutes_v2(
+    suspend fun getLastRoutesV2(
         userId: Long,
         start: Coordinate,
         end: Coordinate?,
@@ -94,20 +101,24 @@ class TransitService(
         lastRouteReader.read(start, destination)?.let { routes ->
             return routes.sort(sortType)
         }
-        val itineraries = transitRouteClient.fetchItineraries_v2(start, destination)
+        val itineraries = transitRouteClient.fetchItineraries(start, destination)
         return lastRouteOperations
-            .calculateRoutes(start, destination, itineraries.map {
-                Itinerary(
-                    it.totalTime,
-                    it.transferCount,
-                    it.totalWalkDistance,
-                    it.totalDistance,
-                    it.totalWalkTime,
-                    it.fare,
-                    it.legs,
-                    it.pathType,
-                )
-            })
+            .calculateRoutesV2(
+                start,
+                destination,
+                itineraries.map {
+                    Itinerary(
+                        it.totalTime,
+                        it.transferCount,
+                        it.totalWalkDistance,
+                        it.totalDistance,
+                        it.totalWalkTime,
+                        it.fare,
+                        it.legs,
+                        it.pathType
+                    )
+                }
+            )
             .sort(sortType)
     }
 }

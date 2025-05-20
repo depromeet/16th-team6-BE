@@ -23,6 +23,9 @@ class ODSaySeoulBusRouteInfoClient(
         station: BusStation,
         route: BusRoute
     ): BusArrival? {
+        println("오딧세이 들어옴 ㅋㅋ__________________________")
+        println("station : $station")
+        println("route : $route")
 //        1. 정류장에 경유하는 노선(대중교통 정류장 검색)
 //        v1/api/searchStation
 //        결과 중 result > station > arsID
