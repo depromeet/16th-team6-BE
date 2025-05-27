@@ -51,7 +51,6 @@ class ODSayBusInfoClient(
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             ) ?: return null
-        log.info { "오디세이를 통해 가져온 막차시간 ${busStationResponse.busLastTime}" }
         return busStationResponse.toBusArrival()
     }
 

@@ -60,7 +60,7 @@ class BusManager(
         val busArrival =
             busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
                 ?: run {
-                    log.info { "오픈API에서 버스도착정보를 가져올 수 없어 오디세이를 이용합니다." }
+                    log.info { "오픈API에서 버스도착정보($station-$busRoute)를 가져올 수 없어 오디세이를 이용합니다." }
                     oDSayBusInfoClient.getBusArrival(station, busRoute)
                 }
 
