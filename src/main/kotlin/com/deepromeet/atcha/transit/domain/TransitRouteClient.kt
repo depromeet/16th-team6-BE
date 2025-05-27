@@ -31,7 +31,7 @@ class TransitRouteClient(
                     startY = start.lat.toString(),
                     endX = end.lon.toString(),
                     endY = end.lat.toString(),
-                    count = 15,
+                    count = 20,
                     searchDttm = baseDate
                 )
             )
