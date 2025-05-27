@@ -48,7 +48,7 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
-          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
 
           timeout: 120s
@@ -60,7 +60,7 @@ jobs:
         with:
           host: ${{ secrets.REMOTE_IP }}
           username: ${{ secrets.REMOTE_SSH_ID }}
-          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
             rm -rf /root/data
