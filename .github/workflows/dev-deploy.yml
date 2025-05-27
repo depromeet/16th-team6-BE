@@ -53,7 +53,7 @@ jobs:
 
           timeout: 120s
           source: "./deployment/dev/"
-          target: /root
+          target: /atcha
 
       - name: Run
         uses: appleboy/ssh-action@master
@@ -63,7 +63,7 @@ jobs:
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            rm -rf /root/data
-            mv /root/deployment/dev/* /root/
-            rm -rf /root/deployment
+            rm -rf /atcha/data
+            mv /atcha/deployment/dev/* /atcha/
+            rm -rf /atcha/deployment
             bash ./deploy.sh
