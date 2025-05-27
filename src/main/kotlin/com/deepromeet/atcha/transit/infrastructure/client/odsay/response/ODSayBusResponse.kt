@@ -67,7 +67,7 @@ data class ODSayLaneResponse(
     var busLocalBlID: String
 ) {
     fun toBusArrival(): BusArrival {
-        var busRoute =
+        val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
                 name = this.busNo,
@@ -109,7 +109,7 @@ data class ODSayLaneResponse(
             } else {
                 time
             }
-        var localTime = LocalTime.parse(checkTime, formatter)
+        val localTime = LocalTime.parse(checkTime, formatter)
         if (overDay) {
             return LocalDateTime.of(LocalDate.now(), localTime)
                 .plusDays(1)

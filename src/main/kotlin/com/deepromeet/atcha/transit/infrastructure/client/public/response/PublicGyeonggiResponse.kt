@@ -307,9 +307,9 @@ data class BusRouteInfoItem(
         busDirection: BusDirection,
         busArrivalInfo: BusArrivalItem,
         busStationList: PublicGyeonggiResponse.BusRouteStationListResponse
-    ): BusArrival {
-        val firstTime = getBusTime(dailyType, busDirection, BusTimeType.FIRST)
-        val lastTime = getBusTime(dailyType, busDirection, BusTimeType.LAST)
+    ): BusArrival? {
+        val firstTime = getBusTime(dailyType, busDirection, BusTimeType.FIRST) ?: return null
+        val lastTime = getBusTime(dailyType, busDirection, BusTimeType.LAST) ?: return null
         val term = getTerm(dailyType)
 
         val travelTimeFromStart = busArrivalInfo.calculateTravelTimeFromStart(busStationList)
@@ -325,8 +325,8 @@ data class BusRouteInfoItem(
             stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
             busTimeTable =
                 BusTimeTable(
-                    firstTime = firstTime?.plusSeconds(travelTimeFromStart),
-                    lastTime = lastTime?.plusSeconds(travelTimeFromStart),
+                    firstTime = firstTime.plusSeconds(travelTimeFromStart),
+                    lastTime = lastTime.plusSeconds(travelTimeFromStart),
                     term = term
                 ),
             realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
@@ -355,13 +355,7 @@ data class BusRouteInfoItem(
         busDirection: BusDirection,
         timeType: BusTimeType
     ): LocalDateTime? {
-        val timeStr: String =
-            getTimeString(dailyType, busDirection, timeType)
-                ?: throw IllegalArgumentException(
-                    "첫차 또는 막차 시간을 가져올 수 없습니다." +
-                        "$routeName($routeId) - $dailyType - $busDirection"
-                )
-
+        val timeStr: String? = getTimeString(dailyType, busDirection, timeType)
         return parseTime(timeStr)
     }
 
@@ -415,7 +409,7 @@ data class BusRouteInfoItem(
             return LocalDateTime.of(date, localTime)
         } catch (e: Exception) {
             log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 파싱 오류: $timeStr" }
-            throw IllegalArgumentException("올바르지 않은 시간 형식입니다: $timeStr")
+            return null
         }
     }
 

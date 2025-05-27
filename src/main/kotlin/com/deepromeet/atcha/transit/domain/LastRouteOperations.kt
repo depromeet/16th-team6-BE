@@ -176,7 +176,6 @@ class LastRouteOperations(
                                         Coordinate(leg.start.lat, leg.start.lon)
                                     )
                                 val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
-                                println("---------busTimeInfo = $busTimeInfo")
 
                                 val departureDateTime = busTimeInfo?.lastTime
                                 val transitTime =
@@ -248,8 +247,6 @@ class LastRouteOperations(
                                         Coordinate(leg.start.lat, leg.start.lon)
                                     )
                                 val busTimeInfo = busManager.getBusTimeInfoV2(routeId, stationMeta)
-                                println("---------busTimeInfo = $busTimeInfo")
-
                                 val departureDateTime = busTimeInfo?.lastTime
                                 val transitTime =
                                     if (busTimeInfo != null) {

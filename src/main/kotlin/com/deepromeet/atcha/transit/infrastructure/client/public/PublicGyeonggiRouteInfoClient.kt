@@ -48,7 +48,7 @@ class PublicGyeonggiRouteInfoClient(
                                 },
                                 isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
                                 processResult = { response -> response.response.msgBody.busRouteInfoItem },
-                                errorMessage = "경기도 노선 정보를 가져오는데 실패했습니다."
+                                errorMessage = "경기도 노선 정보 - ${route.name}-${route.id.value}를 가져오는데 실패했습니다."
                             )
                         }
 
@@ -65,7 +65,7 @@ class PublicGyeonggiRouteInfoClient(
                                 },
                                 isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
                                 processResult = { response -> response.response.msgBody },
-                                errorMessage = "경기도 노선 정류장 목록을 가져오는데 실패했습니다."
+                                errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
                             )
                         }
 

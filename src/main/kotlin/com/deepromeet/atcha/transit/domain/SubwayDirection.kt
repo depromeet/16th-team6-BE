@@ -19,7 +19,14 @@ enum class SubwayDirection(
         ): SubwayDirection {
             return routes.firstOrNull { it.isContains(startStation.name, endStation.name) }
                 ?.getDirection(startStation.name, endStation.name)
-                ?: throw TransitException.NotFoundSubwayRoute
+                ?: run {
+                    log.warn {
+                        "지하철 방향 추정 실패: 출발역='${startStation.name}', 도착역='${endStation.name}', " +
+                            "검사한 노선 수=${routes.size}" +
+                            routes
+                    }
+                    throw TransitException.NotFoundSubwayRoute
+                }
         }
     }
 }

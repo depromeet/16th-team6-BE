@@ -56,7 +56,7 @@ object ApiClientUtils {
 
             return processResult(response)
         } catch (e: Exception) {
-            log.warn(e) { errorMessage }
+            log.warn { errorMessage }
             return null
         }
     }

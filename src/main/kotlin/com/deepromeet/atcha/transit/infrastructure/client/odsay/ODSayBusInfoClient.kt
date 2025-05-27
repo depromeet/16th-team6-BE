@@ -6,8 +6,11 @@ import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class ODSayBusInfoClient(
@@ -29,15 +32,14 @@ class ODSayBusInfoClient(
                 spareKey = spareKey,
                 realLastKey = realLastKey,
                 apiCall = { key -> oDSayBusFeignClient.getStationByStationName(key, station.busStationMeta.name) },
-//            TODO : 여기 오류 났을 때 경우 추가하기
                 isLimitExceeded = { response -> false },
                 processResult = { response ->
-                    response.result.station.find { it.arsID.equals(station.busStationNumber.value) }
+                    response.result.station.find { it.arsID.trim() == station.busStationNumber.value.trim() }
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             ) ?: return null
 
-        var busLanResponse =
+        val busLanResponse =
             ApiClientUtils.callApiWithRetry(
                 primaryKey = serviceKey,
                 spareKey = spareKey,
@@ -49,8 +51,6 @@ class ODSayBusInfoClient(
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             ) ?: return null
-        println("${busLanResponse.busNo} 버스 막차 시간 : ${busLanResponse.busLastTime}")
-
         return busLanResponse.toBusArrival()
     }
 
