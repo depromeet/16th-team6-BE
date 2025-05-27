@@ -19,6 +19,7 @@ import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusRouteListDeserializer
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.BusStationListDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -44,6 +45,7 @@ data class PublicGyeonggiResponse<T>(
     val msgBody: T
 ) {
     data class BusRouteListResponse(
+        @JsonDeserialize(using = BusRouteListDeserializer::class)
         val busRouteList: List<GyeonggiBusRoute>
     )
 
