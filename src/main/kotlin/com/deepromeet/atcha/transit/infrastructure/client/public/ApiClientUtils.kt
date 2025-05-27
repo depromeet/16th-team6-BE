@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicGyeonggiApiResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
+import feign.codec.DecodeException
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger {}
@@ -55,6 +56,9 @@ object ApiClientUtils {
             }
 
             return processResult(response)
+        } catch (e: DecodeException) {
+            log.warn { "해당하는 결과가 없거나 초당 API 제한을 넘었습니다 - $errorMessage" }
+            return null
         } catch (e: Exception) {
             log.warn { errorMessage }
             return null
