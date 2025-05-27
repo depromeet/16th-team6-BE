@@ -46,7 +46,7 @@ jobs:
       - name: Copy file via ssh password
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.REMOTE_IP }}
+          host: ${{ secrets.DEV_SSH_IP }}
           username: ${{ secrets.DEV_SSH_ID }}
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
@@ -58,7 +58,7 @@ jobs:
       - name: Run
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.REMOTE_IP }}
+          host: ${{ secrets.DEV_SSH_IP }}
           username: ${{ secrets.DEV_SSH_ID }}
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
