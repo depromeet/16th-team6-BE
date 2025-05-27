@@ -47,7 +47,7 @@ jobs:
         uses: appleboy/scp-action@v0.1.4
         with:
           host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
+          username: ${{ secrets.DEV_SSH_ID }}
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
 
@@ -59,7 +59,7 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
+          username: ${{ secrets.DEV_SSH_ID }}
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
