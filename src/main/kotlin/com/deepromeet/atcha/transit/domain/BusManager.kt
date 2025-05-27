@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.odsay.ODSaySeoulBusRouteInfoClient
+import com.deepromeet.atcha.transit.infrastructure.client.odsay.ODSayBusInfoClient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -12,7 +12,7 @@ val log = KotlinLogging.logger {}
 
 @Component
 class BusManager(
-    private val oDSaySeoulBusRouteInfoClient: ODSaySeoulBusRouteInfoClient,
+    private val oDSayBusInfoClient: ODSayBusInfoClient,
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
@@ -86,7 +86,7 @@ class BusManager(
         var busArrival =
             busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
                 ?.busTimeTable?.lastTime?.let {
-                    oDSaySeoulBusRouteInfoClient.getBusArrival(station, busRoute)
+                    oDSayBusInfoClient.getBusArrival(station, busRoute)
                         .logIfNull(
                             "[ODSay NotFoundBusArrival] region=$region, " +
                                 "station=${station.busStationMeta.name}, routeName=$routeName"
