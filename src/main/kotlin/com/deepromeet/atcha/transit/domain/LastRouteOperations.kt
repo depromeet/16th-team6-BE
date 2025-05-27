@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import kotlinx.coroutines.Dispatchers
@@ -196,7 +197,7 @@ class LastRouteOperations(
 
         return if (calculatedLegs.any {
                 (it.mode == "BUS" || it.mode == "SUBWAY") &&
-                    (it.departureDateTime == null || it.departureDateTime == "null")
+                    it.departureDateTime.isNullOrBlank()
             }
         ) {
             null
@@ -206,72 +207,61 @@ class LastRouteOperations(
     }
 
     private suspend fun calculateLegLastArriveDateTimesV2(legs: List<Leg>): List<LastRouteLeg>? {
-        val calculatedLegs =
-            coroutineScope {
-                legs.map { leg ->
-                    async(Dispatchers.IO) {
-                        when (leg.mode) {
-                            "SUBWAY" -> {
-                                // 지하철 노선 조회
-                                val subwayLine = SubwayLine.fromRouteName(leg.route!!)
+        return try {
+            val calculatedLegs =
+                coroutineScope {
+                    legs.map { leg ->
+                        async(Dispatchers.IO) {
+                            when (leg.mode) {
+                                "SUBWAY" -> {
+                                    val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
-                                // 정류장 정보 조회
-                                val routesDeferred = async(Dispatchers.IO) { subwayManager.getRoutes(subwayLine) }
-                                val startDeferred =
-                                    async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.start.name) }
-                                val endDeferred =
-                                    async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.end.name) }
+                                    val routesDeferred = async(Dispatchers.IO) { subwayManager.getRoutes(subwayLine) }
+                                    val startDeferred =
+                                        async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.start.name) }
+                                    val endDeferred =
+                                        async(Dispatchers.IO) { subwayManager.getStation(subwayLine, leg.end.name) }
 
-//                                정류장 정보를 모두 가져온 후 처리 시작
-                                val routes = routesDeferred.await()
-                                val startStation = startDeferred.await()
-                                val endStation = endDeferred.await()
+                                    val routes = routesDeferred.await()
+                                    val startStation = startDeferred.await()
+                                    val endStation = endDeferred.await()
 
-//                                지하철 시간표 조회
-                                val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                                    val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                                    val departureDateTime = timeTable?.getLastTime(endStation, routes)?.departureTime
+                                    val transitTime =
+                                        timeTable?.let {
+                                            TransitTime.SubwayTimeInfo(it)
+                                        } ?: throw TransitException.NotFoundTime
 
-                                val departureDateTime = timeTable?.getLastTime(endStation, routes)?.departureTime
-                                val transitTime =
-                                    timeTable?.let {
-                                        TransitTime.SubwayTimeInfo(timeTable)
-                                    } ?: TransitTime.NoTimeTable
+                                    leg.toLastRouteLeg(departureDateTime, transitTime)
+                                }
 
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
+                                "BUS" -> {
+                                    val routeId = leg.route!!.split(":")[1]
+                                    val stationMeta =
+                                        BusStationMeta(
+                                            leg.start.name.removeSuffix(),
+                                            Coordinate(leg.start.lat, leg.start.lon)
+                                        )
+                                    val busTimeInfo =
+                                        busManager.getBusTimeInfoV2(routeId, stationMeta)
+                                            ?: throw TransitException.NotFoundBusArrival
+
+                                    val departureDateTime = busTimeInfo.lastTime
+                                    val transitTime = TransitTime.BusTimeInfo(busTimeInfo)
+
+                                    leg.toLastRouteLeg(departureDateTime, transitTime)
+                                }
+
+                                else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
                             }
-
-                            "BUS" -> {
-                                val routeId = leg.route!!.split(":")[1]
-                                val stationMeta =
-                                    BusStationMeta(
-                                        leg.start.name.removeSuffix(),
-                                        Coordinate(leg.start.lat, leg.start.lon)
-                                    )
-                                val busTimeInfo = busManager.getBusTimeInfoV2(routeId, stationMeta)
-                                val departureDateTime = busTimeInfo?.lastTime
-                                val transitTime =
-                                    if (busTimeInfo != null) {
-                                        TransitTime.BusTimeInfo(busTimeInfo)
-                                    } else {
-                                        TransitTime.NoTimeTable
-                                    }
-
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
-                            }
-
-                            else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
                         }
-                    }
-                }.awaitAll()
-            }
-
-        return if (calculatedLegs.any {
-                (it.mode == "BUS" || it.mode == "SUBWAY") &&
-                    (it.departureDateTime == null || it.departureDateTime == "null")
-            }
-        ) {
+                    }.awaitAll()
+                }
+            return calculatedLegs
+        } catch (e: TransitException) {
+            log.warn { "여정의 교통수단 중 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
             null
-        } else {
-            calculatedLegs
         }
     }
 
