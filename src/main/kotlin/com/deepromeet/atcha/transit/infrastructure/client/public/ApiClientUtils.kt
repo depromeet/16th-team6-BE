@@ -86,13 +86,6 @@ object ApiClientUtils {
     }
 
     fun <T> isGyeonggiApiLimitExceeded(response: PublicGyeonggiResponse<T>): Boolean {
-        // 결과 없음 메시지도 없으면서 결과가 NULL 일 경우
-        val isLimited = response.msgBody == null && !response.msgHeader.isEmptyResponse()
-
-        if (isLimited) {
-            log.warn { "$response 경기도 공공 API 요청 수 초과" }
-        }
-
-        return isLimited
+        return response.msgBody == null && !response.msgHeader.isEmptyResponse()
     }
 }
