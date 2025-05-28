@@ -1,15 +1,12 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicGyeonggiApiResponse
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicGyeonggiResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
 import feign.codec.DecodeException
 import io.github.oshai.kotlinlogging.KotlinLogging
 
 private val log = KotlinLogging.logger {}
 
-/**
- * API 클라이언트 공통 유틸리티 클래스
- */
 object ApiClientUtils {
     /**
      * API 호출과 재시도 로직을 처리하는 공통 함수
@@ -32,36 +29,39 @@ object ApiClientUtils {
         processResult: (T) -> R,
         errorMessage: String
     ): R? {
-        try {
-            // 기본 키로 API 호출
-            val response = apiCall(primaryKey)
+        val keys = listOf(primaryKey, spareKey, realLastKey)
+        return callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, 0)
+    }
 
-            // API 제한 확인
+    private fun <T, R> callApiWithRetryInternal(
+        keys: List<String>,
+        apiCall: (String) -> T,
+        isLimitExceeded: (T) -> Boolean,
+        processResult: (T) -> R,
+        errorMessage: String,
+        index: Int
+    ): R? {
+        if (index >= keys.size) {
+            log.warn { "모든 API 키가 실패했습니다. $errorMessage" }
+            return null
+        }
+
+        val currentKey = keys[index]
+
+        return try {
+            val response = apiCall(currentKey)
             if (isLimitExceeded(response)) {
-                log.warn { "기본 API 키가 제한되어 예비 키로 재시도합니다." }
-
-                // 예비 키로 재시도
-                val retryResponse = apiCall(spareKey)
-                if (isLimitExceeded(retryResponse)) {
-                    log.warn { "예비 API 키도 제한되었습니다. 찐막키로 재시도합니다" }
-                    // 찐막 키로 재시도
-                    val lastResponse = apiCall(realLastKey)
-                    if (isLimitExceeded(lastResponse)) {
-                        log.warn { "찐막키도 제한되었습니다. 망했다고 볼 수 있습니다." }
-                        return null
-                    }
-                    return processResult(lastResponse)
-                }
-                return processResult(retryResponse)
+                log.warn { "API 키(${index + 1}) 제한됨. 다음 키로 재시도합니다." }
+                callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, index + 1)
+            } else {
+                processResult(response)
             }
-
-            return processResult(response)
         } catch (e: DecodeException) {
-            log.warn { "해당하는 결과가 없거나 초당 API 제한을 넘었습니다 - $errorMessage" }
-            return null
+            log.warn { "DecodeException 발생. API 응답 포맷이 예상과 다릅니다. 다음 키로 재시도합니다. - $errorMessage" }
+            callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, index + 1)
         } catch (e: Exception) {
-            log.warn { errorMessage }
-            return null
+            log.warn { "예상치 못한 오류 발생: ${e.message} - $errorMessage" }
+            null
         }
     }
 
@@ -85,21 +85,12 @@ object ApiClientUtils {
         return isLimited
     }
 
-    fun <T> isGyeonggiApiLimitExceeded(response: PublicGyeonggiApiResponse<T>): Boolean {
-        // 제한 메시지 목록 (필요시 확장 가능)
-        val limitMessages =
-            listOf(
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
-            )
-
-        // 결과 코드가 0이 아니고 메시지가 제한 메시지 중 하나를 포함하는지 확인
-        val isLimited =
-            response.response.msgHeader.resultCode != "00" &&
-                limitMessages.any { response.response.msgHeader.resultMessage.contains(it) }
+    fun <T> isGyeonggiApiLimitExceeded(response: PublicGyeonggiResponse<T>): Boolean {
+        // 결과 없음 메시지도 없으면서 결과가 NULL 일 경우
+        val isLimited = response.msgBody == null && !response.msgHeader.isEmptyResponse()
 
         if (isLimited) {
-            log.warn { "경기도 공공 API 요청 수 초과: ${response.response.msgHeader.resultMessage}" }
+            log.warn { "$response 경기도 공공 API 요청 수 초과" }
         }
 
         return isLimited
