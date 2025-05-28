@@ -47,26 +47,30 @@ class BusManager(
     fun getArrivalInfoV2(
         routeName: String,
         busStationMeta: BusStationMeta
-    ): BusArrival? {
+    ): BusArrival {
         val region = regionIdentifier.identify(busStationMeta.coordinate)
 
         val station =
             busStationInfoClientMap[region]?.getStationByName(busStationMeta)
-                ?: return null
+                ?: run {
+                    log.warn { "$region - $busStationMeta 의 정보를 가져오는데 실패" }
+                    throw TransitException.NotFoundBusStation
+                }
         val busRoute =
             busStationInfoClientMap[region]?.getRoute(station, routeName)
-                ?: return null
+                ?: run {
+                    log.warn { "$region - 버스 노선($routeName) 정보를 가져오는데 실패" }
+                    throw TransitException.NotFoundBusRoute
+                }
 
         val busArrival =
             busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
                 ?: run {
-                    log.info { "오픈API에서 버스도착정보($station-$busRoute)를 가져올 수 없어 오디세이를 이용합니다." }
+                    log.debug { "오픈API에서 버스도착정보($station-$busRoute)를 가져올 수 없어 오디세이를 이용합니다." }
                     oDSayBusInfoClient.getBusArrival(station, busRoute)
-                }
+                } ?: throw TransitException.NotFoundBusArrival
 
-        if (busArrival != null) {
-            busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
-        }
+        busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
 
         return busArrival
     }
@@ -81,8 +85,8 @@ class BusManager(
     fun getBusTimeInfoV2(
         routeName: String,
         busStationMeta: BusStationMeta
-    ): BusTimeTable? {
-        return getArrivalInfoV2(routeName, busStationMeta)?.busTimeTable
+    ): BusTimeTable {
+        return getArrivalInfoV2(routeName, busStationMeta).busTimeTable
     }
 
     fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
