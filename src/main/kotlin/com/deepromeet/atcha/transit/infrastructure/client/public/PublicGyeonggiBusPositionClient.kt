@@ -25,7 +25,7 @@ class PublicGyeonggiBusPositionClient(
             apiCall = { key -> publicGyeonggiBusPositionClient.getBusLocationList(key, routeId.value) },
             isLimitExceeded = { response -> isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                response.response.msgBody.busLocationList.map { it.toBusPosition() }
+                response.msgBody?.busLocationList?.map { it.toBusPosition() }
             },
             errorMessage = "경기도 버스 위치 정보를 가져오는데 실패했습니다."
         ) ?: emptyList() // API 호출 실패 시 빈 리스트 반환

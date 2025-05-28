@@ -27,7 +27,10 @@ class PublicGyeonggiStationInfoClient(
             apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationList(key, info.resolveName()) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                val busStations = response.response.msgBody.busStationList.map { it.toBusStation() }
+                val busStations =
+                    response.msgBody?.busStationList?.map { it.toBusStation() } ?: run {
+                        return@callApiWithRetry null
+                    }
                 busStations.minByOrNull { it.busStationMeta.coordinate.distanceTo(info.coordinate) }
             },
             errorMessage = "경기도 버스 정류소-${info.resolveName()} 정보를 가져오는데 실패했습니다."
@@ -45,8 +48,8 @@ class PublicGyeonggiStationInfoClient(
             apiCall = { key -> publicGyeonggiBusStationInfoFeignClient.getStationRouteList(key, station.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                response.response.msgBody.busRouteList
-                    .firstOrNull { it.routeName.trim() == routeName.trim() }
+                response.msgBody?.busRouteList
+                    ?.firstOrNull { it.routeName.trim() == routeName.trim() }
                     ?.toBusRoute()
             },
             errorMessage = "경기도 버스 노선 정보 - $routeName-${station}를 가져오는데 실패했습니다."
@@ -61,7 +64,7 @@ class PublicGyeonggiStationInfoClient(
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                val busRouteStationsResponse = response.response.msgBody.busRouteStationList
+                val busRouteStationsResponse = response.msgBody?.busRouteStationList ?: return@callApiWithRetry null
 
                 BusRouteStationList(
                     busRouteStationsResponse.map { it.toBusRouteStation(route) },
