@@ -1,60 +1,59 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.odsay.ODSayBusInfoClient
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 
 val log = KotlinLogging.logger {}
 
 @Component
 class BusManager(
+    private val oDSayBusInfoClient: ODSayBusInfoClient,
     private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val regionIdentifier: RegionIdentifier,
     private val busTimeTableCache: BusTimeTableCache
 ) {
-    fun getArrivalInfo(
+    fun getSchedule(
         routeName: String,
-        busStationMeta: BusStationMeta
-    ): BusArrival? {
-        val region = regionIdentifier.identify(busStationMeta.coordinate)
-        val station =
-            busStationInfoClientMap[region]?.getStationByName(busStationMeta)
-                .logIfNull(
-                    "[NotFoundBusStation] region=$region," +
-                        " station=${busStationMeta.resolveName()}"
-                )
-                ?: return null
-        val busRoute =
-            busStationInfoClientMap[region]?.getRoute(station, routeName)
-                .logIfNull(
-                    "[NotFoundBusRoute] region=$region," +
-                        " station=${station.busStationMeta.name}, routeName=$routeName"
-                )
-                ?: return null
-        val busArrival =
-            busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
-                .logIfNull(
-                    "[NotFoundBusArrival] region=$region, " +
-                        "station=${station.busStationMeta.name}, routeName=$routeName"
-                )
-        if (busArrival != null) {
-            busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
-        }
+        meta: BusStationMeta
+    ): BusSchedule {
+        val (station, route) = findStationAndRoute(routeName, meta)
 
-        return busArrival
+        val schedule =
+            busRouteInfoClientMap[route.serviceRegion]?.getBusSchedule(station, route)
+                ?: oDSayBusInfoClient.getBusSchedule(station, route)
+                ?: throw TransitException.NotFoundBusArrival
+
+        busTimeTableCache.cache(routeName, meta, schedule.busTimeTable)
+        return schedule
+    }
+
+    fun getRealTimeArrival(
+        routeName: String,
+        meta: BusStationMeta
+    ): BusRealTimeArrival {
+        val (station, route) = findStationAndRoute(routeName, meta)
+
+        return busRouteInfoClientMap[route.serviceRegion]
+            ?.getBusRealTimeInfo(station, route)
+            ?: throw TransitException.NotFoundBusRealTime
     }
 
     fun getBusTimeInfo(
         routeName: String,
-        busStationMeta: BusStationMeta
-    ): BusTimeTable? {
-        return busTimeTableCache.get(routeName, busStationMeta)
-            ?: getArrivalInfo(routeName, busStationMeta)?.busTimeTable
+        stationMeta: BusStationMeta
+    ): BusTimeTable {
+        return busTimeTableCache.get(
+            routeName,
+            stationMeta
+        ) ?: getSchedule(routeName, stationMeta).busTimeTable
     }
 
     fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
@@ -62,28 +61,44 @@ class BusManager(
             ?: throw TransitException.BusRouteOperationInfoFetchFailed
     }
 
-    suspend fun getBusPositions(busRoute: BusRoute): BusRoutePositions =
-        coroutineScope {
-            val stationListDeferred =
-                async(Dispatchers.IO) {
-                    busStationInfoClientMap[busRoute.serviceRegion]!!
-                        .getByRoute(busRoute)
-                        ?: throw TransitException.BusRouteStationListFetchFailed
-                }
-
-            val positionsDeferred =
-                async(Dispatchers.IO) {
-                    busPositionFetcherMap[busRoute.serviceRegion]!!
-                        .fetch(busRoute.id)
-                }
-
-            BusRoutePositions(stationListDeferred.await(), positionsDeferred.await())
+    suspend fun getBusPositions(route: BusRoute): BusRoutePositions =
+        withContext(Dispatchers.IO) {
+            coroutineScope {
+                val stations = async { busStationInfoClientMap[route.serviceRegion]!!.getByRoute(route) }
+                val positions = async { busPositionFetcherMap[route.serviceRegion]!!.fetch(route.id) }
+                BusRoutePositions(
+                    stations.await() ?: throw TransitException.BusRouteStationListFetchFailed,
+                    positions.await().also {
+                        if (it.isEmpty()) {
+                            throw TransitException.NotFoundBusPosition
+                        }
+                    }
+                )
+            }
         }
-}
 
-fun <T> T?.logIfNull(message: String): T? {
-    if (this == null) {
-        log.warn { message }
+    private fun findStationAndRoute(
+        routeName: String,
+        meta: BusStationMeta
+    ): Pair<BusStation, BusRoute> {
+        val region = regionIdentifier.identify(meta.coordinate)
+
+        val station =
+            busStationInfoClientMap[region]
+                ?.getStationByName(meta)
+                ?: run {
+                    log.warn { "$region - $meta 정류장 정보 실패" }
+                    throw TransitException.NotFoundBusStation
+                }
+
+        val route =
+            busStationInfoClientMap[region]
+                ?.getRoute(station, routeName)
+                ?: run {
+                    log.warn { "$region - 버스 노선($routeName) 정보 실패" }
+                    throw TransitException.NotFoundBusRoute
+                }
+
+        return station to route
     }
-    return this
 }

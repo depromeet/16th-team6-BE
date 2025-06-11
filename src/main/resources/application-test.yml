@@ -40,6 +40,13 @@ kric:
   api:
     service-key: ${secret.dev.KRIC_SERVICE_KEY}
 
+odsay:
+  api:
+    url: https://api.odsay.com
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
+
 jwt:
   access:
     secret: ${secret.dev.JWT_ACCESS_SECRET}

@@ -24,7 +24,10 @@ class SubwayManager(
         stationName: String
     ): SubwayStation {
         return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
-            ?: throw TransitException.NotFoundSubwayStation
+            ?: run {
+                log.warn { "지하철역 조회 실패: [노선코드=${subwayLine.lnCd}, 역이름=$stationName]" }
+                throw TransitException.NotFoundSubwayStation
+            }
     }
 
     suspend fun getTimeTable(
