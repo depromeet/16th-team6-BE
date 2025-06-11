@@ -66,7 +66,16 @@ class RouteDepartureTimeRefresher(
                         firstBusLeg.start.lon
                     )
             )
-        val busArrival = busManager.getRealTimeArrival(routeName, busStationMeta)
+
+        val busArrival =
+            try {
+                busManager.getRealTimeArrival(
+                    routeName,
+                    busStationMeta
+                )
+            } catch (e: Exception) {
+                return
+            }
         val timeTable = busManager.getBusTimeInfo(routeName, busStationMeta)
 
         // 4) 실시간 정보를 활용해 최대 4개 후보 시간 생성

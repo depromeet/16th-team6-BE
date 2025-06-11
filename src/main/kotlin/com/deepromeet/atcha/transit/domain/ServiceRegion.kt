@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.exception.TransitException
+
 enum class ServiceRegion(
     val regionName: String
 ) {
@@ -9,7 +11,7 @@ enum class ServiceRegion(
     companion object {
         fun from(regionName: String): ServiceRegion {
             return entries.firstOrNull { it.regionName == regionName }
-                ?: throw IllegalArgumentException("Invalid region name: $regionName")
+                ?: throw TransitException.ServiceAreaNotSupported
         }
     }
 
