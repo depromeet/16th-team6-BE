@@ -1,8 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -25,15 +23,6 @@ class TransitService(
         busStationMeta: BusStationMeta
     ): BusArrival {
         return busManager.getArrivalInfo(routeName, busStationMeta)
-            ?: throw TransitException.NotFoundBusArrival
-    }
-
-    fun getBusArrivalInfoV2(
-        routeName: String,
-        busStationMeta: BusStationMeta
-    ): BusArrival {
-        return busManager.getArrivalInfoV2(routeName, busStationMeta)
-            ?: throw TransitException.NotFoundBusArrival
     }
 
     suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
@@ -65,32 +54,10 @@ class TransitService(
                 lastRoute.findFirstBus().resolveRouteName(),
                 lastRoute.findFirstBus().resolveStartStation()
             )
-        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
+        return busArrival.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
     }
 
     suspend fun getLastRoutes(
-        userId: Long,
-        start: Coordinate,
-        end: Coordinate?,
-        sortType: LastRouteSortType
-    ): List<LastRoute> {
-        // 목적지 설정 안 하면 집 주소임
-        val destination = end ?: userReader.read(userId).getHomeCoordinate()
-
-        // 캐시에서 조회, 있을 경우 해당 경로를 리턴
-//        lastRouteReader.read(start, destination)?.let { routes ->
-//            return routes.sort(sortType)
-//        }
-
-        // 캐시에서 조회가 안 될 경우, Tmap API를 통해서 경로를 조회
-        val itineraries = transitRouteClient.fetchItineraries(start, destination)
-
-        return lastRouteOperations
-            .calculateRoutes(start, destination, itineraries)
-            .sort(sortType)
-    }
-
-    suspend fun getLastRoutesV2(
         userId: Long,
         start: Coordinate,
         end: Coordinate?,
@@ -102,22 +69,7 @@ class TransitService(
         }
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
         return lastRouteOperations
-            .calculateRoutesV2(
-                start,
-                destination,
-                itineraries.map {
-                    Itinerary(
-                        it.totalTime,
-                        it.transferCount,
-                        it.totalWalkDistance,
-                        it.totalDistance,
-                        it.totalWalkTime,
-                        it.fare,
-                        it.legs,
-                        it.pathType
-                    )
-                }
-            )
+            .calculateRoutes(start, destination, itineraries)
             .sort(sortType)
     }
 }

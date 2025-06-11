@@ -22,31 +22,6 @@ class BusManager(
     fun getArrivalInfo(
         routeName: String,
         busStationMeta: BusStationMeta
-    ): BusArrival? {
-//        지역 정보 TMap에서 가져옴
-        val region = regionIdentifier.identify(busStationMeta.coordinate)
-
-//        버스 정류장 정보를 '지역'을 키 값으로 가져옴
-//        데이터 정합성이 걱정돼서 여기부터 아래 3개는 오딧세이로 해보는 게 좋지 않을까라는 생각이 듦
-        val station =
-            busStationInfoClientMap[region]?.getStationByName(busStationMeta)
-                ?: return null
-        val busRoute =
-            busStationInfoClientMap[region]?.getRoute(station, routeName)
-                ?: return null
-
-        val busArrival =
-            busRouteInfoClientMap[region]?.getBusArrival(station, busRoute)
-        if (busArrival != null) {
-            busTimeTableCache.cache(routeName, busStationMeta, busArrival.busTimeTable)
-        }
-
-        return busArrival
-    }
-
-    fun getArrivalInfoV2(
-        routeName: String,
-        busStationMeta: BusStationMeta
     ): BusArrival {
         val region = regionIdentifier.identify(busStationMeta.coordinate)
 
@@ -75,18 +50,18 @@ class BusManager(
         return busArrival
     }
 
+    fun getBusRealTimeInfo(
+        routeName: String,
+        busStationMeta: BusStationMeta
+    ): List<RealTimeBusArrival> {
+        TODO()
+    }
+
     fun getBusTimeInfo(
         routeName: String,
         busStationMeta: BusStationMeta
-    ): BusTimeTable? {
-        return getArrivalInfo(routeName, busStationMeta)?.busTimeTable
-    }
-
-    fun getBusTimeInfoV2(
-        routeName: String,
-        busStationMeta: BusStationMeta
     ): BusTimeTable {
-        return getArrivalInfoV2(routeName, busStationMeta).busTimeTable
+        return getArrivalInfo(routeName, busStationMeta).busTimeTable
     }
 
     fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
