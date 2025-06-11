@@ -68,7 +68,11 @@ class BusManager(
                 val positions = async { busPositionFetcherMap[route.serviceRegion]!!.fetch(route.id) }
                 BusRoutePositions(
                     stations.await() ?: throw TransitException.BusRouteStationListFetchFailed,
-                    positions.await()
+                    positions.await().also {
+                        if (it.isEmpty()) {
+                            throw TransitException.NotFoundBusPosition
+                        }
+                    }
                 )
             }
         }

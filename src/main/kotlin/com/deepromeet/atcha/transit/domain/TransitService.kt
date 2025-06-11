@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -37,7 +38,7 @@ class TransitService(
         start: Coordinate,
         end: Coordinate
     ): Fare {
-        return taxiFareFetcher.fetch(start, end) ?: Fare(0)
+        return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
     }
 
     fun getRoute(routeId: String): LastRoute {
