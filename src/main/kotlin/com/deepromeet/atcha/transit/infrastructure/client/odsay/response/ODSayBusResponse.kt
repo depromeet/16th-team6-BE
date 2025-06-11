@@ -1,13 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay.response
 
-import com.deepromeet.atcha.transit.domain.BusArrival
-import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusStationId
-import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.BusSchedule
+import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusTimeTable
-import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -66,36 +63,22 @@ data class ODSayLaneResponse(
     var busInterval: String,
     var busLocalBlID: String
 ) {
-    fun toBusArrival(): BusArrival {
+    fun toBusArrival(station: BusStation): BusSchedule {
         val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
                 name = this.busNo,
                 serviceRegion = ServiceRegion.SEOUL
             )
-        return BusArrival(
+        return BusSchedule(
             busRoute = busRoute,
-            // TODO : 오딧세이에서는 버스 스테이션 id 없음 수정 예정
-            busStationId = BusStationId(""),
+            busStation = station,
             busTimeTable =
                 BusTimeTable(
                     toBusArrivalTime(busFirstTime),
                     toBusArrivalTime(busLastTime),
                     busInterval.toInt()
-                ),
-            realTimeInfo =
-                listOf(
-                    RealTimeBusArrival(
-                        vehicleId = "",
-                        busStatus = BusStatus.SOON,
-                        remainingTime = 0,
-                        remainingStations = 0,
-                        isLast = false,
-                        busCongestion = BusCongestion.LOW,
-                        remainingSeats = 0
-                    )
-                ),
-            stationName = ""
+                )
         )
     }
 

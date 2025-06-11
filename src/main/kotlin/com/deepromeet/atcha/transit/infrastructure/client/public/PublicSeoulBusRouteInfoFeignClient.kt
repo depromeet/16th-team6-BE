@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.BusRouteInfoResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.BusRouteStationResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
 import org.springframework.cloud.openfeign.FeignClient
@@ -14,12 +13,6 @@ import org.springframework.web.bind.annotation.RequestParam
     configuration = [PublicFeignConfig::class]
 )
 interface PublicSeoulBusRouteInfoFeignClient {
-    @GetMapping("/getRouteInfo")
-    fun getRouteInfo(
-        @RequestParam busRouteId: String,
-        @RequestParam serviceKey: String
-    ): ServiceResult<BusRouteInfoResponse>
-
     @GetMapping("/getStaionByRoute")
     fun getStationsByRoute(
         @RequestParam busRouteId: String,

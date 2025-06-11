@@ -1,9 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
-import com.deepromeet.atcha.transit.domain.BusArrival
+import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -19,7 +20,7 @@ private val log = KotlinLogging.logger {}
 @Component
 class PublicGyeonggiRouteInfoClient(
     private val publicGyeonggiRouteInfoFeignClient: PublicGyeonggiRouteInfoFeignClient,
-    private val publicGyeonggiBusArrivalInfoFeignClient: PublicGyeonggiBusArrivalInfoFeignClient,
+    private val publicGyeonggiBusRealTimeInfoFeignClient: PublicGyeonggiBusRealTimeInfoFeignClient,
     private val dailyTypeResolver: DailyTypeResolver,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
@@ -28,10 +29,10 @@ class PublicGyeonggiRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
-    override fun getBusArrival(
+    override fun getBusSchedule(
         station: BusStation,
         route: BusRoute
-    ): BusArrival? =
+    ): BusSchedule? =
         runBlocking {
             try {
                 coroutineScope {
@@ -76,31 +77,10 @@ class PublicGyeonggiRouteInfoClient(
                     // 3. 정류장 정보 찾기
                     val stationInfo = busRouteStations.getStation(station.id)
 
-                    // 4. 도착 정보 가져오기
-                    val arrivalInfo =
-                        ApiClientUtils.callApiWithRetry(
-                            primaryKey = serviceKey,
-                            spareKey = spareKey,
-                            realLastKey = realLastKey,
-                            apiCall = { key ->
-                                publicGyeonggiBusArrivalInfoFeignClient.getArrivalInfo(
-                                    key,
-                                    station.id.value,
-                                    route.id.value,
-                                    stationInfo.stationSeq.toString()
-                                )
-                            },
-                            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                            processResult = { response -> response.msgBody?.busArrivalItem },
-                            errorMessage = "경기도 버스 도착 정보를 가져오는데 실패했습니다."
-                        ) ?: return@coroutineScope null
-
-                    // 5. 버스 도착 정보 변환
-                    busRouteInfo.toBusArrival(
+                    // 4. 버스 도착 정보 변환
+                    busRouteInfo.toBusSchedule(
                         dailyTypeResolver.resolve(),
-                        stationInfo.getDirection(),
-                        arrivalInfo,
-                        busRouteStations
+                        stationInfo
                     )
                 }
             } catch (e: Exception) {
@@ -120,6 +100,43 @@ class PublicGyeonggiRouteInfoClient(
                 response.msgBody?.busRouteInfoItem?.toBusRouteOperationInfo()
             },
             errorMessage = "경기도 노선 운행 정보를 가져오는데 실패했습니다."
+        )
+    }
+
+    override fun getBusRealTimeInfo(
+        station: BusStation,
+        route: BusRoute
+    ): BusRealTimeArrival? {
+        val busRouteStationList =
+            ApiClientUtils.callApiWithRetry(
+                primaryKey = serviceKey,
+                spareKey = spareKey,
+                realLastKey = realLastKey,
+                apiCall = { key ->
+                    publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
+                },
+                isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                processResult = { response -> response.msgBody },
+                errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
+            ) ?: return null
+
+        val stationInfo = busRouteStationList.getStation(station.id)
+
+        return ApiClientUtils.callApiWithRetry(
+            primaryKey = serviceKey,
+            spareKey = spareKey,
+            realLastKey = realLastKey,
+            apiCall = { key ->
+                publicGyeonggiBusRealTimeInfoFeignClient.getRealTimeInfo(
+                    key,
+                    station.id.value,
+                    route.id.value,
+                    stationInfo.stationSeq.toString()
+                )
+            },
+            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+            processResult = { response -> response.msgBody?.busRealTimeInfoItem?.toRealTimeArrival() },
+            errorMessage = "경기도 버스 도착 정보를 가져오는데 실패했습니다."
         )
     }
 }

@@ -11,13 +11,13 @@ import org.springframework.web.bind.annotation.RequestParam
     url = "\${open-api.api.url.gyeonggi-arrival}",
     configuration = [PublicFeignConfig::class]
 )
-interface PublicGyeonggiBusArrivalInfoFeignClient {
+interface PublicGyeonggiBusRealTimeInfoFeignClient {
     @GetMapping("/getBusArrivalItemv2")
-    fun getArrivalInfo(
+    fun getRealTimeInfo(
         @RequestParam serviceKey: String,
         @RequestParam stationId: String,
         @RequestParam routeId: String,
         @RequestParam staOrder: String,
         @RequestParam format: String = "xml"
-    ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusArrivalInfoResponse>
+    ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusRealTimeInfoResponse>
 }

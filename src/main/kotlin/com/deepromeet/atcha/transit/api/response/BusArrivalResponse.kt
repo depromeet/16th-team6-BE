@@ -19,13 +19,13 @@ data class BusArrivalResponse(
     constructor(
         busArrival: BusArrival
     ) : this(
-        busArrival.busRoute.id,
-        busArrival.busRoute.name,
-        busArrival.busRoute.serviceRegion,
-        busArrival.busStationId,
-        busArrival.stationName,
-        busArrival.busTimeTable.lastTime,
-        busArrival.busTimeTable.term,
-        busArrival.realTimeInfo.map { RealTimeBusArrivalResponse(it) }
+        busArrival.schedule.busRoute.id,
+        busArrival.schedule.busRoute.name,
+        busArrival.schedule.busRoute.serviceRegion,
+        busArrival.schedule.busStation.id,
+        busArrival.schedule.busStation.busStationMeta.name,
+        busArrival.schedule.busTimeTable.lastTime,
+        busArrival.schedule.busTimeTable.term,
+        busArrival.realTimeArrival.realTimeInfoList.map { RealTimeBusArrivalResponse(it) }
     )
 }

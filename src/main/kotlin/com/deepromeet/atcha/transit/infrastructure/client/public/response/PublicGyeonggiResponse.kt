@@ -1,14 +1,16 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusDirection
 import com.deepromeet.atcha.transit.domain.BusPosition
+import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
+import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
@@ -17,7 +19,6 @@ import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
@@ -29,6 +30,7 @@ import java.time.LocalTime
 import kotlin.math.abs
 
 val log = KotlinLogging.logger {}
+const val AVERAGE_MINUTE_PER_STATION = 2
 
 @JacksonXmlRootElement(localName = "response")
 data class PublicGyeonggiResponse<T>(
@@ -81,9 +83,9 @@ data class PublicGyeonggiResponse<T>(
         val busRouteInfoItem: BusRouteInfoItem
     )
 
-    data class BusArrivalInfoResponse(
+    data class BusRealTimeInfoResponse(
         @field:JacksonXmlProperty(localName = "busArrivalItem")
-        val busArrivalItem: BusArrivalItem
+        val busRealTimeInfoItem: BusRealTimeInfoItem
     )
 
     data class BusLocationListResponse(
@@ -106,7 +108,7 @@ data class GyeonggiMsgHeader(
     }
 }
 
-data class BusArrivalItem(
+data class BusRealTimeInfoItem(
     @field:JacksonXmlProperty(localName = "routeDestId")
     val routeDestId: Int,
     @field:JacksonXmlProperty(localName = "routeDestName")
@@ -142,44 +144,12 @@ data class BusArrivalItem(
     @field:JacksonXmlProperty(localName = "vehId2")
     val vehId2: Int
 ) {
-    fun toRealTimeBussArrivals(): List<RealTimeBusArrival> {
+    fun toRealTimeArrival(): BusRealTimeArrival {
         val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, vehId1)
         val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, vehId2)
-        return listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
-    }
-
-    fun calculateTravelTimeFromStart(busStationList: PublicGyeonggiResponse.BusRouteStationListResponse): Long {
-        val chosenStationName =
-            when {
-                stationNm2.isNotBlank() -> stationNm2
-                stationNm1.isNotBlank() -> stationNm1
-                else -> ""
-            }
-
-        if (chosenStationName.isBlank()) {
-            val stationCount = if (staOrder < turnSeq) staOrder else staOrder - turnSeq
-            return (2 * stationCount).toLong()
-        }
-
-        val chosenStation = busStationList.getStation(chosenStationName, staOrder)
-        val remainOrder = staOrder - chosenStation.stationSeq
-
-        val chosenPredictTimeSec =
-            when (chosenStationName) {
-                stationNm2 -> predictTimeSec2
-                stationNm1 -> predictTimeSec1
-                else -> null
-            }
-
-        val averageSecondPerStation =
-            if (chosenPredictTimeSec != null && remainOrder != 0) {
-                chosenPredictTimeSec.div(remainOrder)
-            } else {
-                2
-            }
-
-        val stationCount = if (staOrder < turnSeq) staOrder else (staOrder - turnSeq)
-        return (averageSecondPerStation * stationCount).toLong()
+        return BusRealTimeArrival(
+            listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
+        )
     }
 
     private fun createRealTimeArrivalInfo(
@@ -187,7 +157,7 @@ data class BusArrivalItem(
         crowded: Int,
         remainSeatCnt: Int,
         vehId: Int
-    ): RealTimeBusArrival {
+    ): BusRealTimeInfo {
         val busCongestion =
             when (crowded) {
                 0 -> BusCongestion.UNKNOWN
@@ -198,7 +168,7 @@ data class BusArrivalItem(
                 else -> throw IllegalArgumentException("Unknown bus congestion: $crowded")
             }
 
-        return RealTimeBusArrival(
+        return BusRealTimeInfo(
             vehicleId = vehId.toString(),
             busStatus = determineBusStatus(predictTimeSec),
             remainingTime = predictTimeSec ?: 0,
@@ -238,9 +208,28 @@ data class GyeonggiBusRouteStation(
     @field:JacksonXmlProperty(localName = "turnYn")
     val turnYn: String
 ) {
+    fun toBusStation(): BusStation =
+        BusStation(
+            id = BusStationId(stationId),
+            busStationNumber = BusStationNumber(mobileNo.trim()),
+            busStationMeta =
+                BusStationMeta(
+                    name = stationName,
+                    coordinate = Coordinate(y.toDouble(), x.toDouble())
+                )
+        )
+
     fun getDirection(): BusDirection {
         // 경기도는 기점 -> 종점은 상행, 종점 -> 기점은 하행
         return if (stationSeq < turnSeq) BusDirection.UP else BusDirection.DOWN
+    }
+
+    fun getStationsCountFromStart(): Int {
+        return if (stationSeq < turnSeq) {
+            stationSeq
+        } else {
+            stationSeq - turnSeq
+        }
     }
 
     fun toBusRouteStation(busRoute: BusRoute): BusRouteStation {
@@ -376,34 +365,32 @@ data class BusRouteInfoItem(
         LAST
     }
 
-    fun toBusArrival(
+    fun toBusSchedule(
         dailyType: DailyType,
-        busDirection: BusDirection,
-        busArrivalInfo: BusArrivalItem,
-        busStationList: PublicGyeonggiResponse.BusRouteStationListResponse
-    ): BusArrival? {
-        val firstTime = getBusTime(dailyType, busDirection, BusTimeType.FIRST) ?: return null
-        val lastTime = getBusTime(dailyType, busDirection, BusTimeType.LAST) ?: return null
+        stationInfo: GyeonggiBusRouteStation
+    ): BusSchedule? {
+        val firstTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.FIRST) ?: return null
+        val lastTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.LAST) ?: return null
         val term = getTerm(dailyType)
 
-        val travelTimeFromStart = busArrivalInfo.calculateTravelTimeFromStart(busStationList)
+        val stationsCountFromStart = stationInfo.getStationsCountFromStart()
 
-        return BusArrival(
+        val travelTimeFromStart = (stationsCountFromStart * AVERAGE_MINUTE_PER_STATION).toLong()
+
+        return BusSchedule(
             busRoute =
                 BusRoute(
                     id = BusRouteId(routeId),
                     name = routeName,
                     serviceRegion = ServiceRegion.GYEONGGI
                 ),
-            busStationId = BusStationId(busArrivalInfo.stationId),
-            stationName = busStationList.getStation(BusStationId(busArrivalInfo.stationId)).stationName,
+            busStation = stationInfo.toBusStation(),
             busTimeTable =
                 BusTimeTable(
                     firstTime = firstTime.plusSeconds(travelTimeFromStart),
                     lastTime = lastTime.plusSeconds(travelTimeFromStart),
                     term = term
-                ),
-            realTimeInfo = busArrivalInfo.toRealTimeBussArrivals()
+                )
         )
     }
 

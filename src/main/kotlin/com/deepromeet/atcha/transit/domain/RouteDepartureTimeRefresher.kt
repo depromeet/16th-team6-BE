@@ -66,17 +66,18 @@ class RouteDepartureTimeRefresher(
                         firstBusLeg.start.lon
                     )
             )
-        val busArrival = busManager.getArrivalInfo(routeName, busStationMeta) ?: return
+        val busArrival = busManager.getRealTimeArrival(routeName, busStationMeta)
+        val timeTable = busManager.getBusTimeInfo(routeName, busStationMeta)
 
         // 4) 실시간 정보를 활용해 최대 4개 후보 시간 생성
-        val realTimeInfos = busArrival.realTimeInfo
+        val realTimeInfos = busArrival.realTimeInfoList
         if (realTimeInfos.isEmpty()) return
 
         val candidateTimes = realTimeInfos.mapNotNull { it.expectedArrivalTime }.take(2).toMutableList()
 
         realTimeInfos.getOrNull(1)?.expectedArrivalTime?.let { secondBusArrivalTime ->
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong())
-            candidateTimes += secondBusArrivalTime.plusMinutes(busArrival.busTimeTable.term.toLong() * 2)
+            candidateTimes += secondBusArrivalTime.plusMinutes(timeTable.term.toLong())
+            candidateTimes += secondBusArrivalTime.plusMinutes(timeTable.term.toLong() * 2)
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택

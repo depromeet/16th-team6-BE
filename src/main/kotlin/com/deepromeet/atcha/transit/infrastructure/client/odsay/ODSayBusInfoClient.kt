@@ -1,9 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
-import com.deepromeet.atcha.transit.domain.BusArrival
+import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -22,10 +23,10 @@ class ODSayBusInfoClient(
     @Value("\${odsay.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
-    override fun getBusArrival(
+    override fun getBusSchedule(
         station: BusStation,
         route: BusRoute
-    ): BusArrival? {
+    ): BusSchedule? {
         val busStation =
             ApiClientUtils.callApiWithRetry(
                 primaryKey = serviceKey,
@@ -51,10 +52,17 @@ class ODSayBusInfoClient(
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             ) ?: return null
-        return busStationResponse.toBusArrival()
+        return busStationResponse.toBusArrival(station)
     }
 
     override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo? {
+        TODO("Not yet implemented")
+    }
+
+    override fun getBusRealTimeInfo(
+        station: BusStation,
+        route: BusRoute
+    ): BusRealTimeArrival? {
         TODO("Not yet implemented")
     }
 }
