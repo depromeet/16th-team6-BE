@@ -44,6 +44,8 @@ class LastRouteOperations(
             lastRouteAppender.appendRoutes(start, end, routes)
         }
 
+        log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
+
         return routes
     }
 
