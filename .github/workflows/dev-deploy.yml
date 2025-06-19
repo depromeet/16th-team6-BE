@@ -46,24 +46,24 @@ jobs:
       - name: Copy file via ssh password
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
-          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          host: ${{ secrets.DEV_SSH_IP }}
+          username: ${{ secrets.DEV_SSH_ID }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
 
           timeout: 120s
           source: "./deployment/dev/"
-          target: /root
+          target: /home/atcha
 
       - name: Run
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.REMOTE_IP }}
-          username: ${{ secrets.REMOTE_SSH_ID }}
-          password: ${{ secrets.REMOTE_SSH_PASSWORD }}
+          host: ${{ secrets.DEV_SSH_IP }}
+          username: ${{ secrets.DEV_SSH_ID }}
+          key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            rm -rf /root/data
-            mv /root/deployment/dev/* /root/
-            rm -rf /root/deployment
+            rm -rf /home/atcha/data
+            mv /home/atcha/deployment/dev/* /home/atcha/
+            rm -rf /home/atcha/deployment
             bash ./deploy.sh

@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 data class SubwayTimeTable(
     val startStation: SubwayStation,
@@ -13,15 +12,12 @@ data class SubwayTimeTable(
     fun getLastTime(
         destinationStation: SubwayStation,
         routes: List<Route>
-    ): SubwayTime? =
+    ): SubwayTime =
         schedule
-            .filter {
-                it.departureTime
-                    ?.isAfter(LocalDateTime.of(it.departureTime.toLocalDate(), LocalTime.of(21, 0)))
-                    ?: false
-            }
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
-            .maxWithOrNull(compareBy(nullsLast()) { it.departureTime })
+            .filter { it.departureTime != null }
+            .maxByOrNull { it.departureTime!! }
+            ?: throw TransitException.NotFoundSubwayLastTime
 
     fun findNearestTime(
         time: LocalDateTime,

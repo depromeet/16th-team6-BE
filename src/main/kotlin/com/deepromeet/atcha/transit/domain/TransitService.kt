@@ -19,12 +19,13 @@ class TransitService(
         subwayStationBatchAppender.appendAll()
     }
 
-    fun getBusArrivalInfo(
+    fun getBusArrival(
         routeName: String,
         busStationMeta: BusStationMeta
     ): BusArrival {
-        return busManager.getArrivalInfo(routeName, busStationMeta)
-            ?: throw TransitException.NotFoundBusArrival
+        val schedule = busManager.getSchedule(routeName, busStationMeta)
+        val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta)
+        return BusArrival(schedule, realTimeArrival)
     }
 
     suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
@@ -37,7 +38,7 @@ class TransitService(
         start: Coordinate,
         end: Coordinate
     ): Fare {
-        return taxiFareFetcher.fetch(start, end) ?: Fare(0)
+        return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
     }
 
     fun getRoute(routeId: String): LastRoute {
@@ -51,12 +52,12 @@ class TransitService(
     // TODO: 두번째 도착 예정 버스인지 확인하고있음 -> 실제 차고지 출발 여부 확인으로 변경 필요
     fun isBusStarted(lastRouteId: String): Boolean {
         val lastRoute = lastRouteReader.read(lastRouteId)
-        val busArrival =
-            busManager.getArrivalInfo(
+        val busRealTime =
+            busManager.getRealTimeArrival(
                 lastRoute.findFirstBus().resolveRouteName(),
                 lastRoute.findFirstBus().resolveStartStation()
             )
-        return busArrival?.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
+        return busRealTime.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
     }
 
     suspend fun getLastRoutes(

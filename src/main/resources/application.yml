@@ -12,9 +12,9 @@ spring:
 
 logging:
   level:
-    com.deepromeet.seulseul: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-    feign: DEBUG
+    com.deepromeet.atcha: INFO
+    org.springframework.cloud.openfeign: INFO
+    feign: INFO
     tracer: trace
     org:
       hibernate:

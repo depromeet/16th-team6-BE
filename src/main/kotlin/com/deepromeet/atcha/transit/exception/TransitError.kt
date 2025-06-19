@@ -20,8 +20,12 @@ enum class TransitErrorType(
     NOT_FOUND_ROUTE(404, "TRS_013", "경로를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_POSITION(404, "TRS_014", "버스 위치를 찾을 수 없습니다.", LogLevel.ERROR),
     BUS_ROUTE_STATION_LIST_FETCH_FAILED(500, "TRS_015", "버스 노선 경유 정류소를 가져오는데 실패했습니다.", LogLevel.ERROR),
-    NOT_FOUND_BUS_ARRIVAL(404, "TRS_016", "버스 도착 정보를 찾을 수 없습니다.", LogLevel.ERROR),
-    NOT_FOUND_BUS_OPERATION_INFO(404, "TRS_017", "버스 운행 정보를 찾을 수 없습니다.", LogLevel.ERROR)
+    NOT_FOUND_BUS_SCHEDULE(404, "TRS_016", "버스 도착 정보를 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_BUS_REAL_TIME(404, "TRS_017", "버스 실시간 정보를 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_BUS_OPERATION_INFO(404, "TRS_017", "버스 운행 정보를 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_BUS_STATION(404, "TRS_018", "버스 정류소를 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_BUS_ROUTE(404, "TRS_019", "버스 노선을 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.ERROR)
 }
 
 sealed class TransitException(
@@ -69,7 +73,7 @@ sealed class TransitException(
         override fun readResolve(): Any = BusRouteStationListFetchFailed
     }
 
-    data object NotFoundBusArrival : TransitException(TransitErrorType.NOT_FOUND_BUS_ARRIVAL) {
+    data object NotFoundBusArrival : TransitException(TransitErrorType.NOT_FOUND_BUS_SCHEDULE) {
         override fun readResolve(): Any = NotFoundBusArrival
     }
 
@@ -77,5 +81,21 @@ sealed class TransitException(
         TransitErrorType.NOT_FOUND_BUS_OPERATION_INFO
     ) {
         override fun readResolve(): Any = BusRouteOperationInfoFetchFailed
+    }
+
+    data object NotFoundBusStation : TransitException(TransitErrorType.NOT_FOUND_BUS_STATION) {
+        override fun readResolve(): Any = NotFoundBusStation
+    }
+
+    data object NotFoundBusRoute : TransitException(TransitErrorType.NOT_FOUND_BUS_ROUTE) {
+        override fun readResolve(): Any = NotFoundBusRoute
+    }
+
+    data object NotFoundSubwayLastTime : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_LAST_TIME) {
+        override fun readResolve(): Any = NotFoundSubwayLastTime
+    }
+
+    data object NotFoundBusRealTime : TransitException(TransitErrorType.NOT_FOUND_BUS_REAL_TIME) {
+        override fun readResolve(): Any = NotFoundBusRealTime
     }
 }
