@@ -63,7 +63,6 @@ jobs:
           key: ${{ secrets.DEV_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
           script: |
-            rm -rf /home/atcha/data
-            mv /home/atcha/deployment/dev/* /home/atcha/
+            mv -f /home/atcha/deployment/dev/* /home/atcha/
             rm -rf /home/atcha/deployment
             bash ./deploy.sh
