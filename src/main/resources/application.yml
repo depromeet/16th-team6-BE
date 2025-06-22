@@ -39,6 +39,10 @@ kakao:
   oauth:
     url: https://kauth.kakao.com/oauth
 
+apple:
+  api:
+    url: https://appleid.apple.com
+
 open-api:
   api:
     url:

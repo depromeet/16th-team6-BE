@@ -19,7 +19,7 @@ class User(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
-    val providerId: Long,
+    val providerId: String,
     var nickname: String,
     var profileImageUrl: String = "",
     @Embedded
