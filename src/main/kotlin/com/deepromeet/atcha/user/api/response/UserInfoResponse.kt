@@ -5,7 +5,7 @@ import com.deepromeet.atcha.user.domain.User
 
 data class UserInfoResponse(
     val id: Long,
-    val providerId: Long,
+    val providerId: String,
     val nickname: String,
     val profileImageUrl: String,
     val address: String,

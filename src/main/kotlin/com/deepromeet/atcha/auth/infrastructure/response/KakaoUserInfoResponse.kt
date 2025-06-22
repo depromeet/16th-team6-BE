@@ -17,7 +17,7 @@ data class KakaoUserInfoResponse(
         get() = kakaoAccount.profile
 
     fun toUserInfoResponse(): ProviderUserInfoResponse =
-        ProviderUserInfoResponse(providerId = kakaoId, nickname, profileImageUrl)
+        ProviderUserInfoResponse(providerId = kakaoId.toString(), nickname, profileImageUrl)
 }
 
 data class KakaoAccount(

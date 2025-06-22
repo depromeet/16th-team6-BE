@@ -6,7 +6,7 @@ import com.deepromeet.atcha.user.domain.User
 
 object UserFixture {
     fun create(
-        providerId: Long = 1L,
+        providerId: String = "1",
         nickname: String = "TEST_USER",
         profileImageUrl: String = "TEST_PROFILE_URL",
         address: Address =

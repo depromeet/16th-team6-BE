@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: application.yml
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -10,6 +12,10 @@ spring:
 
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
+
+apple:
+  api:
+    url: https://appleid.apple.com
 
 tmap:
   api:
