@@ -11,6 +11,10 @@ spring:
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
 
+apple:
+  api:
+    url: https://appleid.apple.com
+
 tmap:
   api:
     app-key: ${secret.dev.TMAP_API_KEY}
