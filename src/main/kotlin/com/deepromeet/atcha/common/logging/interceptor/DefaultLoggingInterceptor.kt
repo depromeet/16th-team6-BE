@@ -28,11 +28,14 @@ class DefaultLoggingInterceptor : BaseLoggingInterceptor() {
         // 요청 헤더
         val headers = request.headerNames?.toList()?.associateWith { request.getHeader(it) } ?: emptyMap()
 
+        // 요청 파라미터
+        val params = request.parameterMap?.mapValues { it.value.joinToString(", ") } ?: emptyMap()
+
         // 요청 바디
         val requestBody =
             if (request is ContentCachingRequestWrapper) {
                 try {
-                    java.lang.String(request.contentAsByteArray, request.characterEncoding ?: "UTF-8")
+                    java.lang.String(request.contentAsByteArray, request.characterEncoding)
                 } catch (e: Exception) {
                     "[Failed to read body: ${e.message}]"
                 }
@@ -47,6 +50,7 @@ class DefaultLoggingInterceptor : BaseLoggingInterceptor() {
             ▶ Status: [${response.status}]
             ▶ Duration: ${duration}ms
             ▶ Headers: $headers
+            ▶ Params: $params
             ▶ Body: $requestBody
             """.trimIndent()
         }
