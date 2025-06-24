@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.user.domain
 
 import com.deepromeet.atcha.auth.domain.SignUpInfo
-import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.response.ProviderUserInfoResponse
 import com.deepromeet.atcha.user.infrastructure.repository.UserJpaRepository
 import org.springframework.stereotype.Component
@@ -18,9 +17,7 @@ class UserAppender(
     ): User {
         val user =
             User(
-                nickname =
-                    providerUserInfo.nickname ?: signUpInfo.userName
-                        ?: throw AuthException.NameRequired,
+                nickname = providerUserInfo.nickname ?: signUpInfo.userName ?: "익명",
                 providerId = providerUserInfo.providerId,
                 profileImageUrl = providerUserInfo.profileImageUrl,
                 address = signUpInfo.getAddress(),
