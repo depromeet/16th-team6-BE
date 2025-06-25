@@ -60,7 +60,7 @@ class GlobalControllerAdvice {
                 ApiResponse.error(
                     exception.errorType.errorCode,
                     request.requestURI,
-                    exception.message
+                    exception.message ?: exception.errorType.message
                 )
             )
     }
