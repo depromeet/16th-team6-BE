@@ -2,9 +2,7 @@ package com.deepromeet.atcha.auth
 
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
-import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
-import com.deepromeet.atcha.auth.infrastructure.response.Profile
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
@@ -19,8 +17,7 @@ import org.springframework.http.HttpHeaders
 class AuthControllerTest : BaseControllerTest() {
     private val providerAccessToken: String = "thisisfortestfJmGasdwdWIDEbraTFAAAAAQoqJREAAAGVMPfFQEA9X5YOsAdz"
     private val providerId = 12345L
-    private val profile = Profile("test", "test@test.com")
-    private val kakaoUserInfo = KakaoUserInfoResponse(providerId, KakaoAccount(profile))
+    private val kakaoUserInfo = KakaoUserInfoResponse(providerId)
 
     @BeforeEach
     fun setMockKakaoApiClient() {

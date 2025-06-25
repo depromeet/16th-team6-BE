@@ -17,9 +17,7 @@ class UserAppender(
     ): User {
         val user =
             User(
-                nickname = providerUserInfo.nickname ?: signUpInfo.userName ?: "익명",
                 providerId = providerUserInfo.providerId,
-                profileImageUrl = providerUserInfo.profileImageUrl,
                 address = signUpInfo.getAddress(),
                 alertFrequencies = signUpInfo.alertFrequencies.toMutableSet(),
                 fcmToken = signUpInfo.fcmToken
@@ -31,8 +29,6 @@ class UserAppender(
         user: User,
         userUpdateInfo: UserUpdateInfo
     ): User {
-        userUpdateInfo.nickname?.let { user.nickname = it }
-        userUpdateInfo.profileImageUrl?.let { user.profileImageUrl = it }
         userUpdateInfo.alertFrequencies?.let { user.alertFrequencies = it }
         userUpdateInfo.address?.let { user.address.address = it }
         userUpdateInfo.lat?.let { user.address.lat = it }

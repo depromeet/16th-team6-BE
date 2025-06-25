@@ -83,9 +83,7 @@ class UserControllerTest(
         val findUser = userReader.read(user.id)
 
         // then
-        assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
-        assertThat(findUser.profileImageUrl).isEqualTo(userInfoUpdateRequest.profileImageUrl)
         assertThat(findUser.address.address).isEqualTo(userInfoUpdateRequest.address)
         assertThat(findUser.address.lat).isEqualTo(userInfoUpdateRequest.lat)
         assertThat(findUser.address.lon).isEqualTo(userInfoUpdateRequest.lon)
