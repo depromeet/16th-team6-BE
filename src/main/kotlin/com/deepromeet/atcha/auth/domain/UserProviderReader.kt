@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.auth.domain
 
+import com.deepromeet.atcha.auth.exception.AuthError
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.repository.UserProviderRepository
 import org.springframework.stereotype.Component
@@ -10,5 +11,5 @@ class UserProviderReader(
 ) {
     fun read(userid: Long): UserProvider =
         userProviderRepository.findByUserId(userid)
-            ?: throw AuthException.NoMatchedUserToken
+            ?: throw AuthException.of(AuthError.NO_MATCHED_USER_TOKEN, userid.toString())
 }

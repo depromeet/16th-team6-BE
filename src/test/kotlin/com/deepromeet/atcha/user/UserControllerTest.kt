@@ -36,7 +36,7 @@ class UserControllerTest(
 
     @BeforeEach
     fun issueToken() {
-        user = userAppender.save(user)
+        user = userAppender.append(user)
         val generateToken = tokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
