@@ -6,9 +6,7 @@ import com.deepromeet.atcha.auth.domain.UserProviderAppender
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
-import com.deepromeet.atcha.auth.infrastructure.response.KakaoAccount
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
-import com.deepromeet.atcha.auth.infrastructure.response.Profile
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.domain.UserAppender
 import org.assertj.core.api.Assertions.assertThat
@@ -46,8 +44,7 @@ class AuthServiceTest {
         // given
         val token = "token"
         val kakaoId = 12345L
-        val profile = Profile("test", "test@test.com")
-        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // when
@@ -62,15 +59,12 @@ class AuthServiceTest {
         // given
         val token = "token"
         val kakaoId = 12345L
-        val profile = Profile("test", "test@test.com")
-        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         val existingUser =
             UserFixture.create(
-                providerId = kakaoId.toString(),
-                nickname = kakaoUserInfo.nickname,
-                profileImageUrl = kakaoUserInfo.profileImageUrl
+                providerId = kakaoId.toString()
             )
 
         userAppender.save(existingUser)
@@ -87,8 +81,7 @@ class AuthServiceTest {
         // given
         val token = "token"
         val kakaoId = 67890L
-        val profile = Profile("newUser", "new@test.com")
-        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
         val user = UserFixture.create()
         val signUpRequest = UserFixture.userToSignUpRequest(user, ProviderType.KAKAO.ordinal)
@@ -109,16 +102,13 @@ class AuthServiceTest {
         // given
         val token = "token"
         val kakaoId = 11111L
-        val profile = Profile("existingUser", "exist@test.com")
-        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 해당 유저 저장
         val existingUser =
             UserFixture.create(
-                providerId = kakaoId.toString(),
-                nickname = kakaoUserInfo.nickname,
-                profileImageUrl = kakaoUserInfo.profileImageUrl
+                providerId = kakaoId.toString()
             )
         userAppender.save(existingUser)
         val signUpRequest = UserFixture.userToSignUpRequest(existingUser, ProviderType.KAKAO.ordinal)
@@ -133,8 +123,7 @@ class AuthServiceTest {
         // given
         val token = "token"
         val kakaoId = 22222L
-        val profile = Profile("loginUser", "login@test.com")
-        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId, KakaoAccount(profile))
+        val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
 
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 

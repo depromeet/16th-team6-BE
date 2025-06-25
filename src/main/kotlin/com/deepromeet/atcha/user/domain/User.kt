@@ -20,8 +20,6 @@ class User(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0,
     val providerId: String,
-    var nickname: String,
-    var profileImageUrl: String = "",
     @Embedded
     var address: Address = Address(),
     @ElementCollection(fetch = FetchType.EAGER)
@@ -51,8 +49,6 @@ class User(
     override fun toString(): String {
         return "User(id=$id, " +
             "providerId=$providerId, " +
-            "nickname='$nickname', " +
-            "profileImageUrl='$profileImageUrl', " +
             "address=$address, " +
             "alertFrequencies=$alertFrequencies, " +
             "fcmToken='$fcmToken', " +

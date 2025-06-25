@@ -16,10 +16,7 @@ class AppleProvider(
         val publicKey = PublicKeyGenerator.generate(header, publicKeys)
         val claims = appleTokenParser.extractClaims(providerToken, publicKey)
 
-        return ProviderUserInfoResponse(
-            providerId = claims.subject,
-            profileImageUrl = ""
-        )
+        return ProviderUserInfoResponse(providerId = claims.subject)
     }
 
     override fun logout(providerToken: String) {
