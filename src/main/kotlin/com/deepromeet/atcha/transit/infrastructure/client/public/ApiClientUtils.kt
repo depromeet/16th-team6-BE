@@ -8,6 +8,22 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 private val log = KotlinLogging.logger {}
 
 object ApiClientUtils {
+    fun <T, R> callApiByKeyProvider(
+        keyProvider: () -> String,
+        apiCall: (String) -> T,
+        processResult: (T) -> R,
+        errorMessage: String
+    ): R? {
+        return try {
+            val apiKey = keyProvider()
+            val response = apiCall(apiKey)
+            processResult(response)
+        } catch (e: Exception) {
+            log.warn(e) { "API 호출 중 예상치 못한 오류 발생: ${e.message} - $errorMessage" }
+            null
+        }
+    }
+
     /**
      * API 호출과 재시도 로직을 처리하는 공통 함수
      *
