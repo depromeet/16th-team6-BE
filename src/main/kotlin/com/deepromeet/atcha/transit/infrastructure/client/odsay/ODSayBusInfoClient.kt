@@ -6,12 +6,9 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class ODSayBusInfoClient(
