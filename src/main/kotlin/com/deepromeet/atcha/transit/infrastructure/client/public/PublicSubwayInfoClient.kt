@@ -5,9 +5,12 @@ import com.deepromeet.atcha.transit.domain.SubwayDirection
 import com.deepromeet.atcha.transit.domain.SubwayInfoClient
 import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
+import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.SubwayTimeTable
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicJsonResponse
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.SubwayTimeResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
@@ -57,70 +60,85 @@ class PublicSubwayInfoClient(
         direction: SubwayDirection
     ): SubwayTimeTable? {
         return try {
-            val (stationsDeferred, scheduleDeferred) =
-                coroutineScope {
-                    val stations =
-                        async(Dispatchers.IO) {
-                            subwayStationRepository.findByRouteCode(startStation.routeCode)
-                        }
+            val (subwayStations, scheduleItems) =
+                fetchDataConcurrently(startStation, dailyType, direction)
+                    ?: return null
 
-                    val schedule =
-                        async(Dispatchers.IO) {
-                            ApiClientUtils.callApiWithRetry(
-                                primaryKey = serviceKey,
-                                spareKey = spareKey,
-                                realLastKey = realLastKey,
-                                apiCall = { key ->
-                                    subwayInfoFeignClient.getStationSchedule(
-                                        key,
-                                        startStation.id!!.value,
-                                        dailyType.code,
-                                        direction.code
-                                    )
-                                },
-                                isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
-                                processResult = { response ->
-                                    response.response.body.items?.item
-                                        ?.filter { it.endSubwayStationNm != null }
-                                        ?: emptyList()
-                                },
-                                errorMessage =
-                                    "지하철 시간표 정보를 가져오는데 실패했습니다 " +
-                                        "- ${startStation.id} ${dailyType.code} ${direction.code}"
-                            )
-                        }
+            val schedule = mapToSchedule(scheduleItems, subwayStations, startStation.name)
 
-                    stations to schedule
-                }
-
-            val subwayStations = stationsDeferred.await()
-            val scheduleItems = scheduleDeferred.await() ?: return null
-
-            val timeTableItems =
-                coroutineScope {
-                    scheduleItems.map { item ->
-                        async(Dispatchers.IO) {
-                            val finalStation =
-                                subwayStations.find { station -> station.name == item.endSubwayStationNm }
-                                    ?: throw TransitException.NotFoundSubwayStation
-                            item.toDomain(finalStation)
-                        }
-                    }.awaitAll()
-                }
-
-            SubwayTimeTable(
-                startStation,
-                dailyType,
-                direction,
-                timeTableItems
-            )
+            SubwayTimeTable(startStation, dailyType, direction, schedule)
+        } catch (e: TransitException) {
+            log.warn(e) { "지하철 시간표 정보 처리 중 예상된 오류 발생: ${e.message}" }
+            throw e
         } catch (e: Exception) {
-            log.warn(e) {
-                "지하철 시간표 정보를 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}"
-            }
+            log.warn(e) { "지하철 시간표 정보 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}" }
             null
         }
     }
+
+    private suspend fun fetchDataConcurrently(
+        startStation: SubwayStation,
+        dailyType: DailyType,
+        direction: SubwayDirection
+    ): Pair<List<SubwayStation>, List<SubwayTimeResponse>>? =
+        coroutineScope {
+            val stationsDeferred =
+                async(Dispatchers.IO) {
+                    subwayStationRepository.findByRouteCode(startStation.routeCode)
+                }
+
+            val scheduleDeferred =
+                async(Dispatchers.IO) {
+                    ApiClientUtils.callApiWithRetry(
+                        primaryKey = serviceKey,
+                        spareKey = spareKey,
+                        realLastKey = realLastKey,
+                        apiCall = { key ->
+                            subwayInfoFeignClient.getStationSchedule(
+                                key,
+                                startStation.id!!.value,
+                                dailyType.code,
+                                direction.code
+                            )
+                        },
+                        isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
+                        processResult = { response ->
+                            response.response.body.items?.item?.filter { it.endSubwayStationNm != null } ?: emptyList()
+                        },
+                        errorMessage =
+                            "지하철 시간표 정보를 가져오는데 실패했습니다 -" +
+                                " ${startStation.id} ${dailyType.code} ${direction.code}"
+                    )
+                }
+
+            val subwayStations = stationsDeferred.await()
+            val scheduleItems = scheduleDeferred.await()
+
+            if (scheduleItems == null) {
+                return@coroutineScope null
+            }
+
+            subwayStations to scheduleItems
+        }
+
+    private suspend fun mapToSchedule(
+        scheduleItems: List<SubwayTimeResponse>,
+        subwayStations: List<SubwayStation>,
+        startStationName: String
+    ): List<SubwayTime> =
+        coroutineScope {
+            scheduleItems.map { item ->
+                async(Dispatchers.IO) {
+                    val finalStation =
+                        subwayStations.find { station -> station.name == item.endSubwayStationNm }
+                            ?: throw TransitException.of(
+                                TransitError.NOT_FOUND_SUBWAY_STATION,
+                                "지하철 '$startStationName'역의 시간표에서 도착역 '${item.endSubwayStationNm}'을 찾을 수 없습니다."
+                            )
+                    item.toDomain(finalStation)
+                }
+            }.awaitAll()
+        }
 
     private fun <T> isSubwayApiLimitExceeded(response: PublicJsonResponse<T>): Boolean {
         val limitMessages =

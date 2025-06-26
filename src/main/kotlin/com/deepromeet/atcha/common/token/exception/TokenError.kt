@@ -14,14 +14,38 @@ enum class TokenError(
     NOT_VALID_TOKEN(400, "TOK_002", "유효하지 않는 토큰입니다.", LogLevel.WARN)
 }
 
-sealed class TokenException(
-    errorType: TokenError
-) : CustomException(errorType) {
-    data object ExpiredToken : TokenException(TokenError.EXPIRED_TOKEN) {
-        override fun readResolve(): Any = ExpiredToken
-    }
+class TokenException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
 
-    data object NotValidToken : TokenException(TokenError.NOT_VALID_TOKEN) {
-        override fun readResolve(): Any = NotValidToken
+    companion object {
+        fun of(errorType: BaseErrorType): TokenException {
+            return TokenException(errorType)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): TokenException {
+            return TokenException(errorType, customMessage = message)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): TokenException {
+            return TokenException(errorType, cause = cause)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): TokenException {
+            return TokenException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

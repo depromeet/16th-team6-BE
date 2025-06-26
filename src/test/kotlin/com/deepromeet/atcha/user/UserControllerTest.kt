@@ -101,6 +101,6 @@ class UserControllerTest(
 
         // then
         assertThatThrownBy { userReader.read(user.id) }
-            .isInstanceOf(UserException.UserNotFound::class.java)
+            .isInstanceOf(UserException::class.java)
     }
 }

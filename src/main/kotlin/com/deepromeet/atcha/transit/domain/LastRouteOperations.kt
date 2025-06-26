@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
@@ -115,7 +116,10 @@ class LastRouteOperations(
                                         val transitTime =
                                             timeTable?.let {
                                                 TransitTime.SubwayTimeInfo(it)
-                                            } ?: throw TransitException.NotFoundTime
+                                            } ?: throw TransitException.of(
+                                                TransitError.NOT_FOUND_TIME,
+                                                "지하철 '${leg.start.name}'역에서 '${leg.end.name}'역으로 가는 시간표를 찾을 수 없습니다."
+                                            )
 
                                         leg.toLastRouteLeg(departureDateTime, transitTime)
                                     }

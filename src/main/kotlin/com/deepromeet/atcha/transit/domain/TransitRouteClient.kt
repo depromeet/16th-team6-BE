@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
@@ -38,12 +39,18 @@ class TransitRouteClient(
 
         response.result?.let { result ->
             when (result.status) {
-                11 -> throw TransitException.DistanceTooShort
-                else -> throw TransitException.ServiceAreaNotSupported
+                11 -> throw TransitException.of(TransitError.DISTANCE_TOO_SHORT)
+                else -> throw TransitException.of(TransitError.SERVICE_AREA_NOT_SUPPORTED)
             }
         }
 
-        return filterValidItineraries(response.metaData?.plan?.itineraries ?: throw TransitException.TransitApiError)
+        return filterValidItineraries(
+            response.metaData?.plan?.itineraries
+                ?: throw TransitException.of(
+                    TransitError.TRANSIT_API_ERROR,
+                    "경로 검색 API에서 유효한 여행 경로를 반환하지 않았습니다."
+                )
+        )
     }
 
     private fun filterValidItineraries(itineraries: List<Itinerary>): List<Itinerary> {

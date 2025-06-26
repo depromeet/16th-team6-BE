@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -14,7 +15,11 @@ class LastRouteReader(
     private val lastRouteIndexCache: LastRouteIndexCache
 ) {
     fun read(routeId: String): LastRoute {
-        return lastRouteCache.get(routeId) ?: throw TransitException.NotFoundRoute
+        return lastRouteCache.get(routeId)
+            ?: throw TransitException.of(
+                TransitError.NOT_FOUND_ROUTE,
+                "경로 ID '$routeId'에 해당하는 경로를 찾을 수 없습니다."
+            )
     }
 
     suspend fun read(

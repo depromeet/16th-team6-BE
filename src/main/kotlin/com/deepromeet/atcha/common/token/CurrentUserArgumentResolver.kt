@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.common.token
 
+import com.deepromeet.atcha.common.web.exception.RequestError
 import com.deepromeet.atcha.common.web.exception.RequestException
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.MethodParameter
@@ -30,10 +31,10 @@ class CurrentUserArgumentResolver(
     ): Long {
         val request =
             webRequest.getNativeRequest(HttpServletRequest::class.java)
-                ?: throw RequestException.NoRequestInfo
+                ?: throw RequestException.of(RequestError.NO_REQUEST_INFO, "HTTP 요청 정보를 가져올 수 없습니다")
         val authorization = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (authorization == null || !authorization.startsWith(TOKEN_TYPE)) {
-            throw RequestException.NotValidHeader
+            throw RequestException.of(RequestError.NOT_VALID_HEADER, "Authorization 헤더가 없거나 Bearer 토큰 형식이 아닙니다")
         }
         val token = authorization.substring(TOKEN_TYPE.length)
         tokenGenerator.validateToken(token, TokenType.ACCESS)

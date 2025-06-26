@@ -82,6 +82,6 @@ class TokenGeneratorTest(
 
         // then
         Assertions.assertThatThrownBy { tokenGenerator.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
-            .isInstanceOf(TokenException.ExpiredToken::class.java)
+            .isInstanceOf(TokenException::class.java)
     }
 }

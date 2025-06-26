@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.time.LocalDateTime
 
@@ -17,7 +18,10 @@ data class SubwayTimeTable(
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
             .filter { it.departureTime != null }
             .maxByOrNull { it.departureTime!! }
-            ?: throw TransitException.NotFoundSubwayLastTime
+            ?: throw TransitException.of(
+                TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
+                "지하철 '${startStation.name}'역에서 '${destinationStation.name}'역으로 가는 막차 시간을 찾을 수 없습니다."
+            )
 
     fun findNearestTime(
         time: LocalDateTime,
@@ -27,13 +31,25 @@ data class SubwayTimeTable(
             TimeDirection.AFTER -> {
                 schedule
                     .filter { it.departureTime?.isAfter(time) ?: false }
-                    .minByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
+                    .minByOrNull {
+                        it.departureTime
+                            ?: throw TransitException.of(
+                                TransitError.NOT_FOUND_TIME,
+                                "시간표에서 출발 시간이 null입니다."
+                            )
+                    }
             }
 
             TimeDirection.BEFORE -> {
                 schedule
                     .filter { it.departureTime?.isBefore(time) ?: false }
-                    .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
+                    .maxByOrNull {
+                        it.departureTime
+                            ?: throw TransitException.of(
+                                TransitError.NOT_FOUND_TIME,
+                                "시간표에서 출발 시간이 null입니다."
+                            )
+                    }
             }
         }
 

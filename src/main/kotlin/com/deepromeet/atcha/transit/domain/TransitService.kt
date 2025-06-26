@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -38,7 +39,11 @@ class TransitService(
         start: Coordinate,
         end: Coordinate
     ): Fare {
-        return taxiFareFetcher.fetch(start, end) ?: throw TransitException.TaxiFareFetchFailed
+        return taxiFareFetcher.fetch(start, end)
+            ?: throw TransitException.of(
+                TransitError.TAXI_FARE_FETCH_FAILED,
+                "출발지(${start.lat}, ${start.lon})에서 도착지(${end.lat}, ${end.lon})까지의 택시 요금을 조회할 수 없습니다."
+            )
     }
 
     fun getRoute(routeId: String): LastRoute {

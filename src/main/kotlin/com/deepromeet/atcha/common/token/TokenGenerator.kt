@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.common.token
 
+import com.deepromeet.atcha.common.token.exception.TokenError
 import com.deepromeet.atcha.common.token.exception.TokenException
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
@@ -43,9 +44,9 @@ class TokenGenerator(
         try {
             validateJwtFormat(tokenType, token)
         } catch (e: ExpiredJwtException) {
-            throw TokenException.ExpiredToken
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "만료된 토큰입니다: ${e.message}")
         } catch (e: Exception) {
-            throw TokenException.NotValidToken
+            throw TokenException.of(TokenError.NOT_VALID_TOKEN, "유효하지 않은 토큰 형식입니다: ${e.message}")
         }
     }
 
@@ -62,9 +63,9 @@ class TokenGenerator(
                     .body
             return body.get("sub").toString().toLong()
         } catch (e: ExpiredJwtException) {
-            throw TokenException.ExpiredToken
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "만료된 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}")
         } catch (e: Exception) {
-            throw TokenException.NotValidToken
+            throw TokenException.of(TokenError.NOT_VALID_TOKEN, "유효하지 않은 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}")
         }
     }
 
@@ -88,9 +89,9 @@ class TokenGenerator(
                     .body
             return body.get(TokenType.ACCESS.name).toString()
         } catch (e: ExpiredJwtException) {
-            throw TokenException.ExpiredToken
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "만료된 리프레시 토큰으로 액세스 토큰을 가져올 수 없습니다: ${e.message}")
         } catch (e: Exception) {
-            throw TokenException.NotValidToken
+            throw TokenException.of(TokenError.NOT_VALID_TOKEN, "유효하지 않은 리프레시 토큰으로 액세스 토큰을 가져올 수 없습니다: ${e.message}")
         }
     }
 
@@ -131,12 +132,12 @@ class TokenGenerator(
             .build()
             .parseClaimsJws(token)
             .body.get("sub")
-            ?: throw TokenException.NotValidToken
+            ?: throw TokenException.of(TokenError.NOT_VALID_TOKEN, "토큰에 사용자 정보가 포함되어 있지 않습니다")
     }
 
     private fun validateContainBlacklist(token: String) {
         if (blacklist.contains(token)) {
-            throw TokenException.ExpiredToken
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
         }
     }
 }
