@@ -60,7 +60,7 @@ class PublicSubwayInfoClient(
         direction: SubwayDirection
     ): SubwayTimeTable {
         val (subwayStations, scheduleItems) = fetchDataConcurrently(startStation, dailyType, direction)
-        val schedule = mapToSchedule(scheduleItems, subwayStations, startStation.name)
+        val schedule = mapToSchedule(scheduleItems, subwayStations)
         return SubwayTimeTable(startStation, dailyType, direction, schedule)
     }
 
@@ -111,8 +111,7 @@ class PublicSubwayInfoClient(
 
     private suspend fun mapToSchedule(
         scheduleItems: List<SubwayTimeResponse>,
-        subwayStations: List<SubwayStation>,
-        startStationName: String
+        subwayStations: List<SubwayStation>
     ): List<SubwayTime> =
         coroutineScope {
             scheduleItems.map { item ->
@@ -121,11 +120,11 @@ class PublicSubwayInfoClient(
                         subwayStations.find { station -> station.name == item.endSubwayStationNm }
                             ?: throw TransitException.of(
                                 TransitError.NOT_FOUND_SUBWAY_STATION,
-                                "지하철 '$startStationName'역의 시간표에서 도착역 '${item.endSubwayStationNm}'을 찾을 수 없습니다."
+                                "지하철역 데이터에서 도착역 '${item.endSubwayStationNm}'을 찾을 수 없습니다."
                             )
                     item.toDomain(finalStation)
                 }
-            }.awaitAll()
+            }.awaitAll().filterNotNull()
         }
 
     private fun <T> isSubwayApiLimitExceeded(response: PublicJsonResponse<T>): Boolean {

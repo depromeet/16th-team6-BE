@@ -20,6 +20,8 @@ import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
@@ -368,9 +370,9 @@ data class BusRouteInfoItem(
     fun toBusSchedule(
         dailyType: DailyType,
         stationInfo: GyeonggiBusRouteStation
-    ): BusSchedule? {
-        val firstTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.FIRST) ?: return null
-        val lastTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.LAST) ?: return null
+    ): BusSchedule {
+        val firstTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.FIRST)
+        val lastTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.LAST)
         val term = getTerm(dailyType)
 
         val stationsCountFromStart = stationInfo.getStationsCountFromStart()
@@ -414,7 +416,7 @@ data class BusRouteInfoItem(
         dailyType: DailyType,
         busDirection: BusDirection,
         timeType: BusTimeType
-    ): LocalDateTime? {
+    ): LocalDateTime {
         val timeStr: String? = getTimeString(dailyType, busDirection, timeType)
         return parseTime(timeStr)
     }
@@ -452,10 +454,12 @@ data class BusRouteInfoItem(
         }
     }
 
-    private fun parseTime(timeStr: String?): LocalDateTime? {
+    private fun parseTime(timeStr: String?): LocalDateTime {
         if (timeStr == "0" || timeStr == null) {
-            log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 값이 '0' 입니다." }
-            return null
+            throw TransitException.of(
+                TransitError.INVALID_TIME_FORMAT,
+                "경기도 버스 시간 형식이 잘못되었습니다: $timeStr"
+            )
         }
 
         try {
@@ -469,7 +473,7 @@ data class BusRouteInfoItem(
             return LocalDateTime.of(date, localTime)
         } catch (e: Exception) {
             log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 파싱 오류: $timeStr" }
-            return null
+            throw TransitException.of(TransitError.INVALID_TIME_FORMAT, e)
         }
     }
 

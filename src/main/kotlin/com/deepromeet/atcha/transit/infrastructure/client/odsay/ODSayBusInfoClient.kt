@@ -5,6 +5,8 @@ import com.deepromeet.atcha.common.exception.InfrastructureException
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
@@ -28,16 +30,20 @@ class ODSayBusInfoClient(
     fun getBusSchedule(
         station: BusStation,
         route: BusRoute
-    ): BusSchedule? {
+    ): BusSchedule {
         val busStation =
             ApiClientUtils.callApiByKeyProvider(
                 keyProvider = ::getApiKeyBasedOnUsage,
                 apiCall = { key -> oDSayBusFeignClient.getStationByStationName(key, station.busStationMeta.name) },
                 processResult = { response ->
                     response.result.station.find { it.arsID.trim() == station.busStationNumber.value.trim() }
+                        ?: throw TransitException.of(
+                            TransitError.NOT_FOUND_BUS_STATION,
+                            "ODSay에서 정류장 '${station.busStationMeta.name}'을 찾을 수 없습니다."
+                        )
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
-            ) ?: return null
+            )
 
         val busStationResponse =
             ApiClientUtils.callApiByKeyProvider(
@@ -45,9 +51,13 @@ class ODSayBusInfoClient(
                 apiCall = { key -> oDSayBusFeignClient.getStationInfoBystationID(key, busStation.stationID) },
                 processResult = { response ->
                     response.result.lane.find { it.busLocalBlID == route.id.value }
+                        ?: throw TransitException.of(
+                            TransitError.NOT_FOUND_BUS_ROUTE,
+                            "ODSay에서 노선 '${route.name} - ${route.id.value}'을 찾을 수 없습니다."
+                        )
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
-            ) ?: return null
+            )
 
         return busStationResponse.toBusArrival(station)
     }
@@ -56,7 +66,10 @@ class ODSayBusInfoClient(
         try {
             val count =
                 redisTemplate.opsForValue().increment(ODSAY_API_CALL_COUNT_KEY, 1)
-                    ?: throw IllegalStateException("Redis increment operation unexpectedly returned null.")
+                    ?: throw InfrastructureException.of(
+                        InfrastructureError.CACHE_ERROR,
+                        "Redis에서 ODSay API 호출 카운트를 가져올 수 없습니다."
+                    )
 
             return when {
                 count <= 900 -> serviceKey

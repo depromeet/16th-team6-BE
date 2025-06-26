@@ -37,68 +37,63 @@ class PublicGyeonggiRouteInfoClient(
         route: BusRoute
     ): BusSchedule? =
         runBlocking {
-            try {
-                coroutineScope {
-                    // 1. 노선 정보 가져오기 - 비동기
-                    val busRouteInfoDeferred =
-                        async(Dispatchers.IO) {
-                            ApiClientUtils.callApiWithRetry(
-                                primaryKey = serviceKey,
-                                spareKey = spareKey,
-                                realLastKey = realLastKey,
-                                apiCall = {
-                                        key ->
-                                    publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value)
-                                },
-                                isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                                processResult = { response ->
-                                    response.msgBody?.busRouteInfoItem ?: throw TransitException.of(
-                                        TransitError.NOT_FOUND_BUS_ROUTE,
-                                        "경기도 노선 정보 응답값이 null 입니다."
-                                    )
-                                },
-                                errorMessage = "경기도 노선 정보 - ${route.name}-${route.id.value}를 가져오는데 실패했습니다."
-                            )
-                        }
+            coroutineScope {
+                // 1. 노선 정보 가져오기 - 비동기
+                val busRouteInfoDeferred =
+                    async(Dispatchers.IO) {
+                        ApiClientUtils.callApiWithRetry(
+                            primaryKey = serviceKey,
+                            spareKey = spareKey,
+                            realLastKey = realLastKey,
+                            apiCall = {
+                                    key ->
+                                publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value)
+                            },
+                            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                            processResult = { response ->
+                                response.msgBody?.busRouteInfoItem ?: throw TransitException.of(
+                                    TransitError.NOT_FOUND_BUS_ROUTE,
+                                    "경기도 노선 정보 응답값이 null 입니다."
+                                )
+                            },
+                            errorMessage = "경기도 노선 정보 - ${route.name}-${route.id.value}를 가져오는데 실패했습니다."
+                        )
+                    }
 
-                    // 2. 노선 정류장 목록 가져오기 - 비동기
-                    val busRouteStationsDeferred =
-                        async(Dispatchers.IO) {
-                            ApiClientUtils.callApiWithRetry(
-                                primaryKey = serviceKey,
-                                spareKey = spareKey,
-                                realLastKey = realLastKey,
-                                apiCall = {
-                                        key ->
-                                    publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
-                                },
-                                isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                                processResult = { response ->
-                                    response.msgBody ?: throw TransitException.of(
-                                        TransitError.BUS_ROUTE_STATION_LIST_FETCH_FAILED,
-                                        "경기도 노선 정류장 목록 응닶값이 null 입니다."
-                                    )
-                                },
-                                errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
-                            )
-                        }
+                // 2. 노선 정류장 목록 가져오기 - 비동기
+                val busRouteStationsDeferred =
+                    async(Dispatchers.IO) {
+                        ApiClientUtils.callApiWithRetry(
+                            primaryKey = serviceKey,
+                            spareKey = spareKey,
+                            realLastKey = realLastKey,
+                            apiCall = {
+                                    key ->
+                                publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
+                            },
+                            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+                            processResult = { response ->
+                                response.msgBody ?: throw TransitException.of(
+                                    TransitError.BUS_ROUTE_STATION_LIST_FETCH_FAILED,
+                                    "경기도 노선 정류장 목록 응닶값이 null 입니다."
+                                )
+                            },
+                            errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
+                        )
+                    }
 
-                    // 결과 대기
-                    val busRouteInfo = busRouteInfoDeferred.await()
-                    val busRouteStations = busRouteStationsDeferred.await()
+                // 결과 대기
+                val busRouteInfo = busRouteInfoDeferred.await()
+                val busRouteStations = busRouteStationsDeferred.await()
 
-                    // 3. 정류장 정보 찾기
-                    val stationInfo = busRouteStations.getStation(station.id)
+                // 3. 정류장 정보 찾기
+                val stationInfo = busRouteStations.getStation(station.id)
 
-                    // 4. 버스 도착 정보 변환
-                    busRouteInfo.toBusSchedule(
-                        dailyTypeResolver.resolve(),
-                        stationInfo
-                    )
-                }
-            } catch (e: Exception) {
-                log.warn(e) {}
-                null
+                // 4. 버스 도착 정보 변환
+                busRouteInfo.toBusSchedule(
+                    dailyTypeResolver.resolve(),
+                    stationInfo
+                )
             }
         }
 

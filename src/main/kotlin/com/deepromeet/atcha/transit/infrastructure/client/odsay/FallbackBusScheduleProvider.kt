@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
+import com.deepromeet.atcha.common.exception.InfrastructureException
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusScheduleProvider
@@ -20,9 +21,14 @@ class FallbackBusScheduleProvider(
         route: BusRoute
     ): BusSchedule? {
         log.debug { "ODSay를 통한 버스 도착 정보 조회 시도: $station, 노선: $route" }
-        return odSayBusInfoClient.getBusSchedule(
-            station,
-            route
-        )
+        try {
+            return odSayBusInfoClient.getBusSchedule(
+                station,
+                route
+            )
+        } catch (e: InfrastructureException) {
+            log.warn { "ODSay를 통한 버스 도착 정보 조회 실패: ${e.message}" }
+            throw e
+        }
     }
 }
