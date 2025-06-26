@@ -3,8 +3,8 @@ package com.deepromeet.atcha.transit.domain
 import java.time.LocalDateTime
 
 data class BusTimeTable(
-    val firstTime: LocalDateTime?,
-    val lastTime: LocalDateTime?,
+    val firstTime: LocalDateTime,
+    val lastTime: LocalDateTime,
     val term: Int
 ) {
     fun calculateNearestTime(
@@ -13,10 +13,6 @@ data class BusTimeTable(
     ): LocalDateTime? {
         when (timeDirection) {
             TimeDirection.BEFORE -> {
-                if (firstTime == null) {
-                    return null
-                }
-
                 // 이전 버스를 찾는 경우
                 if (time.isBefore(firstTime)) {
                     // 첫차 이전 시간에서는 이전 버스가 없음
@@ -24,8 +20,8 @@ data class BusTimeTable(
                 }
 
                 // 첫차부터 시작하여 버스 시간 계산
-                var current = firstTime!!
-                var prev: LocalDateTime? = null
+                var current = firstTime
+                var prev: LocalDateTime = firstTime
 
                 while (!current.isAfter(time)) {
                     prev = current
@@ -52,7 +48,7 @@ data class BusTimeTable(
                 }
 
                 // 막차 시간부터 역순으로 계산
-                var temp = lastTime!!
+                var temp = lastTime
                 var candidate = lastTime
 
                 while (temp.isAfter(time)) {

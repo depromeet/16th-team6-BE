@@ -16,8 +16,7 @@ data class SubwayTimeTable(
     ): SubwayTime =
         schedule
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
-            .filter { it.departureTime != null }
-            .maxByOrNull { it.departureTime!! }
+            .maxByOrNull { it.departureTime }
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
                 "지하철 '${startStation.name}'역에서 '${destinationStation.name}'역으로 가는 막차 시간을 찾을 수 없습니다."
@@ -30,26 +29,14 @@ data class SubwayTimeTable(
         when (direction) {
             TimeDirection.AFTER -> {
                 schedule
-                    .filter { it.departureTime?.isAfter(time) ?: false }
-                    .minByOrNull {
-                        it.departureTime
-                            ?: throw TransitException.of(
-                                TransitError.NOT_FOUND_TIME,
-                                "시간표에서 출발 시간이 null입니다."
-                            )
-                    }
+                    .filter { it.departureTime.isAfter(time) }
+                    .minByOrNull { it.departureTime }
             }
 
             TimeDirection.BEFORE -> {
                 schedule
-                    .filter { it.departureTime?.isBefore(time) ?: false }
-                    .maxByOrNull {
-                        it.departureTime
-                            ?: throw TransitException.of(
-                                TransitError.NOT_FOUND_TIME,
-                                "시간표에서 출발 시간이 null입니다."
-                            )
-                    }
+                    .filter { it.departureTime.isBefore(time) }
+                    .maxByOrNull { it.departureTime }
             }
         }
 
