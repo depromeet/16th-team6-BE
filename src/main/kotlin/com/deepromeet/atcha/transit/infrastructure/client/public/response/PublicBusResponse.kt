@@ -16,6 +16,8 @@ import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
@@ -230,9 +232,12 @@ data class BusArrivalResponse(
             else -> BusStatus.OPERATING
         }
 
-    private fun parseDateTime(dateTimeString: String): LocalDateTime? {
+    private fun parseDateTime(dateTimeString: String): LocalDateTime {
         if (dateTimeString.length == 10) {
-            return null
+            throw TransitException(
+                TransitError.INVALID_TIME_FORMAT,
+                "Invalid date time format: $dateTimeString. Expected format is 'yyyyMMddHHmmss'."
+            )
         }
         return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
     }

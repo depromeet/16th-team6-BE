@@ -1,5 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
+import com.deepromeet.atcha.common.exception.CustomException
+import com.deepromeet.atcha.common.exception.InfrastructureError
+import com.deepromeet.atcha.common.exception.InfrastructureException
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.PublicGyeonggiResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
 import feign.codec.DecodeException
@@ -13,14 +16,17 @@ object ApiClientUtils {
         apiCall: (String) -> T,
         processResult: (T) -> R,
         errorMessage: String
-    ): R? {
+    ): R {
         return try {
             val apiKey = keyProvider()
             val response = apiCall(apiKey)
             processResult(response)
         } catch (e: Exception) {
+            if (e is CustomException) {
+                throw e // CustomException은 그대로 던져서 상위로 전달
+            }
             log.warn(e) { "API 호출 중 예상치 못한 오류 발생: ${e.message} - $errorMessage" }
-            null
+            throw InfrastructureException.of(InfrastructureError.EXTERNAL_API_ERROR, e)
         }
     }
 
@@ -44,7 +50,7 @@ object ApiClientUtils {
         isLimitExceeded: (T) -> Boolean,
         processResult: (T) -> R,
         errorMessage: String
-    ): R? {
+    ): R {
         val keys = listOf(primaryKey, spareKey, realLastKey)
         return callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, 0)
     }
@@ -56,10 +62,10 @@ object ApiClientUtils {
         processResult: (T) -> R,
         errorMessage: String,
         index: Int
-    ): R? {
+    ): R {
         if (index >= keys.size) {
             log.warn { "모든 API 키가 실패했습니다. $errorMessage" }
-            return null
+            throw InfrastructureException.of(InfrastructureError.EXTERNAL_API_CALL_LIMIT_EXCEEDED, errorMessage)
         }
 
         val currentKey = keys[index]
@@ -76,8 +82,11 @@ object ApiClientUtils {
             log.warn { "DecodeException 발생. API 응답 포맷이 예상과 다릅니다. 다음 키로 재시도합니다. - $errorMessage" }
             callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, index + 1)
         } catch (e: Exception) {
+            if (e is CustomException) {
+                throw e // CustomException은 그대로 던져서 상위로 전달
+            }
             log.warn { "예상치 못한 오류 발생: ${e.message} - $errorMessage" }
-            null
+            throw InfrastructureException.of(InfrastructureError.EXTERNAL_API_ERROR, e)
         }
     }
 

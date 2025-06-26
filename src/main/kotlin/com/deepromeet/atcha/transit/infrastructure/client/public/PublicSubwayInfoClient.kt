@@ -58,29 +58,17 @@ class PublicSubwayInfoClient(
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
-    ): SubwayTimeTable? {
-        return try {
-            val (subwayStations, scheduleItems) =
-                fetchDataConcurrently(startStation, dailyType, direction)
-                    ?: return null
-
-            val schedule = mapToSchedule(scheduleItems, subwayStations, startStation.name)
-
-            SubwayTimeTable(startStation, dailyType, direction, schedule)
-        } catch (e: TransitException) {
-            log.warn(e) { "지하철 시간표 정보 처리 중 예상된 오류 발생: ${e.message}" }
-            throw e
-        } catch (e: Exception) {
-            log.warn(e) { "지하철 시간표 정보 가져오는데 실패했습니다 - ${startStation.id} ${dailyType.code} ${direction.code}" }
-            null
-        }
+    ): SubwayTimeTable {
+        val (subwayStations, scheduleItems) = fetchDataConcurrently(startStation, dailyType, direction)
+        val schedule = mapToSchedule(scheduleItems, subwayStations, startStation.name)
+        return SubwayTimeTable(startStation, dailyType, direction, schedule)
     }
 
     private suspend fun fetchDataConcurrently(
         startStation: SubwayStation,
         dailyType: DailyType,
         direction: SubwayDirection
-    ): Pair<List<SubwayStation>, List<SubwayTimeResponse>>? =
+    ): Pair<List<SubwayStation>, List<SubwayTimeResponse>> =
         coroutineScope {
             val stationsDeferred =
                 async(Dispatchers.IO) {
@@ -103,7 +91,11 @@ class PublicSubwayInfoClient(
                         },
                         isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
                         processResult = { response ->
-                            response.response.body.items?.item?.filter { it.endSubwayStationNm != null } ?: emptyList()
+                            response.response.body.items?.item?.filter { it.endSubwayStationNm != null }
+                                ?: throw TransitException.of(
+                                    TransitError.NOT_FOUND_SUBWAY_SCHEDULE,
+                                    "지하철 시간표 응답값이 NULL 입니다 - ${startStation.id} ${dailyType.code} ${direction.code}"
+                                )
                         },
                         errorMessage =
                             "지하철 시간표 정보를 가져오는데 실패했습니다 -" +
@@ -113,10 +105,6 @@ class PublicSubwayInfoClient(
 
             val subwayStations = stationsDeferred.await()
             val scheduleItems = scheduleDeferred.await()
-
-            if (scheduleItems == null) {
-                return@coroutineScope null
-            }
 
             subwayStations to scheduleItems
         }

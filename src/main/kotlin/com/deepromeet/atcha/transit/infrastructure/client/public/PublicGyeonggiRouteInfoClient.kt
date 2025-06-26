@@ -7,6 +7,8 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -14,6 +16,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.runBlocking
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import sun.security.krb5.KrbException.errorMessage
 
 private val log = KotlinLogging.logger {}
 
@@ -48,7 +51,12 @@ class PublicGyeonggiRouteInfoClient(
                                     publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value)
                                 },
                                 isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                                processResult = { response -> response.msgBody?.busRouteInfoItem },
+                                processResult = { response ->
+                                    response.msgBody?.busRouteInfoItem ?: throw TransitException.of(
+                                        TransitError.NOT_FOUND_BUS_ROUTE,
+                                        "경기도 노선 정보 응답값이 null 입니다."
+                                    )
+                                },
                                 errorMessage = "경기도 노선 정보 - ${route.name}-${route.id.value}를 가져오는데 실패했습니다."
                             )
                         }
@@ -65,14 +73,19 @@ class PublicGyeonggiRouteInfoClient(
                                     publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
                                 },
                                 isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                                processResult = { response -> response.msgBody },
+                                processResult = { response ->
+                                    response.msgBody ?: throw TransitException.of(
+                                        TransitError.BUS_ROUTE_STATION_LIST_FETCH_FAILED,
+                                        "경기도 노선 정류장 목록 응닶값이 null 입니다."
+                                    )
+                                },
                                 errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
                             )
                         }
 
                     // 결과 대기
-                    val busRouteInfo = busRouteInfoDeferred.await() ?: return@coroutineScope null
-                    val busRouteStations = busRouteStationsDeferred.await() ?: return@coroutineScope null
+                    val busRouteInfo = busRouteInfoDeferred.await()
+                    val busRouteStations = busRouteStationsDeferred.await()
 
                     // 3. 정류장 정보 찾기
                     val stationInfo = busRouteStations.getStation(station.id)
@@ -84,12 +97,12 @@ class PublicGyeonggiRouteInfoClient(
                     )
                 }
             } catch (e: Exception) {
-                log.warn(e) { "경기도 버스 도착 정보를 가져오는데 실패했습니다." }
+                log.warn(e) {}
                 null
             }
         }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo? {
+    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -97,7 +110,10 @@ class PublicGyeonggiRouteInfoClient(
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                response.msgBody?.busRouteInfoItem?.toBusRouteOperationInfo()
+                response.msgBody?.busRouteInfoItem?.toBusRouteOperationInfo() ?: throw TransitException.of(
+                    TransitError.NOT_FOUND_BUS_ROUTE,
+                    "경기도 노선 정보 응답값이 null 입니다."
+                )
             },
             errorMessage = "경기도 노선 운행 정보를 가져오는데 실패했습니다."
         )
@@ -106,7 +122,7 @@ class PublicGyeonggiRouteInfoClient(
     override fun getBusRealTimeInfo(
         station: BusStation,
         route: BusRoute
-    ): BusRealTimeArrival? {
+    ): BusRealTimeArrival {
         val busRouteStationList =
             ApiClientUtils.callApiWithRetry(
                 primaryKey = serviceKey,
@@ -116,9 +132,14 @@ class PublicGyeonggiRouteInfoClient(
                     publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value)
                 },
                 isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-                processResult = { response -> response.msgBody },
+                processResult = { response ->
+                    response.msgBody ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_REAL_TIME,
+                        "경기도 버스 실시간 정보 처리 중 오류 발생 - 경기도 노선 정류장 목록 응닶값이 null 입니다."
+                    )
+                },
                 errorMessage = "경기도 노선 정류장 목록 - ${route.name}-${route.id.value}을 가져오는데 실패했습니다."
-            ) ?: return null
+            )
 
         val stationInfo = busRouteStationList.getStation(station.id)
 
@@ -135,7 +156,12 @@ class PublicGyeonggiRouteInfoClient(
                 )
             },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
-            processResult = { response -> response.msgBody?.busRealTimeInfoItem?.toRealTimeArrival() },
+            processResult = { response ->
+                response.msgBody?.busRealTimeInfoItem?.toRealTimeArrival() ?: throw TransitException.of(
+                    TransitError.NOT_FOUND_BUS_REAL_TIME,
+                    "경기도 버스 도착 정보 응답값이 null 입니다."
+                )
+            },
             errorMessage = "경기도 버스 도착 정보를 가져오는데 실패했습니다."
         )
     }

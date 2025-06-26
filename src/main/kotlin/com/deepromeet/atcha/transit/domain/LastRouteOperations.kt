@@ -51,104 +51,88 @@ class LastRouteOperations(
     }
 
     private suspend fun calculateRoute(route: Itinerary): LastRoute? {
-        // 1. 경로 내 대중교통 별 막차 시간 조회
-        val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
-        // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
-        val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
-        // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
-        val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
-        // 4. 유효하지 않는 경로 제거 (leg.departureTime=null 인 경우)
-        if (adjustedLegs.any { leg ->
-                (leg.mode == "SUBWAY" || leg.mode == "BUS") &&
-                    (leg.departureDateTime == null || leg.departureDateTime == "null")
-            }
-        ) {
+        try {
+            // 1. 경로 내 대중교통 별 막차 시간 조회
+            val calculatedLegs = calculateLegLastArriveDateTimes(route.legs) ?: return null
+            // 2. 도보 시간 조정  - 모든 도보는 2분씩 더해준다.
+            val adjustedWalkLegs = increaseWalkTime(calculatedLegs)
+            // 3. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
+            val adjustedLegs = adjustTransitDepartureTimes(adjustedWalkLegs)
+            // 4. 출발 시간 계산
+            val departureDateTime = calculateDepartureDateTime(adjustedLegs)
+            // 5. 총 소요 시간 계산
+            val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
+
+            return LastRoute(
+                routeId = UUID.randomUUID().toString(),
+                departureDateTime = departureDateTime.toString(),
+                totalTime = totalTime.toInt(),
+                totalWalkTime = route.totalWalkTime,
+                transferCount = route.transferCount,
+                totalWorkDistance = route.totalWalkDistance,
+                totalDistance = route.totalDistance,
+                pathType = route.pathType,
+                legs = adjustedLegs
+            )
+        } catch (e: TransitException) {
+            log.warn { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
             return null
         }
-        // 5. 출발 시간 계산
-        val departureDateTime = calculateDepartureDateTime(adjustedLegs)
-        // 6. 총 소요 시간 계산
-        val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
-
-        return LastRoute(
-            routeId = UUID.randomUUID().toString(),
-            departureDateTime = departureDateTime.toString(),
-            totalTime = totalTime.toInt(),
-            totalWalkTime = route.totalWalkTime,
-            transferCount = route.transferCount,
-            totalWorkDistance = route.totalWalkDistance,
-            totalDistance = route.totalDistance,
-            pathType = route.pathType,
-            legs = adjustedLegs
-        )
     }
 
     private suspend fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
-        return try {
-            val calculatedLegs =
-                coroutineScope {
-                    legs.map { leg ->
-                        async(Dispatchers.IO) {
-                            semaphore.withPermit {
-                                when (leg.mode) {
-                                    "SUBWAY" -> {
-                                        val subwayLine = SubwayLine.fromRouteName(leg.route!!)
-                                        val routesDeferred =
-                                            async {
-                                                subwayManager.getRoutes(subwayLine)
-                                            }
-                                        val startDeferred =
-                                            async { subwayManager.getStation(subwayLine, leg.start.name) }
-                                        val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
-
-                                        val routes = routesDeferred.await()
-                                        val startStation = startDeferred.await()
-                                        val endStation = endDeferred.await()
-
-                                        val timeTable =
-                                            subwayManager
-                                                .getTimeTable(startStation, endStation, routes)
-                                        val departureDateTime =
-                                            timeTable?.getLastTime(
-                                                endStation,
-                                                routes
-                                            )?.departureTime
-                                        val transitTime =
-                                            timeTable?.let {
-                                                TransitTime.SubwayTimeInfo(it)
-                                            } ?: throw TransitException.of(
-                                                TransitError.NOT_FOUND_TIME,
-                                                "지하철 '${leg.start.name}'역에서 '${leg.end.name}'역으로 가는 시간표를 찾을 수 없습니다."
-                                            )
-
-                                        leg.toLastRouteLeg(departureDateTime, transitTime)
+        return coroutineScope {
+            legs.map { leg ->
+                async(Dispatchers.IO) {
+                    semaphore.withPermit {
+                        when (leg.mode) {
+                            "SUBWAY" -> {
+                                val subwayLine = SubwayLine.fromRouteName(leg.route!!)
+                                val routesDeferred =
+                                    async {
+                                        subwayManager.getRoutes(subwayLine)
                                     }
+                                val startDeferred =
+                                    async { subwayManager.getStation(subwayLine, leg.start.name) }
+                                val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
 
-                                    "BUS" -> {
-                                        val routeId = leg.route!!.split(":")[1]
-                                        val stationMeta =
-                                            BusStationMeta(
-                                                leg.start.name.removeSuffix(),
-                                                Coordinate(leg.start.lat, leg.start.lon)
-                                            )
-                                        val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
-                                        val departureDateTime = busTimeInfo.lastTime
-                                        val transitTime = TransitTime.BusTimeInfo(busTimeInfo)
+                                val routes = routesDeferred.await()
+                                val startStation = startDeferred.await()
+                                val endStation = endDeferred.await()
 
-                                        leg.toLastRouteLeg(departureDateTime, transitTime)
+                                val timeTable =
+                                    subwayManager.getTimeTable(startStation, endStation, routes)
+                                val departureDateTime =
+                                    timeTable.getLastTime(
+                                        endStation,
+                                        routes
+                                    ).departureTime
+                                val transitTime =
+                                    timeTable.let {
+                                        TransitTime.SubwayTimeInfo(it)
                                     }
-
-                                    else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
-                                }
+                                leg.toLastRouteLeg(departureDateTime, transitTime)
                             }
-                        }
-                    }.awaitAll()
-                }
 
-            calculatedLegs
-        } catch (e: TransitException) {
-            log.warn { "여정의 교통수단 막차 시간 조회에서 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
-            null
+                            "BUS" -> {
+                                val routeId = leg.route!!.split(":")[1]
+                                val stationMeta =
+                                    BusStationMeta(
+                                        leg.start.name.removeSuffix(),
+                                        Coordinate(leg.start.lat, leg.start.lon)
+                                    )
+                                val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
+                                val departureDateTime = busTimeInfo.lastTime
+                                val transitTime = TransitTime.BusTimeInfo(busTimeInfo)
+
+                                leg.toLastRouteLeg(departureDateTime, transitTime)
+                            }
+
+                            else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
+                        }
+                    }
+                }
+            }.awaitAll()
         }
     }
 
@@ -225,8 +209,8 @@ class LastRouteOperations(
 
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
             val calculateBoardingTime = calculateBoardingTime(leg, adjustedDepartureTime, TimeDirection.BEFORE)
-            adjustedLegs[i] = leg.copy(departureDateTime = calculateBoardingTime?.toString())
-            adjustBaseTime = calculateBoardingTime?.let { LocalDateTime.parse(it.toString()) }
+            adjustedLegs[i] = leg.copy(departureDateTime = calculateBoardingTime.toString())
+            adjustBaseTime = calculateBoardingTime.let { LocalDateTime.parse(it.toString()) }
         }
 
         // 5. 기준점 뒤쪽 시간 재조정
@@ -249,7 +233,7 @@ class LastRouteOperations(
             val adjustedDepartureTime = adjustBaseTime
             val calculateBoardingTime = calculateBoardingTime(leg, adjustedDepartureTime, TimeDirection.AFTER)
             adjustedLegs[i] = leg.copy(departureDateTime = calculateBoardingTime.toString())
-            adjustBaseTime = calculateBoardingTime?.plusSeconds(leg.sectionTime.toLong())
+            adjustBaseTime = calculateBoardingTime.plusSeconds(leg.sectionTime.toLong())
         }
         return adjustedLegs
     }
@@ -258,14 +242,31 @@ class LastRouteOperations(
         leg: LastRouteLeg,
         adjustedDepartureTime: LocalDateTime,
         direction: TimeDirection
-    ): LocalDateTime? =
+    ): LocalDateTime =
         when (leg.transitTime) {
-            is TransitTime.SubwayTimeInfo -> {
-                leg.transitTime.timeTable.findNearestTime(adjustedDepartureTime, direction)?.departureTime
-            }
+            is TransitTime.SubwayTimeInfo ->
+                leg.transitTime.timeTable.findNearestTime(
+                    adjustedDepartureTime,
+                    direction
+                )?.departureTime
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_SPECIFIED_TIME,
+                        "지하철 '${leg.route}'의 ${leg.start.name}'역에서" +
+                            " $adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
+                    )
             is TransitTime.BusTimeInfo ->
-                leg.transitTime.arrivalInfo.calculateNearestTime(adjustedDepartureTime, direction)
-            TransitTime.NoTimeTable -> null
+                leg.transitTime.arrivalInfo.calculateNearestTime(
+                    adjustedDepartureTime,
+                    direction
+                ) ?: throw TransitException.of(
+                    TransitError.NOT_FOUND_SPECIFIED_TIME,
+                    "버스 '${leg.route}'의 '${leg.start.name}' 정류장에서 " +
+                        "$adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
+                )
+            TransitTime.NoTimeTable -> throw TransitException.of(
+                TransitError.NOT_FOUND_SPECIFIED_TIME,
+                "해당 교통수단의 막차 시간 정보가 없습니다. ${leg.mode} - ${leg.start.name} -> ${leg.end.name}"
+            )
         }
 
     fun calculateDepartureDateTime(legs: List<LastRouteLeg>): LocalDateTime {
@@ -309,7 +310,7 @@ class LastRouteOperations(
             distance = this.distance,
             sectionTime = this.sectionTime,
             mode = this.mode,
-            departureDateTime = departureDateTime?.toString(),
+            departureDateTime = departureDateTime.toString(),
             route = this.route,
             type = this.type.toString(),
             service = this.service.toString(),

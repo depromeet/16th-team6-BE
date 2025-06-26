@@ -5,8 +5,6 @@ import com.deepromeet.atcha.common.exception.InfrastructureException
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
-import com.deepromeet.atcha.transit.exception.TransitError
-import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -60,7 +58,7 @@ class ODSayBusInfoClient(
     private fun getApiKeyBasedOnUsage(): String {
         try {
             val count =
-                redisTemplate.opsForValue().increment(ODSAY_API_CALL_COUNT_KEY, 2)
+                redisTemplate.opsForValue().increment(ODSAY_API_CALL_COUNT_KEY, 1)
                     ?: throw IllegalStateException("Redis increment operation unexpectedly returned null.")
 
             return when {
@@ -68,17 +66,13 @@ class ODSayBusInfoClient(
                 count <= 1800 -> spareKey
                 count <= 2700 -> realLastKey
                 else -> {
-                    throw TransitException.of(
-                        TransitError.API_CALL_LIMIT_EXCEEDED,
+                    throw InfrastructureException.of(
+                        InfrastructureError.EXTERNAL_API_CALL_LIMIT_EXCEEDED,
                         "ODSay API 호출 제한을 초과했습니다. 현재 호출 횟수: $count"
                     )
                 }
             }
         } catch (e: Exception) {
-            if (e is TransitException) {
-                throw e // 한도 초과 예외는 다시 던져서 상위로 전달
-            }
-
             log.warn(e) { "API 키 선택을 위한 Redis 작업 중 오류 발생" }
             throw InfrastructureException.of(InfrastructureError.CACHE_ERROR, cause = e)
         }

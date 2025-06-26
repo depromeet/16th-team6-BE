@@ -95,7 +95,9 @@ class TransitRouteClient(
                 transitCount < 4
         }
 
-        return itineraries.filter { itinerary -> isValidItinerary(itinerary) }
+        val filtered = itineraries.filter { itinerary -> isValidItinerary(itinerary) }
+        log.info { "필터링 로직에서 ${itineraries.size}개의 경로 중 ${filtered.size}개가 유효한 경로로 필터링되었습니다." }
+        return filtered
     }
 
     private fun validateServiceRegion(

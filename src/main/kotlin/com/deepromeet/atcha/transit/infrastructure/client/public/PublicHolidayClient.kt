@@ -30,7 +30,7 @@ class PublicHolidayClient(
                 response.body.items.item.map { it.toLocalDate() }
             },
             errorMessage = "공휴일 정보를 가져오는데 실패했습니다 - $year"
-        ) ?: emptyList() // API 호출 실패 시 빈 리스트 반환
+        )
     }
 
     private fun isHolidayApiLimitExceeded(response: HolidayResponse): Boolean {

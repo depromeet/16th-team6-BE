@@ -25,20 +25,17 @@ class SubwayManager(
         stationName: String
     ): SubwayStation {
         return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
-            ?: run {
-                log.warn { "지하철역 조회 실패: [노선코드=${subwayLine.lnCd}, 역이름=$stationName]" }
-                throw TransitException.of(
-                    TransitError.NOT_FOUND_SUBWAY_STATION,
-                    "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
-                )
-            }
+            ?: throw TransitException.of(
+                TransitError.NOT_FOUND_SUBWAY_STATION,
+                "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
+            )
     }
 
     suspend fun getTimeTable(
         startStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
-    ): SubwayTimeTable? {
+    ): SubwayTimeTable {
         val dailyType = dailyTypeResolver.resolve()
         val direction = SubwayDirection.resolve(routes, startStation, endStation)
 
@@ -46,7 +43,7 @@ class SubwayManager(
             return it
         }
 
-        return subwayInfoClient.getTimeTable(startStation, dailyType, direction)?.also { timeTable ->
+        return subwayInfoClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
             subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
         }
     }

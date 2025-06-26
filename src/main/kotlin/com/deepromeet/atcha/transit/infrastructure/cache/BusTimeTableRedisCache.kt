@@ -35,7 +35,7 @@ class BusTimeTableRedisCache(
         routeName: String,
         busStation: BusStationMeta
     ): String {
-        return "time:bus:$routeName:${busStation.coordinate.lat},${busStation.coordinate.lon}"
+        return "routes:time:bus:$routeName:${busStation.coordinate.lat},${busStation.coordinate.lon}"
     }
 
     private fun calculateTtlUntilMidnight(): Long {

@@ -6,10 +6,10 @@ interface BusRouteInfoClient {
         route: BusRoute
     ): BusSchedule?
 
-    fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo?
+    fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo
 
     fun getBusRealTimeInfo(
         station: BusStation,
         route: BusRoute
-    ): BusRealTimeArrival?
+    ): BusRealTimeArrival
 }
