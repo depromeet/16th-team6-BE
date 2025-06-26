@@ -1,28 +1,32 @@
 package com.deepromeet.atcha.user.domain
 
+import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.SignUpInfo
-import com.deepromeet.atcha.auth.infrastructure.response.ProviderUserInfoResponse
+import com.deepromeet.atcha.auth.domain.UserProviderAppender
 import com.deepromeet.atcha.user.infrastructure.repository.UserJpaRepository
 import org.springframework.stereotype.Component
 
 @Component
 class UserAppender(
-    private val userJpaRepository: UserJpaRepository
+    private val userJpaRepository: UserJpaRepository,
+    private val userProviderAppender: UserProviderAppender
 ) {
-    fun save(user: User): User = userJpaRepository.save(user)
+    fun append(user: User): User = userJpaRepository.save(user)
 
-    fun save(
-        providerUserInfo: ProviderUserInfoResponse,
+    fun append(
+        provider: Provider,
         signUpInfo: SignUpInfo
     ): User {
         val user =
             User(
-                providerId = providerUserInfo.providerId,
+                providerId = provider.providerUserId,
                 address = signUpInfo.getAddress(),
                 alertFrequencies = signUpInfo.alertFrequencies.toMutableSet(),
                 fcmToken = signUpInfo.fcmToken
             )
-        return userJpaRepository.save(user)
+        val saved = userJpaRepository.save(user)
+        userProviderAppender.append(saved, provider)
+        return saved
     }
 
     fun update(

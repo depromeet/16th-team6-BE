@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class UserProviderAppender(
     private val userProviderRepository: UserProviderRepository
 ) {
-    fun save(
+    fun append(
         user: User,
         provider: Provider
     ) = userProviderRepository.save(UserProvider(user, provider))

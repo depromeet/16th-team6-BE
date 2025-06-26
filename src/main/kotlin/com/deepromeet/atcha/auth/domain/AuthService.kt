@@ -1,10 +1,9 @@
 package com.deepromeet.atcha.auth.domain
 
+import com.deepromeet.atcha.auth.exception.AuthError
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.token.TokenType
-import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.user.domain.UserAppender
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -20,58 +19,45 @@ class AuthService(
     private val userProviderReader: UserProviderReader
 ) {
     @Transactional(readOnly = true)
-    fun checkUserExists(
-        providerToken: String,
-        providerOrdinal: Int
-    ): Boolean {
-        val authProvider = authProviders.getAuthProvider(providerOrdinal)
-        val userInfo = authProvider.getUserInfo(providerToken)
-        return userReader.checkExists(userInfo.providerId)
+    fun checkUserExists(providerToken: ProviderToken): Boolean {
+        val authProvider = authProviders.getAuthProvider(providerToken.providerType)
+        val provider = authProvider.getProviderUserId(providerToken)
+        return userReader.checkExists(provider.providerUserId)
     }
 
     @Transactional
     fun signUp(
-        providerToken: String,
+        providerToken: ProviderToken,
         signUpInfo: SignUpInfo
     ): UserAuthInfo {
-        val providerType = ProviderType.findByOrdinal(signUpInfo.provider)
-        val authProvider = authProviders.getAuthProvider(providerType)
-        val providerUserInfo = authProvider.getUserInfo(providerToken)
-        if (userReader.checkExists(providerUserInfo.providerId)) { // todo uk로 예외 처리
-            throw AuthException.AlreadyExistsUser
+        val authProvider = authProviders.getAuthProvider(providerToken.providerType)
+        val provider = authProvider.getProviderUserId(providerToken)
+
+        if (userReader.checkExists(provider.providerUserId)) { // todo uk로 예외 처리
+            throw AuthException.of(AuthError.ALREADY_EXISTS_USER)
         }
 
-        val savedUser = userAppender.save(providerUserInfo, signUpInfo)
+        val savedUser = userAppender.append(provider, signUpInfo)
         val token = tokenGenerator.generateTokens(savedUser.id)
-
-        userProviderAppender.save(savedUser, Provider(providerUserInfo.providerId, providerType, providerToken))
-        val userTokenInfo = UserTokenInfo(savedUser.id, token)
-        val coordinate = Coordinate(savedUser.address.lat, savedUser.address.lon)
-
-        return UserAuthInfo(userTokenInfo, coordinate)
+        return UserAuthInfo(savedUser, token)
     }
 
     @Transactional
     fun login(
-        providerToken: String,
-        providerOrdinal: Int,
+        providerToken: ProviderToken,
         fcmToken: String
     ): UserAuthInfo {
-        val providerType = ProviderType.findByOrdinal(providerOrdinal)
-        val authProvider = authProviders.getAuthProvider(providerType)
+        val authProvider = authProviders.getAuthProvider(providerToken.providerType)
 
-        val userInfo = authProvider.getUserInfo(providerToken)
-        val user = userReader.readByProviderId(userInfo.providerId)
+        val userInfo = authProvider.getProviderUserId(providerToken)
+        val user = userReader.readByProviderId(userInfo.providerUserId)
         userAppender.updateFcmToken(user, fcmToken)
 
         val userProvider = userProviderReader.read(user.id)
-        userProviderAppender.updateProviderToken(userProvider, providerToken)
-
+        userProviderAppender.updateProviderToken(userProvider, providerToken.token)
         val token = tokenGenerator.generateTokens(user.id)
-        val userTokenInfo = UserTokenInfo(user.id, token)
-        val coordinate = Coordinate(user.address.lat, user.address.lon)
 
-        return UserAuthInfo(userTokenInfo, coordinate)
+        return UserAuthInfo(user, token)
     }
 
     @Transactional

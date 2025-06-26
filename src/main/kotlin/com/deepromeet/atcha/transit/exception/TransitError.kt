@@ -4,7 +4,7 @@ import com.deepromeet.atcha.common.exception.BaseErrorType
 import com.deepromeet.atcha.common.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
-enum class TransitErrorType(
+enum class TransitError(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
@@ -28,74 +28,38 @@ enum class TransitErrorType(
     NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.ERROR)
 }
 
-sealed class TransitException(
-    errorCode: BaseErrorType
-) : CustomException(errorCode) {
-    data object TransitApiError : TransitException(TransitErrorType.TRANSIT_API_ERROR) {
-        override fun readResolve(): Any = TransitApiError
-    }
+class TransitException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
 
-    data object TaxiFareFetchFailed : TransitException(TransitErrorType.TAXI_FARE_FETCH_FAILED) {
-        override fun readResolve(): Any = TaxiFareFetchFailed
-    }
+    companion object {
+        fun of(errorType: BaseErrorType): TransitException {
+            return TransitException(errorType)
+        }
 
-    data object NotFoundTime : TransitException(TransitErrorType.NOT_FOUND_TIME) {
-        override fun readResolve(): Any = NotFoundTime
-    }
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): TransitException {
+            return TransitException(errorType, customMessage = message)
+        }
 
-    data object NotFoundSubwayStation : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_STATION) {
-        override fun readResolve(): Any = NotFoundSubwayStation
-    }
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): TransitException {
+            return TransitException(errorType, cause = cause)
+        }
 
-    data object NotFoundSubwayRoute : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_ROUTE) {
-        override fun readResolve(): Any = NotFoundSubwayRoute
-    }
-
-    data object DistanceTooShort : TransitException(TransitErrorType.DISTANCE_TOO_SHORT) {
-        override fun readResolve(): Any = DistanceTooShort
-    }
-
-    data object ServiceAreaNotSupported : TransitException(TransitErrorType.SERVICE_AREA_NOT_SUPPORTED) {
-        override fun readResolve(): Any = ServiceAreaNotSupported
-    }
-
-    data object NotFoundRoute : TransitException(TransitErrorType.NOT_FOUND_ROUTE) {
-        override fun readResolve(): Any = NotFoundRoute
-    }
-
-    data object NotFoundBusPosition : TransitException(TransitErrorType.NOT_FOUND_BUS_POSITION) {
-        override fun readResolve(): Any = NotFoundBusPosition
-    }
-
-    data object BusRouteStationListFetchFailed : TransitException(
-        TransitErrorType.BUS_ROUTE_STATION_LIST_FETCH_FAILED
-    ) {
-        override fun readResolve(): Any = BusRouteStationListFetchFailed
-    }
-
-    data object NotFoundBusArrival : TransitException(TransitErrorType.NOT_FOUND_BUS_SCHEDULE) {
-        override fun readResolve(): Any = NotFoundBusArrival
-    }
-
-    data object BusRouteOperationInfoFetchFailed : TransitException(
-        TransitErrorType.NOT_FOUND_BUS_OPERATION_INFO
-    ) {
-        override fun readResolve(): Any = BusRouteOperationInfoFetchFailed
-    }
-
-    data object NotFoundBusStation : TransitException(TransitErrorType.NOT_FOUND_BUS_STATION) {
-        override fun readResolve(): Any = NotFoundBusStation
-    }
-
-    data object NotFoundBusRoute : TransitException(TransitErrorType.NOT_FOUND_BUS_ROUTE) {
-        override fun readResolve(): Any = NotFoundBusRoute
-    }
-
-    data object NotFoundSubwayLastTime : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_LAST_TIME) {
-        override fun readResolve(): Any = NotFoundSubwayLastTime
-    }
-
-    data object NotFoundBusRealTime : TransitException(TransitErrorType.NOT_FOUND_BUS_REAL_TIME) {
-        override fun readResolve(): Any = NotFoundBusRealTime
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): TransitException {
+            return TransitException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

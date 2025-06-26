@@ -13,10 +13,38 @@ enum class AppError(
     NO_MATCHED_PLATFORM(404, "APP_001", "일치하는 플랫폼이 없습니다.", LogLevel.WARN)
 }
 
-sealed class AppException(
-    errorCode: BaseErrorType
-) : CustomException(errorCode) {
-    data object NoMatchedPlatForm : AppException(AppError.NO_MATCHED_PLATFORM) {
-        override fun readResolve(): Any = NoMatchedPlatForm
+class AppException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
+
+    companion object {
+        fun of(errorType: BaseErrorType): AppException {
+            return AppException(errorType)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): AppException {
+            return AppException(errorType, customMessage = message)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): AppException {
+            return AppException(errorType, cause = cause)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): AppException {
+            return AppException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

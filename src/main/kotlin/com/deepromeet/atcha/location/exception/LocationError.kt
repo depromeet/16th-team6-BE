@@ -4,7 +4,7 @@ import com.deepromeet.atcha.common.exception.BaseErrorType
 import com.deepromeet.atcha.common.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
-enum class LocationErrorType(
+enum class LocationError(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
@@ -16,22 +16,38 @@ enum class LocationErrorType(
     INVALID_LONGITUDE(400, "LOC_004", "유효하지 않은 경도입니다", LogLevel.ERROR)
 }
 
-sealed class LocationException(
-    errorCode: BaseErrorType
-) : CustomException(errorCode) {
-    data object FailedToReadPOIs : LocationException(LocationErrorType.FAILED_TO_READ_POIS) {
-        override fun readResolve(): Any = FailedToReadPOIs
-    }
+class LocationException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
 
-    data object FailedToReadLocation : LocationException(LocationErrorType.FAILED_TO_READ_LOCATION) {
-        override fun readResolve(): Any = FailedToReadLocation
-    }
+    companion object {
+        fun of(errorType: BaseErrorType): LocationException {
+            return LocationException(errorType)
+        }
 
-    data object InvalidLatitude : LocationException(LocationErrorType.INVALID_LATITUDE) {
-        override fun readResolve(): Any = InvalidLatitude
-    }
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): LocationException {
+            return LocationException(errorType, customMessage = message)
+        }
 
-    data object InvalidLongitude : LocationException(LocationErrorType.INVALID_LONGITUDE) {
-        override fun readResolve(): Any = InvalidLongitude
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): LocationException {
+            return LocationException(errorType, cause = cause)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): LocationException {
+            return LocationException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

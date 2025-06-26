@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 
 enum class SubwayDirection(
@@ -21,7 +22,10 @@ enum class SubwayDirection(
                 ?.getDirection(startStation.name, endStation.name)
                 ?: run {
                     log.warn { "지하철 방향 추정 실패: 출발역='${startStation.name}', 도착역='${endStation.name}'" }
-                    throw TransitException.NotFoundSubwayRoute
+                    throw TransitException.of(
+                        TransitError.NOT_FOUND_SUBWAY_ROUTE,
+                        "출발역 '${startStation.name}'에서 도착역 '${endStation.name}'으로 가는 지하철 노선을 찾을 수 없습니다."
+                    )
                 }
         }
     }

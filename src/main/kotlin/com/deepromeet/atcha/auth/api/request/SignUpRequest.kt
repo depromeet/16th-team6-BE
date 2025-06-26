@@ -13,7 +13,6 @@ data class SignUpRequest(
 ) {
     fun toSignUpInfo() =
         SignUpInfo(
-            provider = provider,
             address = address,
             lat = lat,
             lon = lon,

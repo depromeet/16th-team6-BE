@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.kakao.response
 
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.annotation.JsonProperty
 
@@ -29,7 +30,10 @@ data class KakaoRegionResponse(
         return when (region1depthName) {
             "서울특별시" -> ServiceRegion.SEOUL
             "경기도" -> ServiceRegion.GYEONGGI
-            else -> throw TransitException.ServiceAreaNotSupported
+            else -> throw TransitException.of(
+                TransitError.SERVICE_AREA_NOT_SUPPORTED,
+                "카카오 API에서 알 수 없는 지역 '$region1depthName'를 반환했습니다."
+            )
         }
     }
 }

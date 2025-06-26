@@ -16,22 +16,38 @@ enum class RequestError(
     NO_MATCHED_RESOURCE(400, "REQ_004", "잘못된 API 요청입니다.", LogLevel.WARN)
 }
 
-sealed class RequestException(
-    errorType: BaseErrorType
-) : CustomException(errorType) {
-    data object NoRequestInfo : RequestException(RequestError.NO_REQUEST_INFO) {
-        override fun readResolve(): Any = NoRequestInfo
-    }
+class RequestException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
 
-    data object NotValidHeader : RequestException(RequestError.NOT_VALID_HEADER) {
-        override fun readResolve(): Any = NotValidHeader
-    }
+    companion object {
+        fun of(errorType: BaseErrorType): RequestException {
+            return RequestException(errorType)
+        }
 
-    data object NoMatchedMethod : RequestException(RequestError.NO_MATCHED_METHOD) {
-        override fun readResolve(): Any = NoMatchedMethod
-    }
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): RequestException {
+            return RequestException(errorType, customMessage = message)
+        }
 
-    data object NoMatchedResource : RequestException(RequestError.NO_MATCHED_RESOURCE) {
-        override fun readResolve(): Any = NoMatchedResource
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): RequestException {
+            return RequestException(errorType, cause = cause)
+        }
+
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): RequestException {
+            return RequestException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

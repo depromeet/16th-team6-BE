@@ -17,7 +17,7 @@ class NotificationServiceTest : BaseServiceTest() {
         // given
         val user = UserFixture.create()
         val lastRoute = LastRouteFixture.create()
-        userAppender.save(user)
+        userAppender.append(user)
         lastRouteAppender.append(lastRoute)
 
         // when
@@ -38,7 +38,7 @@ class NotificationServiceTest : BaseServiceTest() {
         // given
         val user = UserFixture.create(alertFrequencies = mutableSetOf(1))
         val lastRoute = LastRouteFixture.create()
-        userAppender.save(user)
+        userAppender.append(user)
         lastRouteAppender.append(lastRoute)
         notificationService.addRouteNotification(user.id, lastRoute.routeId)
 

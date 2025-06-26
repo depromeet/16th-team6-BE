@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.common.web
 
 import com.deepromeet.atcha.common.exception.CustomException
+import com.deepromeet.atcha.common.web.exception.RequestError
 import com.deepromeet.atcha.common.web.exception.RequestException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
@@ -22,14 +23,30 @@ class GlobalControllerAdvice {
     ): ResponseEntity<ApiResponse<Unit>> = handle(exception, request)
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
-    fun handleHttpRequestMethodNotSupportedException(request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
-        val exception = RequestException.NoMatchedMethod
+    fun handleHttpRequestMethodNotSupportedException(
+        httpException: HttpRequestMethodNotSupportedException,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+        val exception =
+            RequestException.of(
+                RequestError.NO_MATCHED_METHOD,
+                "지원하지 않는 HTTP 메서드입니다: ${httpException.method}. 지원되는 메서드: ${httpException.supportedMethods?.joinToString(
+                    ", "
+                )}"
+            )
         return handle(exception, request)
     }
 
     @ExceptionHandler(NoResourceFoundException::class)
-    fun handleNoResourceFoundException(request: HttpServletRequest): ResponseEntity<ApiResponse<Unit>> {
-        val exception = RequestException.NoMatchedResource
+    fun handleNoResourceFoundException(
+        noResourceException: NoResourceFoundException,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+        val exception =
+            RequestException.of(
+                RequestError.NO_MATCHED_RESOURCE,
+                "요청하신 리소스를 찾을 수 없습니다: ${noResourceException.resourcePath}"
+            )
         return handle(exception, request)
     }
 
@@ -60,7 +77,7 @@ class GlobalControllerAdvice {
                 ApiResponse.error(
                     exception.errorType.errorCode,
                     request.requestURI,
-                    exception.message
+                    exception.message ?: exception.errorType.message
                 )
             )
     }

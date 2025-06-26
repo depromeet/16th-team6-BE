@@ -3,7 +3,6 @@ package com.deepromeet.atcha.auth.domain
 import com.deepromeet.atcha.user.domain.Address
 
 data class SignUpInfo(
-    val provider: Int,
     val userName: String? = null,
     val address: String,
     val lat: Double,

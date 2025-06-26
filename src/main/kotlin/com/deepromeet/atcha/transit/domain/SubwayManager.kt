@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayBranchRepository
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
@@ -26,7 +27,10 @@ class SubwayManager(
         return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
             ?: run {
                 log.warn { "지하철역 조회 실패: [노선코드=${subwayLine.lnCd}, 역이름=$stationName]" }
-                throw TransitException.NotFoundSubwayStation
+                throw TransitException.of(
+                    TransitError.NOT_FOUND_SUBWAY_STATION,
+                    "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
+                )
             }
     }
 
