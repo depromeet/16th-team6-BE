@@ -9,17 +9,20 @@ import org.springframework.stereotype.Component
 
 @Component
 class Proj4CoordinateTransformer : CoordinateTransformer {
-    override fun transformToWGS84(coordinate: Coordinate): Coordinate {
+    override fun transformToWGS84(
+        x: String,
+        y: String
+    ): Coordinate {
         val crsFactory = CRSFactory()
-        val sourceCRS = crsFactory.createFromName("EPSG:5174") // Korea 2000 / Unified CS
+        val sourceCRS = crsFactory.createFromName("EPSG:5174")
         val targetCRS = crsFactory.createFromName("EPSG:4326") // WGS 84
 
-        val srcCoord = ProjCoordinate(coordinate.lon, coordinate.lat)
+        val srcCoord = ProjCoordinate(x.toDouble(), y.toDouble())
         val targetCoord = ProjCoordinate()
 
         val transform = BasicCoordinateTransform(sourceCRS, targetCRS)
         transform.transform(srcCoord, targetCoord)
 
-        return Coordinate(targetCoord.x, targetCoord.y)
+        return Coordinate(targetCoord.y, targetCoord.x)
     }
 }
