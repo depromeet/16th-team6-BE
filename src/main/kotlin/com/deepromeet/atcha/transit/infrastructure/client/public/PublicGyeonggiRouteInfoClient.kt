@@ -114,7 +114,9 @@ class PublicGyeonggiRouteInfoClient(
                 BusRouteStationList(
                     busRouteStationsResponse
                         .filter { station ->
-                            NON_STOP_STATION_NAME.none { keyword -> station.stationName.contains(keyword) }
+                            NON_STOP_STATION_NAME.none { keyword ->
+                                station.stationName.contains(keyword) && station.stationSeq != 1
+                            }
                         }
                         .map { it.toBusRouteStation(route) },
                     busRouteStationsResponse.firstOrNull()?.turnSeq

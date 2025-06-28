@@ -28,7 +28,7 @@ class LastRouteOperations(
 ) {
     suspend fun calculateRoutes(
         start: Coordinate,
-        end: Coordinate,
+        destination: Coordinate,
         itineraries: List<Itinerary>
     ): List<LastRoute> {
         val routes =
@@ -44,7 +44,7 @@ class LastRouteOperations(
             }
 
         if (routes.isNotEmpty()) {
-            lastRouteAppender.appendRoutes(start, end, routes)
+            lastRouteAppender.appendRoutes(start, destination, routes)
         }
 
         log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
