@@ -14,11 +14,11 @@ import java.time.format.DateTimeFormatter
 private val log = KotlinLogging.logger {}
 
 @Component
-class TransitRouteClient(
+class TransitRouteClientV2(
     private val tMapTransitClient: TMapTransitClient,
     private val regionIdentifier: RegionIdentifier
 ) {
-    fun fetchItineraries(
+    fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
     ): List<Itinerary> {
@@ -47,7 +47,7 @@ class TransitRouteClient(
             }
         }
 
-        return filterValidItineraries(
+        return filterValidItinerariesV2(
             response.metaData?.plan?.itineraries
                 ?: throw TransitException.of(
                     TransitError.TRANSIT_API_ERROR,
@@ -56,7 +56,7 @@ class TransitRouteClient(
         )
     }
 
-    private fun filterValidItineraries(itineraries: List<Itinerary>): List<Itinerary> {
+    private fun filterValidItinerariesV2(itineraries: List<Itinerary>): List<Itinerary> {
         fun isValidItinerary(itinerary: Itinerary): Boolean {
             var hasValidModes = false
             var hasExpressSubway = false
