@@ -28,7 +28,7 @@ class BusManager(
             busScheduleProvider.getBusSchedule(busRouteInfo)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_BUS_SCHEDULE,
-                    "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 도착 정보를 찾을 수 없습니다."
+                    "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 시간표 정보를 찾을 수 없습니다."
                 )
 
         busTimeTableCache.cache(routeName, stationMeta, schedule)
