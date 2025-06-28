@@ -17,7 +17,9 @@ import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
+import com.deepromeet.atcha.transit.domain.BusTravelTimeCalculator
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
@@ -28,7 +30,7 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
 val log = KotlinLogging.logger {}
@@ -41,6 +43,12 @@ data class PublicGyeonggiResponse<T>(
     @field:JacksonXmlProperty(localName = "msgBody")
     val msgBody: T?
 ) {
+    data class BusStationRouteListResponse(
+        @field:JacksonXmlElementWrapper(useWrapping = false)
+        @field:JacksonXmlProperty(localName = "busRouteList")
+        val busRouteList: List<GyeonggiBusStationRoute>
+    )
+
     data class BusRouteListResponse(
         @field:JacksonXmlElementWrapper(useWrapping = false)
         @field:JacksonXmlProperty(localName = "busRouteList")
@@ -60,7 +68,12 @@ data class PublicGyeonggiResponse<T>(
     ) {
         fun getStation(stationId: BusStationId): GyeonggiBusRouteStation {
             val station = busRouteStationList.find { it.stationId == stationId.value }
-            requireNotNull(station) { "Station not found: $stationId" }
+            if (station == null) {
+                throw TransitException.of(
+                    TransitError.NOT_FOUND_BUS_STATION,
+                    "경기도 버스 정류장 정보를 찾을 수 없습니다. stationId: $stationId"
+                )
+            }
             return station
         }
 
@@ -221,19 +234,6 @@ data class GyeonggiBusRouteStation(
                 )
         )
 
-    fun getDirection(): BusDirection {
-        // 경기도는 기점 -> 종점은 상행, 종점 -> 기점은 하행
-        return if (stationSeq < turnSeq) BusDirection.UP else BusDirection.DOWN
-    }
-
-    fun getStationsCountFromStart(): Int {
-        return if (stationSeq < turnSeq) {
-            stationSeq
-        } else {
-            stationSeq - turnSeq
-        }
-    }
-
     fun toBusRouteStation(busRoute: BusRoute): BusRouteStation {
         return BusRouteStation(
             busRoute = busRoute,
@@ -247,7 +247,8 @@ data class GyeonggiBusRouteStation(
                             coordinate = Coordinate(y.toDouble(), x.toDouble())
                         )
                 ),
-            order = stationSeq
+            order = stationSeq,
+            turnPoint = turnSeq
         )
     }
 }
@@ -281,7 +282,7 @@ data class GyeonggiBusStation(
     }
 }
 
-data class GyeonggiBusRoute(
+data class GyeonggiBusStationRoute(
     @field:JacksonXmlProperty(localName = "routeId")
     val routeId: String,
     @field:JacksonXmlProperty(localName = "routeName")
@@ -369,15 +370,13 @@ data class BusRouteInfoItem(
 
     fun toBusSchedule(
         dailyType: DailyType,
-        stationInfo: GyeonggiBusRouteStation
+        routeStation: BusRouteStation
     ): BusSchedule {
-        val firstTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.FIRST)
-        val lastTime = getBusTime(dailyType, stationInfo.getDirection(), BusTimeType.LAST)
+        val firstTime = getBusTime(dailyType, routeStation.getDirection(), BusTimeType.FIRST)
+        val lastTime = getBusTime(dailyType, routeStation.getDirection(), BusTimeType.LAST)
         val term = getTerm(dailyType)
 
-        val stationsCountFromStart = stationInfo.getStationsCountFromStart()
-
-        val travelTimeFromStart = (stationsCountFromStart * AVERAGE_MINUTE_PER_STATION).toLong()
+        val travelTimeFromStart = BusTravelTimeCalculator.calculate(routeStation, hasDownTimetable(dailyType))
 
         return BusSchedule(
             busRoute =
@@ -386,11 +385,11 @@ data class BusRouteInfoItem(
                     name = routeName,
                     serviceRegion = ServiceRegion.GYEONGGI
                 ),
-            busStation = stationInfo.toBusStation(),
+            busStation = routeStation.busStation,
             busTimeTable =
                 BusTimeTable(
-                    firstTime = firstTime.plusSeconds(travelTimeFromStart),
-                    lastTime = lastTime.plusSeconds(travelTimeFromStart),
+                    firstTime = firstTime.plusMinutes(travelTimeFromStart),
+                    lastTime = lastTime.plusMinutes(travelTimeFromStart),
                     term = term
                 )
         )
@@ -417,15 +416,19 @@ data class BusRouteInfoItem(
         busDirection: BusDirection,
         timeType: BusTimeType
     ): LocalDateTime {
-        val timeStr: String? = getTimeString(dailyType, busDirection, timeType)
-        return parseTime(timeStr)
+        val timeStr = getTimeString(dailyType, busDirection, timeType)
+        return BusTimeParser.parseTime(
+            timeStr,
+            LocalDate.now(),
+            TIME_FORMATTER
+        )
     }
 
     private fun getTimeString(
         dailyType: DailyType,
         busDirection: BusDirection,
         timeType: BusTimeType
-    ): String? {
+    ): String {
         return when (dailyType) {
             DailyType.WEEKDAY -> {
                 when (busDirection) {
@@ -451,30 +454,10 @@ data class BusRouteInfoItem(
                     BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) weDownFirstTime else weDownLastTime
                 }
             }
-        }
-    }
-
-    private fun parseTime(timeStr: String?): LocalDateTime {
-        if (timeStr == "0" || timeStr == null) {
-            throw TransitException.of(
-                TransitError.INVALID_TIME_FORMAT,
-                "경기도 버스 시간 형식이 잘못되었습니다: $timeStr"
-            )
-        }
-
-        try {
-            val localTime = LocalTime.parse(timeStr)
-            val date =
-                if (localTime.isBefore(LocalTime.of(3, 0))) {
-                    LocalDate.now().plusDays(1)
-                } else {
-                    LocalDate.now()
-                }
-            return LocalDateTime.of(date, localTime)
-        } catch (e: Exception) {
-            log.warn { "노선 이름: ${this.routeName}, 노선 번호: ${this.routeName} - 시간 파싱 오류: $timeStr" }
-            throw TransitException.of(TransitError.INVALID_TIME_FORMAT, e)
-        }
+        } ?: throw TransitException.of(
+            TransitError.NOT_FOUND_BUS_SCHEDULE,
+            "버스 시간 정보가 없습니다. $dailyType, $busDirection, $timeType"
+        )
     }
 
     private fun createBusServiceHours(
@@ -484,7 +467,7 @@ data class BusRouteInfoItem(
         val firstTimeStr = getTimeString(dailyType, busDirection, BusTimeType.FIRST)
         val lastTimeStr = getTimeString(dailyType, busDirection, BusTimeType.LAST)
 
-        if (firstTimeStr.isNullOrBlank() || lastTimeStr.isNullOrBlank()) return null
+        if (firstTimeStr.isBlank() || lastTimeStr.isBlank()) return null
 
         val term =
             when (dailyType) {
@@ -497,10 +480,24 @@ data class BusRouteInfoItem(
         return BusServiceHours(
             dailyType = dailyType,
             busDirection = busDirection,
-            startTime = parseTime(firstTimeStr),
-            endTime = parseTime(lastTimeStr),
+            startTime =
+                BusTimeParser.parseTime(
+                    firstTimeStr,
+                    LocalDate.now(),
+                    TIME_FORMATTER
+                ),
+            endTime =
+                BusTimeParser.parseTime(
+                    lastTimeStr,
+                    LocalDate.now(),
+                    TIME_FORMATTER
+                ),
             term = term
         )
+    }
+
+    companion object {
+        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
     }
 
     private fun getTerm(dailyType: DailyType): Int {
@@ -509,6 +506,15 @@ data class BusRouteInfoItem(
             DailyType.SATURDAY -> satPeekAlloc
             DailyType.HOLIDAY -> wePeekAlloc
             DailyType.SUNDAY -> sunPeekAlloc
+        }
+    }
+
+    private fun hasDownTimetable(dailyType: DailyType): Boolean {
+        return when (dailyType) {
+            DailyType.WEEKDAY -> downFirstTime != null && downLastTime != null
+            DailyType.SATURDAY -> satDownFirstTime != null && satDownLastTime != null
+            DailyType.SUNDAY -> sunDownFirstTime != null && sunDownLastTime != null
+            DailyType.HOLIDAY -> weDownFirstTime != null && weDownLastTime != null
         }
     }
 }
@@ -549,6 +555,39 @@ data class BusLocationResponse(
             currentSectionDistance = null,
             busCongestion = busCongestion,
             remainSeats = remainSeatCnt
+        )
+    }
+}
+
+data class GyeonggiBusRoute(
+    @field:JacksonXmlProperty(localName = "adminName")
+    val adminName: String?,
+    @field:JacksonXmlProperty(localName = "districtCd")
+    val districtCode: Int,
+    @field:JacksonXmlProperty(localName = "endStationId")
+    val endStationId: String,
+    @field:JacksonXmlProperty(localName = "endStationName")
+    val endStationName: String,
+    @field:JacksonXmlProperty(localName = "regionName")
+    val regionName: String?,
+    @field:JacksonXmlProperty(localName = "routeId")
+    val routeId: String,
+    @field:JacksonXmlProperty(localName = "routeName")
+    val routeName: String,
+    @field:JacksonXmlProperty(localName = "routeTypeCd")
+    val routeTypeCode: String,
+    @field:JacksonXmlProperty(localName = "routeTypeName")
+    val routeTypeName: String,
+    @field:JacksonXmlProperty(localName = "startStationId")
+    val startStationId: String,
+    @field:JacksonXmlProperty(localName = "startStationName")
+    val startStationName: String
+) {
+    fun toBusRoute(): BusRoute {
+        return BusRoute(
+            id = BusRouteId(routeId),
+            name = routeName,
+            serviceRegion = ServiceRegion.GYEONGGI
         )
     }
 }

@@ -6,6 +6,7 @@ import com.deepromeet.atcha.transit.domain.BusStationMeta
 data class BusArrivalRequest(
     val routeName: String,
     val stationName: String,
+    val nextStationName: String?,
     val lat: Double,
     val lon: Double
 ) {

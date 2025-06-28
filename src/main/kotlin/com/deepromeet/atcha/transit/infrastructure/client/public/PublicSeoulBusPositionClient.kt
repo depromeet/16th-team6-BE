@@ -5,7 +5,7 @@ import com.deepromeet.atcha.transit.domain.BusPositionFetcher
 import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils.isSeoulApiLimitExceeded
+import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils.isServiceResultApiLimitExceeded
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -25,7 +25,7 @@ class PublicSeoulBusPositionClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key -> publicSeoulBusPositionClient.getBusPosByRtid(key, routeId.value) },
-            isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody.itemList?.map { busPositionResponse ->
                     busPositionResponse.toBusPosition()

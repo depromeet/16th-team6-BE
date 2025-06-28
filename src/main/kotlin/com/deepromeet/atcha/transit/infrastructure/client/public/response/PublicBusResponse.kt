@@ -7,20 +7,26 @@ import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
+import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
 import com.deepromeet.atcha.transit.domain.BusSchedule
+import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
+import com.deepromeet.atcha.transit.domain.BusTravelTimeCalculator
+import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -34,11 +40,21 @@ data class ServiceResult<T>(
 
 data class MsgHeader(
     @JacksonXmlProperty(localName = "headerCd")
-    val headerCd: Int,
+    val headerCd: Int?,
     @JacksonXmlProperty(localName = "headerMsg")
-    val headerMsg: String,
+    val headerMsg: String?,
     @JacksonXmlProperty(localName = "itemCount")
-    val itemCount: Int
+    val itemCount: Int?,
+    @JacksonXmlProperty(localName = "numOfRows")
+    val numOfRows: Int?,
+    @JacksonXmlProperty(localName = "pageNo")
+    val pageNo: Int?,
+    @JacksonXmlProperty(localName = "resultCode")
+    val resultCode: Int?,
+    @JacksonXmlProperty(localName = "resultMsg")
+    val resultMessage: String?,
+    @JacksonXmlProperty(localName = "totalCount")
+    val totalCount: Int?
 )
 
 data class MsgBody<T>(
@@ -307,7 +323,7 @@ data class BusRouteStationResponse(
     @JacksonXmlProperty(localName = "transYn")
     val transYn: String
 ) {
-    fun toBusRouteStation(): BusRouteStation =
+    fun toBusRouteStation(turnPoint: Int?): BusRouteStation =
         BusRouteStation(
             busRoute =
                 BusRoute(
@@ -329,6 +345,243 @@ data class BusRouteStationResponse(
                                     lon = gpsX.toDouble()
                                 )
                         )
+                ),
+            turnPoint = turnPoint
+        )
+}
+
+data class SeoulBusRouteInfoResponse(
+    @JacksonXmlProperty(localName = "busRouteAbrv")
+    val busRouteAbrv: String,
+    @JacksonXmlProperty(localName = "busRouteId")
+    val busRouteId: String,
+    @JacksonXmlProperty(localName = "busRouteNm")
+    val busRouteName: String,
+    @JacksonXmlProperty(localName = "corpNm")
+    val corpName: String,
+    @JacksonXmlProperty(localName = "edStationNm")
+    val endStationName: String,
+    @JacksonXmlProperty(localName = "firstBusTm")
+    val firstBusTime: String,
+    @JacksonXmlProperty(localName = "firstLowTm")
+    val firstLowBusTime: String,
+    @JacksonXmlProperty(localName = "lastBusTm")
+    val lastBusTime: String,
+    @JacksonXmlProperty(localName = "lastBusYn")
+    val lastBusYn: String?,
+    @JacksonXmlProperty(localName = "lastLowTm")
+    val lastLowBusTime: String,
+    @JacksonXmlProperty(localName = "length")
+    val length: String,
+    @JacksonXmlProperty(localName = "routeType")
+    val routeType: Int,
+    @JacksonXmlProperty(localName = "stStationNm")
+    val startStationName: String,
+    @JacksonXmlProperty(localName = "term")
+    val term: Int
+) {
+    fun toBusRoute(): BusRoute {
+        return BusRoute(
+            id = BusRouteId(busRouteId),
+            name = busRouteName,
+            serviceRegion = ServiceRegion.SEOUL
+        )
+    }
+
+    companion object {
+        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+    }
+}
+
+data class IncheonBusStationResponse(
+    @JacksonXmlProperty(localName = "ADMINNM")
+    val adminName: String,
+    @JacksonXmlProperty(localName = "BSTOPID")
+    val stationId: String,
+    @JacksonXmlProperty(localName = "BSTOPNM")
+    val stationName: String,
+    @JacksonXmlProperty(localName = "CENTERLANEYN")
+    val centerLaneYn: String,
+    @JacksonXmlProperty(localName = "POSX")
+    val positionX: String,
+    @JacksonXmlProperty(localName = "POSY")
+    val positionY: String,
+    @JacksonXmlProperty(localName = "SHORT_BSTOPID")
+    val shortStationId: String
+) {
+    fun toBusStation(transformCoordinate: Coordinate): BusStation {
+        return BusStation(
+            id = BusStationId(stationId),
+            busStationNumber = BusStationNumber(shortStationId),
+            busStationMeta =
+                BusStationMeta(
+                    name = stationName,
+                    coordinate = transformCoordinate
                 )
         )
+    }
+}
+
+data class IncheonBusStationRouteResponse(
+    @JacksonXmlProperty(localName = "BSTOPID")
+    val stationId: String,
+    @JacksonXmlProperty(localName = "BSTOPNM")
+    val stationName: String,
+    @JacksonXmlProperty(localName = "BSTOPSEQ")
+    val stationSequence: Int,
+    @JacksonXmlProperty(localName = "DESTINATION")
+    val destination: String,
+    @JacksonXmlProperty(localName = "DEST_BSTOPID")
+    val destinationStationId: String,
+    @JacksonXmlProperty(localName = "DIRCD")
+    val directionCode: Int,
+    @JacksonXmlProperty(localName = "PATHSEQ")
+    val pathSequence: Int,
+    @JacksonXmlProperty(localName = "ROUTEID")
+    val routeId: String,
+    @JacksonXmlProperty(localName = "ROUTENO")
+    val routeNumber: String,
+    @JacksonXmlProperty(localName = "ROUTETPCD")
+    val routeType: Int
+) {
+    fun toBusRoute(): BusRoute {
+        return BusRoute(
+            id = BusRouteId(routeId),
+            name = routeNumber,
+            serviceRegion = ServiceRegion.INCHEON
+        )
+    }
+}
+
+data class IncheonBusRouteStationListResponse(
+    @JacksonXmlProperty(localName = "ADMINNM")
+    val adminName: String,
+    @JacksonXmlProperty(localName = "BSTOPID")
+    val stationId: String,
+    @JacksonXmlProperty(localName = "BSTOPNM")
+    val stationName: String,
+    @JacksonXmlProperty(localName = "BSTOPSEQ")
+    val stationSequence: Int,
+    @JacksonXmlProperty(localName = "DIRCD")
+    val directionCode: Int,
+    @JacksonXmlProperty(localName = "PATHSEQ")
+    val pathSequence: Int,
+    @JacksonXmlProperty(localName = "POSX")
+    val positionX: String,
+    @JacksonXmlProperty(localName = "POSY")
+    val positionY: String,
+    @JacksonXmlProperty(localName = "ROUTEID")
+    val routeId: String,
+    @JacksonXmlProperty(localName = "SHORT_BSTOPID")
+    val shortStationId: String
+) {
+    fun toBusRouteStation(
+        busRoute: BusRoute,
+        turnPoint: Int?,
+        transformCoordinate: Coordinate
+    ): BusRouteStation {
+        val busStation =
+            BusStation(
+                id = BusStationId(stationId),
+                busStationNumber = BusStationNumber(shortStationId),
+                busStationMeta =
+                    BusStationMeta(
+                        name = stationName,
+                        coordinate = transformCoordinate
+                    )
+            )
+
+        return BusRouteStation(
+            busRoute = busRoute,
+            order = stationSequence,
+            busStation = busStation,
+            turnPoint = turnPoint
+        )
+    }
+}
+
+data class IncheonBusRouteInfoResponse(
+    @JacksonXmlProperty(localName = "ADMINNM")
+    val adminName: String,
+    @JacksonXmlProperty(localName = "DEST_BSTOPID")
+    val destinationStationId: String,
+    @JacksonXmlProperty(localName = "DEST_BSTOPNM")
+    val destinationStationName: String,
+    @JacksonXmlProperty(localName = "FBUS_DEPHMS")
+    val firstBusTime: String,
+    @JacksonXmlProperty(localName = "LBUS_DEPHMS")
+    val lastBusTime: String,
+    @JacksonXmlProperty(localName = "MAX_ALLOCGAP")
+    val maxDispatchInterval: Int,
+    @JacksonXmlProperty(localName = "MIN_ALLOCGAP")
+    val minDispatchInterval: Int,
+    @JacksonXmlProperty(localName = "ORIGIN_BSTOPID")
+    val originStationId: String,
+    @JacksonXmlProperty(localName = "ORIGIN_BSTOPNM")
+    val originStationName: String,
+    @JacksonXmlProperty(localName = "ROUTEID")
+    val routeId: String,
+    @JacksonXmlProperty(localName = "ROUTELEN")
+    val routeLength: String,
+    @JacksonXmlProperty(localName = "ROUTENO")
+    val routeNumber: String,
+    @JacksonXmlProperty(localName = "ROUTETPCD")
+    val routeType: String,
+    @JacksonXmlProperty(localName = "TURN_BSTOPID")
+    val turnStationId: String,
+    @JacksonXmlProperty(localName = "TURN_BSTOPNM")
+    val turnStationName: String
+) {
+    fun toBusRoute(): BusRoute {
+        return BusRoute(
+            id = BusRouteId(routeId),
+            name = routeNumber,
+            serviceRegion = ServiceRegion.INCHEON
+        )
+    }
+
+    fun toBusSchedule(busRouteStation: BusRouteStation): BusSchedule {
+        val travelTime = BusTravelTimeCalculator.calculate(busRouteStation, false)
+
+        return BusSchedule(
+            busRoute = busRouteStation.busRoute,
+            busStation = busRouteStation.busStation,
+            busTimeTable =
+                BusTimeTable(
+                    firstTime =
+                        BusTimeParser.parseTime(
+                            firstBusTime,
+                            LocalDate.now(),
+                            TIME_FORMATTER
+                        ).plusMinutes(travelTime),
+                    lastTime =
+                        BusTimeParser.parseTime(
+                            lastBusTime,
+                            LocalDate.now(),
+                            TIME_FORMATTER
+                        ).plusMinutes(travelTime),
+                    term = maxDispatchInterval
+                )
+        )
+    }
+
+    fun toBusRouteOperationInfo(): BusRouteOperationInfo {
+        return BusRouteOperationInfo(
+            originStationName,
+            destinationStationName,
+            serviceHours =
+                listOf(
+                    BusServiceHours(
+                        dailyType = DailyType.WEEKDAY,
+                        startTime = BusTimeParser.parseTime(firstBusTime, LocalDate.now(), TIME_FORMATTER),
+                        endTime = BusTimeParser.parseTime(lastBusTime, LocalDate.now(), TIME_FORMATTER),
+                        term = maxDispatchInterval
+                    )
+                )
+        )
+    }
+
+    companion object {
+        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm")
+    }
 }

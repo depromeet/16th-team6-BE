@@ -4,10 +4,11 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
+import com.deepromeet.atcha.transit.domain.BusStationInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils.isSeoulApiLimitExceeded
+import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils.isServiceResultApiLimitExceeded
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -31,7 +32,7 @@ class PublicSeoulBusStationInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key -> publicBusClient.getStationInfoByName(info.resolveName(), key) },
-            isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 val busStations =
                     response.msgBody.itemList?.map { it.toBusStation() } ?: throw TransitException.of(
@@ -58,7 +59,7 @@ class PublicSeoulBusStationInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key -> publicBusClient.getRouteByStation(station.busStationNumber.value, key) },
-            isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 val busRoutes = response.msgBody.itemList?.map { it.toBusRoute() }
                 busRoutes?.find { it.name == routeName }
@@ -77,7 +78,7 @@ class PublicSeoulBusStationInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key -> publicBusRouteClient.getStationsByRoute(route.id.value, key) },
-            isLimitExceeded = { response -> isSeoulApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 val responses = response.msgBody.itemList
                 if (responses == null) {
@@ -86,9 +87,13 @@ class PublicSeoulBusStationInfoClient(
                         "버스 노선 '${route.id.value}'의 경유 정류소 정보를 찾을 수 없습니다."
                     )
                 } else {
-                    val busRouteStations = responses.map { it.toBusRouteStation() }
                     val turnPoint = responses.first { it.transYn == "Y" }.seq.toInt()
-
+                    val busRouteStations =
+                        responses
+                            .filter { station ->
+                                NON_STOP_STATION_NAME.none { keyword -> station.stationNm.contains(keyword) }
+                            }
+                            .map { it.toBusRouteStation(turnPoint) }
                     BusRouteStationList(busRouteStations, turnPoint)
                 }
             },

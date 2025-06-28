@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.api.response
 
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.LastRouteLeg
+import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 
 data class LastRouteResponse(

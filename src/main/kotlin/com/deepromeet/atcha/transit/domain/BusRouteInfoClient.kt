@@ -1,15 +1,11 @@
 package com.deepromeet.atcha.transit.domain
 
 interface BusRouteInfoClient {
-    fun getBusSchedule(
-        station: BusStation,
-        route: BusRoute
-    ): BusSchedule?
+    fun getBusRoute(routeName: String): List<BusRoute>
 
     fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo
 
-    fun getBusRealTimeInfo(
-        station: BusStation,
-        route: BusRoute
-    ): BusRealTimeArrival
+    fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule?
+
+    fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival
 }

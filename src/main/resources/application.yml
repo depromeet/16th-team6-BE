@@ -54,6 +54,8 @@ open-api:
       gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
       gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
       gyeonggi-bus-position: http://apis.data.go.kr/6410000/buslocationservice/v2
+      incheon-route: https://apis.data.go.kr/6280000/busRouteService
+      incheon-station: https://apis.data.go.kr/6280000/busStationService
       subway: http://apis.data.go.kr/1613000/SubwayInfoService
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
 

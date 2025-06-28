@@ -2,14 +2,53 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusServiceHours
+import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.DailyType
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.SeoulBusOperationRow.Companion.TIME_FORMATTER
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
+import java.time.format.DateTimeFormatter
 
 data class SeoulBusOperationResponse(
     val rows: List<SeoulBusOperationRow>
-)
+) {
+    fun toBusRouteOperationInfo(): BusRouteOperationInfo? {
+        val row = rows.firstOrNull() ?: return null
+
+        val serviceHoursList = mutableListOf<BusServiceHours>()
+
+        val today = LocalDate.now()
+
+        serviceHoursList +=
+            BusServiceHours(
+                dailyType = DailyType.WEEKDAY,
+                startTime = BusTimeParser.parseTime(row.timeFirst, today, TIME_FORMATTER),
+                endTime = BusTimeParser.parseTime(row.timeLast, today, TIME_FORMATTER),
+                term = row.norTerms.toIntOrNull() ?: 0
+            )
+
+        serviceHoursList +=
+            BusServiceHours(
+                dailyType = DailyType.SATURDAY,
+                startTime = BusTimeParser.parseTime(row.satTimeFirst, today, TIME_FORMATTER),
+                endTime = BusTimeParser.parseTime(row.satTimeLast, today, TIME_FORMATTER),
+                term = row.satTerms.toIntOrNull() ?: 0
+            )
+
+        serviceHoursList +=
+            BusServiceHours(
+                dailyType = DailyType.HOLIDAY,
+                startTime = BusTimeParser.parseTime(row.holTimeFirst, today, TIME_FORMATTER),
+                endTime = BusTimeParser.parseTime(row.holTimeLast, today, TIME_FORMATTER),
+                term = row.holTerms.toIntOrNull() ?: 0
+            )
+
+        return BusRouteOperationInfo(
+            startStationName = row.stnFirst,
+            endStationName = row.stnLast,
+            serviceHours = serviceHoursList
+        )
+    }
+}
 
 data class SeoulBusOperationRow(
     val routId: String,
@@ -51,47 +90,8 @@ data class SeoulBusOperationRow(
     val etcDesc: String?,
     val rn: Int,
     val rnum: Int
-)
-
-private fun parseTime(hhmm: String): LocalDateTime {
-    val hour = hhmm.substring(0, 2).toIntOrNull() ?: 0
-    val minute = hhmm.substring(2, 4).toIntOrNull() ?: 0
-    val today = LocalDate.now()
-    return LocalDateTime.of(today, LocalTime.of(hour, minute))
-}
-
-fun SeoulBusOperationResponse.toBusRouteOperationInfo(): BusRouteOperationInfo? {
-    val row = rows.firstOrNull() ?: return null
-
-    val serviceHoursList = mutableListOf<BusServiceHours>()
-
-    serviceHoursList +=
-        BusServiceHours(
-            dailyType = DailyType.WEEKDAY,
-            startTime = parseTime(row.timeFirst),
-            endTime = parseTime(row.timeLast),
-            term = row.norTerms.toIntOrNull() ?: 0
-        )
-
-    serviceHoursList +=
-        BusServiceHours(
-            dailyType = DailyType.SATURDAY,
-            startTime = parseTime(row.satTimeFirst),
-            endTime = parseTime(row.satTimeLast),
-            term = row.satTerms.toIntOrNull() ?: 0
-        )
-
-    serviceHoursList +=
-        BusServiceHours(
-            dailyType = DailyType.HOLIDAY,
-            startTime = parseTime(row.holTimeFirst),
-            endTime = parseTime(row.holTimeLast),
-            term = row.holTerms.toIntOrNull() ?: 0
-        )
-
-    return BusRouteOperationInfo(
-        startStationName = row.stnFirst,
-        endStationName = row.stnLast,
-        serviceHours = serviceHoursList
-    )
+) {
+    companion object {
+        val TIME_FORMATTER = DateTimeFormatter.ofPattern("HHmm")
+    }
 }

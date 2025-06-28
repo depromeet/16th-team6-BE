@@ -31,4 +31,13 @@ interface PublicGyeonggiRouteInfoFeignClient {
         @RequestParam format: String = "xml",
         @RequestHeader("Accept") acceptHeader: String = "application/xml"
     ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusRouteInfoResponse>
+
+    @GetMapping("/getBusRouteListv2")
+    @Headers("Accept: application/xml")
+    fun getRouteList(
+        @RequestParam serviceKey: String,
+        @RequestParam keyword: String,
+        @RequestParam format: String = "xml",
+        @RequestHeader("Accept") acceptHeader: String = "application/xml"
+    ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusRouteListResponse>
 }

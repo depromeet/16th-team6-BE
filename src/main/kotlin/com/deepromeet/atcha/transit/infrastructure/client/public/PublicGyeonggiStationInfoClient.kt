@@ -4,6 +4,7 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationInfoClient
+import com.deepromeet.atcha.transit.domain.BusStationInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
@@ -83,7 +84,11 @@ class PublicGyeonggiStationInfoClient(
                         )
 
                 BusRouteStationList(
-                    busRouteStationsResponse.map { it.toBusRouteStation(route) },
+                    busRouteStationsResponse
+                        .filter { station ->
+                            NON_STOP_STATION_NAME.none { keyword -> station.stationName.contains(keyword) }
+                        }
+                        .map { it.toBusRouteStation(route) },
                     busRouteStationsResponse.firstOrNull()?.turnSeq
                 )
             },

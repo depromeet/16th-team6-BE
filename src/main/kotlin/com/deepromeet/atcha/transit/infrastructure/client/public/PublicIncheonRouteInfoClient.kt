@@ -8,16 +8,12 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
-private val log = KotlinLogging.logger {}
-
 @Component
-class PublicSeoulBusRouteInfoClient(
-    private val publicSeoulBusArrivalInfoFeignClient: PublicSeoulBusArrivalInfoFeignClient,
-    private val seoulBusOperationFeignClient: SeoulBusOperationFeignClient,
+class PublicIncheonRouteInfoClient(
+    private val incheonBusRouteInfoFeignClient: PublicIncheonBusRouteInfoFeignClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -30,19 +26,16 @@ class PublicSeoulBusRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicSeoulBusArrivalInfoFeignClient.getBusRouteList(key, routeName) },
+            apiCall = { key -> incheonBusRouteInfoFeignClient.getBusRouteByName(key, routeName) },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 val routes = (
-                    response.msgBody.itemList
-                        ?.filter { it.busRouteName == routeName || it.busRouteAbrv == routeName }
-                        ?.map { it.toBusRoute() }
+                    response.msgBody.itemList?.filter { it.routeNumber == routeName }?.map { it.toBusRoute() }
                         ?: throw TransitException.of(
                             TransitError.NOT_FOUND_BUS_ROUTE,
-                            "서울시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
+                            "인천시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
                         )
                 )
-
                 if (routes.isEmpty()) {
                     throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_ROUTE,
@@ -51,7 +44,7 @@ class PublicSeoulBusRouteInfoClient(
                 }
                 routes
             },
-            errorMessage = "서울시 버스 노선 정보를 가져오는데 실패했습니다."
+            errorMessage = "인천시 버스 노선 정보를 가져오는데 실패했습니다."
         )
     }
 
@@ -61,49 +54,39 @@ class PublicSeoulBusRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicSeoulBusArrivalInfoFeignClient
-                    .getArrivalInfoByRoute(routeInfo.route.id.value, key)
+                incheonBusRouteInfoFeignClient.getBusRouteInfoById(key, routeInfo.routeId)
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val targetStation = routeInfo.getTargetStation().busStation
-                val findResult = response.msgBody.itemList?.find { it.arsId == targetStation.busStationNumber.value }
-                findResult?.toBusSchedule(targetStation)
+                response.msgBody.itemList?.get(0)?.toBusSchedule(routeInfo.getTargetStation())
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_ROUTE,
+                        "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 정보를 찾을 수 없습니다."
+                    )
             },
-            errorMessage = "서울시 버스 도착 정보를 가져오는데 실패했습니다."
+            errorMessage = "인천시 버스 정류소-${routeInfo.getTargetStation().stationId} 정보를 가져오는데 실패했습니다."
         )
     }
 
     override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
-        return seoulBusOperationFeignClient.getBusOperationInfo(route.id.value).toBusRouteOperationInfo()
-            ?: throw TransitException.of(
-                TransitError.NOT_FOUND_BUS_OPERATION_INFO,
-                "서울시 버스 노선 '${route.id.value}'의 운영 정보를 찾을 수 없습니다."
-            )
-    }
-
-    override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = {
-                    key ->
-                publicSeoulBusArrivalInfoFeignClient
-                    .getArrivalInfoByRoute(routeInfo.route.id.value, key)
-            },
+            apiCall = { key -> incheonBusRouteInfoFeignClient.getBusRouteInfoById(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val findResult =
-                    response.msgBody.itemList
-                        ?.find { it.arsId == routeInfo.getTargetStation().stationNumber }
-
-                findResult?.toBusRealTimeArrival() ?: throw TransitException.of(
-                    TransitError.NOT_FOUND_BUS_REAL_TIME,
-                    "서울시 버스 정류소 '${routeInfo.getTargetStation().stationNumber}'의 실시간 도착 정보를 찾을 수 없습니다."
-                )
+                response.msgBody.itemList?.get(0)?.toBusRouteOperationInfo()
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_OPERATION_INFO,
+                        "인천시 버스 노선-${route.name}-${route.id.value}의 운영 정보를 찾을 수 없습니다."
+                    )
             },
-            errorMessage = "서울시 버스 실시간 정보를 가져오는데 실패했습니다."
+            errorMessage = "인천시 버스 노선-${route.name}-${route.id.value}의 운영 정보를 가져오는데 실패했습니다."
         )
+    }
+
+    override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
+        TODO("Not yet implemented")
     }
 }

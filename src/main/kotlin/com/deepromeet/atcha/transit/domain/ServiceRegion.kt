@@ -7,7 +7,8 @@ enum class ServiceRegion(
     val regionName: String
 ) {
     SEOUL("서울특별시"),
-    GYEONGGI("경기도");
+    GYEONGGI("경기도"),
+    INCHEON("인천광역시") ;
 
     companion object {
         fun from(regionName: String): ServiceRegion {
@@ -17,9 +18,5 @@ enum class ServiceRegion(
                     "지역 '$regionName'은 현재 서비스를 지원하지 않습니다."
                 )
         }
-    }
-
-    fun isNotSupported(): Boolean {
-        return (this in listOf(SEOUL, GYEONGGI)).not()
     }
 }
