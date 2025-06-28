@@ -29,7 +29,7 @@ interface ODSayBusFeignClient {
     ): ODSayBusArrivalResponse
 
     @GetMapping("/v1/api/busStationInfo")
-    fun getStationInfoBystationID(
+    fun getStationInfoByStationID(
         @RequestParam apiKey: String,
         @RequestParam stationID: String,
         @RequestParam lang: String = "0"

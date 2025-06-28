@@ -8,12 +8,9 @@ import org.springframework.stereotype.Component
 class CompositeBusScheduleProvider(
     private val providers: List<BusScheduleProvider>
 ) : BusScheduleProvider {
-    override fun getBusSchedule(
-        station: BusStation,
-        route: BusRoute
-    ): BusSchedule? =
+    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? =
         providers
             .asSequence()
-            .mapNotNull { it.getBusSchedule(station, route) }
+            .mapNotNull { it.getBusSchedule(routeInfo) }
             .firstOrNull()
 }

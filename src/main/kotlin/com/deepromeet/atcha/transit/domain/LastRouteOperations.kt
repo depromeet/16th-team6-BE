@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -17,6 +18,7 @@ import java.time.LocalDateTime
 import java.util.UUID
 
 private val semaphore: Semaphore = Semaphore(permits = 5)
+private val log = KotlinLogging.logger {}
 
 @Component
 class LastRouteOperations(
@@ -74,8 +76,8 @@ class LastRouteOperations(
                 pathType = route.pathType,
                 legs = adjustedLegs
             )
-        } catch (e: TransitException) {
-            log.warn { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
+        } catch (e: Exception) {
+            log.warn(e) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
             return null
         }
     }
@@ -121,7 +123,12 @@ class LastRouteOperations(
                                         leg.start.name.removeSuffix(),
                                         Coordinate(leg.start.lat, leg.start.lon)
                                     )
-                                val busTimeInfo = busManager.getBusTimeInfo(routeId, stationMeta)
+                                val busTimeInfo =
+                                    busManager.getBusTimeInfo(
+                                        routeId,
+                                        stationMeta,
+                                        leg.passStopList!!.stationList[1].stationName
+                                    )
                                 val departureDateTime = busTimeInfo.lastTime
                                 val transitTime = TransitTime.BusTimeInfo(busTimeInfo)
 

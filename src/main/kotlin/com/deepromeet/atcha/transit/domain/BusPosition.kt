@@ -10,7 +10,7 @@ data class BusPosition(
     val remainSeats: Int? = null
 ) {
     fun calculateSectionProgress(): Double {
-        if (fullSectionDistance == null || currentSectionDistance == null) {
+        if (fullSectionDistance == null || currentSectionDistance == null || fullSectionDistance == 0.0) {
             return 0.0
         }
 

@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.Duration
 import java.time.LocalDateTime
@@ -56,6 +55,8 @@ data class LastRouteLeg(
             Coordinate(start.lat, start.lon)
         )
     }
+
+    fun getNextStationName(): String? = passStopList?.getOrNull(1)?.stationName
 }
 
 fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
@@ -73,3 +74,10 @@ fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
         LastRouteSortType.DEPARTURE_TIME_DESC -> upcomingRoutes.sortedByDescending { it.departureDateTime }
     }
 }
+
+data class Station(
+    val index: Int,
+    val stationName: String,
+    val lon: String,
+    val lat: String
+)

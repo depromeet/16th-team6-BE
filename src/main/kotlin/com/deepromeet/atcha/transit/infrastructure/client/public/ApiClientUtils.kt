@@ -79,8 +79,8 @@ object ApiClientUtils {
                 processResult(response)
             }
         } catch (e: DecodeException) {
-            log.warn { "DecodeException 발생. API 응답 포맷이 예상과 다릅니다. 다음 키로 재시도합니다. - $errorMessage" }
-            callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, index + 1)
+            log.warn(e) { "DecodeException 발생. API 응답 포맷이 예상과 다릅니다. 다음 키로 재시도합니다." }
+            throw InfrastructureException.of(InfrastructureError.EXTERNAL_API_ERROR, e)
         } catch (e: Exception) {
             if (e is CustomException) {
                 throw e // CustomException은 그대로 던져서 상위로 전달
@@ -90,7 +90,7 @@ object ApiClientUtils {
         }
     }
 
-    fun <T> isSeoulApiLimitExceeded(response: ServiceResult<T>): Boolean {
+    fun <T> isServiceResultApiLimitExceeded(response: ServiceResult<T>): Boolean {
         // 제한 메시지 목록 (필요시 확장 가능)
         val limitMessages =
             listOf(
@@ -101,7 +101,10 @@ object ApiClientUtils {
         // 헤더 코드가 7이고 메시지가 제한 메시지 중 하나를 포함하는지 확인
         val isLimited =
             response.msgHeader.headerCd == 7 ||
-                limitMessages.any { response.msgHeader.headerMsg.contains(it) }
+                limitMessages.any {
+                    response.msgHeader.headerMsg?.contains(it)
+                        ?: false
+                }
 
         if (isLimited) {
             log.warn { "공공 API 요청 수 초과: ${response.msgHeader.headerMsg}" }

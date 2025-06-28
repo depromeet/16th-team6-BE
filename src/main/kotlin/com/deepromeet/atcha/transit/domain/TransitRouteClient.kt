@@ -6,9 +6,12 @@ import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class TransitRouteClient(

@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 
+import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
 data class TMapRouteResponse(
@@ -127,17 +128,4 @@ data class PassShape(
 
 data class PassStopList(
     val stationList: List<Station> = emptyList()
-)
-
-data class Station(
-    // 순번
-    val index: Int,
-    // 정류장 ID
-    val stationID: String,
-    // 정류장 명칭
-    val stationName: String,
-    // 경도
-    val lon: String,
-    // 위도
-    val lat: String
 )

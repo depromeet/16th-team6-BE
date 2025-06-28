@@ -2,6 +2,9 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import io.github.oshai.kotlinlogging.KotlinLogging
+
+private val log = KotlinLogging.logger {}
 
 enum class SubwayDirection(
     val code: String,

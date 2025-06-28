@@ -16,7 +16,7 @@ data class BusRealTimeInfo(
     val remainingStations: Int?,
     val isLast: Boolean?,
     val busCongestion: BusCongestion,
-    val remainingSeats: Int
+    val remainingSeats: Int?
 ) {
     val expectedArrivalTime: LocalDateTime?
         get() =

@@ -4,11 +4,10 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
+import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import java.time.LocalDate
-import java.time.LocalDateTime
-import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 data class ODSayBusArrivalResponse(
@@ -63,7 +62,7 @@ data class ODSayLaneResponse(
     var busInterval: String,
     var busLocalBlID: String
 ) {
-    fun toBusArrival(station: BusStation): BusSchedule {
+    fun toBusSchedule(station: BusStation): BusSchedule {
         val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
@@ -75,29 +74,15 @@ data class ODSayLaneResponse(
             busStation = station,
             busTimeTable =
                 BusTimeTable(
-                    toBusArrivalTime(busFirstTime),
-                    toBusArrivalTime(busLastTime),
+                    BusTimeParser.parseTime(busFirstTime, LocalDate.now(), TIME_FORMATTER),
+                    BusTimeParser.parseTime(busLastTime, LocalDate.now(), TIME_FORMATTER),
                     busInterval.toInt()
                 )
         )
     }
 
-    // TODO : "xx:xx" -> LocalDateTime 변환, Util로 옮기기
-    fun toBusArrivalTime(time: String): LocalDateTime {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
-        val overDay = time.substring(0, 2).toInt() > 24
-        val checkTime =
-            if (overDay) {
-                "0" + time.substring(0, 2).toInt().minus(24).toString() + time.substring(2)
-            } else {
-                time
-            }
-        val localTime = LocalTime.parse(checkTime, formatter)
-        if (overDay) {
-            return LocalDateTime.of(LocalDate.now(), localTime)
-                .plusDays(1)
-        }
-        return LocalDateTime.of(LocalDate.now(), localTime)
+    companion object {
+        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
     }
 }
 

@@ -24,5 +24,5 @@ interface PublicGyeonggiBusStationInfoFeignClient {
         @RequestParam serviceKey: String,
         @RequestParam stationId: String,
         @RequestParam format: String = "xml"
-    ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusRouteListResponse>
+    ): PublicGyeonggiResponse<PublicGyeonggiResponse.BusStationRouteListResponse>
 }

@@ -6,8 +6,6 @@ import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayStationId
 import com.deepromeet.atcha.transit.domain.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.SubwayTime
-import com.deepromeet.atcha.transit.exception.TransitError
-import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.ItemDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import java.time.LocalDate
@@ -62,19 +60,17 @@ data class SubwayTimeResponse(
     val subwayStationNm: String,
     val upDownTypeCode: String
 ) {
-    fun toDomain(endStation: SubwayStation): SubwayTime =
-        SubwayTime(
+    fun toDomain(endStation: SubwayStation): SubwayTime? {
+        return SubwayTime(
             finalStation = endStation,
-            departureTime = parseTime(depTime),
+            departureTime = parseTime(depTime) ?: return null,
             subwayDirection = SubwayDirection.fromCode(upDownTypeCode)
         )
+    }
 
-    private fun parseTime(time: String): LocalDateTime {
+    private fun parseTime(time: String): LocalDateTime? {
         if (time == "0") {
-            throw TransitException(
-                TransitError.INVALID_TIME_FORMAT,
-                "지하철 시간 정보가 잘못되었습니다: $time"
-            )
+            return null
         }
 
         val formatter = DateTimeFormatter.ofPattern("HHmmss")

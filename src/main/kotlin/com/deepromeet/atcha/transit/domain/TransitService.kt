@@ -22,10 +22,11 @@ class TransitService(
 
     fun getBusArrival(
         routeName: String,
-        busStationMeta: BusStationMeta
+        busStationMeta: BusStationMeta,
+        nextStationName: String? = null
     ): BusArrival {
-        val schedule = busManager.getSchedule(routeName, busStationMeta)
-        val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta)
+        val schedule = busManager.getSchedule(routeName, busStationMeta, nextStationName)
+        val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta, nextStationName)
         return BusArrival(schedule, realTimeArrival)
     }
 
@@ -60,7 +61,8 @@ class TransitService(
         val busRealTime =
             busManager.getRealTimeArrival(
                 lastRoute.findFirstBus().resolveRouteName(),
-                lastRoute.findFirstBus().resolveStartStation()
+                lastRoute.findFirstBus().resolveStartStation(),
+                lastRoute.findFirstBus().getNextStationName()
             )
         return busRealTime.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
     }

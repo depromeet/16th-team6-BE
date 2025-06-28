@@ -6,9 +6,10 @@ data class BusStationMeta(
     val name: String,
     val coordinate: Coordinate
 ) {
-    fun resolveName(): String {
-        return name
-            .replace("(지하)", "")
+    fun resolveName(): String = normalize(name)
+
+    private fun normalize(name: String): String =
+        name.replace("(지하)", "")
             .replace("(중)", "")
-    }
+            .trim()
 }

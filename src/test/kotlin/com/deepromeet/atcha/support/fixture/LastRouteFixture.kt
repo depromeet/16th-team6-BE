@@ -2,9 +2,9 @@ package com.deepromeet.atcha.support.fixture
 
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.LastRouteLeg
+import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.domain.TransitTime
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.LocalDateTime
 
@@ -47,7 +47,6 @@ object LastRouteFixture {
             listOf(
                 Station(
                     index = 0,
-                    stationID = "station-001",
                     stationName = "MidStation",
                     lat = "37.5700",
                     lon = "126.9800"
