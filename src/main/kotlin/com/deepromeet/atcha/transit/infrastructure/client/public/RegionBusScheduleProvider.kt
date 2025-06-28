@@ -29,7 +29,7 @@ class RegionBusScheduleProvider(
 
             return busSchedule
         } catch (e: Exception) {
-            log.warn(e) { "공공 데이터 버스 시간표 조회 실패 - 정류장: ${routeInfo.getTargetStation().stationName} 노선: $routeInfo" }
+            log.debug(e) { "공공 데이터 버스 시간표 조회 실패 - 정류장: ${routeInfo.getTargetStation().stationName} 노선: $routeInfo" }
             return null
         }
     }
