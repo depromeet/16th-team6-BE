@@ -14,7 +14,8 @@ class TransitService(
     private val userReader: UserReader,
     private val transitRouteClient: TransitRouteClient,
     private val lastRouteReader: LastRouteReader,
-    private val lastRouteOperations: LastRouteOperations
+    private val lastRouteOperations: LastRouteOperations,
+    private val startedBusCache: StartedBusCache
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -55,16 +56,24 @@ class TransitService(
         return lastRouteReader.readRemainingTime(routeId)
     }
 
-    // TODO: 두번째 도착 예정 버스인지 확인하고있음 -> 실제 차고지 출발 여부 확인으로 변경 필요
-    fun isBusStarted(lastRouteId: String): Boolean {
+    suspend fun isBusStarted(lastRouteId: String): Boolean {
+        startedBusCache.get(lastRouteId)?.let { return true }
+
         val lastRoute = lastRouteReader.read(lastRouteId)
-        val busRealTime =
-            busManager.getRealTimeArrival(
-                lastRoute.findFirstBus().resolveRouteName(),
-                lastRoute.findFirstBus().resolveStartStation(),
-                lastRoute.findFirstBus().getNextStationName()
-            )
-        return busRealTime.getSecondBus()?.isTargetBus(lastRoute.findFirstBus()) ?: false
+        val firstBus = lastRoute.findFirstBus()
+        val busInfo = firstBus.transitInfo as TransitInfo.BusInfo
+        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+
+        busPositions.findTargetBus(
+            busInfo.busStation,
+            firstBus.departureDateTime!!,
+            busInfo.timeTable.term
+        )?.let {
+            startedBusCache.cache(lastRouteId, it)
+            return true
+        }
+
+        return false
     }
 
     suspend fun getLastRoutes(

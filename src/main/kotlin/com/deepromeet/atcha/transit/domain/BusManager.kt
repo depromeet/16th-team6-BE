@@ -16,22 +16,12 @@ class BusManager(
     private val busRouteResolver: BusRouteResolver,
     private val busTimeTableCache: BusTimeTableCache
 ) {
-    fun getBusTimeInfo(
-        routeName: String,
-        stationMeta: BusStationMeta,
-        nextStationName: String?
-    ): BusTimeTable {
-        return busTimeTableCache.get(
-            routeName,
-            stationMeta
-        ) ?: getSchedule(routeName, stationMeta, nextStationName).busTimeTable
-    }
-
     fun getSchedule(
         routeName: String,
         stationMeta: BusStationMeta,
         nextStationName: String?
     ): BusSchedule {
+        busTimeTableCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, nextStationName)
 
         val schedule =
@@ -41,7 +31,7 @@ class BusManager(
                     "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 도착 정보를 찾을 수 없습니다."
                 )
 
-        busTimeTableCache.cache(routeName, stationMeta, schedule.busTimeTable)
+        busTimeTableCache.cache(routeName, stationMeta, schedule)
         return schedule
     }
 

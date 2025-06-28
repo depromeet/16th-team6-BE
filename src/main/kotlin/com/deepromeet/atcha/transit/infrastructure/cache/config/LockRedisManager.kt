@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.common.redis
+package com.deepromeet.atcha.transit.infrastructure.cache.config
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CoroutineScope

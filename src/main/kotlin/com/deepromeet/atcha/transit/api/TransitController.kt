@@ -99,7 +99,7 @@ class TransitController(
         )
 
     @GetMapping("/last-routes/{lastRouteId}/bus-started")
-    fun isBusStarted(
+    suspend fun isBusStarted(
         @PathVariable lastRouteId: String
     ): ApiResponse<Boolean> =
         ApiResponse.success(

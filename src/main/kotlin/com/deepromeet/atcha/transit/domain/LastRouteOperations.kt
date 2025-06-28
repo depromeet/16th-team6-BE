@@ -109,11 +109,11 @@ class LastRouteOperations(
                                         endStation,
                                         routes
                                     ).departureTime
-                                val transitTime =
+                                val transitInfo =
                                     timeTable.let {
-                                        TransitTime.SubwayTimeInfo(it)
+                                        TransitInfo.SubwayInfo(it)
                                     }
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
+                                leg.toLastRouteLeg(departureDateTime, transitInfo)
                             }
 
                             "BUS" -> {
@@ -123,19 +123,19 @@ class LastRouteOperations(
                                         leg.start.name.removeSuffix(),
                                         Coordinate(leg.start.lat, leg.start.lon)
                                     )
-                                val busTimeInfo =
-                                    busManager.getBusTimeInfo(
+                                val busSchedule =
+                                    busManager.getSchedule(
                                         routeId,
                                         stationMeta,
                                         leg.passStopList!!.stationList[1].stationName
                                     )
-                                val departureDateTime = busTimeInfo.lastTime
-                                val transitTime = TransitTime.BusTimeInfo(busTimeInfo)
+                                val departureDateTime = busSchedule.busTimeTable.lastTime
+                                val transitInfo = TransitInfo.BusInfo(busSchedule)
 
-                                leg.toLastRouteLeg(departureDateTime, transitTime)
+                                leg.toLastRouteLeg(departureDateTime, transitInfo)
                             }
 
-                            else -> leg.toLastRouteLeg(null, TransitTime.NoTimeTable)
+                            else -> leg.toLastRouteLeg(null, TransitInfo.NoInfoTable)
                         }
                     }
                 }
@@ -250,9 +250,9 @@ class LastRouteOperations(
         adjustedDepartureTime: LocalDateTime,
         direction: TimeDirection
     ): LocalDateTime =
-        when (leg.transitTime) {
-            is TransitTime.SubwayTimeInfo ->
-                leg.transitTime.timeTable.findNearestTime(
+        when (leg.transitInfo) {
+            is TransitInfo.SubwayInfo ->
+                leg.transitInfo.timeTable.findNearestTime(
                     adjustedDepartureTime,
                     direction
                 )?.departureTime
@@ -261,8 +261,8 @@ class LastRouteOperations(
                         "지하철 '${leg.route}'의 ${leg.start.name}'역에서" +
                             " $adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
                     )
-            is TransitTime.BusTimeInfo ->
-                leg.transitTime.arrivalInfo.calculateNearestTime(
+            is TransitInfo.BusInfo ->
+                leg.transitInfo.timeTable.calculateNearestTime(
                     adjustedDepartureTime,
                     direction
                 ) ?: throw TransitException.of(
@@ -270,7 +270,7 @@ class LastRouteOperations(
                     "버스 '${leg.route}'의 '${leg.start.name}' 정류장에서 " +
                         "$adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
                 )
-            TransitTime.NoTimeTable -> throw TransitException.of(
+            TransitInfo.NoInfoTable -> throw TransitException.of(
                 TransitError.NOT_FOUND_SPECIFIED_TIME,
                 "해당 교통수단의 막차 시간 정보가 없습니다. ${leg.mode} - ${leg.start.name} -> ${leg.end.name}"
             )
@@ -311,7 +311,7 @@ class LastRouteOperations(
 
     private fun Leg.toLastRouteLeg(
         departureDateTime: LocalDateTime?,
-        transitTime: TransitTime
+        transitInfo: TransitInfo
     ): LastRouteLeg {
         return LastRouteLeg(
             distance = this.distance,
@@ -326,7 +326,7 @@ class LastRouteOperations(
             passStopList = this.passStopList?.stationList,
             step = this.steps,
             passShape = this.passShape?.linestring,
-            transitTime = transitTime
+            transitInfo = transitInfo
         )
     }
 
