@@ -19,7 +19,12 @@ class SimilarTransitNameComparer() : TransitNameComparer {
         if (name1 == "남문시장.청춘삘딩") {
             println("Comparing: $name1 and $name2")
         }
-        val score = similarity.apply(name1, name2)
+        val score = similarity.apply(normalize(name1), normalize(name2))
         return score >= SIMILARITY_THRESHOLD
     }
+
+    private fun normalize(name: String): String =
+        name.replace("(지하)", "")
+            .replace("(중)", "")
+            .trim()
 }

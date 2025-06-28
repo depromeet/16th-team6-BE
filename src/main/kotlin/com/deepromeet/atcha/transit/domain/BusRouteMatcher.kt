@@ -14,8 +14,6 @@ class BusRouteMatcher(
         stationMeta: BusStationMeta,
         nextStationName: String?
     ): BusRouteInfo {
-        val targetStationName = stationMeta.resolveName()
-
         busRoutes.forEach { rt ->
 
             val routeStationList = busRouteInfoClientMap[rt.serviceRegion]!!.getStationList(rt)
@@ -23,7 +21,7 @@ class BusRouteMatcher(
             val passStops = routeStationList.busRouteStations
 
             passStops.forEachIndexed { idx, station ->
-                if (!transitNameComparer.isSame(station.stationName, targetStationName)) {
+                if (!transitNameComparer.isSame(station.stationName, stationMeta.name)) {
                     return@forEachIndexed
                 }
 
@@ -42,8 +40,8 @@ class BusRouteMatcher(
 
         throw TransitException.of(
             TransitError.NOT_FOUND_BUS_ROUTE,
-            "'$targetStationName -> $nextStationName'을" +
-                " 경유하는 ${busRoutes[0].serviceRegion}버스노선 '${busRoutes[0].id}'을 찾을 수 없습니다."
+            "'${stationMeta.name} -> $nextStationName'을" +
+                " 경유하는 ${busRoutes[0].serviceRegion} 버스노선 '${busRoutes[0].name}'을 찾을 수 없습니다."
         )
     }
 }

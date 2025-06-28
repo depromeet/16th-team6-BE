@@ -11,10 +11,6 @@ class SubwayStationBatchAppender(
 ) {
     @Transactional
     fun appendAll() {
-        if (subwayStationRepository.count() > 0) {
-            return
-        }
-
         val stationListsByLine =
             SubwayLine.entries.associateWith { line -> subwayStationFetcher.fetch(line.lnCd) }
 

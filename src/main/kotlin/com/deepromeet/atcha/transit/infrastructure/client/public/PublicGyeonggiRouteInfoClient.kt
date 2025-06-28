@@ -55,7 +55,7 @@ class PublicGyeonggiRouteInfoClient(
                 }
                 routes
             },
-            errorMessage = "경기도 버스 노선 정보를 가져오는데 실패했습니다."
+            errorMessage = "경기도 버스 노선 정보를 가져오는데 실패했습니다. $routeName"
         )
     }
 

@@ -84,18 +84,25 @@ class RouteDepartureTimeRefresher(
         val realTimeInfos = busArrival.realTimeInfoList
         if (realTimeInfos.isEmpty()) return
 
-        val candidateTimes = realTimeInfos.mapNotNull { it.expectedArrivalTime }.take(2).toMutableList()
+        val candidateTimes = realTimeInfos.map { it.expectedArrivalTime }.take(2).toMutableSet()
 
-        realTimeInfos.getOrNull(1)?.expectedArrivalTime?.let { secondBusArrivalTime ->
-            candidateTimes += secondBusArrivalTime.plusMinutes(timeTable.term.toLong())
-            candidateTimes += secondBusArrivalTime.plusMinutes(timeTable.term.toLong() * 2)
+        val baseArrival =
+            realTimeInfos
+                .maxWith(compareBy { it.expectedArrivalTime })
+                .expectedArrivalTime!!
+
+        repeat(2) { i ->
+            candidateTimes += baseArrival.plusMinutes(timeTable.term.toLong() * (i + 1))
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
         val chosenArrivalTime =
-            candidateTimes.minByOrNull { candidate ->
-                Duration.between(originalBusDepartureTime, candidate).abs()
-            } ?: return
+            candidateTimes
+                .minByOrNull { candidate -> Duration.between(originalBusDepartureTime, candidate).abs() }
+                ?: return
+
+        val diffMinutes = Duration.between(originalBusDepartureTime, chosenArrivalTime).abs().toMinutes()
+        if (diffMinutes < 3) return
 
         // (a) 버스 구간 출발 시간을 chosenArrivalTime으로 재설정
         val updatedBusLeg =
