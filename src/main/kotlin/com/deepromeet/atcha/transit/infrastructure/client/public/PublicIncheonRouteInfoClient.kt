@@ -144,12 +144,11 @@ class PublicIncheonRouteInfoClient(
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody.itemList?.get(0)?.toBusRealTimeArrival()
-                    ?: throw TransitException.of(
-                        TransitError.NOT_FOUND_BUS_REAL_TIME,
-                        "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 도착 정보를 찾을 수 없습니다."
-                    )
+                    ?: BusRealTimeArrival(emptyList())
             },
-            errorMessage = "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 도착 정보를 가져오는데 실패했습니다."
+            errorMessage =
+                "인천시 버스 노선 - " +
+                    "${routeInfo.getTargetStation().stationId}-${routeInfo.route.id.value}의 도착 정보를 가져오는데 실패했습니다."
         )
     }
 }

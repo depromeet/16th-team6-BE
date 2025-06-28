@@ -37,7 +37,7 @@ class ODSayBusInfoClient(
         val busStationResponse =
             ApiClientUtils.callApiByKeyProvider(
                 keyProvider = oDSayCallCounter::getApiKeyBasedOnUsage,
-                apiCall = { key -> oDSayBusFeignClient.getStationInfoBystationID(key, busStation.stationID) },
+                apiCall = { key -> oDSayBusFeignClient.getStationInfoByStationID(key, busStation.stationID) },
                 processResult = { response ->
                     response.result.lane.find { it.busLocalBlID == routeInfo.routeId }
                         ?: throw TransitException.of(
@@ -48,6 +48,6 @@ class ODSayBusInfoClient(
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             )
 
-        return busStationResponse.toBusArrival(routeInfo.getTargetStation().busStation)
+        return busStationResponse.toBusSchedule(routeInfo.getTargetStation().busStation)
     }
 }

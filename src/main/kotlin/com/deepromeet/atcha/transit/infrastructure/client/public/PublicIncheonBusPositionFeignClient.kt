@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
+import com.deepromeet.atcha.transit.infrastructure.client.public.response.IncheonBusPositionResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,5 +19,5 @@ interface PublicIncheonBusPositionFeignClient {
         @RequestParam routeId: String,
         @RequestParam pageNo: Int = 1,
         @RequestParam numOfRows: Int = 1000
-    ): ServiceResult<*>
+    ): ServiceResult<IncheonBusPositionResponse>
 }

@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiBusPositionClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiRouteInfoClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.PublicIncheonBusPositionClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicIncheonRouteInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusPositionClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusRouteInfoClient
@@ -17,7 +18,8 @@ class BusBeanConfig(
     private val seoulPositionClient: PublicSeoulBusPositionClient,
     private val gyeonggiRouteInfoClient: PublicGyeonggiRouteInfoClient,
     private val gyeonggiPositionClient: PublicGyeonggiBusPositionClient,
-    private val incheonRouteInfoClient: PublicIncheonRouteInfoClient
+    private val incheonRouteInfoClient: PublicIncheonRouteInfoClient,
+    private val incheonPositionClient: PublicIncheonBusPositionClient
 ) {
     @Bean
     fun routeInfoClient(): Map<ServiceRegion, BusRouteInfoClient> =
@@ -31,6 +33,7 @@ class BusBeanConfig(
     fun positionClient(): Map<ServiceRegion, BusPositionFetcher> =
         mapOf(
             ServiceRegion.SEOUL to seoulPositionClient,
-            ServiceRegion.GYEONGGI to gyeonggiPositionClient
+            ServiceRegion.GYEONGGI to gyeonggiPositionClient,
+            ServiceRegion.INCHEON to incheonPositionClient
         )
 }
