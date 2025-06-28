@@ -22,13 +22,13 @@ data class Route(val list: List<SubwayBranch>) {
         endStationName: String,
         finalStationName: String
     ): Boolean {
-        val startBranch = stationMap[startStationName] ?: return false
-        val endBranch = stationMap[endStationName] ?: return false
-        val finalBranch = stationMap[finalStationName] ?: return false
+        val start = stationMap[startStationName] ?: return false
+        val end = stationMap[endStationName] ?: return false
+        val final = stationMap[finalStationName] ?: return false
 
-        val minOrd = minOf(startBranch.ord, finalBranch.ord)
-        val maxOrd = maxOf(startBranch.ord, finalBranch.ord)
-        return endBranch.ord in minOrd..maxOrd
+        val minOrd = minOf(start.ord, final.ord)
+        val maxOrd = maxOf(start.ord, final.ord)
+        return end.ord in minOrd..maxOrd
     }
 
     fun isContains(
@@ -42,6 +42,10 @@ data class Route(val list: List<SubwayBranch>) {
     ): SubwayDirection {
         val startOrd = stationMap[startStationName]!!.ord
         val endOrd = stationMap[endStationName]!!.ord
-        return if (startOrd < endOrd) SubwayDirection.DOWN else SubwayDirection.UP
+        return if (startOrd < endOrd && stationMap[startStationName]!!.routeCode != "9") {
+            SubwayDirection.DOWN
+        } else {
+            SubwayDirection.UP
+        }
     }
 }
