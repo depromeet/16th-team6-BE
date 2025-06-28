@@ -4,6 +4,7 @@ import com.deepromeet.atcha.common.exception.InfrastructureError
 import com.deepromeet.atcha.common.exception.InfrastructureException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
 import kotlin.compareTo
 
@@ -19,16 +20,23 @@ class ODSayCallCounter(
 ) {
     companion object {
         private const val ODSAY_API_CALL_COUNT_KEY = "odsay:call_count"
+        private val incrScript =
+            RedisScript.of(
+                "local c = redis.call('INCR', KEYS[1]); " +
+                    "if (c == 1) then redis.call('EXPIRE', KEYS[1], ARGV[1]); end; " +
+                    "return c",
+                Long::class.java
+            )
     }
 
     fun getApiKeyBasedOnUsage(): String {
         try {
-            val count =
-                redisTemplate.opsForValue().increment(ODSAY_API_CALL_COUNT_KEY, 1)
-                    ?: throw InfrastructureException.of(
-                        InfrastructureError.CACHE_ERROR,
-                        "Redis에서 ODSay API 호출 카운트를 가져올 수 없습니다."
-                    )
+            val count: Long =
+                redisTemplate.execute(
+                    incrScript,
+                    listOf(ODSAY_API_CALL_COUNT_KEY),
+                    86400.toString()
+                )
 
             return when {
                 count <= 900 -> serviceKey
