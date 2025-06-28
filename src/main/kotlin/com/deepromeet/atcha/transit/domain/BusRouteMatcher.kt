@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class BusRouteMatcher(
-    private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
+    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val transitNameComparer: TransitNameComparer
 ) {
     fun getMatchedRoute(
@@ -18,7 +18,7 @@ class BusRouteMatcher(
 
         busRoutes.forEach { rt ->
 
-            val routeStationList = busStationInfoClientMap[rt.serviceRegion]!!.getByRoute(rt)
+            val routeStationList = busRouteInfoClientMap[rt.serviceRegion]!!.getStationList(rt)
 
             val passStops = routeStationList.busRouteStations
 

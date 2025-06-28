@@ -4,7 +4,9 @@ import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import com.deepromeet.atcha.transit.domain.TransitType
@@ -91,6 +93,34 @@ class PublicGyeonggiRouteInfoClient(
                 )
             },
             errorMessage = "경기도 노선 운행 정보를 가져오는데 실패했습니다."
+        )
+    }
+
+    override fun getStationList(route: BusRoute): BusRouteStationList {
+        return ApiClientUtils.callApiWithRetry(
+            primaryKey = serviceKey,
+            spareKey = spareKey,
+            realLastKey = realLastKey,
+            apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value) },
+            isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
+            processResult = { response ->
+                val busRouteStationsResponse =
+                    response.msgBody?.busRouteStationList
+                        ?: throw TransitException.of(
+                            TransitError.BUS_ROUTE_STATION_LIST_FETCH_FAILED,
+                            "경기도 버스 노선 '${route.name}-${route.id.value}'의 경유 정류소를 찾을 수 없습니다."
+                        )
+
+                BusRouteStationList(
+                    busRouteStationsResponse
+                        .filter { station ->
+                            NON_STOP_STATION_NAME.none { keyword -> station.stationName.contains(keyword) }
+                        }
+                        .map { it.toBusRouteStation(route) },
+                    busRouteStationsResponse.firstOrNull()?.turnSeq
+                )
+            },
+            errorMessage = "경기도 버스 노선 경유 정류소를 가져오는데 실패했습니다."
         )
     }
 

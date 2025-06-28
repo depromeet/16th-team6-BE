@@ -10,7 +10,6 @@ import org.springframework.stereotype.Component
 
 @Component
 class BusManager(
-    private val busStationInfoClientMap: Map<ServiceRegion, BusStationInfoClient>,
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val busScheduleProvider: BusScheduleProvider,
@@ -63,7 +62,7 @@ class BusManager(
     suspend fun getBusPositions(route: BusRoute): BusRoutePositions =
         withContext(Dispatchers.IO) {
             coroutineScope {
-                val stations = async { busStationInfoClientMap[route.serviceRegion]!!.getByRoute(route) }
+                val stations = async { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
                 val positions = async { busPositionFetcherMap[route.serviceRegion]!!.fetch(route.id) }
                 BusRoutePositions(stations.await(), positions.await())
             }
