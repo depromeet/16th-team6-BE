@@ -73,7 +73,7 @@ object ApiClientUtils {
         return try {
             val response = apiCall(currentKey)
             if (isLimitExceeded(response)) {
-                log.warn { "API 키(${index + 1}) 제한됨. 다음 키로 재시도합니다." }
+                log.warn { "API 키(${index + 1}) 제한됨. 다음 키로 재시도합니다. $errorMessage" }
                 callApiWithRetryInternal(keys, apiCall, isLimitExceeded, processResult, errorMessage, index + 1)
             } else {
                 processResult(response)

@@ -1,6 +1,7 @@
-package com.deepromeet.atcha.common.redis
+package com.deepromeet.atcha.transit.infrastructure.cache.config
 
 import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -12,6 +13,8 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Profile
 import org.springframework.data.redis.connection.RedisConnectionFactory
+import org.springframework.data.redis.connection.RedisPassword
+import org.springframework.data.redis.connection.RedisStandaloneConfiguration
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
@@ -20,19 +23,24 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-@Profile("staging", "dev", "test", "local")
+@Profile("prod")
 @EnableRedisRepositories(basePackages = ["com.deepromeet.atcha"])
-class DefaultRedisConfig(
+class ProdRedisConfig(
     @Value("\${redis.host}")
     private val host: String,
     @Value("\${redis.port}")
-    private val port: Int
+    private val port: Int,
+    @Value("\${redis.password}")
+    private val password: String
 ) {
     @Bean
     fun redisConnectionFactory(): RedisConnectionFactory {
-        return LettuceConnectionFactory(host, port)
+        val redisStandaloneConfiguration = RedisStandaloneConfiguration(host, port)
+        redisStandaloneConfiguration.password = RedisPassword.of(password)
+        return LettuceConnectionFactory(redisStandaloneConfiguration)
     }
 
+    // TODO 공통 부분 분리
     @Bean
     fun lockReleaseScript(): RedisScript<Long> {
         val script =
@@ -89,6 +97,11 @@ class DefaultRedisConfig(
         redisConnectionFactory: RedisConnectionFactory
     ): RedisTemplate<String, LastRoute> {
         return createRedisTemplate(redisConnectionFactory, LastRoute::class.java)
+    }
+
+    @Bean
+    fun startedBusRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, BusPosition> {
+        return createRedisTemplate(redisConnectionFactory, BusPosition::class.java)
     }
 
     @Bean

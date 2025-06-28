@@ -3,7 +3,7 @@ package com.deepromeet.atcha.support.fixture
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.LastRouteLeg
 import com.deepromeet.atcha.transit.domain.Station
-import com.deepromeet.atcha.transit.domain.TransitTime
+import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.LocalDateTime
@@ -62,7 +62,7 @@ object LastRouteFixture {
                 )
             ),
         passShape: String? = "encodedPolylineData",
-        transitTime: TransitTime = TransitTime.NoTimeTable
+        transitInfo: TransitInfo = TransitInfo.NoInfoTable
     ): LastRouteLeg {
         return LastRouteLeg(
             distance = distance,
@@ -77,7 +77,7 @@ object LastRouteFixture {
             passStopList = passStopList,
             step = step,
             passShape = passShape,
-            transitTime = transitTime
+            transitInfo = transitInfo
         )
     }
 }

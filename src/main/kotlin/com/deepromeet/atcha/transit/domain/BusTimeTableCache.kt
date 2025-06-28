@@ -4,11 +4,11 @@ interface BusTimeTableCache {
     fun get(
         routeName: String,
         busStation: BusStationMeta
-    ): BusTimeTable?
+    ): BusSchedule?
 
     fun cache(
         routeName: String,
         busStation: BusStationMeta,
-        busTimeTable: BusTimeTable
+        busSchedule: BusSchedule
     )
 }

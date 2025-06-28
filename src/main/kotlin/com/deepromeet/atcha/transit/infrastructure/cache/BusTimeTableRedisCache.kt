@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStationMeta
-import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.BusTimeTableCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
@@ -11,12 +11,12 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class BusTimeTableRedisCache(
-    private val busTimeTableRedisTemplate: RedisTemplate<String, BusTimeTable>
+    private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>
 ) : BusTimeTableCache {
     override fun get(
         routeName: String,
         busStation: BusStationMeta
-    ): BusTimeTable? {
+    ): BusSchedule? {
         val key = getKey(routeName, busStation)
         return busTimeTableRedisTemplate.opsForValue().get(key)
     }
@@ -24,11 +24,11 @@ class BusTimeTableRedisCache(
     override fun cache(
         routeName: String,
         busStation: BusStationMeta,
-        busTimeTable: BusTimeTable
+        busSchedule: BusSchedule
     ) {
         val key = getKey(routeName, busStation)
         val ttlSeconds = calculateTtlUntilMidnight()
-        busTimeTableRedisTemplate.opsForValue().set(key, busTimeTable, ttlSeconds, TimeUnit.SECONDS)
+        busTimeTableRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
     }
 
     private fun getKey(

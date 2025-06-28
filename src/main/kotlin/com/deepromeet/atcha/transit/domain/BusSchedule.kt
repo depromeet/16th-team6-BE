@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 data class BusSchedule(
     val busRoute: BusRoute,
@@ -26,10 +25,4 @@ data class BusRealTimeInfo(
                         .plusSeconds(remainingTime.toLong())
                 else -> null
             }
-
-    fun isTargetBus(targetBus: LastRouteLeg): Boolean {
-        val targetBusDepartureTime = LocalDateTime.parse(targetBus.departureDateTime ?: return false)
-        val diffMinutes = ChronoUnit.MINUTES.between(targetBusDepartureTime, expectedArrivalTime ?: return false)
-        return kotlin.math.abs(diffMinutes) <= 5
-    }
 }

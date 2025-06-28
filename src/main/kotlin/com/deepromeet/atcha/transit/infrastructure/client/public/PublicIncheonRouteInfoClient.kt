@@ -116,7 +116,7 @@ class PublicIncheonRouteInfoClient(
                             )
                         }
                         ?: throw TransitException.of(
-                            TransitError.NOT_FOUND_BUS_STATION,
+                            TransitError.BUS_ROUTE_STATION_LIST_FETCH_FAILED,
                             "인천시 버스 노선-${route.name}-${route.id.value}의 경유 정류소 정보를 찾을 수 없습니다."
                         )
 

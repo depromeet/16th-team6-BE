@@ -13,36 +13,25 @@ class BusManager(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val busScheduleProvider: BusScheduleProvider,
-    private val regionIdentifier: RegionIdentifier,
-    private val busTimeTableCache: BusTimeTableCache,
-    private val busRouteMatcher: BusRouteMatcher
+    private val busRouteResolver: BusRouteResolver,
+    private val busTimeTableCache: BusTimeTableCache
 ) {
-    fun getBusTimeInfo(
-        routeName: String,
-        stationMeta: BusStationMeta,
-        nextStationName: String?
-    ): BusTimeTable {
-        return busTimeTableCache.get(
-            routeName,
-            stationMeta
-        ) ?: getSchedule(routeName, stationMeta, nextStationName).busTimeTable
-    }
-
     fun getSchedule(
         routeName: String,
         stationMeta: BusStationMeta,
         nextStationName: String?
     ): BusSchedule {
-        val busRouteInfo = getBusRouteInfo(routeName, stationMeta, nextStationName)
+        busTimeTableCache.get(routeName, stationMeta)?.let { return it }
+        val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, nextStationName)
 
         val schedule =
             busScheduleProvider.getBusSchedule(busRouteInfo)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_BUS_SCHEDULE,
-                    "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 도착 정보를 찾을 수 없습니다."
+                    "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 시간표 정보를 찾을 수 없습니다."
                 )
 
-        busTimeTableCache.cache(routeName, stationMeta, schedule.busTimeTable)
+        busTimeTableCache.cache(routeName, stationMeta, schedule)
         return schedule
     }
 
@@ -51,7 +40,7 @@ class BusManager(
         meta: BusStationMeta,
         nextStationName: String?
     ): BusRealTimeArrival {
-        val routeInfo = getBusRouteInfo(routeName, meta, nextStationName)
+        val routeInfo = busRouteResolver.resolve(routeName, meta, nextStationName)
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }
 
@@ -67,14 +56,4 @@ class BusManager(
                 BusRoutePositions(stations.await(), positions.await())
             }
         }
-
-    private fun getBusRouteInfo(
-        routeName: String,
-        meta: BusStationMeta,
-        nextStationName: String?
-    ): BusRouteInfo {
-        val region = regionIdentifier.identify(meta.coordinate)
-        val busRoutes = busRouteInfoClientMap[region]!!.getBusRoute(routeName)
-        return busRouteMatcher.getMatchedRoute(busRoutes, meta, nextStationName)
-    }
 }

@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
@@ -108,7 +109,11 @@ data class Location(
     val lon: Double,
     // 정류장 명칭
     val name: String
-)
+) {
+    fun toCoordinate(): Coordinate {
+        return Coordinate(lat, lon)
+    }
+}
 
 data class Step(
     // 도보 이동 거리 (m)

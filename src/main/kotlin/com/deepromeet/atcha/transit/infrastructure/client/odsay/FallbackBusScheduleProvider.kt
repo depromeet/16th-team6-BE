@@ -15,13 +15,10 @@ class FallbackBusScheduleProvider(
     private val odSayBusInfoClient: ODSayBusInfoClient
 ) : BusScheduleProvider {
     override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
-        log.info { "ODSay를 통한 버스 도착 정보 조회 시도: ${routeInfo.getTargetStation().busStation}, 노선: ${routeInfo.route}" }
+        log.debug { "ODSay를 통한 버스 도착 정보 조회 시도: ${routeInfo.getTargetStation().busStation}, 노선: ${routeInfo.route}" }
         try {
             return odSayBusInfoClient.getBusSchedule(routeInfo)
         } catch (e: Exception) {
-            log.warn(
-                e
-            ) { "ODSay를 통한 버스 도착 정보 조회 실패: ${routeInfo.getTargetStation().busStation}, 노선: ${routeInfo.route}" }
             throw e
         }
     }

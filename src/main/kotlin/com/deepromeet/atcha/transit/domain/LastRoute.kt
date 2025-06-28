@@ -43,7 +43,7 @@ data class LastRouteLeg(
     val passStopList: List<Station>? = null,
     val step: List<Step>? = null,
     val passShape: String? = null,
-    val transitTime: TransitTime
+    val transitInfo: TransitInfo
 ) {
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
