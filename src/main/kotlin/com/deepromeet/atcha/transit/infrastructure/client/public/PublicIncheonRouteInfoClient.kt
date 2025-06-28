@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicIncheonRouteInfoClient(
+    private val publicIncheonBusArrivalFeignClient: PublicIncheonBusArrivalFeignClient,
     private val incheonBusRouteInfoFeignClient: PublicIncheonBusRouteInfoFeignClient,
     private val coordinateTransformer: CoordinateTransformer,
     @Value("\${open-api.api.service-key}")
@@ -129,6 +130,26 @@ class PublicIncheonRouteInfoClient(
     }
 
     override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
-        TODO("Not yet implemented")
+        return ApiClientUtils.callApiWithRetry(
+            primaryKey = serviceKey,
+            spareKey = spareKey,
+            realLastKey = realLastKey,
+            apiCall = { key ->
+                publicIncheonBusArrivalFeignClient.getBusArrivalList(
+                    key,
+                    routeInfo.routeId,
+                    routeInfo.getTargetStation().stationId
+                )
+            },
+            isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
+            processResult = { response ->
+                response.msgBody.itemList?.get(0)?.toBusRealTimeArrival()
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_REAL_TIME,
+                        "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 도착 정보를 찾을 수 없습니다."
+                    )
+            },
+            errorMessage = "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 도착 정보를 가져오는데 실패했습니다."
+        )
     }
 }
