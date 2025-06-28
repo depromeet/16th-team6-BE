@@ -15,7 +15,9 @@ class TransitService(
     private val transitRouteClient: TransitRouteClient,
     private val lastRouteReader: LastRouteReader,
     private val lastRouteOperations: LastRouteOperations,
-    private val startedBusCache: StartedBusCache
+    private val startedBusCache: StartedBusCache,
+    private val lastRouteOperationsV2: LastRouteOperationsV2,
+    private val transitRouteClientV2: TransitRouteClientV2
 ) {
     fun init() {
         subwayStationBatchAppender.appendAll()
@@ -89,6 +91,22 @@ class TransitService(
         val itineraries = transitRouteClient.fetchItineraries(start, destination)
         return lastRouteOperations
             .calculateRoutes(start, destination, itineraries)
+            .sort(sortType)
+    }
+
+    suspend fun getLastRoutesV2(
+        userId: Long,
+        start: Coordinate,
+        end: Coordinate?,
+        sortType: LastRouteSortType
+    ): List<LastRoute> {
+        val destination = end ?: userReader.read(userId).getHomeCoordinate()
+        lastRouteReader.read(start, destination)?.let { routes ->
+            return routes.sort(sortType)
+        }
+        val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
+        return lastRouteOperationsV2
+            .calculateRoutesV2(start, destination, itineraries)
             .sort(sortType)
     }
 }
