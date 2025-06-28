@@ -69,6 +69,9 @@ dependencies {
     implementation("org.locationtech.proj4j:proj4j:1.3.0")
     implementation("org.locationtech.proj4j:proj4j-epsg:1.3.0")
 
+    // similarity
+    implementation("org.apache.commons:commons-text:1.10.0")
+
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
