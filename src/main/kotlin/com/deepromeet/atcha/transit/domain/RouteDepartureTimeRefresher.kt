@@ -89,7 +89,12 @@ class RouteDepartureTimeRefresher(
         val realTimeInfos = busArrival.realTimeInfoList
         if (realTimeInfos.isEmpty()) return
 
-        val candidateTimes = realTimeInfos.map { it.expectedArrivalTime }.take(2).toMutableSet()
+        val candidateTimes =
+            realTimeInfos
+                .filter { it.expectedArrivalTime != null }
+                .map { it.expectedArrivalTime }.take(2).toMutableSet()
+
+        if (candidateTimes.isEmpty()) return
 
         val baseArrival =
             realTimeInfos
