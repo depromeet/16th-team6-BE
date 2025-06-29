@@ -6,5 +6,5 @@ interface TaxiFareFetcher {
     fun fetch(
         start: Coordinate,
         end: Coordinate
-    ): Fare?
+    ): Fare
 }

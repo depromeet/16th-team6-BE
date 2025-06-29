@@ -35,6 +35,28 @@ class TransitController(
             )
         )
 
+    @GetMapping("/last-routes")
+    suspend fun getLastRoutes(
+        @CurrentUser id: Long,
+        @ModelAttribute request: LastRoutesRequest
+    ): ApiResponse<List<LastRouteResponse>> =
+        ApiResponse.success(
+            transitService.getLastRoutes(
+                id,
+                request.toStart(),
+                request.toEnd(),
+                request.sortType
+            ).map { LastRouteResponse(it) }
+        )
+
+    @GetMapping("/last-routes/{routeId}")
+    fun getLastRoute(
+        @PathVariable routeId: String
+    ): ApiResponse<LastRoute> =
+        ApiResponse.success(
+            transitService.getRoute(routeId)
+        )
+
     @GetMapping("/bus-arrival")
     fun getArrivalInfo(
         @ModelAttribute request: BusArrivalRequest
@@ -67,28 +89,6 @@ class TransitController(
             transitService.getBusOperationInfo(request.toBusRoute())
         )
     }
-
-    @GetMapping("/last-routes")
-    suspend fun getLastRoutes(
-        @CurrentUser id: Long,
-        @ModelAttribute request: LastRoutesRequest
-    ): ApiResponse<List<LastRouteResponse>> =
-        ApiResponse.success(
-            transitService.getLastRoutes(
-                id,
-                request.toStart(),
-                request.toEnd(),
-                request.sortType
-            ).map { LastRouteResponse(it) }
-        )
-
-    @GetMapping("/last-routes/{routeId}")
-    fun getLastRoute(
-        @PathVariable routeId: String
-    ): ApiResponse<LastRoute> =
-        ApiResponse.success(
-            transitService.getRoute(routeId)
-        )
 
     @GetMapping("/last-routes/{routeId}/departure-remaining")
     fun getDepartureRemainingTime(

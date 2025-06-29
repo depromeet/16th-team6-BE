@@ -1,8 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.exception.TransitError
-import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -17,8 +15,31 @@ class TransitService(
     private val lastRouteOperations: LastRouteOperations,
     private val startedBusCache: StartedBusCache
 ) {
-    fun init() {
-        subwayStationBatchAppender.appendAll()
+    fun getTaxiFare(
+        start: Coordinate,
+        end: Coordinate
+    ): Fare {
+        return taxiFareFetcher.fetch(start, end)
+    }
+
+    suspend fun getLastRoutes(
+        userId: Long,
+        start: Coordinate,
+        end: Coordinate?,
+        sortType: LastRouteSortType
+    ): List<LastRoute> {
+        val destination = end ?: userReader.read(userId).getHomeCoordinate()
+        lastRouteReader.read(start, destination)?.let { routes ->
+            return routes.sort(sortType)
+        }
+        val itineraries = transitRouteClient.fetchItineraries(start, destination)
+        return lastRouteOperations
+            .calculateRoutes(start, destination, itineraries)
+            .sort(sortType)
+    }
+
+    fun getRoute(routeId: String): LastRoute {
+        return lastRouteReader.read(routeId)
     }
 
     fun getBusArrival(
@@ -35,21 +56,6 @@ class TransitService(
 
     fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
         return busManager.getBusRouteOperationInfo(busRoute)
-    }
-
-    fun getTaxiFare(
-        start: Coordinate,
-        end: Coordinate
-    ): Fare {
-        return taxiFareFetcher.fetch(start, end)
-            ?: throw TransitException.of(
-                TransitError.TAXI_FARE_FETCH_FAILED,
-                "출발지(${start.lat}, ${start.lon})에서 도착지(${end.lat}, ${end.lon})까지의 택시 요금을 조회할 수 없습니다."
-            )
-    }
-
-    fun getRoute(routeId: String): LastRoute {
-        return lastRouteReader.read(routeId)
     }
 
     fun getDepartureRemainingTime(routeId: String): Int {
@@ -76,19 +82,7 @@ class TransitService(
         return false
     }
 
-    suspend fun getLastRoutes(
-        userId: Long,
-        start: Coordinate,
-        end: Coordinate?,
-        sortType: LastRouteSortType
-    ): List<LastRoute> {
-        val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes.sort(sortType)
-        }
-        val itineraries = transitRouteClient.fetchItineraries(start, destination)
-        return lastRouteOperations
-            .calculateRoutes(start, destination, itineraries)
-            .sort(sortType)
+    fun init() {
+        subwayStationBatchAppender.appendAll()
     }
 }
