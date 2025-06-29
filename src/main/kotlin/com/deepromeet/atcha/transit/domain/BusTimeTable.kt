@@ -11,46 +11,26 @@ data class BusTimeTable(
         time: LocalDateTime,
         timeDirection: TimeDirection
     ): LocalDateTime? {
-        when (timeDirection) {
+        return when (timeDirection) {
             TimeDirection.BEFORE -> {
-                // 첫차부터 시작하여 버스 시간 계산
-                var current = lastTime
-                var prev: LocalDateTime = lastTime
+                if (time.isBefore(firstTime)) return null
 
-                while (!current.isAfter(time)) {
-                    prev = current
-                    current = current.plusMinutes(term.toLong())
-                    // 막차 시간을 넘어가면 중단
-                    if (current.isAfter(lastTime)) {
-                        break
-                    }
-                }
-
-                return prev
-            }
-
-            TimeDirection.AFTER -> {
-                // 이후 버스를 찾는 경우
-                if (time.isAfter(lastTime)) {
-                    // 막차 이후 시간에서는 이후 버스가 없음
-                    return null
-                }
-
-                // 첫차 이전 시간이면 첫차가 다음 버스
-                if (time.isBefore(firstTime)) {
-                    return firstTime
-                }
-
-                // 막차 시간부터 역순으로 계산
-                var temp = lastTime
                 var candidate = lastTime
-
-                while (temp.isAfter(time)) {
-                    candidate = temp
-                    temp = temp.minusMinutes(term.toLong())
+                while (candidate.isAfter(time)) {
+                    candidate = candidate.minusMinutes(term.toLong())
                 }
 
-                return candidate
+                if (candidate.isBefore(firstTime)) null else candidate
+            }
+            TimeDirection.AFTER -> {
+                if (time.isAfter(lastTime)) return null
+                if (time.isBefore(firstTime)) return firstTime
+
+                var candidate = firstTime
+                while (candidate.isBefore(time)) {
+                    candidate = candidate.plusMinutes(term.toLong())
+                }
+                candidate
             }
         }
     }
