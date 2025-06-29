@@ -70,7 +70,7 @@ class UserNotificationRedisRepository(
                 val entries = hashOps.entries(key)
                 notifications.addAll(
                     entries.values.filter { notification ->
-                        notification.notificationTime.substring(0, 16) <= time
+                        notification.notificationTime.substring(0, 16) == time
                     }
                 )
             }
