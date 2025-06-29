@@ -22,11 +22,7 @@ class RegionBusScheduleProvider(
                 busRouteInfoClientMap[routeInfo.route.serviceRegion]?.getBusSchedule(
                     routeInfo
                 )
-
-            if (busSchedule != null) {
-                log.debug { "공공데이터에서 막차 정보 조회 성공 - 정류장: ${routeInfo.getTargetStation().stationName} 노선: $routeInfo" }
-            }
-
+            log.debug { "공공데이터에서 막차 정보 조회 성공 - 정류장: ${routeInfo.getTargetStation().stationName} 노선: $routeInfo" }
             return busSchedule
         } catch (e: Exception) {
             log.debug(e) { "공공 데이터 버스 시간표 조회 실패 - 정류장: ${routeInfo.getTargetStation().stationName} 노선: $routeInfo" }

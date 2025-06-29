@@ -12,7 +12,7 @@ spring:
 
 logging:
   level:
-    com.deepromeet.atcha: INFO
+    com.deepromeet.atcha: DEBUG
     org.springframework.cloud.openfeign: INFO
     feign: INFO
     tracer: trace
@@ -22,12 +22,7 @@ logging:
           jdbc:
             bind: trace
         SQL: trace
-
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: FULL
+    root: INFO
 
 tmap:
   api:
