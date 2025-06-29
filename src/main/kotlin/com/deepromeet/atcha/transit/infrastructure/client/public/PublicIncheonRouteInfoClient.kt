@@ -34,26 +34,20 @@ class PublicIncheonRouteInfoClient(
             apiCall = { key -> incheonBusRouteInfoFeignClient.getBusRouteByName(key, routeName) },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val routes = (
-                    response.msgBody.itemList?.filter { it.routeNumber == routeName }?.map { it.toBusRoute() }
-                        ?: throw TransitException.of(
-                            TransitError.NOT_FOUND_BUS_ROUTE,
-                            "인천시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
-                        )
-                )
-                if (routes.isEmpty()) {
-                    throw TransitException.of(
+                response.msgBody.itemList
+                    ?.filter { it.routeNumber == routeName }
+                    ?.map { it.toBusRoute() }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_ROUTE,
-                        "인천시 버스 노선 '$routeName'의 해당하는 노선들을 찾을 수 없습니다."
+                        "인천시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
                     )
-                }
-                routes
             },
             errorMessage = "인천시 버스 노선 정보를 가져오는데 실패했습니다."
         )
     }
 
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -143,12 +137,13 @@ class PublicIncheonRouteInfoClient(
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                response.msgBody.itemList?.get(0)?.toBusRealTimeArrival()
+                response.msgBody.itemList?.getOrNull(0)
+                    ?.toBusRealTimeArrival()
                     ?: BusRealTimeArrival(emptyList())
             },
             errorMessage =
-                "인천시 버스 노선 - " +
-                    "${routeInfo.getTargetStation().stationId}-${routeInfo.route.id.value}의 도착 정보를 가져오는데 실패했습니다."
+                "인천시 버스(${routeInfo.route.id})의 " +
+                    "정류장(${routeInfo.getTargetStation().stationId}) 도착 정보를 가져오는데 실패했습니다."
         )
     }
 }

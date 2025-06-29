@@ -37,7 +37,6 @@ object BusTimeParser {
         baseDate: LocalDate,
         format: DateTimeFormatter
     ): LocalDateTime {
-        // 입력 값 유효성 검사
         if (timeStr.isNullOrBlank() || timeStr == "0") {
             throw TransitException.of(
                 TransitError.INVALID_TIME_FORMAT,
@@ -48,7 +47,7 @@ object BusTimeParser {
         try {
             val localTime = LocalTime.parse(timeStr, format)
 
-            // 새벽 3시 이전이면 다음 날 규칙을 적용
+            // 새벽 3시 이전이면 다음 날로 변경
             val effectiveDate =
                 if (localTime.isBefore(LocalTime.of(3, 0))) {
                     baseDate.plusDays(1)

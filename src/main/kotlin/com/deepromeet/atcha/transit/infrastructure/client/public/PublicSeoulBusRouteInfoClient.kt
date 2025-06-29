@@ -36,42 +36,44 @@ class PublicSeoulBusRouteInfoClient(
             apiCall = { key -> publicSeoulBusArrivalInfoFeignClient.getBusRouteList(key, routeName) },
             isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val routes = (
-                    response.msgBody.itemList
-                        ?.filter { it.busRouteName == routeName || it.busRouteAbrv == routeName }
-                        ?.map { it.toBusRoute() }
-                        ?: throw TransitException.of(
-                            TransitError.NOT_FOUND_BUS_ROUTE,
-                            "서울시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
-                        )
-                )
-
-                if (routes.isEmpty()) {
-                    throw TransitException.of(
+                response.msgBody.itemList
+                    ?.filter { it.busRouteName == routeName || it.busRouteAbrv == routeName }
+                    ?.map { it.toBusRoute() }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_ROUTE,
-                        "인천시 버스 노선 '$routeName'의 해당하는 노선들을 찾을 수 없습니다."
+                        "서울시 버스 노선 '$routeName'의 정보를 찾을 수 없습니다."
                     )
-                }
-                routes
             },
             errorMessage = "서울시 버스 노선 정보를 가져오는데 실패했습니다."
         )
     }
 
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
                 publicSeoulBusArrivalInfoFeignClient
-                    .getArrivalInfoByRoute(routeInfo.route.id.value, key)
+                    .getArrivalInfoByRoute(
+                        key,
+                        routeInfo.route.id.value,
+                        routeInfo.getTargetStation().stationId,
+                        routeInfo.getTargetStation().order
+                    )
             },
-            isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val targetStation = routeInfo.getTargetStation().busStation
-                val findResult = response.msgBody.itemList?.find { it.arsId == targetStation.busStationNumber.value }
-                findResult?.toBusSchedule(targetStation)
+                response.msgBody.itemList
+                    ?.getOrNull(0)
+                    ?.toBusSchedule(routeInfo.getTargetStation().busStation)
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_REAL_TIME,
+                        "서울시 버스(${routeInfo.routeId}의" +
+                            " 정류소(${routeInfo.getTargetStation().stationId}" +
+                            "-${routeInfo.getTargetStation().order})의 실시간 도착 정보를 찾을 수 없습니다."
+                    )
             },
             errorMessage = "서울시 버스 도착 정보를 가져오는데 실패했습니다."
         )
@@ -122,18 +124,24 @@ class PublicSeoulBusRouteInfoClient(
             apiCall = {
                     key ->
                 publicSeoulBusArrivalInfoFeignClient
-                    .getArrivalInfoByRoute(routeInfo.route.id.value, key)
+                    .getArrivalInfoByRoute(
+                        key,
+                        routeInfo.route.id.value,
+                        routeInfo.getTargetStation().stationId,
+                        routeInfo.getTargetStation().order
+                    )
             },
-            isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
+            isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                val findResult =
-                    response.msgBody.itemList
-                        ?.find { it.arsId == routeInfo.getTargetStation().stationNumber }
-
-                findResult?.toBusRealTimeArrival() ?: throw TransitException.of(
-                    TransitError.NOT_FOUND_BUS_REAL_TIME,
-                    "서울시 버스 정류소 '${routeInfo.getTargetStation().stationNumber}'의 실시간 도착 정보를 찾을 수 없습니다."
-                )
+                response.msgBody.itemList
+                    ?.getOrNull(0)
+                    ?.toBusRealTimeArrival()
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_BUS_REAL_TIME,
+                        "서울시 버스(${routeInfo.routeId}의" +
+                            " 정류소(${routeInfo.getTargetStation().stationId}" +
+                            "-${routeInfo.getTargetStation().order})의 실시간 도착 정보를 찾을 수 없습니다."
+                    )
             },
             errorMessage = "서울시 버스 실시간 정보를 가져오는데 실패했습니다."
         )

@@ -27,7 +27,8 @@ class PublicGyeonggiBusPositionClient(
             apiCall = { key -> publicGyeonggiBusPositionClient.getBusLocationList(key, routeId.value) },
             isLimitExceeded = { response -> isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                response.msgBody?.busLocationList?.map { it.toBusPosition() }
+                response.msgBody?.busLocationList
+                    ?.map { it.toBusPosition() }
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_POSITION,
                         "버스 노선 '${routeId.value}'의 버스 위치 정보를 찾을 수 없습니다."

@@ -29,7 +29,6 @@ import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlRootElement
 import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import kotlin.math.abs
 
@@ -175,12 +174,11 @@ data class BusRealTimeInfoItem(
     ): BusRealTimeInfo {
         val busCongestion =
             when (crowded) {
-                0 -> BusCongestion.UNKNOWN
                 1 -> BusCongestion.LOW
                 2 -> BusCongestion.MEDIUM
                 3 -> BusCongestion.HIGH
                 4 -> BusCongestion.VERY_HIGH
-                else -> throw IllegalArgumentException("Unknown bus congestion: $crowded")
+                else -> BusCongestion.UNKNOWN
             }
 
         return BusRealTimeInfo(
@@ -363,6 +361,18 @@ data class BusRouteInfoItem(
     @field:JacksonXmlProperty(localName = "sunNPeekAlloc")
     val sunNPeekAlloc: Int
 ) {
+    companion object {
+        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
+    }
+
+    private val termMap =
+        mapOf(
+            DailyType.WEEKDAY to peekAlloc,
+            DailyType.SATURDAY to satPeekAlloc,
+            DailyType.SUNDAY to sunPeekAlloc,
+            DailyType.HOLIDAY to wePeekAlloc
+        )
+
     enum class BusTimeType {
         FIRST,
         LAST
@@ -372,11 +382,18 @@ data class BusRouteInfoItem(
         dailyType: DailyType,
         routeStation: BusRouteStation
     ): BusSchedule {
-        val firstTime = getBusTime(dailyType, routeStation.getDirection(), BusTimeType.FIRST)
-        val lastTime = getBusTime(dailyType, routeStation.getDirection(), BusTimeType.LAST)
-        val term = getTerm(dailyType)
+        val travelTimeFromStart =
+            BusTravelTimeCalculator.calculate(
+                routeStation,
+                hasDownTimetable(dailyType)
+            )
 
-        val travelTimeFromStart = BusTravelTimeCalculator.calculate(routeStation, hasDownTimetable(dailyType))
+        val busTimeTable =
+            getBusTimeTable(
+                dailyType,
+                routeStation.getDirection(),
+                travelTimeFromStart
+            )
 
         return BusSchedule(
             busRoute =
@@ -386,12 +403,7 @@ data class BusRouteInfoItem(
                     serviceRegion = ServiceRegion.GYEONGGI
                 ),
             busStation = routeStation.busStation,
-            busTimeTable =
-                BusTimeTable(
-                    firstTime = firstTime.plusMinutes(travelTimeFromStart),
-                    lastTime = lastTime.plusMinutes(travelTimeFromStart),
-                    term = term
-                )
+            busTimeTable = busTimeTable
         )
     }
 
@@ -411,103 +423,77 @@ data class BusRouteInfoItem(
         )
     }
 
-    private fun getBusTime(
+    private fun getBusTimeTable(
         dailyType: DailyType,
         busDirection: BusDirection,
-        timeType: BusTimeType
-    ): LocalDateTime {
-        val timeStr = getTimeString(dailyType, busDirection, timeType)
-        return BusTimeParser.parseTime(
-            timeStr,
-            LocalDate.now(),
-            TIME_FORMATTER
-        )
-    }
+        travelTimeFromStart: Long
+    ): BusTimeTable =
+        getBusTimeStr(dailyType, busDirection).let { (first, last) ->
+            BusTimeTable(
+                firstTime =
+                    BusTimeParser
+                        .parseTime(first, LocalDate.now(), TIME_FORMATTER)
+                        .plusMinutes(travelTimeFromStart),
+                lastTime =
+                    BusTimeParser
+                        .parseTime(last, LocalDate.now(), TIME_FORMATTER)
+                        .plusMinutes(travelTimeFromStart),
+                term = termMap[dailyType] ?: 0
+            )
+        }
 
-    private fun getTimeString(
+    private fun getBusTimeStr(
         dailyType: DailyType,
-        busDirection: BusDirection,
-        timeType: BusTimeType
-    ): String {
+        busDirection: BusDirection
+    ): Pair<String?, String?> {
         return when (dailyType) {
-            DailyType.WEEKDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) upFirstTime else upLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) downFirstTime else downLastTime
+            DailyType.WEEKDAY ->
+                if (busDirection == BusDirection.UP) {
+                    upFirstTime to upLastTime
+                } else {
+                    downFirstTime to downLastTime
                 }
-            }
-            DailyType.SATURDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) satUpFirstTime else satUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) satDownFirstTime else satDownLastTime
+
+            DailyType.SATURDAY ->
+                if (busDirection == BusDirection.UP) {
+                    satUpFirstTime to satUpLastTime
+                } else {
+                    satDownFirstTime to satDownLastTime
                 }
-            }
-            DailyType.SUNDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) sunUpFirstTime else sunUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) sunDownFirstTime else sunDownLastTime
+
+            DailyType.SUNDAY ->
+                if (busDirection == BusDirection.UP) {
+                    sunUpFirstTime to sunUpLastTime
+                } else {
+                    sunDownFirstTime to sunDownLastTime
                 }
-            }
-            DailyType.HOLIDAY -> {
-                when (busDirection) {
-                    BusDirection.UP -> if (timeType == BusTimeType.FIRST) weUpFirstTime else weUpLastTime
-                    BusDirection.DOWN -> if (timeType == BusTimeType.FIRST) weDownFirstTime else weDownLastTime
+
+            DailyType.HOLIDAY ->
+                if (busDirection == BusDirection.UP) {
+                    weUpFirstTime to weUpLastTime
+                } else {
+                    weDownFirstTime to weDownLastTime
                 }
-            }
-        } ?: throw TransitException.of(
-            TransitError.NOT_FOUND_BUS_SCHEDULE,
-            "버스 시간 정보가 없습니다. $dailyType, $busDirection, $timeType"
-        )
+        }
     }
 
     private fun createBusServiceHours(
         dailyType: DailyType,
         busDirection: BusDirection
     ): BusServiceHours? {
-        val firstTimeStr = getTimeString(dailyType, busDirection, BusTimeType.FIRST)
-        val lastTimeStr = getTimeString(dailyType, busDirection, BusTimeType.LAST)
-
-        if (firstTimeStr.isBlank() || lastTimeStr.isBlank()) return null
-
-        val term =
-            when (dailyType) {
-                DailyType.WEEKDAY -> peekAlloc
-                DailyType.SATURDAY -> satPeekAlloc
-                DailyType.SUNDAY -> sunPeekAlloc
-                DailyType.HOLIDAY -> wePeekAlloc
-            }
-
+        val (startTime, endTime) = getBusTimeStr(dailyType, busDirection)
         return BusServiceHours(
             dailyType = dailyType,
             busDirection = busDirection,
-            startTime =
-                BusTimeParser.parseTime(
-                    firstTimeStr,
-                    LocalDate.now(),
-                    TIME_FORMATTER
-                ),
-            endTime =
-                BusTimeParser.parseTime(
-                    lastTimeStr,
-                    LocalDate.now(),
-                    TIME_FORMATTER
-                ),
-            term = term
+            startTime = parseOrNull(startTime),
+            endTime = parseOrNull(endTime),
+            term = termMap[dailyType] ?: 0
         )
     }
 
-    companion object {
-        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
-    }
-
-    private fun getTerm(dailyType: DailyType): Int {
-        return when (dailyType) {
-            DailyType.WEEKDAY -> peekAlloc
-            DailyType.SATURDAY -> satPeekAlloc
-            DailyType.HOLIDAY -> wePeekAlloc
-            DailyType.SUNDAY -> sunPeekAlloc
-        }
-    }
+    private fun parseOrNull(time: String?) =
+        runCatching { BusTimeParser.parseTime(time, LocalDate.now(), TIME_FORMATTER) }
+            .getOrNull()
 
     private fun hasDownTimetable(dailyType: DailyType): Boolean {
         return when (dailyType) {
@@ -542,9 +528,7 @@ data class BusLocationResponse(
                 2 -> BusCongestion.MEDIUM
                 3 -> BusCongestion.HIGH
                 4 -> BusCongestion.VERY_HIGH
-                else -> throw IllegalArgumentException(
-                    "Unknown bus congestion: $crowded"
-                )
+                else -> BusCongestion.UNKNOWN
             }
 
         return BusPosition(

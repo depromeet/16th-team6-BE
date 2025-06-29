@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.RequestParam
     configuration = [PublicFeignConfig::class]
 )
 interface PublicSeoulBusArrivalInfoFeignClient {
-    @GetMapping("/api/rest/arrive/getArrInfoByRouteAll")
+    @GetMapping("/api/rest/arrive/getArrInfoByRoute")
     fun getArrivalInfoByRoute(
+        @RequestParam serviceKey: String,
         @RequestParam busRouteId: String,
-        @RequestParam serviceKey: String
+        @RequestParam stId: String,
+        @RequestParam ord: Int
     ): ServiceResult<BusArrivalResponse>
 
     @GetMapping("/api/rest/busRouteInfo/getBusRouteList")
