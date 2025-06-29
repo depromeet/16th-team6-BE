@@ -94,7 +94,7 @@ class RouteDepartureTimeRefresher(
         val baseArrival =
             realTimeInfos
                 .maxWith(compareBy { it.expectedArrivalTime })
-                .expectedArrivalTime!!
+                .expectedArrivalTime ?: return
 
         repeat(2) { i ->
             candidateTimes += baseArrival.plusMinutes(timeTable.term.toLong() * (i + 1))
