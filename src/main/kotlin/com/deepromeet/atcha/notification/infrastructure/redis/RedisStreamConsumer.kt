@@ -39,7 +39,7 @@ class RedisStreamConsumer(
     private val streamOps = redisTemplate.opsForStream<String, String>()
     private val consumerId: String = InetAddress.getLocalHost().hostName
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     fun consumeStreamMessages() {
         val messages =
             streamOps.read(
@@ -59,7 +59,7 @@ class RedisStreamConsumer(
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * ?")
+//    @Scheduled(cron = "0 * * * * ?")
     fun reclaimPendingMessages() {
         val pendingMessages =
             streamOps.pending(

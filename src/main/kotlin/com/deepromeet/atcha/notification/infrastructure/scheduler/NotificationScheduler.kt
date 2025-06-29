@@ -17,7 +17,7 @@ class NotificationScheduler(
 ) {
     private val logger = LoggerFactory.getLogger(NotificationScheduler::class.java)
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     fun checkAndSendNotifications() {
         // 알림 업데이트
         routeDepartureTimeRefresher.refresh()
