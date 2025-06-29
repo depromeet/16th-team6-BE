@@ -4,7 +4,7 @@ import com.deepromeet.atcha.transit.domain.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.public.ApiClientUtils
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import org.springframework.stereotype.Component
 
 @Component

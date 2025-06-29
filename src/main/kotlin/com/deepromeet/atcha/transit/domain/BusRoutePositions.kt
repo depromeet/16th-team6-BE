@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.AVERAGE_MINUTE_PER_STATION
+import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.AVERAGE_MINUTE_PER_STATION
 import java.time.Duration
 import java.time.LocalDateTime
 

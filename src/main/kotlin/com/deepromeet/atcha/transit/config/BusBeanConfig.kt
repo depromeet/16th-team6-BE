@@ -3,12 +3,12 @@ package com.deepromeet.atcha.transit.config
 import com.deepromeet.atcha.transit.domain.BusPositionFetcher
 import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
 import com.deepromeet.atcha.transit.domain.ServiceRegion
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiBusPositionClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicGyeonggiRouteInfoClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicIncheonBusPositionClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicIncheonRouteInfoClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusPositionClient
-import com.deepromeet.atcha.transit.infrastructure.client.public.PublicSeoulBusRouteInfoClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.PublicGyeonggiBusPositionClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.PublicGyeonggiRouteInfoClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.incheon.PublicIncheonBusPositionClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.incheon.PublicIncheonRouteInfoClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.seoul.PublicSeoulBusPositionClient
+import com.deepromeet.atcha.transit.infrastructure.client.public.seoul.PublicSeoulBusRouteInfoClient
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
