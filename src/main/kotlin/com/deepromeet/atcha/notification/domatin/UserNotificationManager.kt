@@ -1,10 +1,9 @@
 package com.deepromeet.atcha.notification.domatin
 
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
-class UserNotificationAppender(
+class UserNotificationManager(
     private val userNotificationRepository: UserNotificationRepository
 ) {
     fun saveUserNotification(userNotification: UserNotification) = userNotificationRepository.save(userNotification)
@@ -13,11 +12,6 @@ class UserNotificationAppender(
         userNotificationRepository.updateDelayNotificationFlags(
             userNotification
         )
-
-    fun updateDepartureNotification(
-        userNotification: UserNotification,
-        newDepartureTime: LocalDateTime
-    ) = userNotificationRepository.updateNotificationDepartureTime(userNotification, newDepartureTime)
 
     fun deleteUserNotification(
         userId: Long,

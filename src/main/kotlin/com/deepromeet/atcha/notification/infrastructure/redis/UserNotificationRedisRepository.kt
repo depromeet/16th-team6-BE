@@ -6,7 +6,6 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 @Component
@@ -18,9 +17,10 @@ class UserNotificationRedisRepository(
     private val scanOptions = ScanOptions.scanOptions().match("notification:*").count(1000).build()
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    override fun save(userNotification: UserNotification) {
+    override fun save(userNotification: UserNotification): UserNotification {
         hashOps.put(getKey(userNotification), userNotification.userNotificationFrequency.name, userNotification)
         hashOps.apply { userNotificationRedisTemplate.expire(getKey(userNotification), duration) }
+        return userNotification
     }
 
     override fun findById(
@@ -48,18 +48,8 @@ class UserNotificationRedisRepository(
         save(updateUserNotification)
     }
 
-    override fun updateNotificationDepartureTime(
-        userNotification: UserNotification,
-        newDepartureTime: LocalDateTime
-    ) {
-        val updatedNotification =
-            userNotification.copy(
-                updatedDepartureTime = newDepartureTime.format(dateTimeFormatter),
-                notificationTime =
-                    newDepartureTime.minusMinutes(userNotification.userNotificationFrequency.minutes)
-                        .format(dateTimeFormatter)
-            )
-        save(updatedNotification)
+    override fun update(userNotification: UserNotification) {
+        save(userNotification)
     }
 
     override fun findByTime(time: String): List<UserNotification> {
