@@ -11,6 +11,8 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+private const val MIN_UPDATE_MINUTES = 3
+
 @Component
 class RouteDepartureTimeRefresher(
     private val userNotificationReader: UserNotificationReader,
@@ -68,15 +70,13 @@ class RouteDepartureTimeRefresher(
             )
 
         val busArrival =
-            try {
+            runCatching {
                 busManager.getRealTimeArrival(
                     routeName,
                     busStationMeta,
                     firstBusLeg.getNextStationName()
                 )
-            } catch (e: Exception) {
-                return
-            }
+            }.getOrElse { return }
 
         val timeTable =
             busManager.getSchedule(
@@ -89,30 +89,33 @@ class RouteDepartureTimeRefresher(
         val realTimeInfos = busArrival.realTimeInfoList
         if (realTimeInfos.isEmpty()) return
 
+        // 예상 도착 시간이 존재하는 최대 2개 후보 생성
         val candidateTimes =
             realTimeInfos
                 .filter { it.expectedArrivalTime != null }
-                .map { it.expectedArrivalTime }.take(2).toMutableSet()
+                .map { it.expectedArrivalTime }
+                .take(2).toMutableSet()
 
         if (candidateTimes.isEmpty()) return
 
+        // 실시간 정보 중 가장 늦은 도착 시각을 기준으로 후보 시간 생성
         val baseArrival =
             realTimeInfos
                 .maxWith(compareBy { it.expectedArrivalTime })
                 .expectedArrivalTime ?: return
 
+        // 가장 늦은 도착 시각을 기준으로 배차간격만큼 후보 시간 2개 생성
         repeat(2) { i ->
             candidateTimes += baseArrival.plusMinutes(timeTable.term.toLong() * (i + 1))
         }
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
         val chosenArrivalTime =
-            candidateTimes
-                .minByOrNull { candidate -> Duration.between(originalBusDepartureTime, candidate).abs() }
+            candidateTimes.minBy { candidate -> Duration.between(originalBusDepartureTime, candidate).abs() }
                 ?: return
 
         val diffMinutes = Duration.between(originalBusDepartureTime, chosenArrivalTime).abs().toMinutes()
-        if (diffMinutes < 3) return
+        if (diffMinutes in MIN_UPDATE_MINUTES..timeTable.term) return
 
         // (a) 버스 구간 출발 시간을 chosenArrivalTime으로 재설정
         val updatedBusLeg =

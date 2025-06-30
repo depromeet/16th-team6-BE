@@ -29,21 +29,22 @@ class TransitRouteClient(
         val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         val baseDate = today.format(dateFormatter) + "2300"
 
-        val response = try {
-            tMapTransitClient.getRoutes(
-                TMapRouteRequest(
-                    startX = start.lon.toString(),
-                    startY = start.lat.toString(),
-                    endX = end.lon.toString(),
-                    endY = end.lat.toString(),
-                    count = 20,
-                    searchDttm = baseDate
+        val response =
+            try {
+                tMapTransitClient.getRoutes(
+                    TMapRouteRequest(
+                        startX = start.lon.toString(),
+                        startY = start.lat.toString(),
+                        endX = end.lon.toString(),
+                        endY = end.lat.toString(),
+                        count = 20,
+                        searchDttm = baseDate
+                    )
                 )
-            )
-        } catch (e: FeignException) {
-            log.error(e) { "TMap 경로 검색 API 호출 중 에러 발생" }
-            throw TransitException.of(TransitError.TMAP_TIME_OUT, e)
-        }
+            } catch (e: FeignException) {
+                log.error(e) { "TMap 경로 검색 API 호출 중 에러 발생" }
+                throw TransitException.of(TransitError.TMAP_TIME_OUT, e)
+            }
 
         response.result?.let { result ->
             when (result.status) {

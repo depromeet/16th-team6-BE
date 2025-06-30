@@ -4,12 +4,14 @@ import com.deepromeet.atcha.notification.domatin.Messaging
 import com.deepromeet.atcha.notification.domatin.MessagingProvider
 import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotification
+import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.domain.Range
 import org.springframework.data.redis.connection.stream.Consumer
 import org.springframework.data.redis.connection.stream.MapRecord
+import org.springframework.data.redis.connection.stream.PendingMessage
 import org.springframework.data.redis.connection.stream.ReadOffset
 import org.springframework.data.redis.connection.stream.RecordId
 import org.springframework.data.redis.connection.stream.StreamOffset
@@ -21,6 +23,15 @@ import java.net.InetAddress
 import java.time.Duration
 
 private const val PAYLOAD = "payload"
+private const val IDEMPOTENCY_KEY_PREFIX = "notification:processed:"
+private val IDEMPOTENCY_KEY_TTL =
+    Duration.ofMinutes(
+        UserNotificationFrequency
+            .entries
+            .toTypedArray()
+            .max()
+            .minutes
+    )
 
 @Service
 class RedisStreamConsumer(
@@ -37,9 +48,10 @@ class RedisStreamConsumer(
 ) {
     private val log = LoggerFactory.getLogger(this::class.java)
     private val streamOps = redisTemplate.opsForStream<String, String>()
+    private val valueOps = redisTemplate.opsForValue()
     private val consumerId: String = InetAddress.getLocalHost().hostName
 
-    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     fun consumeStreamMessages() {
         val messages =
             streamOps.read(
@@ -48,18 +60,42 @@ class RedisStreamConsumer(
                     .block(Duration.ofSeconds(1)),
                 StreamOffset.create(streamKey, ReadOffset.lastConsumed())
             )
+
         messages?.forEach { message ->
-            val messaging = createMessaging(message)
-            if (messagingProvider.send(messaging)) {
-                log.info("⭐️알림 전송 성공")
+            val userNotification =
+                runCatching {
+                    objectMapper.readValue(message.value[PAYLOAD], UserNotification::class.java)
+                }.getOrElse {
+                    log.error("메시지 역직렬화 실패. Dead Letter로 이동: ${message.id}", it)
+                    handleDeadLetter(false, message, message.value[PAYLOAD])
+                    return@forEach
+                }
+
+            val idempotencyKey = createIdempotencyKey(userNotification)
+            val isNew =
+                valueOps.setIfAbsent(
+                    idempotencyKey,
+                    message.id.toString(),
+                    IDEMPOTENCY_KEY_TTL
+                )
+
+            if (isNew == true) {
+                val content = notificationContentManager.createPushNotification(userNotification)
+                val messaging = Messaging(content, userNotification.token)
+
+                if (!messagingProvider.send(messaging)) {
+                    log.warn("⚠️️ 알림 전송 실패: $idempotencyKey")
+                    redisTemplate.delete(idempotencyKey)
+                    return@forEach
+                }
+
+                log.info("⭐️ 알림 전송 성공")
                 streamOps.acknowledge(streamKey, groupName, message.id)
-                return@forEach
             }
-            log.info("⚠️️알림 전송 실패")
         }
     }
 
-//    @Scheduled(cron = "0 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     fun reclaimPendingMessages() {
         val pendingMessages =
             streamOps.pending(
@@ -71,7 +107,7 @@ class RedisStreamConsumer(
 
         val reclaimRecordIds: List<RecordId> =
             pendingMessages
-                .filter { it.totalDeliveryCount > 1 }
+                .filter { isReclaimTarget(it) }
                 .map { it.id }
                 .toList()
 
@@ -113,6 +149,10 @@ class RedisStreamConsumer(
         return messaging
     }
 
+    private fun createIdempotencyKey(userNotification: UserNotification): String {
+        return "$IDEMPOTENCY_KEY_PREFIX${userNotification.lastRouteId}-${userNotification.userNotificationFrequency}"
+    }
+
     private fun handleDeadLetter(
         success: Boolean,
         message: MapRecord<String, String, String>,
@@ -125,4 +165,8 @@ class RedisStreamConsumer(
             streamOps.acknowledge(streamKey, groupName, message.id)
         }
     }
+
+    private fun isReclaimTarget(message: PendingMessage): Boolean =
+        message.totalDeliveryCount > 1 &&
+            message.elapsedTimeSinceLastDelivery > Duration.ofMinutes(3)
 }
