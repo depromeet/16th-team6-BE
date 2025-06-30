@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.common.feign.FeignException
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
@@ -28,7 +29,7 @@ class TransitRouteClient(
         val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         val baseDate = today.format(dateFormatter) + "2300"
 
-        val response =
+        val response = try {
             tMapTransitClient.getRoutes(
                 TMapRouteRequest(
                     startX = start.lon.toString(),
@@ -39,6 +40,10 @@ class TransitRouteClient(
                     searchDttm = baseDate
                 )
             )
+        } catch (e: FeignException) {
+            log.error(e) { "TMap 경로 검색 API 호출 중 에러 발생" }
+            throw TransitException.of(TransitError.TMAP_TIME_OUT, e)
+        }
 
         response.result?.let { result ->
             when (result.status) {
