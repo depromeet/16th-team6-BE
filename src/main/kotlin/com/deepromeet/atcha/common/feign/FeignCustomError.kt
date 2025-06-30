@@ -4,7 +4,7 @@ import com.deepromeet.atcha.common.exception.BaseErrorType
 import com.deepromeet.atcha.common.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
-enum class FeignError(
+enum class ExternalApiError(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
@@ -17,7 +17,7 @@ enum class FeignError(
     EXTERNAL_API_UNKNOWN_ERROR(500, "EXT_005", "외부 API 서버에서 알 수 없는 오류가 발생했습니다", LogLevel.ERROR)
 }
 
-class FeignException(
+class ExternalApiException(
     errorCode: BaseErrorType,
     customMessage: String? = null,
     cause: Throwable? = null
@@ -25,30 +25,30 @@ class FeignException(
     override fun readResolve(): Any = this
 
     companion object {
-        fun of(errorType: BaseErrorType): FeignException {
-            return FeignException(errorType)
+        fun of(errorType: BaseErrorType): ExternalApiException {
+            return ExternalApiException(errorType)
         }
 
         fun of(
             errorType: BaseErrorType,
             message: String
-        ): FeignException {
-            return FeignException(errorType, customMessage = message)
+        ): ExternalApiException {
+            return ExternalApiException(errorType, customMessage = message)
         }
 
         fun of(
             errorType: BaseErrorType,
             cause: Throwable
-        ): FeignException {
-            return FeignException(errorType, cause = cause)
+        ): ExternalApiException {
+            return ExternalApiException(errorType, cause = cause)
         }
 
         fun of(
             errorType: BaseErrorType,
             message: String,
             cause: Throwable
-        ): FeignException {
-            return FeignException(errorType, customMessage = message, cause = cause)
+        ): ExternalApiException {
+            return ExternalApiException(errorType, customMessage = message, cause = cause)
         }
     }
 }
