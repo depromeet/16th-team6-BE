@@ -1,7 +1,5 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.notification.domatin.MessagingManager
-import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.notification.domatin.UserNotificationManager
 import com.deepromeet.atcha.notification.domatin.UserNotificationReader
@@ -19,9 +17,7 @@ class RouteDepartureTimeRefresher(
     private val userNotificationManager: UserNotificationManager,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
-    private val lastRouteReader: LastRouteReader,
-    private val notificationContentManager: NotificationContentManager,
-    private val messagingManager: MessagingManager
+    private val lastRouteReader: LastRouteReader
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 

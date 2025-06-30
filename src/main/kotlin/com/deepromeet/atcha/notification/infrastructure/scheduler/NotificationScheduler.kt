@@ -3,11 +3,8 @@ package com.deepromeet.atcha.notification.infrastructure.scheduler
 import com.deepromeet.atcha.transit.domain.DepartureDelayNotifier
 import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
 import com.deepromeet.atcha.transit.domain.ScheduledNotificationPublisher
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger { }
 
 @Component
 class NotificationScheduler(
