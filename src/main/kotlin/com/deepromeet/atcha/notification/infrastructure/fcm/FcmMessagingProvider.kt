@@ -31,7 +31,7 @@ class FcmMessagingProvider(
             firebaseMessaging.send(message)
             return true
         } catch (e: FirebaseMessagingException) {
-            log.warn(e) { "❌️알림 전송 실패" }
+            log.warn(e) { }
             return false
         } catch (e: Exception) {
             throw e
