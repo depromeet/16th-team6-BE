@@ -25,17 +25,9 @@ class RouteDepartureTimeRefresher(
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    fun refresh() {
-        userNotificationReader.findAll().forEach { userNotification ->
-            val updatedNotification = refreshDepartureTime(userNotification) ?: return@forEach
-            val diffMinutes =
-                calculateDiffMinutes(updatedNotification.initialDepartureTime, updatedNotification.updatedDepartureTime)
-            if (diffMinutes >= 10 && !userNotification.isDelayNotified) {
-                val notificationContent =
-                    notificationContentManager.createDelayPushNotification(userNotification)
-                messagingManager.send(notificationContent, userNotification.token)
-                userNotificationManager.updateDelayNotificationFlags(userNotification)
-            }
+    fun refresh(): List<UserNotification> {
+        return userNotificationReader.findAll().mapNotNull { userNotification ->
+            refreshDepartureTime(userNotification)
         }
     }
 
