@@ -124,19 +124,10 @@ class RouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         // 출발 시간이 현재 시간으로부터 배차 간격 이내에 있는 경우에만 업데이트
-        // 시간 기준 : 고정 20분 + 배차간격 * 2
+        // 시간 기준 : 고정 20분 + 배차간격
         val now = LocalDateTime.now()
         val minutesUntilDeparture = Duration.between(now, oldDepartureTime).toMinutes()
-        return minutesUntilDeparture !in 0 until (MIN_REFRESH_MINUTES + busTerm * 2)
-    }
-
-    private fun calculateDiffMinutes(
-        controlTime: String,
-        treatmentTime: String
-    ): Long {
-        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
-        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
-        return Duration.between(control, treatment).toMinutes()
+        return minutesUntilDeparture !in 0 until (MIN_REFRESH_MINUTES + busTerm)
     }
 
     private fun getWalkTimeBeforeThisLeg(
