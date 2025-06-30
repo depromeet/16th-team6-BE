@@ -36,7 +36,7 @@ class RouteDepartureTimeRefresher(
         val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return null
 
         // 버스 시간표 가져오기
-        val timeTable = (firstBusLeg.transitInfo as TransitInfo.BusInfo).timeTable
+        val timeTable = (firstBusLeg.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
 
         if (isNotRefreshTarget(oldDepartureTime, timeTable.term)) return null
 
