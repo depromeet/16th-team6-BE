@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 class NotificationService(
     private val lastRouteReader: LastRouteReader,
     private val userReader: UserReader,
-    private val userNotificationAppender: UserNotificationAppender,
+    private val userNotificationManager: UserNotificationManager,
     private val messagingManager: MessagingManager,
     private val notificationContentManager: NotificationContentManager
 ) {
@@ -37,7 +37,7 @@ class NotificationService(
                         routeId = lastRouteId,
                         userId = user.id
                     )
-                userNotificationAppender.saveUserNotification(userNotification)
+                userNotificationManager.saveUserNotification(userNotification)
             }
         }
     }
@@ -47,7 +47,7 @@ class NotificationService(
         lastRouteId: String
     ) {
         val user = userReader.read(id)
-        userNotificationAppender.deleteUserNotification(user.id, lastRouteId)
+        userNotificationManager.deleteUserNotification(user.id, lastRouteId)
     }
 
     fun suggestRouteNotification(

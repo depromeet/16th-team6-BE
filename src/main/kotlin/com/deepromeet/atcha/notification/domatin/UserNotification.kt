@@ -34,6 +34,14 @@ data class UserNotification(
         userId = userId
     )
 
+    fun updateDepartureTime(newDepartureTime: LocalDateTime) =
+        this.copy(
+            updatedDepartureTime = newDepartureTime.format(dateTimeFormatter),
+            notificationTime =
+                newDepartureTime.minusMinutes(userNotificationFrequency.minutes)
+                    .format(dateTimeFormatter)
+        )
+
     override fun toString(): String {
         return "UserNotification(userNotificationFrequency=$userNotificationFrequency, " +
             "initialDepartureTime='$initialDepartureTime', " +

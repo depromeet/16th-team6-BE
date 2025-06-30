@@ -49,14 +49,14 @@ data class LastRouteLeg(
         return route!!.split(":")[1]
     }
 
-    fun resolveStartStation(): BusStationMeta {
+    fun getNextStationName(): String? = passStopList?.getOrNull(1)?.stationName
+
+    fun toBusStationMeta(): BusStationMeta {
         return BusStationMeta(
             start.name,
             Coordinate(start.lat, start.lon)
         )
     }
-
-    fun getNextStationName(): String? = passStopList?.getOrNull(1)?.stationName
 }
 
 fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
