@@ -23,6 +23,10 @@ data class BusRealTimeInfo(
                 BusStatus.OPERATING, BusStatus.SOON ->
                     LocalDateTime.now()
                         .plusSeconds(remainingTime.toLong())
+                        .minusSeconds(30)
                 else -> null
             }
+
+    val remainingTimeExtra: Int
+        get() = remainingTime - 30
 }
