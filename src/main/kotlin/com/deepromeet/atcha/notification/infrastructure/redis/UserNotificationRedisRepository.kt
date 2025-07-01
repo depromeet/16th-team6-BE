@@ -16,7 +16,7 @@ class UserNotificationRedisRepository(
     private val scanOptions =
         ScanOptions
             .scanOptions()
-            .match("notification:*")
+            .match("notification:[0-9]*")
             .count(1000)
             .build()
 

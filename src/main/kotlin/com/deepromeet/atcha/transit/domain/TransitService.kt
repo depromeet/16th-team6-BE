@@ -72,7 +72,11 @@ class TransitService(
         val lastRoute = lastRouteReader.read(lastRouteId)
         val firstBus = lastRoute.findFirstBus()
         val busInfo = firstBus.transitInfo as TransitInfo.BusInfo
-        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+
+        val busPositions =
+            runCatching {
+                busManager.getBusPositions(busInfo.busRoute)
+            }.getOrElse { return false }
 
         busPositions.findTargetBus(
             busInfo.busStation,

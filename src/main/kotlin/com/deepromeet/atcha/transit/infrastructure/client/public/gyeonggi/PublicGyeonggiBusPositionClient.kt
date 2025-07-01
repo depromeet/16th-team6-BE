@@ -35,7 +35,7 @@ class PublicGyeonggiBusPositionClient(
                         "버스 노선 '${routeId.value}'의 버스 위치 정보를 찾을 수 없습니다."
                     )
             },
-            errorMessage = "경기도 버스 위치 정보를 가져오는데 실패했습니다."
+            errorMessage = "경기도 버스 '${routeId.value}'의 버스 위치 정보를 가져오는 데 실패했습니다."
         )
     }
 }
