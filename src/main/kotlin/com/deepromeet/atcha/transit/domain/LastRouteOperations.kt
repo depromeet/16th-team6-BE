@@ -77,7 +77,7 @@ class LastRouteOperations(
                 legs = adjustedLegs
             )
         } catch (e: Exception) {
-            log.warn(e) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다. ${e.message}" }
+            log.warn(e) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다." }
             return null
         }
     }
