@@ -28,7 +28,7 @@ enum class TransitError(
     NOT_FOUND_SUBWAY_SCHEDULE(404, "TRS_022", "지하철 시간표를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_SPECIFIED_TIME(404, "TRS_023", "특정 시간에 해당하는 대중교통을 찾을 수 없습니다.", LogLevel.ERROR),
     INVALID_TIME_FORMAT(400, "TRS_024", "유효하지 않은 시간 형식입니다.", LogLevel.ERROR),
-    TMAP_TIME_OUT(500, "TRS_025", "TMap이 응답하지 않습니다.", LogLevel.ERROR)
+    API_TIME_OUT(500, "TRS_025", "TMap이 응답하지 않습니다.", LogLevel.ERROR)
 }
 
 class TransitException(

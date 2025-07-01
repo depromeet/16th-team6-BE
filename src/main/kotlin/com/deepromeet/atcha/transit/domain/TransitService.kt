@@ -10,10 +10,12 @@ class TransitService(
     private val busManager: BusManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender,
     private val userReader: UserReader,
-    private val transitRouteClient: TransitRouteClient,
+    private val transitRouteSearchClient: TransitRouteSearchClient,
     private val lastRouteReader: LastRouteReader,
     private val lastRouteOperations: LastRouteOperations,
-    private val startedBusCache: StartedBusCache
+    private val startedBusCache: StartedBusCache,
+    private val regionIdentifier: RegionIdentifier,
+    private val serviceRegionValidator: ServiceRegionValidator
 ) {
     fun getTaxiFare(
         start: Coordinate,
@@ -32,9 +34,11 @@ class TransitService(
         lastRouteReader.read(start, destination)?.let { routes ->
             return routes.sort(sortType)
         }
-        val itineraries = transitRouteClient.fetchItineraries(start, destination)
+        serviceRegionValidator.validate(start, destination)
+        val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
+        val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteOperations
-            .calculateRoutes(start, destination, itineraries)
+            .calculateLastRoutes(start, destination, validItineraries)
             .sort(sortType)
     }
 
@@ -84,5 +88,13 @@ class TransitService(
 
     fun init() {
         subwayStationBatchAppender.appendAll()
+    }
+
+    private fun validateServiceRegion(
+        start: Coordinate,
+        destination: Coordinate
+    ) {
+        regionIdentifier.identify(start)
+        regionIdentifier.identify(destination)
     }
 }

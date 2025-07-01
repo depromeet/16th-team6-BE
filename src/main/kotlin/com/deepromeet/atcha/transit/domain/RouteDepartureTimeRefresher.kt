@@ -1,7 +1,5 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.notification.domatin.MessagingManager
-import com.deepromeet.atcha.notification.domatin.NotificationContentManager
 import com.deepromeet.atcha.notification.domatin.UserNotification
 import com.deepromeet.atcha.notification.domatin.UserNotificationManager
 import com.deepromeet.atcha.notification.domatin.UserNotificationReader
@@ -19,23 +17,13 @@ class RouteDepartureTimeRefresher(
     private val userNotificationManager: UserNotificationManager,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
-    private val lastRouteReader: LastRouteReader,
-    private val notificationContentManager: NotificationContentManager,
-    private val messagingManager: MessagingManager
+    private val lastRouteReader: LastRouteReader
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    fun refresh() {
-        userNotificationReader.findAll().forEach { userNotification ->
-            val updatedNotification = refreshDepartureTime(userNotification) ?: return@forEach
-            val diffMinutes =
-                calculateDiffMinutes(updatedNotification.initialDepartureTime, updatedNotification.updatedDepartureTime)
-            if (diffMinutes >= 10 && !userNotification.isDelayNotified) {
-                val notificationContent =
-                    notificationContentManager.createDelayPushNotification(userNotification)
-                messagingManager.send(notificationContent, userNotification.token)
-                userNotificationManager.updateDelayNotificationFlags(userNotification)
-            }
+    fun refresh(): List<UserNotification> {
+        return userNotificationReader.findAll().mapNotNull { userNotification ->
+            refreshDepartureTime(userNotification)
         }
     }
 
@@ -48,7 +36,7 @@ class RouteDepartureTimeRefresher(
         val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return null
 
         // 버스 시간표 가져오기
-        val timeTable = (firstBusLeg.transitInfo as TransitInfo.BusInfo).timeTable
+        val timeTable = (firstBusLeg.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
 
         if (isNotRefreshTarget(oldDepartureTime, timeTable.term)) return null
 
@@ -136,19 +124,10 @@ class RouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         // 출발 시간이 현재 시간으로부터 배차 간격 이내에 있는 경우에만 업데이트
-        // 시간 기준 : 고정 20분 + 배차간격 * 2
+        // 시간 기준 : 고정 20분 + 배차간격
         val now = LocalDateTime.now()
         val minutesUntilDeparture = Duration.between(now, oldDepartureTime).toMinutes()
-        return minutesUntilDeparture !in 0 until (MIN_REFRESH_MINUTES + busTerm * 2)
-    }
-
-    private fun calculateDiffMinutes(
-        controlTime: String,
-        treatmentTime: String
-    ): Long {
-        val control = LocalDateTime.parse(controlTime, dateTimeFormatter)
-        val treatment = LocalDateTime.parse(treatmentTime, dateTimeFormatter)
-        return Duration.between(control, treatment).toMinutes()
+        return minutesUntilDeparture !in 0 until (MIN_REFRESH_MINUTES + busTerm)
     }
 
     private fun getWalkTimeBeforeThisLeg(
