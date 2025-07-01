@@ -9,9 +9,7 @@ enum class InfrastructureError(
     override val logLevel: LogLevel
 ) : BaseErrorType {
     CACHE_ERROR(500, "INF_001", "캐시 서버에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", LogLevel.ERROR),
-    DATABASE_ERROR(500, "INF_002", "데이터베이스에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", LogLevel.ERROR),
-    EXTERNAL_API_ERROR(500, "INF_003", "외부 API에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", LogLevel.ERROR),
-    EXTERNAL_API_CALL_LIMIT_EXCEEDED(429, "INF_004", "외부 API 호출 제한을 초과했습니다.", LogLevel.WARN)
+    DATABASE_ERROR(500, "INF_002", "데이터베이스에서 오류가 발생했습니다. 잠시 후 다시 시도해주세요.", LogLevel.ERROR)
 }
 
 class InfrastructureException(

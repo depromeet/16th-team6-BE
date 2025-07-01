@@ -2,6 +2,8 @@ package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
 import com.deepromeet.atcha.common.exception.InfrastructureError
 import com.deepromeet.atcha.common.exception.InfrastructureException
+import com.deepromeet.atcha.common.feign.ExternalApiError
+import com.deepromeet.atcha.common.feign.ExternalApiException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
@@ -43,8 +45,8 @@ class ODSayCallCounter(
                 count <= 1800 -> spareKey
                 count <= 2700 -> realLastKey
                 else -> {
-                    throw InfrastructureException.of(
-                        InfrastructureError.EXTERNAL_API_CALL_LIMIT_EXCEEDED,
+                    throw ExternalApiException.of(
+                        ExternalApiError.EXTERNAL_API_CALL_LIMIT_EXCEEDED,
                         "ODSay API 호출 제한을 초과했습니다. 현재 호출 횟수: $count"
                     )
                 }
