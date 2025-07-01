@@ -12,7 +12,7 @@ class NotificationScheduler(
     private val departureDelayNotifier: DepartureDelayNotifier,
     private val scheduledNotificationPublisher: ScheduledNotificationPublisher
 ) {
-    @Scheduled(cron = "0 * 0-3,21-23 * * ?")
+    @Scheduled(cron = "0 * * * * ?")
     fun checkAndSendNotifications() {
         // 예상 출발 시간 갱신
         val updatedNotifications = routeDepartureTimeRefresher.refresh()

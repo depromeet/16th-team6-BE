@@ -29,7 +29,8 @@ class NotificationServiceTest : BaseServiceTest() {
             { Assertions.assertThat(userNotifications).hasSize(user.alertFrequencies.size) },
             { Assertions.assertThat(userNotifications.get(0).lastRouteId).isEqualTo(lastRoute.routeId) }
         )
-        val userNotificationFindByTime = userNotificationReader.findByTime(userNotifications.get(0).notificationTime)
+        val notificationTime = userNotifications.get(0).notificationTime.substring(0, 16)
+        val userNotificationFindByTime = userNotificationReader.findByTime(notificationTime)
         Assertions.assertThat(userNotificationFindByTime).contains(userNotifications.get(0))
     }
 

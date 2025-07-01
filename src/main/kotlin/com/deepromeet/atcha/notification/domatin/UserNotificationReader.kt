@@ -11,7 +11,9 @@ class UserNotificationReader(
         routeId: String
     ): List<UserNotification> = userNotificationRepository.findById(userId, routeId)
 
-    fun findByTime(currentTime: String): List<UserNotification> = userNotificationRepository.findByTime(currentTime)
+    fun findByTime(currentTime: String): List<UserNotification> {
+        return userNotificationRepository.findByTime(currentTime)
+    }
 
     fun findAll(): List<UserNotification> = userNotificationRepository.findAll()
 
