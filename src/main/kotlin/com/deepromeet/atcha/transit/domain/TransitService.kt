@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 

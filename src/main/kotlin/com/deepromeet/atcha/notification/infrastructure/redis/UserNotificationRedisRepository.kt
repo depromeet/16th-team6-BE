@@ -6,16 +6,19 @@ import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.stereotype.Component
 import java.time.Duration
-import java.time.format.DateTimeFormatter
 
 @Component
 class UserNotificationRedisRepository(
     private val userNotificationRedisTemplate: RedisTemplate<String, UserNotification>
 ) : UserNotificationRepository {
-    private val duration = Duration.ofHours(12)
+    private val duration = Duration.ofHours(2)
     private val hashOps = userNotificationRedisTemplate.opsForHash<String, UserNotification>()
-    private val scanOptions = ScanOptions.scanOptions().match("notification:*").count(1000).build()
-    private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val scanOptions =
+        ScanOptions
+            .scanOptions()
+            .match("notification:*")
+            .count(1000)
+            .build()
 
     override fun save(userNotification: UserNotification): UserNotification {
         hashOps.put(getKey(userNotification), userNotification.userNotificationFrequency.name, userNotification)
@@ -60,7 +63,8 @@ class UserNotificationRedisRepository(
                 val entries = hashOps.entries(key)
                 notifications.addAll(
                     entries.values.filter { notification ->
-                        notification.notificationTime.substring(0, 16) == time
+                        val substring = notification.notificationTime.substring(0, 16)
+                        substring == time
                     }
                 )
             }

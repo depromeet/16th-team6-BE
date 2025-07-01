@@ -1,9 +1,9 @@
-package com.deepromeet.atcha.transit.domain
+package com.deepromeet.atcha.transit.infrastructure.client.tmap
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.domain.RegionIdentifier
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.TMapTransitClient
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -15,7 +15,7 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class TransitRouteClientV2(
-    private val tMapTransitClient: TMapTransitClient,
+    private val tmapRouteSearchClient: TMapRouteClient,
     private val regionIdentifier: RegionIdentifier
 ) {
     fun fetchItinerariesV2(
@@ -29,7 +29,7 @@ class TransitRouteClientV2(
         val baseDate = today.format(dateFormatter) + "2300"
 
         val response =
-            tMapTransitClient.getRoutes(
+            tmapRouteSearchClient.getRoutes(
                 TMapRouteRequest(
                     startX = start.lon.toString(),
                     startY = start.lat.toString(),
