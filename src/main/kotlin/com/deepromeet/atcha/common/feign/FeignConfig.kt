@@ -16,7 +16,11 @@ class FeignConfig {
 
     @Bean
     fun requestOptions(): Request.Options {
-        return Request.Options(Duration.ofMillis(1000), Duration.ofMillis(3000), true)
+        return Request.Options(
+            Duration.ofMillis(1000),
+            Duration.ofMillis(5000),
+            true
+        )
     }
 
     @Bean
