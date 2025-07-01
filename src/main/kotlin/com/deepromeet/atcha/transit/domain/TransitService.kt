@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -15,10 +14,7 @@ class TransitService(
     private val lastRouteReader: LastRouteReader,
     private val lastRouteOperations: LastRouteOperations,
     private val startedBusCache: StartedBusCache,
-    private val regionIdentifier: RegionIdentifier,
-    private val serviceRegionValidator: ServiceRegionValidator,
-    private val transitRouteClientV2: TransitRouteClientV2,
-    private val lastRouteOperationsV2: LastRouteOperationsV2
+    private val serviceRegionValidator: ServiceRegionValidator
 ) {
     fun getTaxiFare(
         start: Coordinate,
@@ -42,19 +38,6 @@ class TransitService(
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteOperations
             .calculateLastRoutes(start, destination, validItineraries)
-            .sort(sortType)
-    }
-
-    suspend fun getLastRoutesV2(
-        userId: Long,
-        start: Coordinate,
-        end: Coordinate?,
-        sortType: LastRouteSortType
-    ): List<LastRoute> {
-        val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
-        return lastRouteOperationsV2
-            .calculateRoutesV2(start, destination, itineraries)
             .sort(sortType)
     }
 
@@ -108,13 +91,5 @@ class TransitService(
 
     fun init() {
         subwayStationBatchAppender.appendAll()
-    }
-
-    private fun validateServiceRegion(
-        start: Coordinate,
-        destination: Coordinate
-    ) {
-        regionIdentifier.identify(start)
-        regionIdentifier.identify(destination)
     }
 }
