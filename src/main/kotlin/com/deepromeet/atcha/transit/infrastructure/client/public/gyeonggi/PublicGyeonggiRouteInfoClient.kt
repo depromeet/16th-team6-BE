@@ -12,11 +12,8 @@ import com.deepromeet.atcha.transit.domain.TransitType
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class PublicGyeonggiRouteInfoClient(
@@ -41,7 +38,7 @@ class PublicGyeonggiRouteInfoClient(
             isLimitExceeded = ApiClientUtils::isGyeonggiApiLimitExceeded,
             processResult = { resp ->
                 resp.msgBody?.busRouteList
-                    ?.filter { it.routeName == routeName }
+                    ?.filter { it.routeName.startsWith(routeName) }
                     ?.map { it.toBusRoute() }
                     ?.takeIf { it.isNotEmpty() }
                     ?: throw TransitException.of(
