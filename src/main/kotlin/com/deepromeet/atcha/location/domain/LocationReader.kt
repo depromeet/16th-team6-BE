@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.location.domain
 
-import com.deepromeet.atcha.common.feign.FeignException
+import com.deepromeet.atcha.common.feign.ExternalApiException
 import com.deepromeet.atcha.location.exception.LocationError
 import com.deepromeet.atcha.location.exception.LocationException
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -17,25 +17,16 @@ class LocationReader(
         keyword: String,
         currentCoordinate: Coordinate
     ): List<POI> {
-        try {
-            if (keyword.isBlank()) {
-                return emptyList()
-            }
-            return poiFinder.find(keyword, currentCoordinate)
-        } catch (e: FeignException) {
-            logger.error(e) { "POI 정보 읽기 실패: ${e.message}" }
-            throw LocationException.of(
-                LocationError.FAILED_TO_READ_POIS,
-                "키워드 '$keyword'로 POI 검색 중 오류가 발생했습니다.",
-                e
-            )
+        if (keyword.isBlank()) {
+            return emptyList()
         }
+        return poiFinder.find(keyword, currentCoordinate)
     }
 
     fun read(coordinate: Coordinate): Location {
         try {
             return reverseGeocoder.geocode(coordinate)
-        } catch (e: FeignException) {
+        } catch (e: ExternalApiException) {
             logger.error(e) { "위치 정보 읽기 실패: ${e.message}" }
             throw LocationException.of(
                 LocationError.FAILED_TO_READ_LOCATION,

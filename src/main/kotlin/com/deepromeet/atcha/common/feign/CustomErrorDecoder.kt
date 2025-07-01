@@ -28,13 +28,17 @@ class CustomErrorDecoder : ErrorDecoder {
             """.trimIndent()
 
         return when (response.status()) {
-            400 -> FeignException.of(FeignError.EXTERNAL_API_BAD_REQUEST_ERROR, detailedMessage)
-            403 -> FeignException.of(FeignError.EXTERNAL_API_FORBIDDEN_ERROR, detailedMessage)
-            404 -> FeignException.of(FeignError.EXTERNAL_API_NOT_FOUND_ERROR, detailedMessage)
-            500, 502, 503 -> FeignException.of(FeignError.EXTERNAL_API_INTERNAL_SERVER_ERROR, detailedMessage)
+            400 -> ExternalApiException.of(ExternalApiError.EXTERNAL_API_BAD_REQUEST_ERROR, detailedMessage)
+            403 -> ExternalApiException.of(ExternalApiError.EXTERNAL_API_FORBIDDEN_ERROR, detailedMessage)
+            404 -> ExternalApiException.of(ExternalApiError.EXTERNAL_API_NOT_FOUND_ERROR, detailedMessage)
+            500, 502, 503 ->
+                ExternalApiException.of(
+                    ExternalApiError.EXTERNAL_API_INTERNAL_SERVER_ERROR,
+                    detailedMessage
+                )
             else -> {
                 log.warn { "정의되지 않은 외부 API 오류 발생. $detailedMessage" }
-                FeignException.of(FeignError.EXTERNAL_API_UNKNOWN_ERROR, detailedMessage)
+                ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, detailedMessage)
             }
         }
     }

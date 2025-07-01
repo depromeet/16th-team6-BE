@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping
     url = "\${tmap.api.url}",
     configuration = [TMapFeignConfig::class]
 )
-interface TMapTransitClient {
+interface TMapRouteClient {
     @PostMapping("/transit/routes")
     fun getRoutes(request: TMapRouteRequest): TMapRouteResponse
 }

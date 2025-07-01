@@ -26,7 +26,7 @@ class LastRouteOperations(
     private val busManager: BusManager,
     private val lastRouteAppender: LastRouteAppender
 ) {
-    suspend fun calculateRoutes(
+    suspend fun calculateLastRoutes(
         start: Coordinate,
         destination: Coordinate,
         itineraries: List<Itinerary>
