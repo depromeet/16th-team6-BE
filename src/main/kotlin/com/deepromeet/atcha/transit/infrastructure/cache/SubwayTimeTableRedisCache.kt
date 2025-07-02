@@ -40,7 +40,7 @@ class SubwayTimeTableRedisCache(
         dailyType: DailyType,
         direction: SubwayDirection
     ): String {
-        return "time:subway:${startStation.name}:${dailyType.code}:${direction.name}"
+        return "routes:time:subway:${startStation.routeCode}-${startStation.name}:${dailyType.code}:${direction.name}"
     }
 
     private fun calculateTtlUntilMidnight(): Long {
