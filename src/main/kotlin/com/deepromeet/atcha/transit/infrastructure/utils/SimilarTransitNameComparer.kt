@@ -13,9 +13,13 @@ class SimilarTransitNameComparer() : TransitNameComparer {
     private val similarity = JaroWinklerSimilarity()
 
     override fun isSame(
-        name1: String,
-        name2: String
+        name1: String?,
+        name2: String?
     ): Boolean {
+        if (name1.isNullOrBlank() || name2.isNullOrBlank()) {
+            return false
+        }
+
         val score = similarity.apply(normalize(name1), normalize(name2))
         return score >= SIMILARITY_THRESHOLD
     }
