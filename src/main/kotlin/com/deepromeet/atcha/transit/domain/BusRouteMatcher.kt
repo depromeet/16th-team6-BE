@@ -2,7 +2,14 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger { }
+
+private const val SIM_THRESHOLD = 0.6
+private const val SLACK = 5
 
 @Component
 class BusRouteMatcher(
@@ -12,36 +19,62 @@ class BusRouteMatcher(
     fun getMatchedRoute(
         busRoutes: List<BusRoute>,
         stationMeta: BusStationMeta,
-        nextStationName: String?
+        passStopList: PassStopList
     ): BusRouteInfo {
-        busRoutes.forEach { rt ->
+        val plannedStops = passStopList.stationList.map { it.stationName }
+        val similarities = mutableListOf<Double>()
 
-            val routeStationList = busRouteInfoClientMap[rt.serviceRegion]!!.getStationList(rt)
+        busRoutes.forEach { route ->
+            val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
+            val routeStops = stationList.busRouteStations.map { it.stationName }
 
-            val passStops = routeStationList.busRouteStations
+            val startIdxs =
+                routeStops
+                    .withIndex()
+                    .filter { transitNameComparer.isSame(it.value, stationMeta.name) }
+                    .map { it.index }
 
-            passStops.forEachIndexed { idx, station ->
-                if (!transitNameComparer.isSame(station.stationName, stationMeta.name)) {
-                    return@forEachIndexed
-                }
+            if (startIdxs.isEmpty()) return@forEach
 
-                if (nextStationName == null) {
-                    return BusRouteInfo(rt, idx, routeStationList)
-                }
+            for (curIdx in startIdxs) {
+                val end = minOf(curIdx + plannedStops.size + SLACK, routeStops.size)
+                val window = routeStops.subList(curIdx, end)
 
-                val targetNextStation = passStops[idx + 1].stationName
-                if (idx < passStops.lastIndex &&
-                    transitNameComparer.isSame(targetNextStation, nextStationName)
-                ) {
-                    return BusRouteInfo(rt, idx, routeStationList)
+                val lcs = lcsLength(plannedStops, window)
+                val similarity = lcs.toDouble() / plannedStops.size
+
+                similarities.add(similarity)
+
+                if (similarity >= SIM_THRESHOLD) {
+                    return BusRouteInfo(route, curIdx, stationList)
                 }
             }
         }
 
         throw TransitException.of(
             TransitError.NOT_FOUND_BUS_ROUTE,
-            "'${stationMeta.name} -> $nextStationName'을" +
-                " 경유하는 ${busRoutes[0].serviceRegion} 버스노선 '${busRoutes[0].name}'을 찾을 수 없습니다."
+            "'${stationMeta.name}'을 경유하며 티맵 경로와 유사한 노선을 찾지 못했습니다. " +
+                "노선 유사도: ${similarities.joinToString(", ")}"
         )
+    }
+
+    private fun lcsLength(
+        plannedStops: List<String>,
+        window: List<String>
+    ): Int {
+        val n = plannedStops.size
+        val m = window.size
+        val dp = Array(n + 1) { IntArray(m + 1) }
+
+        for (i in 1..n) {
+            for (j in 1..m) {
+                if (transitNameComparer.isSame(plannedStops[i - 1], window[j - 1])) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1
+                } else {
+                    dp[i][j] = maxOf(dp[i - 1][j], dp[i][j - 1])
+                }
+            }
+        }
+        return dp[n][m]
     }
 }

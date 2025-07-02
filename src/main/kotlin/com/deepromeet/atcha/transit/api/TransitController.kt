@@ -66,7 +66,7 @@ class TransitController(
                 transitService.getBusArrival(
                     request.toRouteName(),
                     request.toBusStationMeta(),
-                    request.nextStationName
+                    request.toPassStopList()
                 )
             )
         )

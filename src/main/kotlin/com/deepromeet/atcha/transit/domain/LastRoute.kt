@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.Duration
 import java.time.LocalDateTime
@@ -40,7 +41,7 @@ data class LastRouteLeg(
     val service: String? = null,
     val start: Location,
     val end: Location,
-    val passStopList: List<Station>? = null,
+    val passStopList: PassStopList? = null,
     val step: List<Step>? = null,
     val passShape: String? = null,
     val transitInfo: TransitInfo
@@ -48,8 +49,6 @@ data class LastRouteLeg(
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
     }
-
-    fun getNextStationName(): String? = passStopList?.getOrNull(1)?.stationName
 
     fun toBusStationMeta(): BusStationMeta {
         return BusStationMeta(

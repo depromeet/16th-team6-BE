@@ -54,7 +54,7 @@ data class LastRouteLegResponse(
         service = lastRouteLeg.service,
         start = lastRouteLeg.start,
         end = lastRouteLeg.end,
-        passStopList = lastRouteLeg.passStopList,
+        passStopList = lastRouteLeg.passStopList?.stationList,
         step = lastRouteLeg.step,
         passShape = lastRouteLeg.passShape
     )

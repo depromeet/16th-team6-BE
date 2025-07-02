@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -16,12 +17,12 @@ class BusRouteResolver(
     fun resolve(
         routeName: String,
         station: BusStationMeta,
-        nextStationName: String?
+        passStopList: PassStopList
     ): BusRouteInfo {
         val candidateRegions = regionPolicy.candidates(station)
 
         candidateRegions.forEach { region ->
-            tryFetch(region, routeName, station, nextStationName)?.let { return it }
+            tryFetch(region, routeName, station, passStopList)?.let { return it }
         }
 
         throw TransitException.of(
@@ -34,11 +35,11 @@ class BusRouteResolver(
         region: ServiceRegion,
         routeName: String,
         station: BusStationMeta,
-        nextStationName: String?
+        passStopList: PassStopList
     ): BusRouteInfo? =
         runCatching {
             val routes = clientMap[region]!!.getBusRoute(routeName)
-            busRouteMatcher.getMatchedRoute(routes, station, nextStationName)
+            busRouteMatcher.getMatchedRoute(routes, station, passStopList)
         }.onFailure { e ->
             log.debug(e) { "[$region] 버스 노선 '$routeName' 조회 실패" }
         }.getOrNull()
