@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.location.domain
 
-import com.deepromeet.atcha.common.feign.ExternalApiException
+import com.deepromeet.atcha.common.exception.ExternalApiException
 import com.deepromeet.atcha.location.exception.LocationError
 import com.deepromeet.atcha.location.exception.LocationException
 import io.github.oshai.kotlinlogging.KotlinLogging

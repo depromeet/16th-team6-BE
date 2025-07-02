@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 
@@ -48,10 +49,10 @@ class TransitService(
     fun getBusArrival(
         routeName: String,
         busStationMeta: BusStationMeta,
-        nextStationName: String? = null
+        passStopList: PassStopList
     ): BusArrival {
-        val schedule = busManager.getSchedule(routeName, busStationMeta, nextStationName)
-        val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta, nextStationName)
+        val schedule = busManager.getSchedule(routeName, busStationMeta, passStopList)
+        val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta, passStopList)
         return BusArrival(schedule, realTimeArrival)
     }
 

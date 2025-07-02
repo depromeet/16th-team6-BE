@@ -1,14 +1,13 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
+import com.deepromeet.atcha.common.exception.ExternalApiError
+import com.deepromeet.atcha.common.exception.ExternalApiException
 import com.deepromeet.atcha.common.exception.InfrastructureError
 import com.deepromeet.atcha.common.exception.InfrastructureException
-import com.deepromeet.atcha.common.feign.ExternalApiError
-import com.deepromeet.atcha.common.feign.ExternalApiException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.stereotype.Component
-import kotlin.compareTo
 
 @Component
 class ODSayCallCounter(

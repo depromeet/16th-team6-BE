@@ -24,11 +24,14 @@ class SubwayManager(
         subwayLine: SubwayLine,
         stationName: String
     ): SubwayStation {
-        return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
-            ?: throw TransitException.of(
-                TransitError.NOT_FOUND_SUBWAY_STATION,
-                "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
-            )
+        val station = (
+            subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, stationName)
+                ?: throw TransitException.of(
+                    TransitError.NOT_FOUND_SUBWAY_STATION,
+                    "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
+                )
+        )
+        return station
     }
 
     suspend fun getTimeTable(

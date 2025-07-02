@@ -7,6 +7,7 @@ import com.deepromeet.atcha.transit.domain.SubwayStation
 import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.domain.SubwayTimeTable
+import com.deepromeet.atcha.transit.domain.TransitNameComparer
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayJsonResponse
@@ -27,6 +28,7 @@ private val log = KotlinLogging.logger {}
 class PublicSubwayInfoClient(
     private val subwayInfoFeignClient: PublicSubwayInfoFeignClient,
     private val subwayStationRepository: SubwayStationRepository,
+    private val transitNameComparer: TransitNameComparer,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -118,7 +120,10 @@ class PublicSubwayInfoClient(
             scheduleItems.map { item ->
                 async(Dispatchers.IO) {
                     val finalStation =
-                        subwayStations.find { station -> station.name == item.endSubwayStationNm }
+                        subwayStations.find {
+                                station ->
+                            transitNameComparer.isSame(station.name, item.endSubwayStationNm)
+                        }
                             ?: throw TransitException.of(
                                 TransitError.NOT_FOUND_SUBWAY_STATION,
                                 "지하철역 데이터에서 도착역 '${item.endSubwayStationNm}'을 찾을 수 없습니다."

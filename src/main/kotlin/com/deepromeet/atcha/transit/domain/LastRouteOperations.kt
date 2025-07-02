@@ -3,6 +3,7 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.cache.LastRouteMetricsRepository
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -12,31 +13,39 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
-private val semaphore: Semaphore = Semaphore(permits = 5)
+private val semaphore: Semaphore = Semaphore(permits = 20)
 private val log = KotlinLogging.logger {}
+
+private const val MAX_CALCULATION_TIME = 10_000L // 10초
 
 @Component
 class LastRouteOperations(
     private val subwayManager: SubwayManager,
     private val busManager: BusManager,
-    private val lastRouteAppender: LastRouteAppender
+    private val lastRouteAppender: LastRouteAppender,
+    private val metricsRepository: LastRouteMetricsRepository
 ) {
     suspend fun calculateLastRoutes(
         start: Coordinate,
         destination: Coordinate,
         itineraries: List<Itinerary>
     ): List<LastRoute> {
+        metricsRepository.incrTotal(itineraries.size.toLong())
+
         val routes =
             coroutineScope {
                 itineraries
                     .map { route ->
-                        async(Dispatchers.Default) {
-                            calculateRoute(route)
+                        async(Dispatchers.IO) {
+                            withTimeoutOrNull(MAX_CALCULATION_TIME) {
+                                calculateRoute(route)
+                            }
                         }
                     }
                     .awaitAll()
@@ -44,6 +53,7 @@ class LastRouteOperations(
             }
 
         if (routes.isNotEmpty()) {
+            metricsRepository.incrSuccess(routes.size.toLong())
             lastRouteAppender.appendRoutes(start, destination, routes)
         }
 
@@ -127,7 +137,7 @@ class LastRouteOperations(
                                     busManager.getSchedule(
                                         routeId,
                                         stationMeta,
-                                        leg.passStopList!!.stationList[1].stationName
+                                        leg.passStopList!!
                                     )
                                 val departureDateTime = busSchedule.busTimeTable.lastTime
                                 val transitInfo = TransitInfo.BusInfo(busSchedule)
@@ -323,7 +333,7 @@ class LastRouteOperations(
             service = this.service.toString(),
             start = this.start,
             end = this.end,
-            passStopList = this.passStopList?.stationList,
+            passStopList = this.passStopList,
             step = this.steps,
             passShape = this.passShape?.linestring,
             transitInfo = transitInfo

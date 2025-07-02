@@ -52,7 +52,7 @@ class RouteDepartureTimeRefresher(
                 busManager.getRealTimeArrival(
                     routeName,
                     busStationMeta,
-                    firstBusLeg.getNextStationName()
+                    firstBusLeg.passStopList!!
                 )
             }.getOrElse { return null }
 

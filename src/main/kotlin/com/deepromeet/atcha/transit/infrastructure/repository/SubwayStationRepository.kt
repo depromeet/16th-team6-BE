@@ -26,7 +26,7 @@ interface SubwayStationRepository : JpaRepository<SubwayStation, SubwayStationId
         AND ( s.name = :name OR s.name LIKE CONCAT(:name, '(%') )
         """
     )
-    fun findByRouteCodeAndNameOrLike(
+    fun findStationByNameAndRoute(
         routeCode: String,
         name: String
     ): SubwayStation?

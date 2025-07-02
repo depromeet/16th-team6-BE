@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.common.feign
 
+import com.deepromeet.atcha.common.exception.ExternalApiError
+import com.deepromeet.atcha.common.exception.ExternalApiException
 import feign.Response
 import feign.codec.ErrorDecoder
 import io.github.oshai.kotlinlogging.KotlinLogging
