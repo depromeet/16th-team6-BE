@@ -3,10 +3,7 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger { }
 
 private const val SIM_THRESHOLD = 0.6
 private const val SLACK = 5

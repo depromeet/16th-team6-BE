@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.domain.LastRouteLeg
 import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
+import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
 import java.time.LocalDateTime
 
@@ -74,7 +75,7 @@ object LastRouteFixture {
             service = service,
             start = start,
             end = end,
-            passStopList = passStopList,
+            passStopList = PassStopList(passStopList!!),
             step = step,
             passShape = passShape,
             transitInfo = transitInfo
