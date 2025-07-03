@@ -5,28 +5,33 @@ import com.deepromeet.atcha.common.exception.ExternalApiException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.ServiceResult
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.PublicGyeonggiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runInterruptible
+import kotlinx.coroutines.withContext
+import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger {}
 
+@Component
 object ApiClientUtils {
-    fun <T, R> callApiByKeyProvider(
+    suspend fun <T, R> callApiByKeyProvider(
         keyProvider: () -> String,
         apiCall: (String) -> T,
         processResult: (T) -> R,
         errorMessage: String
     ): R {
-        val response =
+        val response: T =
             try {
                 val apiKey = keyProvider()
-                apiCall(apiKey)
+                interruptible { apiCall(apiKey) }
             } catch (e: Exception) {
-                log.warn(e) { "API 호출 중 예상치 못한 오류 발생: ${e.message} - $errorMessage" }
+                log.warn(e) { "API 호출 중 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
         return processResult(response)
     }
 
-    fun <T, R> callApiWithRetry(
+    suspend fun <T, R> callApiWithRetry(
         primaryKey: String,
         spareKey: String,
         realLastKey: String,
@@ -36,11 +41,11 @@ object ApiClientUtils {
         errorMessage: String
     ): R {
         val keys = listOf(primaryKey, spareKey, realLastKey)
-        val successfulResponse = callApiWithRetryInternal(keys, apiCall, isLimitExceeded, errorMessage, 0)
-        return processResult(successfulResponse)
+        val successful = callApiWithRetryInternal(keys, apiCall, isLimitExceeded, errorMessage, 0)
+        return processResult(successful)
     }
 
-    private fun <T> callApiWithRetryInternal(
+    private suspend fun <T> callApiWithRetryInternal(
         keys: List<String>,
         apiCall: (String) -> T,
         isLimitExceeded: (T) -> Boolean,
@@ -56,19 +61,22 @@ object ApiClientUtils {
 
         val response =
             try {
-                apiCall(currentKey)
+                interruptible { apiCall(currentKey) }
             } catch (e: Exception) {
-                log.warn { "예상치 못한 오류 발생: ${e.message} - $errorMessage" }
+                log.warn(e) { "예상치 못한 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
 
         return if (isLimitExceeded(response)) {
-            log.warn { "API 키(${index + 1}) 제한됨. 다음 키로 재시도합니다. $response" }
+            log.warn { "API 키(${index + 1}) 제한, 다음 키 재시도." }
             callApiWithRetryInternal(keys, apiCall, isLimitExceeded, errorMessage, index + 1)
         } else {
             response
         }
     }
+
+    private suspend fun <T> interruptible(block: () -> T): T =
+        withContext(Dispatchers.IO) { runInterruptible { block() } }
 
     fun <T> isServiceResultApiLimitExceeded(response: ServiceResult<T>): Boolean {
         val limitMessages =
@@ -76,21 +84,13 @@ object ApiClientUtils {
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
             )
-        val isLimited =
+        val limited =
             response.msgHeader.headerCd == 7 ||
-                limitMessages.any {
-                    response.msgHeader.headerMsg?.contains(it)
-                        ?: false
-                }
-
-        if (isLimited) {
-            log.warn { "공공 API 요청 수 초과: ${response.msgHeader.headerMsg}" }
-        }
-
-        return isLimited
+                limitMessages.any { response.msgHeader.headerMsg?.contains(it) == true }
+        if (limited) log.warn { "공공 API 요청 수 초과: ${response.msgHeader.headerMsg}" }
+        return limited
     }
 
-    fun <T> isGyeonggiApiLimitExceeded(response: PublicGyeonggiResponse<T>): Boolean {
-        return response.msgBody == null && !response.msgHeader.isEmptyResponse()
-    }
+    fun <T> isGyeonggiApiLimitExceeded(response: PublicGyeonggiResponse<T>): Boolean =
+        response.msgBody == null && !response.msgHeader.isEmptyResponse()
 }

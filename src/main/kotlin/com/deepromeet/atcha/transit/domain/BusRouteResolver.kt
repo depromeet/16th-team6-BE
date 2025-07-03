@@ -14,7 +14,7 @@ class BusRouteResolver(
     private val busRouteMatcher: BusRouteMatcher,
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
-    fun resolve(
+    suspend fun resolve(
         routeName: String,
         station: BusStationMeta,
         passStopList: PassStopList
@@ -31,7 +31,7 @@ class BusRouteResolver(
         )
     }
 
-    private fun tryFetch(
+    private suspend fun tryFetch(
         region: ServiceRegion,
         routeName: String,
         station: BusStationMeta,

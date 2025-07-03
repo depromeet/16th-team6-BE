@@ -11,13 +11,13 @@ interface BusRouteInfoClient {
             station.stationName.contains(keyword) && isNotGarage(station)
         }
 
-    fun getBusRoute(routeName: String): List<BusRoute>
+    suspend fun getBusRoute(routeName: String): List<BusRoute>
 
-    fun getStationList(route: BusRoute): BusRouteStationList
+    suspend fun getStationList(route: BusRoute): BusRouteStationList
 
-    fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo
+    suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo
 
-    fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule
+    suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule
 
-    fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival
+    suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival
 }

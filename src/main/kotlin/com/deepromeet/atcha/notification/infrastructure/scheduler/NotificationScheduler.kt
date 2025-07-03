@@ -13,9 +13,9 @@ class NotificationScheduler(
     private val scheduledNotificationPublisher: ScheduledNotificationPublisher
 ) {
     @Scheduled(cron = "0 * * * * ?")
-    fun checkAndSendNotifications() {
+    suspend fun checkAndSendNotifications() {
         // 예상 출발 시간 갱신
-        val updatedNotifications = routeDepartureTimeRefresher.refresh()
+        val updatedNotifications = routeDepartureTimeRefresher.refreshAll()
 
         // 지연 알림 전송
         updatedNotifications.forEach {

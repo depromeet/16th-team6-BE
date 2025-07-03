@@ -12,7 +12,7 @@ class ODSayBusInfoClient(
     private val oDSayBusFeignClient: ODSayBusFeignClient,
     private val oDSayCallCounter: ODSayCallCounter
 ) {
-    fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
+    suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         val busStation =
             ApiClientUtils.callApiByKeyProvider(
                 keyProvider = oDSayCallCounter::getApiKeyBasedOnUsage,

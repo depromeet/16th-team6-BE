@@ -4,9 +4,9 @@ import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
-import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -74,8 +74,8 @@ data class ODSayLaneResponse(
             busStation = station,
             busTimeTable =
                 BusTimeTable(
-                    BusTimeParser.parseTime(busFirstTime, LocalDate.now(), TIME_FORMATTER),
-                    BusTimeParser.parseTime(busLastTime, LocalDate.now(), TIME_FORMATTER),
+                    TransitTimeParser.parseTime(busFirstTime, LocalDate.now(), TIME_FORMATTER),
+                    TransitTimeParser.parseTime(busLastTime, LocalDate.now(), TIME_FORMATTER),
                     busInterval.toInt()
                 )
         )

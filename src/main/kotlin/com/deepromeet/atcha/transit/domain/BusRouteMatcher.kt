@@ -13,7 +13,7 @@ class BusRouteMatcher(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val transitNameComparer: TransitNameComparer
 ) {
-    fun getMatchedRoute(
+    suspend fun getMatchedRoute(
         busRoutes: List<BusRoute>,
         stationMeta: BusStationMeta,
         passStopList: PassStopList

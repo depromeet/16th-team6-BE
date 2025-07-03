@@ -6,11 +6,11 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusServiceHours
-import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.BusTravelTimeCalculator
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -64,13 +64,13 @@ data class IncheonBusRouteInfoResponse(
             busTimeTable =
                 BusTimeTable(
                     firstTime =
-                        BusTimeParser.parseTime(
+                        TransitTimeParser.parseTime(
                             firstBusTime.padStart(4, '0'),
                             LocalDate.now(),
                             TIME_FORMATTER
                         ).plusMinutes(travelTime),
                     lastTime =
-                        BusTimeParser.parseTime(
+                        TransitTimeParser.parseTime(
                             lastBusTime.padStart(4, '0'),
                             LocalDate.now(),
                             TIME_FORMATTER
@@ -89,13 +89,13 @@ data class IncheonBusRouteInfoResponse(
                     BusServiceHours(
                         dailyType = DailyType.WEEKDAY,
                         startTime =
-                            BusTimeParser.parseTime(
+                            TransitTimeParser.parseTime(
                                 firstBusTime,
                                 LocalDate.now(),
                                 TIME_FORMATTER
                             ),
                         endTime =
-                            BusTimeParser.parseTime(
+                            TransitTimeParser.parseTime(
                                 lastBusTime,
                                 LocalDate.now(),
                                 TIME_FORMATTER

@@ -8,14 +8,37 @@ import com.deepromeet.atcha.transit.domain.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.SubwayTime
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.ItemDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import io.github.oshai.kotlinlogging.KotlinLogging
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
+private val log = KotlinLogging.logger { }
+
 data class PublicSubwayJsonResponse<T>(
     val response: Response<T>
-)
+) {
+    companion object {
+        fun <T> isSubwayApiLimitExceeded(response: PublicSubwayJsonResponse<T>): Boolean {
+            val limitMessages =
+                listOf(
+                    "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
+                    "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
+                )
+
+            val isLimited =
+                response.response.header.resultCode != "00" ||
+                    limitMessages.any { response.response.header.resultMsg.contains(it) }
+
+            if (isLimited) {
+                log.warn { "지하철 API 요청 수 초과: ${response.response.header.resultMsg}" }
+            }
+
+            return isLimited
+        }
+    }
+}
 
 data class Response<T>(
     val header: Header,
@@ -62,6 +85,7 @@ data class SubwayTimeResponse(
 ) {
     fun toDomain(endStation: SubwayStation): SubwayTime? {
         return SubwayTime(
+            isExpress = false,
             finalStation = endStation,
             departureTime = parseTime(depTime) ?: return null,
             subwayDirection = SubwayDirection.fromCode(upDownTypeCode)
@@ -81,5 +105,70 @@ data class SubwayTimeResponse(
         val date = if (localTime.hour < 4) now.plusDays(1) else now
 
         return LocalDateTime.of(date, localTime)
+    }
+}
+
+data class TrainScheduleResponse(
+    val trainno: String?,
+    val trainKnd: String?,
+    val upbdnbSe: String,
+    val wkndSe: String?,
+    val lineNm: String?,
+    val brlnNm: String?,
+    val stnCd: String?,
+    val stnNo: String?,
+    val stnNm: String?,
+    val dptreLineNm: String?,
+    val dptreStnCd: String?,
+    val dptreStnNm: String?,
+    val dptreStnNo: String?,
+    val arvlLineNm: String?,
+    val arvlStnCd: String?,
+    val arvlStnNm: String,
+    val arvlStnNo: String?,
+    val trainDptreTm: String?,
+    val trainArvlTm: String?,
+    val etrnYn: String?,
+    val lnkgTrainno: String?,
+    val tmprTmtblYn: String?,
+    val vldBgngDt: String?,
+    val vldEndDt: String?,
+    val crtrYmd: String?
+) {
+    fun toDomain(finalStation: SubwayStation): SubwayTime? {
+        return SubwayTime(
+            isExpress = etrnYn == "Y",
+            finalStation = finalStation,
+            departureTime = parseTime(trainDptreTm, LocalDate.now()) ?: return null,
+            subwayDirection = SubwayDirection.fromName(upbdnbSe)
+        )
+    }
+
+    private fun parseTime(
+        time: String?,
+        referenceDate: LocalDate
+    ): LocalDateTime? {
+        return try {
+            if (time.isNullOrBlank()) {
+                return null
+            }
+
+            val parts = time.split(":")
+            var hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+            val second = parts[2].toInt()
+
+            var date = referenceDate
+
+            if (hour >= 24) {
+                hour -= 24
+                date = referenceDate.plusDays(1)
+            }
+
+            val localTime = LocalTime.of(hour, minute, second)
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            null
+        }
     }
 }

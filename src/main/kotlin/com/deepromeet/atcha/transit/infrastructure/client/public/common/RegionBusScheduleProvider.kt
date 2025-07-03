@@ -16,7 +16,7 @@ private val log = KotlinLogging.logger {}
 class RegionBusScheduleProvider(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>
 ) : BusScheduleProvider {
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
         try {
             val busSchedule =
                 busRouteInfoClientMap[routeInfo.route.serviceRegion]?.getBusSchedule(

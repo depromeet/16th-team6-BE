@@ -19,7 +19,7 @@ class PublicIncheonBusPositionClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusPositionFetcher {
-    override fun fetch(routeId: BusRouteId): List<BusPosition> {
+    override suspend fun fetch(routeId: BusRouteId): List<BusPosition> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,

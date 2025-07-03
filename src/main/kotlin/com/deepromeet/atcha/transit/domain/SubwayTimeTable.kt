@@ -12,14 +12,17 @@ data class SubwayTimeTable(
 ) {
     fun getLastTime(
         destinationStation: SubwayStation,
-        routes: List<Route>
+        routes: List<Route>,
+        isExpress: Boolean
     ): SubwayTime =
         schedule
+            .filter { it.isExpress == isExpress }
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
             .maxByOrNull { it.departureTime }
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
-                "지하철 '${startStation.name}'역에서 '${destinationStation.name}'역으로 가는 막차 시간을 찾을 수 없습니다."
+                "${startStation.routeName} 지하철 '${startStation.name}'역에서" +
+                    " '${destinationStation.name}'역으로 가는 막차 시간을 찾을 수 없습니다."
             )
 
     fun findNearestTime(

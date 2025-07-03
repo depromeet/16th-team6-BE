@@ -20,7 +20,7 @@ class PublicHolidayClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : HolidayFetcher {
-    override fun fetch(year: Int): List<LocalDate> {
+    override suspend fun fetch(year: Int): List<LocalDate> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,

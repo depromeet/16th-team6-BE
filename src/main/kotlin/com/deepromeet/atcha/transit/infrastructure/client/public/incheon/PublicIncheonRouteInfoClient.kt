@@ -27,7 +27,7 @@ class PublicIncheonRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
-    override fun getBusRoute(routeName: String): List<BusRoute> {
+    override suspend fun getBusRoute(routeName: String): List<BusRoute> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -48,7 +48,7 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -68,7 +68,7 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
+    override suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -86,7 +86,7 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
-    override fun getStationList(route: BusRoute): BusRouteStationList {
+    override suspend fun getStationList(route: BusRoute): BusRouteStationList {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -124,7 +124,7 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
-    override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
+    override suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,

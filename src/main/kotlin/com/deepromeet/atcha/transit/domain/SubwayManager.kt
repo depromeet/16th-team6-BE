@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component
 @Component
 class SubwayManager(
     private val subwayStationRepository: SubwayStationRepository,
-    private val subwayInfoClient: SubwayInfoClient,
+    private val subwayTimetableClient: SubwayTimetableClient,
     private val dailyTypeResolver: DailyTypeResolver,
     private val subwayBranchRepository: SubwayBranchRepository,
     private val subwayTimeTableCache: SubwayTimeTableCache
 ) {
-    fun getRoutes(subwayLine: SubwayLine) =
+    suspend fun getRoutes(subwayLine: SubwayLine) =
         subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
             .groupBy { it.finalStationName }
             .values
             .map { Route(it) }
 
-    fun getStation(
+    suspend fun getStation(
         subwayLine: SubwayLine,
         stationName: String
     ): SubwayStation {
@@ -46,7 +46,7 @@ class SubwayManager(
             return it
         }
 
-        return subwayInfoClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
+        return subwayTimetableClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
             subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
         }
     }

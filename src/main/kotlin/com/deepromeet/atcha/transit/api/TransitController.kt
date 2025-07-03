@@ -74,7 +74,7 @@ class TransitController(
         )
 
     @PostMapping("/bus-arrival")
-    fun getArrivalInfo(
+    suspend fun getArrivalInfo(
         @RequestBody request: BusArrivalRequest
     ): ApiResponse<BusArrivalResponse> {
         return ApiResponse.success(
@@ -98,7 +98,7 @@ class TransitController(
     }
 
     @GetMapping("/bus-routes/operation-info")
-    fun getBusOperationInfo(
+    suspend fun getBusOperationInfo(
         @ModelAttribute request: BusRouteRequest
     ): ApiResponse<BusRouteOperationInfo> {
         return ApiResponse.success(

@@ -8,30 +8,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
-object BusTimeParser {
-    fun parseDateTime(
-        timeStr: String?,
-        format: DateTimeFormatter
-    ): LocalDateTime {
-        // 입력 값 유효성 검사
-        if (timeStr.isNullOrBlank() || timeStr == "0") {
-            throw TransitException.of(
-                TransitError.INVALID_TIME_FORMAT,
-                "시간 정보가 유효하지 않습니다(null, blank, or '0'): '$timeStr'"
-            )
-        }
-
-        try {
-            return LocalDateTime.parse(timeStr, format)
-        } catch (e: Exception) {
-            throw TransitException.of(
-                TransitError.INVALID_TIME_FORMAT,
-                "시간 형식 파싱에 실패했습니다: 입력='$timeStr', 형식='$format'",
-                e
-            )
-        }
-    }
-
+object TransitTimeParser {
     fun parseTime(
         timeStr: String?,
         baseDate: LocalDate,
