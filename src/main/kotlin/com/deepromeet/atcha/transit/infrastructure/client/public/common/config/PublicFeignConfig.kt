@@ -13,7 +13,7 @@ class PublicFeignConfig(
     @Bean
     fun rateLimitInterceptor(): RequestInterceptor =
         RequestInterceptor { template ->
-            val baseUrl = template.feignTarget().url()
+            val baseUrl = template.feignTarget().url() + template.url()
             registry.awaitByUrl(baseUrl, urlKeyMap)
         }
 }
