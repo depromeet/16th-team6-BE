@@ -55,9 +55,9 @@ open-api:
       subway-schedule: https://apis.data.go.kr/B553766/schedule
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
   limits:
-    default: 20
+    default: 30
     per-api:
-      subway-schedule: 5
+      subway-schedule: 3
       incheon-route: 10
       incheon-arrival: 10
       incheon-position: 10

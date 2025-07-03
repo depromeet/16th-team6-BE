@@ -50,7 +50,7 @@ class BusRouteMatcher(
 
         throw TransitException.of(
             TransitError.NOT_FOUND_BUS_ROUTE,
-            "'${stationMeta.name}'을 경유하며 티맵 경로와 유사한 노선을 찾지 못했습니다. " +
+            "'${stationMeta.name}'을 경유하며 사용자 경로와 유사한 노선을 찾지 못했습니다. " +
                 "노선 유사도: ${similarities.joinToString(", ")}"
         )
     }

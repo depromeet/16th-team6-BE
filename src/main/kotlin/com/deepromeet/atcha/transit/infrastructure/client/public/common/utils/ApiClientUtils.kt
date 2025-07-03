@@ -9,6 +9,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+import kotlin.coroutines.cancellation.CancellationException
 
 private val log = KotlinLogging.logger {}
 
@@ -24,6 +25,8 @@ object ApiClientUtils {
             try {
                 val apiKey = keyProvider()
                 interruptible { apiCall(apiKey) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 log.warn(e) { "API 호출 중 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
@@ -62,6 +65,8 @@ object ApiClientUtils {
         val response =
             try {
                 interruptible { apiCall(currentKey) }
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
                 log.warn(e) { "예상치 못한 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)

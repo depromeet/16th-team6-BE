@@ -22,7 +22,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import kotlin.math.ceil
 
-private const val PAGE_SIZE = 500
+private const val PAGE_SIZE = 300
 
 @Component
 class PublicSubwayTimetableClient(
