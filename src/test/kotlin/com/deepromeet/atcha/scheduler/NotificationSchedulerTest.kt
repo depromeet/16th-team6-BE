@@ -10,6 +10,7 @@ import com.deepromeet.atcha.notification.infrastructure.scheduler.NotificationSc
 import com.deepromeet.atcha.support.BaseServiceTest
 import com.deepromeet.atcha.support.fixture.LastRouteFixture
 import com.deepromeet.atcha.support.fixture.UserNotificationFixture
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -64,7 +65,9 @@ class NotificationSchedulerTest : BaseServiceTest() {
         repeat(threadCount) {
             executor.submit {
                 try {
-                    notificationScheduler.checkAndSendNotifications()
+                    runBlocking {
+                        notificationScheduler.checkAndSendNotifications()
+                    }
                 } finally {
                     latch.countDown()
                 }
@@ -92,7 +95,7 @@ class NotificationSchedulerTest : BaseServiceTest() {
         lastRouteAppender.append(lastRoute)
         userNotificationRepository.save(notificationA)
         userNotificationRepository.save(notificationB)
-        notificationScheduler.checkAndSendNotifications()
+        runBlocking { notificationScheduler.checkAndSendNotifications() }
 
         // when
         val streamKey = "stream:notification"
@@ -136,7 +139,7 @@ class NotificationSchedulerTest : BaseServiceTest() {
         lastRouteAppender.append(lastRoute)
         userNotificationRepository.save(notificationA)
         userNotificationRepository.save(notificationB)
-        notificationScheduler.checkAndSendNotifications()
+        runBlocking { notificationScheduler.checkAndSendNotifications() }
 
         // when
         redisStreamConsumer.consumeStreamMessages()
