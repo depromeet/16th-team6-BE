@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusServiceHours
-import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.DailyType
+import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -21,12 +21,12 @@ data class SeoulBusOperationResponse(
             BusServiceHours(
                 dailyType = DailyType.WEEKDAY,
                 startTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.timeFirst, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),
                 endTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.timeLast, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),
@@ -37,12 +37,12 @@ data class SeoulBusOperationResponse(
             BusServiceHours(
                 dailyType = DailyType.SATURDAY,
                 startTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.satTimeFirst, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),
                 endTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.satTimeLast, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),
@@ -53,12 +53,12 @@ data class SeoulBusOperationResponse(
             BusServiceHours(
                 dailyType = DailyType.HOLIDAY,
                 startTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.holTimeFirst, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),
                 endTime =
-                    BusTimeParser.parseTime(
+                    TransitTimeParser.parseTime(
                         row.holTimeLast, today,
                         SeoulBusOperationRow.Companion.TIME_FORMATTER
                     ),

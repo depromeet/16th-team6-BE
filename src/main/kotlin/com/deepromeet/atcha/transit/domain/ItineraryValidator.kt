@@ -8,33 +8,19 @@ private val log = KotlinLogging.logger {}
 object ItineraryValidator {
     fun filterValidItineraries(itineraries: List<Itinerary>): List<Itinerary> {
         fun isValidItinerary(itinerary: Itinerary): Boolean {
-            var hasValidModes = false
-            var hasExpressSubway = false
+            if (itinerary.transferCount > 4) return false
+
             var busCount = 0
-            var transitCount = 0
             var isFirstTransit = true
             var hasInvalid = false
-            var hasNBUS = false
 
             for (leg in itinerary.legs) {
                 when (leg.mode) {
-                    "WALK" -> hasValidModes = true
-                    "SUBWAY" -> {
-                        transitCount++
-                        if (leg.route?.contains("(급행)") == true) {
-                            hasExpressSubway = true
-                        } else {
-                            hasValidModes = true
-                        }
-                    }
+                    "WALK" -> {}
+                    "SUBWAY" -> {}
                     "BUS" -> {
-                        transitCount++
                         if (!isFirstTransit) {
                             busCount++
-                        }
-                        hasValidModes = true
-                        if (leg.route!!.contains("N")) {
-                            hasNBUS = true
                         }
                         isFirstTransit = false
                     }
@@ -45,12 +31,7 @@ object ItineraryValidator {
                 }
             }
 
-            return !hasInvalid &&
-                !hasExpressSubway &&
-                hasValidModes &&
-                !hasNBUS &&
-                busCount <= 2 &&
-                transitCount < 4
+            return !hasInvalid && busCount <= 1
         }
 
         val filtered = itineraries.filter { itinerary -> isValidItinerary(itinerary) }

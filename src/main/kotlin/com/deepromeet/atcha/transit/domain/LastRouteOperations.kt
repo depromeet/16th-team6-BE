@@ -11,15 +11,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
 
-private val semaphore: Semaphore = Semaphore(permits = 20)
 private val log = KotlinLogging.logger {}
 
 private const val MAX_CALCULATION_TIME = 10_000L // 10초
@@ -96,57 +93,57 @@ class LastRouteOperations(
         return coroutineScope {
             legs.map { leg ->
                 async(Dispatchers.IO) {
-                    semaphore.withPermit {
-                        when (leg.mode) {
-                            "SUBWAY" -> {
-                                val subwayLine = SubwayLine.fromRouteName(leg.route!!)
-                                val routesDeferred =
-                                    async {
-                                        subwayManager.getRoutes(subwayLine)
-                                    }
-                                val startDeferred =
-                                    async { subwayManager.getStation(subwayLine, leg.start.name) }
-                                val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
+                    when (leg.mode) {
+                        "SUBWAY" -> {
+                            val subwayLine = SubwayLine.fromRouteName(leg.route!!)
+                            val routesDeferred =
+                                async {
+                                    subwayManager.getRoutes(subwayLine)
+                                }
+                            val startDeferred =
+                                async { subwayManager.getStation(subwayLine, leg.start.name) }
+                            val endDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
 
-                                val routes = routesDeferred.await()
-                                val startStation = startDeferred.await()
-                                val endStation = endDeferred.await()
+                            val routes = routesDeferred.await()
+                            val startStation = startDeferred.await()
+                            val endStation = endDeferred.await()
+                            val isExpress = leg.route.contains("(급행)")
 
-                                val timeTable =
-                                    subwayManager.getTimeTable(startStation, endStation, routes)
-                                val departureDateTime =
-                                    timeTable.getLastTime(
-                                        endStation,
-                                        routes
-                                    ).departureTime
-                                val transitInfo =
-                                    timeTable.let {
-                                        TransitInfo.SubwayInfo(it)
-                                    }
-                                leg.toLastRouteLeg(departureDateTime, transitInfo)
-                            }
-
-                            "BUS" -> {
-                                val routeId = leg.route!!.split(":")[1]
-                                val stationMeta =
-                                    BusStationMeta(
-                                        leg.start.name.removeSuffix(),
-                                        Coordinate(leg.start.lat, leg.start.lon)
-                                    )
-                                val busSchedule =
-                                    busManager.getSchedule(
-                                        routeId,
-                                        stationMeta,
-                                        leg.passStopList!!
-                                    )
-                                val departureDateTime = busSchedule.busTimeTable.lastTime
-                                val transitInfo = TransitInfo.BusInfo(busSchedule)
-
-                                leg.toLastRouteLeg(departureDateTime, transitInfo)
-                            }
-
-                            else -> leg.toLastRouteLeg(null, TransitInfo.NoInfoTable)
+                            val timeTable =
+                                subwayManager.getTimeTable(startStation, endStation, routes)
+                            val departureDateTime =
+                                timeTable.getLastTime(
+                                    endStation,
+                                    routes,
+                                    isExpress
+                                ).departureTime
+                            val transitInfo =
+                                timeTable.let {
+                                    TransitInfo.SubwayInfo(it)
+                                }
+                            leg.toLastRouteLeg(departureDateTime, transitInfo)
                         }
+
+                        "BUS" -> {
+                            val routeId = leg.route!!.split(":")[1]
+                            val stationMeta =
+                                BusStationMeta(
+                                    leg.start.name.removeSuffix(),
+                                    Coordinate(leg.start.lat, leg.start.lon)
+                                )
+                            val busSchedule =
+                                busManager.getSchedule(
+                                    routeId,
+                                    stationMeta,
+                                    leg.passStopList!!
+                                )
+                            val departureDateTime = busSchedule.busTimeTable.lastTime
+                            val transitInfo = TransitInfo.BusInfo(busSchedule)
+
+                            leg.toLastRouteLeg(departureDateTime, transitInfo)
+                        }
+
+                        else -> leg.toLastRouteLeg(null, TransitInfo.NoInfoTable)
                     }
                 }
             }.awaitAll()

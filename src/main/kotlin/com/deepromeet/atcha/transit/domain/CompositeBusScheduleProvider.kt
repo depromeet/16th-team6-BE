@@ -1,5 +1,8 @@
 package com.deepromeet.atcha.transit.domain
 
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.mapNotNull
 import org.springframework.context.annotation.Primary
 import org.springframework.stereotype.Component
 
@@ -8,9 +11,9 @@ import org.springframework.stereotype.Component
 class CompositeBusScheduleProvider(
     private val providers: List<BusScheduleProvider>
 ) : BusScheduleProvider {
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? =
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? =
         providers
-            .asSequence()
+            .asFlow()
             .mapNotNull { it.getBusSchedule(routeInfo) }
             .firstOrNull()
 }

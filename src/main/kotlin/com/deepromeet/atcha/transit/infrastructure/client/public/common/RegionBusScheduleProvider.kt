@@ -6,6 +6,7 @@ import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusScheduleProvider
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.CancellationException
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 
@@ -16,13 +17,12 @@ private val log = KotlinLogging.logger {}
 class RegionBusScheduleProvider(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>
 ) : BusScheduleProvider {
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
         try {
-            val busSchedule =
-                busRouteInfoClientMap[routeInfo.route.serviceRegion]?.getBusSchedule(
-                    routeInfo
-                )
-            return busSchedule
+            return busRouteInfoClientMap[routeInfo.route.serviceRegion]
+                ?.getBusSchedule(routeInfo)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             log.debug(e) {
                 "공공데이터에서 ${routeInfo.route.serviceRegion} 막차 정보 조회 실패 - " +

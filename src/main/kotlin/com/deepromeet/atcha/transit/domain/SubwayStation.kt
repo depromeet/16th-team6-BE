@@ -28,4 +28,8 @@ class SubwayStation(
     override fun hashCode(): Int {
         return javaClass.hashCode()
     }
+
+    fun normalizeName(): String {
+        return name.replace(Regex("""\s*\(.*?\)"""), "").trim()
+    }
 }

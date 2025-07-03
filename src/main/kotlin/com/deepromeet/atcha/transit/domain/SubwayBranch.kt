@@ -40,12 +40,12 @@ data class Route(val list: List<SubwayBranch>) {
         startStationName: String,
         endStationName: String
     ): SubwayDirection {
-        val startOrd = stationMap[startStationName]!!.ord
-        val endOrd = stationMap[endStationName]!!.ord
-        return if (startOrd < endOrd && stationMap[startStationName]!!.routeCode != "9") {
-            SubwayDirection.DOWN
-        } else {
-            SubwayDirection.UP
-        }
+        val start = stationMap[startStationName]!!
+        val end = stationMap[endStationName]!!
+
+        val isLine9 = start.routeCode == "9"
+        val isDown = if (isLine9) start.ord > end.ord else start.ord < end.ord
+
+        return if (isDown) SubwayDirection.DOWN else SubwayDirection.UP
     }
 }

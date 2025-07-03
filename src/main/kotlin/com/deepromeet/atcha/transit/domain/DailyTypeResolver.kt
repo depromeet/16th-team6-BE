@@ -9,7 +9,7 @@ class DailyTypeResolver(
     private val holidayFetcher: HolidayFetcher,
     private val holidayCache: HolidayCache
 ) {
-    fun resolve(
+    suspend fun resolve(
         transitType: TransitType,
         date: LocalDate = LocalDate.now()
     ): DailyType {
@@ -19,7 +19,7 @@ class DailyTypeResolver(
         }
     }
 
-    private fun resolveSubway(date: LocalDate): DailyType {
+    private suspend fun resolveSubway(date: LocalDate): DailyType {
         return when {
             isHoliday(date) -> DailyType.HOLIDAY
             date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.HOLIDAY
@@ -28,7 +28,7 @@ class DailyTypeResolver(
         }
     }
 
-    private fun resolveBus(date: LocalDate): DailyType {
+    private suspend fun resolveBus(date: LocalDate): DailyType {
         return when {
             isHoliday(date) -> DailyType.HOLIDAY
             date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY
@@ -37,7 +37,7 @@ class DailyTypeResolver(
         }
     }
 
-    private fun isHoliday(date: LocalDate): Boolean {
+    private suspend fun isHoliday(date: LocalDate): Boolean {
         return holidayCache.getHolidays(date.year)?.contains(date) ?: run {
             val holidays = holidayFetcher.fetch(date.year)
             holidayCache.cacheHolidays(holidays)

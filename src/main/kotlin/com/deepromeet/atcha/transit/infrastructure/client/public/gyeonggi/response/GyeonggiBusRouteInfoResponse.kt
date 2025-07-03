@@ -7,11 +7,11 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
 import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusServiceHours
-import com.deepromeet.atcha.transit.domain.BusTimeParser
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.BusTravelTimeCalculator
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -152,11 +152,11 @@ data class BusRouteInfoItem(
         getBusTimeStr(dailyType, busDirection).let { (first, last) ->
             BusTimeTable(
                 firstTime =
-                    BusTimeParser
+                    TransitTimeParser
                         .parseTime(first, LocalDate.now(), TIME_FORMATTER)
                         .plusMinutes(travelTimeFromStart),
                 lastTime =
-                    BusTimeParser
+                    TransitTimeParser
                         .parseTime(last, LocalDate.now(), TIME_FORMATTER)
                         .plusMinutes(travelTimeFromStart),
                 term = termMap[dailyType] ?: 0
@@ -213,7 +213,7 @@ data class BusRouteInfoItem(
     }
 
     private fun parseOrNull(time: String?) =
-        runCatching { BusTimeParser.parseTime(time, LocalDate.now(), TIME_FORMATTER) }
+        runCatching { TransitTimeParser.parseTime(time, LocalDate.now(), TIME_FORMATTER) }
             .getOrNull()
 
     private fun hasDownTimetable(dailyType: DailyType): Boolean {

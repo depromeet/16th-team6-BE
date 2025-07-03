@@ -67,7 +67,7 @@ class TransitService(
         return lastRouteReader.read(routeId)
     }
 
-    fun getBusArrival(
+    suspend fun getBusArrival(
         routeName: String,
         busStationMeta: BusStationMeta,
         passStopList: PassStopList
@@ -79,7 +79,7 @@ class TransitService(
 
     suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
 
-    fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
+    suspend fun getBusOperationInfo(busRoute: BusRoute): BusRouteOperationInfo {
         return busManager.getBusRouteOperationInfo(busRoute)
     }
 

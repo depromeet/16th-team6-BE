@@ -1,15 +1,19 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
-import org.springframework.beans.factory.annotation.Value
+import feign.RequestInterceptor
+import org.springframework.context.annotation.Bean
 
 class PublicFeignConfig(
-    @Value("\${open-api.api.service-key}")
-    private val serviceKey: String
+    props: OpenApiProps,
+    private val registry: RateLimiterRegistry
 ) {
-//    @Bean
-//    fun openApiRequestInterceptor(): RequestInterceptor {
-//        return RequestInterceptor { requestTemplate ->
-//            requestTemplate.header("serviceKey", serviceKey)
-//        }
-//    }
+    private val urlKeyMap: Map<String, String> =
+        props.api.url.entries.associate { (k, v) -> v to k }
+
+    @Bean
+    fun rateLimitInterceptor(): RequestInterceptor =
+        RequestInterceptor { template ->
+            val baseUrl = template.feignTarget().url() + template.url()
+            registry.awaitByUrl(baseUrl, urlKeyMap)
+        }
 }

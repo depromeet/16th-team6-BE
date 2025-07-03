@@ -14,7 +14,7 @@ val log = KotlinLogging.logger {}
 class FallbackBusScheduleProvider(
     private val odSayBusInfoClient: ODSayBusInfoClient
 ) : BusScheduleProvider {
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
         log.debug { "ODSay를 통한 버스 도착 정보 조회 시도: ${routeInfo.getTargetStation().busStation}, 노선: ${routeInfo.route}" }
         try {
             return odSayBusInfoClient.getBusSchedule(routeInfo)

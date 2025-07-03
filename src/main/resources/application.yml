@@ -45,16 +45,24 @@ open-api:
       bus-route: http://ws.bus.go.kr/api/rest/busRouteInfo
       bus-position: http://ws.bus.go.kr/api/rest/buspos
       bus-operation: https://topis.seoul.go.kr/map/busMap/selectBusList.do
-      gyeonggi-bus: http://apis.data.go.kr/6410000/busstationservice/v2
       gyeonggi-route: http://apis.data.go.kr/6410000/busrouteservice/v2
       gyeonggi-arrival: http://apis.data.go.kr/6410000/busarrivalservice/v2
       gyeonggi-bus-position: http://apis.data.go.kr/6410000/buslocationservice/v2
       incheon-route: https://apis.data.go.kr/6280000/busRouteService
-      incheon-station: https://apis.data.go.kr/6280000/busStationService
       incheon-arrival: https://apis.data.go.kr/6280000/busArrivalService
       incheon-position: https://apis.data.go.kr/6280000/busLocationService
       subway: http://apis.data.go.kr/1613000/SubwayInfoService
+      subway-schedule: https://apis.data.go.kr/B553766/schedule
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
+  limits:
+    default: 30
+    per-api:
+      subway-schedule: 5
+      incheon-route: 5
+      incheon-arrival: 10
+      incheon-position: 10
+
+
 
 kric:
   api:

@@ -3,6 +3,8 @@ package com.deepromeet.atcha.transit.domain
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
 private const val SIM_THRESHOLD = 0.6
@@ -13,46 +15,74 @@ class BusRouteMatcher(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val transitNameComparer: TransitNameComparer
 ) {
-    fun getMatchedRoute(
+    suspend fun getMatchedRoute(
         busRoutes: List<BusRoute>,
         stationMeta: BusStationMeta,
         passStopList: PassStopList
-    ): BusRouteInfo {
-        val plannedStops = passStopList.stationList.map { it.stationName }
-        val similarities = mutableListOf<Double>()
+    ): BusRouteInfo =
+        coroutineScope {
+            val plannedStops = passStopList.stationList.map { it.stationName }
 
-        busRoutes.forEach { route ->
-            val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
-            val routeStops = stationList.busRouteStations.map { it.stationName }
-
-            val startIdxs =
-                routeStops
-                    .withIndex()
-                    .filter { transitNameComparer.isSame(it.value, stationMeta.name) }
-                    .map { it.index }
-
-            if (startIdxs.isEmpty()) return@forEach
-
-            for (curIdx in startIdxs) {
-                val end = minOf(curIdx + plannedStops.size + SLACK, routeStops.size)
-                val window = routeStops.subList(curIdx, end)
-
-                val lcs = lcsLength(plannedStops, window)
-                val similarity = lcs.toDouble() / plannedStops.size
-
-                similarities.add(similarity)
-
-                if (similarity >= SIM_THRESHOLD) {
-                    return BusRouteInfo(route, curIdx, stationList)
+            val routeMatching =
+                busRoutes.map { route ->
+                    async {
+                        processRouteWithSimilarity(route, stationMeta, plannedStops)
+                    }
                 }
+
+            routeMatching.forEach { job ->
+                val result = job.await()
+                if (result != null) {
+                    if (result.similarity >= SIM_THRESHOLD) {
+                        return@coroutineScope result.busRouteInfo
+                    }
+                }
+            }
+
+            throw TransitException.of(
+                TransitError.NOT_FOUND_BUS_ROUTE,
+                "'${stationMeta.name}'을 경유하며 사용자 경로와 유사한 노선을 찾지 못했습니다."
+            )
+        }
+
+    private suspend fun processRouteWithSimilarity(
+        route: BusRoute,
+        stationMeta: BusStationMeta,
+        plannedStops: List<String>
+    ): RouteProcessResult? {
+        val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
+        val routeStops = stationList.busRouteStations.map { it.stationName }
+
+        val startIdxs =
+            routeStops
+                .withIndex()
+                .filter { transitNameComparer.isSame(it.value, stationMeta.name) }
+                .map { it.index }
+
+        if (startIdxs.isEmpty()) return null
+
+        var bestSimilarity = 0.0
+        var bestResult: BusRouteInfo? = null
+
+        for (curIdx in startIdxs) {
+            val end = minOf(curIdx + plannedStops.size + SLACK, routeStops.size)
+            val window = routeStops.subList(curIdx, end)
+
+            val lcs = lcsLength(plannedStops, window)
+            val similarity = lcs.toDouble() / plannedStops.size
+
+            if (similarity > bestSimilarity) {
+                bestSimilarity = similarity
+                bestResult = BusRouteInfo(route, curIdx, stationList)
             }
         }
 
-        throw TransitException.of(
-            TransitError.NOT_FOUND_BUS_ROUTE,
-            "'${stationMeta.name}'을 경유하며 티맵 경로와 유사한 노선을 찾지 못했습니다. " +
-                "노선 유사도: ${similarities.joinToString(", ")}"
-        )
+        return bestResult?.let {
+            RouteProcessResult(
+                busRouteInfo = it,
+                similarity = bestSimilarity
+            )
+        }
     }
 
     private fun lcsLength(
@@ -74,4 +104,9 @@ class BusRouteMatcher(
         }
         return dp[n][m]
     }
+
+    private data class RouteProcessResult(
+        val busRouteInfo: BusRouteInfo,
+        val similarity: Double
+    )
 }

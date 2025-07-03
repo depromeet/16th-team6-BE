@@ -10,19 +10,16 @@ import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.domain.TransitNameComparer
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayJsonResponse
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayJsonResponse.Companion.isSubwayApiLimitExceeded
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.SubwayTimeResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
-import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-
-private val log = KotlinLogging.logger {}
 
 @Component
 class PublicSubwayInfoClient(
@@ -36,7 +33,7 @@ class PublicSubwayInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : SubwayInfoClient {
-    fun getSubwayStationByName(
+    suspend fun getSubwayStationByName(
         stationName: String,
         routeName: String
     ): SubwayStationData? {
@@ -118,7 +115,7 @@ class PublicSubwayInfoClient(
     ): List<SubwayTime> =
         coroutineScope {
             scheduleItems.map { item ->
-                async(Dispatchers.IO) {
+                async(Dispatchers.Default) {
                     val finalStation =
                         subwayStations.find {
                                 station ->
@@ -132,22 +129,4 @@ class PublicSubwayInfoClient(
                 }
             }.awaitAll().filterNotNull()
         }
-
-    private fun <T> isSubwayApiLimitExceeded(response: PublicSubwayJsonResponse<T>): Boolean {
-        val limitMessages =
-            listOf(
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
-            )
-
-        val isLimited =
-            response.response.header.resultCode != "00" ||
-                limitMessages.any { response.response.header.resultMsg.contains(it) }
-
-        if (isLimited) {
-            log.warn { "지하철 API 요청 수 초과: ${response.response.header.resultMsg}" }
-        }
-
-        return isLimited
-    }
 }

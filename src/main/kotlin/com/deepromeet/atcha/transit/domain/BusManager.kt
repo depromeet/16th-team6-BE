@@ -17,7 +17,7 @@ class BusManager(
     private val busRouteResolver: BusRouteResolver,
     private val busTimeTableCache: BusTimeTableCache
 ) {
-    fun getSchedule(
+    suspend fun getSchedule(
         routeName: String,
         stationMeta: BusStationMeta,
         passStops: PassStopList
@@ -36,7 +36,7 @@ class BusManager(
         return schedule
     }
 
-    fun getRealTimeArrival(
+    suspend fun getRealTimeArrival(
         routeName: String,
         meta: BusStationMeta,
         passStopList: PassStopList
@@ -45,7 +45,7 @@ class BusManager(
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }
 
-    fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
+    suspend fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
         return busRouteInfoClientMap[route.serviceRegion]!!.getBusRouteInfo(route)
     }
 

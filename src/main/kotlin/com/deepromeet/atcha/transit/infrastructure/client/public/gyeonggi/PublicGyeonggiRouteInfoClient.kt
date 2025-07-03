@@ -27,7 +27,7 @@ class PublicGyeonggiRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
-    override fun getBusRoute(routeName: String): List<BusRoute> =
+    override suspend fun getBusRoute(routeName: String): List<BusRoute> =
         ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -49,7 +49,8 @@ class PublicGyeonggiRouteInfoClient(
             errorMessage = "경기도 버스 노선 정보를 가져오는데 실패했습니다. $routeName"
         )
 
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
+        val dailyType = dailyTypeResolver.resolve(TransitType.BUS)
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -57,7 +58,6 @@ class PublicGyeonggiRouteInfoClient(
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, routeInfo.routeId) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                val dailyType = dailyTypeResolver.resolve(TransitType.BUS)
                 response.msgBody?.busRouteInfoItem?.toBusSchedule(dailyType, routeInfo.getTargetStation())
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_SCHEDULE,
@@ -69,7 +69,7 @@ class PublicGyeonggiRouteInfoClient(
         )
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
+    override suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -87,7 +87,7 @@ class PublicGyeonggiRouteInfoClient(
         )
     }
 
-    override fun getStationList(route: BusRoute): BusRouteStationList {
+    override suspend fun getStationList(route: BusRoute): BusRouteStationList {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -115,7 +115,7 @@ class PublicGyeonggiRouteInfoClient(
         )
     }
 
-    override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
+    override suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,

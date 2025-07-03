@@ -21,19 +21,19 @@ class RouteDepartureTimeRefresher(
 ) {
     private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    fun refresh(): List<UserNotification> {
+    suspend fun refreshAll(): List<UserNotification> {
         return userNotificationReader.findAll().mapNotNull { userNotification ->
             refreshDepartureTime(userNotification)
         }
     }
 
-    private fun refreshDepartureTime(notification: UserNotification): UserNotification? {
+    suspend fun refreshDepartureTime(notification: UserNotification): UserNotification? {
         val oldDepartureTime = LocalDateTime.parse(notification.updatedDepartureTime, dateTimeFormatter)
 
         val route = lastRouteReader.read(notification.lastRouteId)
 
         // 2) 첫 번째 버스 구간 찾기
-        val firstBusLeg = route.legs.firstOrNull { it.mode == "BUS" } ?: return null
+        val firstBusLeg = route.findFirstBus()
 
         // 버스 시간표 가져오기
         val timeTable = (firstBusLeg.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
@@ -43,15 +43,12 @@ class RouteDepartureTimeRefresher(
         // 현재 버스 예상 출발 시간
         val originalBusDepartureTime = LocalDateTime.parse(firstBusLeg.departureDateTime!!, dateTimeFormatter)
 
-        val routeName = firstBusLeg.resolveRouteName()
-        val busStationMeta = firstBusLeg.toBusStationMeta()
-
         // 3) 버스 정보 조회
         val busArrival =
             runCatching {
                 busManager.getRealTimeArrival(
-                    routeName,
-                    busStationMeta,
+                    firstBusLeg.resolveRouteName(),
+                    firstBusLeg.toBusStationMeta(),
                     firstBusLeg.passStopList!!
                 )
             }.getOrElse { return null }
@@ -66,6 +63,10 @@ class RouteDepartureTimeRefresher(
                 .filter { it.expectedArrivalTime != null }
                 .map { it.expectedArrivalTime }
                 .take(2).toMutableSet()
+
+        // 여기서 그냥 후보 2개를 생성하는 것이 아니라,
+        // 실시간 버스 위치 정보를 활용하여 현재 실시간 정보가 있는 버스 이외에 더 몇개의 버스가 있는지 확인하여
+        // 그 버스들의 수만큼 후보 시간을 생성
 
         if (candidateTimes.isEmpty()) return null
 
@@ -82,11 +83,10 @@ class RouteDepartureTimeRefresher(
 
         // 5) 기존 버스 출발 시각과 가장 가까운 도착 시각 선택
         val chosenArrivalTime =
-            candidateTimes.minBy { candidate -> Duration.between(originalBusDepartureTime, candidate).abs() }
+            candidateTimes
+                .filter { it!!.isBefore(timeTable.lastTime) }
+                .minBy { candidate -> Duration.between(originalBusDepartureTime, candidate).abs() }
                 ?: return null
-
-        val diffMinutes = Duration.between(originalBusDepartureTime, chosenArrivalTime).abs().toMinutes()
-        if (diffMinutes in MIN_DIFF_MINUTES..timeTable.term) return null
 
         // 버스 구간 출발 시간을 chosenArrivalTime으로 재설정
         val updatedBusLeg =

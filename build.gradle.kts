@@ -45,6 +45,13 @@ dependencies {
     // xml parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 
+    // OKHttp
+    implementation("io.github.openfeign:feign-okhttp")
+    implementation("com.squareup.okhttp3:okhttp")
+
+    // Rate Limiting
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
+
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
 

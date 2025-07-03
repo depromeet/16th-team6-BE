@@ -29,7 +29,7 @@ class PublicSeoulBusRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
-    override fun getBusRoute(routeName: String): List<BusRoute> {
+    override suspend fun getBusRoute(routeName: String): List<BusRoute> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -50,7 +50,7 @@ class PublicSeoulBusRouteInfoClient(
         )
     }
 
-    override fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
+    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -80,7 +80,7 @@ class PublicSeoulBusRouteInfoClient(
         )
     }
 
-    override fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
+    override suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo {
         return seoulBusOperationFeignClient.getBusOperationInfo(route.id.value).toBusRouteOperationInfo()
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_BUS_OPERATION_INFO,
@@ -88,7 +88,7 @@ class PublicSeoulBusRouteInfoClient(
             )
     }
 
-    override fun getStationList(route: BusRoute): BusRouteStationList {
+    override suspend fun getStationList(route: BusRoute): BusRouteStationList {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -117,7 +117,7 @@ class PublicSeoulBusRouteInfoClient(
         )
     }
 
-    override fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
+    override suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
