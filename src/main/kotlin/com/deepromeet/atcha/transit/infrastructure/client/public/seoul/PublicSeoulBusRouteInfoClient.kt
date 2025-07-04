@@ -13,6 +13,7 @@ import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils.isServiceResultApiLimitExceeded
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 import kotlin.collections.filter
 import kotlin.collections.first
@@ -29,6 +30,11 @@ class PublicSeoulBusRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
+    @Cacheable(
+        cacheNames = ["api:seoul:busRouteList"],
+        key = "#routeName",
+        sync = true
+    )
     override suspend fun getBusRoute(routeName: String): List<BusRoute> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
@@ -88,6 +94,12 @@ class PublicSeoulBusRouteInfoClient(
             )
     }
 
+    @Cacheable(
+        cacheNames = ["api:seoul:busRouteStationList"],
+        key = "#route.id",
+        sync = true,
+        cacheManager = "apiCacheManager"
+    )
     override suspend fun getStationList(route: BusRoute): BusRouteStationList {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,

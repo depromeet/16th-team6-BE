@@ -4,9 +4,12 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import jdk.jfr.internal.OldObjectSample.emit
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.flatMapMerge
+import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger {}
@@ -21,24 +24,24 @@ class BusRouteResolver(
         routeName: String,
         station: BusStationMeta,
         passStopList: PassStopList
-    ): BusRouteInfo =
-        coroutineScope {
-            val candidateRegions = regionPolicy.candidates(station)
+    ): BusRouteInfo {
+        val candidateRegions = regionPolicy.candidates(station)
 
-            val deferredResults =
-                candidateRegions.map { region ->
-                    async {
-                        tryFetch(region, routeName, station, passStopList)
+        val firstResult =
+            candidateRegions.asFlow()
+                .flatMapMerge(concurrency = candidateRegions.size) { region ->
+                    flow {
+                        emit(tryFetch(region, routeName, station, passStopList))
                     }
                 }
+                .filterNotNull()
+                .firstOrNull()
 
-            deferredResults.awaitAll()
-                .firstOrNull { it != null }
-                ?: throw TransitException.of(
-                    TransitError.NOT_FOUND_BUS_ROUTE,
-                    "버스 노선 '$routeName' 을 $candidateRegions 모든 후보 지역에서 찾지 못했습니다."
-                )
-        }
+        return firstResult ?: throw TransitException.of(
+            TransitError.NOT_FOUND_BUS_ROUTE,
+            "버스 노선 '$routeName' 을 $candidateRegions 모든 후보 지역에서 찾지 못했습니다."
+        )
+    }
 
     private suspend fun tryFetch(
         region: ServiceRegion,

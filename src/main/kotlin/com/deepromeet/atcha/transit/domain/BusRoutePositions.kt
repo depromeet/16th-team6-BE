@@ -21,7 +21,7 @@ data class BusRoutePositions(
             if (remainStations < 0) return@firstOrNull false
 
             val nearGarage =
-                when (target.getDirection()) {
+                when (target.resolveDirection()) {
                     BusDirection.UP -> pos.sectionOrder < 5
                     BusDirection.DOWN -> pos.sectionOrder in (target.turnPoint!! + 1)..(target.turnPoint + 5)
                 }
