@@ -9,7 +9,7 @@ object BusTravelTimeCalculator {
     ): Long {
         val passStationCount =
             when {
-                busRouteStation.getDirection() == BusDirection.DOWN && hasDownTimetable ->
+                busRouteStation.resolveDirection() == BusDirection.DOWN && hasDownTimetable ->
                     busRouteStation.order - requireNotNull(busRouteStation.turnPoint)
                 else -> busRouteStation.order - 1
             }

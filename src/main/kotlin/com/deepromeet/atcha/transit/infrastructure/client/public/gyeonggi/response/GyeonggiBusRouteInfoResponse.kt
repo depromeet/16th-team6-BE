@@ -112,7 +112,7 @@ data class BusRouteInfoItem(
         val busTimeTable =
             getBusTimeTable(
                 dailyType,
-                routeStation.getDirection(),
+                routeStation.resolveDirection(),
                 travelTimeFromStart
             )
 

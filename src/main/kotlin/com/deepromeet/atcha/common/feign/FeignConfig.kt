@@ -27,9 +27,9 @@ class FeignConfig {
     @Bean
     fun feignOptions(): Request.Options =
         Request.Options(
-            800,
+            100,
             TimeUnit.MILLISECONDS,
-            1_000,
+            1_500,
             TimeUnit.MILLISECONDS,
             true
         )

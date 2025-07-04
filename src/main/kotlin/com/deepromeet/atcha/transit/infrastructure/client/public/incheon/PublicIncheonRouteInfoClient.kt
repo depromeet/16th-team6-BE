@@ -13,6 +13,7 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 
 @Component
@@ -27,6 +28,12 @@ class PublicIncheonRouteInfoClient(
     @Value("\${open-api.api.real-last-key}")
     private val realLastKey: String
 ) : BusRouteInfoClient {
+    @Cacheable(
+        cacheNames = ["api:incheon:busRouteList"],
+        key = "#routeName",
+        sync = true,
+        cacheManager = "apiCacheManager"
+    )
     override suspend fun getBusRoute(routeName: String): List<BusRoute> {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
@@ -48,6 +55,12 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
+    @Cacheable(
+        cacheNames = ["api:incheone:busRouteStationList"],
+        key = "#route.id",
+        sync = true,
+        cacheManager = "apiCacheManager"
+    )
     override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,

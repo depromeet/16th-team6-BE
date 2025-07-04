@@ -13,7 +13,7 @@ data class BusRouteStation(
     val stationName: String
         get() = busStation.busStationMeta.name
 
-    fun getDirection(): BusDirection {
+    fun resolveDirection(): BusDirection {
         return if (turnPoint == null || order < turnPoint) {
             BusDirection.UP
         } else {
