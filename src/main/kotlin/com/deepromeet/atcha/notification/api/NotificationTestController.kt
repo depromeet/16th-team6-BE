@@ -8,9 +8,11 @@ import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
 import com.deepromeet.atcha.notification.infrastructure.redis.RedisStreamProducer
 import com.deepromeet.atcha.user.domain.UserReader
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 import java.time.LocalDateTime
 
@@ -26,6 +28,7 @@ class NotificationTestController(
 ) {
     // todo 안드 테스트용 (추후 삭제_
     @PostMapping("/push/{type}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun testNotification(
         @CurrentUser id: Long,
         @PathVariable type: String
@@ -40,6 +43,7 @@ class NotificationTestController(
     }
 
     @PostMapping("/scheduler")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun testSchedulerNotification(
         @CurrentUser id: Long
     ) {
