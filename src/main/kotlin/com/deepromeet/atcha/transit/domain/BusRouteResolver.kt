@@ -4,12 +4,6 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jdk.jfr.internal.OldObjectSample.emit
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.filterNotNull
-import kotlinx.coroutines.flow.firstOrNull
-import kotlinx.coroutines.flow.flatMapMerge
-import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger {}
@@ -27,17 +21,14 @@ class BusRouteResolver(
     ): BusRouteInfo {
         val candidateRegions = regionPolicy.candidates(station)
 
-        val firstResult =
-            candidateRegions.asFlow()
-                .flatMapMerge(concurrency = candidateRegions.size) { region ->
-                    flow {
-                        emit(tryFetch(region, routeName, station, passStopList))
-                    }
-                }
-                .filterNotNull()
-                .firstOrNull()
+        for (region in candidateRegions) {
+            val result = tryFetch(region, routeName, station, passStopList)
+            if (result != null) {
+                return result
+            }
+        }
 
-        return firstResult ?: throw TransitException.of(
+        throw TransitException.of(
             TransitError.NOT_FOUND_BUS_ROUTE,
             "버스 노선 '$routeName' 을 $candidateRegions 모든 후보 지역에서 찾지 못했습니다."
         )

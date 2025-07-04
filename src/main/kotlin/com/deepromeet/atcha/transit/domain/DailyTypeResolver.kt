@@ -22,8 +22,8 @@ class DailyTypeResolver(
     private suspend fun resolveSubway(date: LocalDate): DailyType {
         return when {
             isHoliday(date) -> DailyType.HOLIDAY
-            date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.HOLIDAY
-            date.dayOfWeek == DayOfWeek.SUNDAY -> DailyType.HOLIDAY
+            date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY
+            date.dayOfWeek == DayOfWeek.SUNDAY -> DailyType.SUNDAY
             else -> DailyType.WEEKDAY
         }
     }

@@ -41,4 +41,32 @@ object TransitTimeParser {
             )
         }
     }
+
+    fun parseTime(
+        timeStr: String?,
+        referenceDate: LocalDate
+    ): LocalDateTime? {
+        return try {
+            if (timeStr.isNullOrBlank()) {
+                return null
+            }
+
+            val parts = timeStr.split(":")
+            var hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+            val second = parts[2].toInt()
+
+            var date = referenceDate
+
+            if (hour >= 24) {
+                hour -= 24
+                date = referenceDate.plusDays(1)
+            }
+
+            val localTime = LocalTime.of(hour, minute, second)
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            return null
+        }
+    }
 }

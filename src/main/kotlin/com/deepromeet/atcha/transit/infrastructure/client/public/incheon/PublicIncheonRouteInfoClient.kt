@@ -55,12 +55,6 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
-    @Cacheable(
-        cacheNames = ["api:incheone:busRouteStationList"],
-        key = "#route.id",
-        sync = true,
-        cacheManager = "apiCacheManager"
-    )
     override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
@@ -99,6 +93,12 @@ class PublicIncheonRouteInfoClient(
         )
     }
 
+    @Cacheable(
+        cacheNames = ["api:incheon:busRouteStationList"],
+        key = "#route.id",
+        sync = true,
+        cacheManager = "apiCacheManager"
+    )
     override suspend fun getStationList(route: BusRoute): BusRouteStationList {
         return ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,

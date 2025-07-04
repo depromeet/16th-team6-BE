@@ -33,7 +33,8 @@ class PublicSeoulBusRouteInfoClient(
     @Cacheable(
         cacheNames = ["api:seoul:busRouteList"],
         key = "#routeName",
-        sync = true
+        sync = true,
+        cacheManager = "apiCacheManager"
     )
     override suspend fun getBusRoute(routeName: String): List<BusRoute> {
         return ApiClientUtils.callApiWithRetry(

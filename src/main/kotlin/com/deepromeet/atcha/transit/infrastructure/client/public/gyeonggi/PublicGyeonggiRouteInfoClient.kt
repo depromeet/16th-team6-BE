@@ -29,7 +29,7 @@ class PublicGyeonggiRouteInfoClient(
     private val realLastKey: String
 ) : BusRouteInfoClient {
     @Cacheable(
-        cacheNames = ["api:seoul:busRouteList"],
+        cacheNames = ["api:gyeonggi:busRouteList"],
         key = "#routeName",
         sync = true,
         cacheManager = "apiCacheManager"

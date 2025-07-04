@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
 object BusTravelTimeCalculator {
-    private const val AVERAGE_MINUTE_PER_STATION = 2
+    private const val AVERAGE_MINUTE_PER_STATION = 0.7
 
     fun calculate(
         busRouteStation: BusRouteStation,
@@ -14,6 +14,6 @@ object BusTravelTimeCalculator {
                 else -> busRouteStation.order - 1
             }
 
-        return passStationCount * AVERAGE_MINUTE_PER_STATION.toLong()
+        return (passStationCount * AVERAGE_MINUTE_PER_STATION).toLong()
     }
 }

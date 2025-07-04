@@ -6,6 +6,7 @@ import com.deepromeet.atcha.transit.domain.SubwayStationData
 import com.deepromeet.atcha.transit.domain.SubwayStationId
 import com.deepromeet.atcha.transit.domain.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.SubwayTime
+import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.ItemDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -139,36 +140,10 @@ data class TrainScheduleResponse(
         return SubwayTime(
             isExpress = etrnYn == "Y",
             finalStation = finalStation,
-            departureTime = parseTime(trainDptreTm, LocalDate.now()) ?: return null,
+            departureTime =
+                TransitTimeParser.parseTime(trainDptreTm, LocalDate.now())
+                    ?: return null,
             subwayDirection = SubwayDirection.fromName(upbdnbSe)
         )
-    }
-
-    private fun parseTime(
-        time: String?,
-        referenceDate: LocalDate
-    ): LocalDateTime? {
-        return try {
-            if (time.isNullOrBlank()) {
-                return null
-            }
-
-            val parts = time.split(":")
-            var hour = parts[0].toInt()
-            val minute = parts[1].toInt()
-            val second = parts[2].toInt()
-
-            var date = referenceDate
-
-            if (hour >= 24) {
-                hour -= 24
-                date = referenceDate.plusDays(1)
-            }
-
-            val localTime = LocalTime.of(hour, minute, second)
-            LocalDateTime.of(date, localTime)
-        } catch (e: Exception) {
-            null
-        }
     }
 }

@@ -6,9 +6,12 @@ import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.ServiceRegion
-import com.deepromeet.atcha.transit.domain.TransitTimeParser
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
+import java.lang.Exception
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 data class ODSayBusArrivalResponse(
     val result: ODSayBusArrivalResponseResult
@@ -74,15 +77,38 @@ data class ODSayLaneResponse(
             busStation = station,
             busTimeTable =
                 BusTimeTable(
-                    TransitTimeParser.parseTime(busFirstTime, LocalDate.now(), TIME_FORMATTER),
-                    TransitTimeParser.parseTime(busLastTime, LocalDate.now(), TIME_FORMATTER),
+                    parseTime(busFirstTime, LocalDate.now()),
+                    parseTime(busLastTime, LocalDate.now()),
                     busInterval.toInt()
                 )
         )
     }
 
-    companion object {
-        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm")
+    fun parseTime(
+        timeStr: String?,
+        referenceDate: LocalDate
+    ): LocalDateTime {
+        return try {
+            if (timeStr.isNullOrBlank()) {
+                throw TransitException.of(TransitError.INVALID_TIME_FORMAT)
+            }
+
+            val parts = timeStr.split(":")
+            var hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+
+            var date = referenceDate
+
+            if (hour >= 24) {
+                hour -= 24
+                date = referenceDate.plusDays(1)
+            }
+
+            val localTime = LocalTime.of(hour, minute)
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            throw TransitException.of(TransitError.INVALID_TIME_FORMAT)
+        }
     }
 }
 
