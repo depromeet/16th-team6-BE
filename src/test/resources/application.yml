@@ -65,7 +65,7 @@ redis:
 
 open-api:
   limits:
-    default: 30
+    default: 100
     per-api:
       subway-schedule: 5
       incheon-route: 5

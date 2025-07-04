@@ -4,6 +4,8 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.user.domain.UserReader
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 
 @Service
@@ -62,6 +64,26 @@ class TransitService(
             .calculateRoutesV2(start, destination, validItineraries)
             .sort(sortType)
     }
+
+    fun streamLastRoutes(
+        userId: Long,
+        start: Coordinate,
+        end: Coordinate?,
+        sortType: LastRouteSortType
+    ): Flow<LastRoute> =
+        flow {
+            val destination = end ?: userReader.read(userId).getHomeCoordinate()
+
+            lastRouteReader.read(start, destination)?.let { cached ->
+                cached.sort(sortType).forEach { emit(it) }
+                return@flow
+            }
+
+            val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
+
+            lastRouteOperations.streamLastRoutes(start, destination, itineraries)
+                .collect { route -> emit(route) }
+        }
 
     fun getRoute(routeId: String): LastRoute {
         return lastRouteReader.read(routeId)
