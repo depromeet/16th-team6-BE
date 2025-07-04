@@ -13,6 +13,9 @@ import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.TransitService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -64,6 +67,21 @@ class TransitController(
                 request.sortType
             ).map { LastRouteResponse(it) }
         )
+
+    @GetMapping(
+        "/v3/last-routes/stream",
+        produces = [MediaType.TEXT_EVENT_STREAM_VALUE]
+    )
+    fun streamLastRoutesV3(
+        @CurrentUser id: Long,
+        @ModelAttribute request: LastRoutesRequest
+    ): Flow<LastRouteResponse> =
+        transitService.streamLastRoutes(
+            id,
+            request.toStart(),
+            request.toEnd(),
+            request.sortType
+        ).map { LastRouteResponse(it) }
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(

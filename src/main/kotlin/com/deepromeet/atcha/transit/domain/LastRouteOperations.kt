@@ -11,15 +11,20 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
+import java.util.Collections
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
-private const val MAX_CALCULATION_TIME = 10_000L // 10초
+private const val MAX_CALCULATION_TIME = 15_000L // 10초
 
 @Component
 class LastRouteOperations(
@@ -57,6 +62,35 @@ class LastRouteOperations(
         log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
 
         return routes
+    }
+
+    fun streamLastRoutes(
+        start: Coordinate,
+        destination: Coordinate,
+        itineraries: List<Itinerary>
+    ): Flow<LastRoute> {
+        val lastRouteBuffer = Collections.synchronizedList(mutableListOf<LastRoute>())
+
+        return channelFlow {
+            metricsRepository.incrTotal(itineraries.size.toLong())
+
+            for (itinerary in itineraries) {
+                launch(Dispatchers.IO) {
+                    val route =
+                        withTimeoutOrNull(MAX_CALCULATION_TIME) {
+                            calculateRoute(itinerary)
+                        }
+
+                    if (route != null) {
+                        metricsRepository.incrSuccess(1)
+                        lastRouteBuffer.add(route)
+                        send(route)
+                    }
+                }
+            }
+        }.onCompletion {
+            lastRouteAppender.appendRoutes(start, destination, lastRouteBuffer)
+        }
     }
 
     private suspend fun calculateRoute(route: Itinerary): LastRoute? {
