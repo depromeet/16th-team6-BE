@@ -2,6 +2,7 @@ package com.deepromeet.atcha.common.feign
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.OpenApiProps
 import com.fasterxml.jackson.databind.ObjectMapper
+import feign.Request
 import feign.Retryer
 import feign.codec.Decoder
 import feign.codec.ErrorDecoder
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.converter.HttpMessageConverter
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter
+import java.util.concurrent.TimeUnit
 
 @Configuration
 @EnableConfigurationProperties(OpenApiProps::class)
@@ -21,6 +23,16 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 class FeignConfig {
 //    @Bean
 //    fun feignLoggerLever(): Logger.Level = Logger.Level.FULL
+
+    @Bean
+    fun feignOptions(): Request.Options =
+        Request.Options(
+            800,
+            TimeUnit.MILLISECONDS,
+            1_000,
+            TimeUnit.MILLISECONDS,
+            true
+        )
 
     @Bean
     fun feignDecoder(objectMapper: ObjectMapper): Decoder {
@@ -41,5 +53,5 @@ class FeignConfig {
     fun errorDecoder(): ErrorDecoder = CustomErrorDecoder()
 
     @Bean
-    fun retryer() = Retryer.Default(200, 1500, 3)
+    fun retryer(): Retryer? = Retryer.NEVER_RETRY
 }

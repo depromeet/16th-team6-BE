@@ -89,6 +89,7 @@ class LastRouteOperations(
                 }
             }
         }.onCompletion {
+            log.info { "총 ${itineraries.size}개의 여정 중 ${lastRouteBuffer.size}개의 막차 경로를 계산했습니다." }
             lastRouteAppender.appendRoutes(start, destination, lastRouteBuffer)
         }
     }
