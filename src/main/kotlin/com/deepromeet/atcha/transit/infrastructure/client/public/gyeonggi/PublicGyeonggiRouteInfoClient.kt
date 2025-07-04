@@ -45,7 +45,7 @@ class PublicGyeonggiRouteInfoClient(
             isLimitExceeded = ApiClientUtils::isGyeonggiApiLimitExceeded,
             processResult = { resp ->
                 resp.msgBody?.busRouteList
-                    ?.filter { it.routeName.startsWith(routeName) }
+                    ?.filter { it.routeName == routeName }
                     ?.map { it.toBusRoute() }
                     ?.takeIf { it.isNotEmpty() }
                     ?: throw TransitException.of(
