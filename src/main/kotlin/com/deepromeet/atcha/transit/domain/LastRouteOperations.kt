@@ -24,7 +24,7 @@ import java.util.UUID
 
 private val log = KotlinLogging.logger {}
 
-private const val MAX_CALCULATION_TIME = 15_000L // 10초
+private const val MAX_CALCULATION_TIME = 15_000L // 15초
 
 @Component
 class LastRouteOperations(
@@ -303,15 +303,23 @@ class LastRouteOperations(
                         "지하철 '${leg.route}'의 ${leg.start.name}'역에서" +
                             " $adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
                     )
-            is TransitInfo.BusInfo ->
-                leg.transitInfo.timeTable.calculateNearestTime(
-                    adjustedDepartureTime,
-                    direction
-                ) ?: throw TransitException.of(
-                    TransitError.NOT_FOUND_SPECIFIED_TIME,
-                    "버스 '${leg.route}'의 '${leg.start.name}' 정류장에서 " +
-                        "$adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다."
-                )
+
+            is TransitInfo.BusInfo -> {
+                try {
+                    leg.transitInfo.timeTable.calculateNearestTime(
+                        adjustedDepartureTime,
+                        direction
+                    )
+                } catch (e: TransitException) {
+                    throw TransitException.of(
+                        TransitError.NOT_FOUND_SPECIFIED_TIME,
+                        "지하철 '${leg.route}'의 ${leg.start.name}'역에서" +
+                            " $adjustedDepartureTime ${direction}의 시간표를 찾을 수 없습니다.",
+                        e
+                    )
+                }
+            }
+
             TransitInfo.NoInfoTable -> throw TransitException.of(
                 TransitError.NOT_FOUND_SPECIFIED_TIME,
                 "해당 교통수단의 막차 시간 정보가 없습니다. ${leg.mode} - ${leg.start.name} -> ${leg.end.name}"
