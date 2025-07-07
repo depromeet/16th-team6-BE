@@ -8,7 +8,6 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-private const val MIN_DIFF_MINUTES = 3
 private const val MIN_REFRESH_MINUTES = 20
 
 @Component
