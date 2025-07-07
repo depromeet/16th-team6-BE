@@ -54,9 +54,6 @@ class TransitService(
         sortType: LastRouteSortType
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes.sort(sortType)
-        }
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
