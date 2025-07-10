@@ -29,6 +29,10 @@ data class LastRoute(
     fun findFirstBus(): LastRouteLeg {
         return legs.first { it.mode == "BUS" }
     }
+
+    fun findFirstTransit(): LastRouteLeg {
+        return legs.first { it.mode == "BUS" || it.mode == "SUBWAY" }
+    }
 }
 
 data class LastRouteLeg(
@@ -55,6 +59,14 @@ data class LastRouteLeg(
             start.name,
             Coordinate(start.lat, start.lon)
         )
+    }
+
+    fun isBus(): Boolean {
+        return mode == "BUS"
+    }
+
+    fun isSubway(): Boolean {
+        return mode == "SUBWAY"
     }
 }
 

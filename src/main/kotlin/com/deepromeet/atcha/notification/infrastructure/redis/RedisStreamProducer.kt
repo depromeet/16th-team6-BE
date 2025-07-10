@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
-import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.notification.domatin.UserNotificationStreamProducer
+import com.deepromeet.atcha.notification.domatin.UserLastRoute
+import com.deepromeet.atcha.notification.domatin.UserLastRouteStreamProducer
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.connection.stream.StreamRecords
@@ -21,11 +21,11 @@ class RedisStreamProducer(
     private val group: String,
     @Value("\${redis.stream.notification.dead-letter.key}")
     private val deadLetterKey: String
-) : UserNotificationStreamProducer {
+) : UserLastRouteStreamProducer {
     private val streamOps = redisTemplate.opsForStream<String, String>()
 
     override fun produce(
-        userNotification: UserNotification,
+        userLastRoute: UserLastRoute,
         retryCount: Int
     ) {
         val record =
@@ -33,7 +33,7 @@ class RedisStreamProducer(
                 .`in`(group)
                 .ofMap(
                     mapOf(
-                        PAYLOAD to objectMapper.writeValueAsString(userNotification),
+                        PAYLOAD to objectMapper.writeValueAsString(userLastRoute),
                         RETRY_COUNT to retryCount.toString()
                     )
                 )
@@ -41,19 +41,19 @@ class RedisStreamProducer(
         streamOps.add(record)
     }
 
-    override fun produceAll(userNotifications: List<UserNotification>) {
-        userNotifications.forEach { userNotification -> produce(userNotification) }
+    override fun produceAll(userLastRoutes: List<UserLastRoute>) {
+        userLastRoutes.forEach { userNotification -> produce(userNotification) }
     }
 
     override fun produceToDeadLetter(
-        userNotification: UserNotification,
+        userLastRoute: UserLastRoute,
         retryCount: Int
     ) {
         val record =
             StreamRecords.newRecord()
                 .ofMap(
                     mapOf(
-                        PAYLOAD to objectMapper.writeValueAsString(userNotification),
+                        PAYLOAD to objectMapper.writeValueAsString(userLastRoute),
                         RETRY_COUNT to retryCount.toString()
                     )
                 )

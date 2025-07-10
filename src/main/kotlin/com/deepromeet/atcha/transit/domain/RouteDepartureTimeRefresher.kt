@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.notification.domatin.UserNotificationManager
-import com.deepromeet.atcha.notification.domatin.UserNotificationReader
+import com.deepromeet.atcha.notification.domatin.UserLastRoute
+import com.deepromeet.atcha.notification.domatin.UserLastRouteManager
+import com.deepromeet.atcha.notification.domatin.UserLastRouteReader
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -13,33 +13,35 @@ private const val BUFFER_SEC_SECONDS = 2 * 60
 
 @Component
 class RouteDepartureTimeRefresher(
-    private val userNotificationReader: UserNotificationReader,
-    private val userNotificationManager: UserNotificationManager,
+    private val userLastRouteReader: UserLastRouteReader,
+    private val userLastRouteManager: UserLastRouteManager,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader
 ) {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    suspend fun refreshAll(): List<UserNotification> =
-        userNotificationReader.findAll().mapNotNull { refreshDepartureTime(it) }
+    suspend fun refreshAll(): List<UserLastRoute> =
+        userLastRouteReader.findAll().mapNotNull { refreshDepartureTime(it) }
 
-    suspend fun refreshDepartureTime(notification: UserNotification): UserNotification? {
-        val oldDeparture = LocalDateTime.parse(notification.updatedDepartureTime, formatter)
+    suspend fun refreshDepartureTime(notification: UserLastRoute): UserLastRoute? {
+        val oldDeparture = LocalDateTime.parse(notification.departureTime, formatter)
         val route = lastRouteReader.read(notification.lastRouteId)
 
         // 1) 버스 구간 및 시간표
-        val firstBusLeg = route.findFirstBus()
-        val timeTable = (firstBusLeg.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
+        val firstTransit = route.findFirstTransit()
+        if (!firstTransit.isBus()) return null
+
+        val timeTable = (firstTransit.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
 
         if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
 
         // 2) 실시간 도착 정보
         val arrivalInfos =
             busManager.getRealTimeArrival(
-                firstBusLeg.resolveRouteName(),
-                firstBusLeg.toBusStationMeta(),
-                firstBusLeg.passStopList!!
+                firstTransit.resolveRouteName(),
+                firstTransit.toBusStationMeta(),
+                firstTransit.passStopList!!
             ).realTimeInfoList.ifEmpty { return null }
 
         // 3) 도착 후보 시각 계산
@@ -49,7 +51,7 @@ class RouteDepartureTimeRefresher(
                 .toSet()
 
         val now = LocalDateTime.now()
-        val walkSec = calcWalkSecBefore(firstBusLeg, route)
+        val walkSec = calcWalkSecBefore(firstTransit, route)
         val feasible =
             candidateArrivals.mapNotNull { arrival ->
                 val dep =
@@ -62,10 +64,10 @@ class RouteDepartureTimeRefresher(
         val (chosenArrival, newDeparture) = feasible.minByOrNull { it.second } ?: return null
 
         // 5) 갱신된 route 및 알림 저장
-        val updatedRoute = route.updateWithNewTimes(firstBusLeg, chosenArrival, newDeparture)
+        val updatedRoute = route.updateWithNewTimes(firstTransit, chosenArrival, newDeparture)
         lastRouteAppender.append(updatedRoute)
 
-        return userNotificationManager.saveUserNotification(
+        return userLastRouteManager.saveUserNotification(
             notification.updateDepartureTime(newDeparture)
         )
     }
@@ -76,7 +78,7 @@ class RouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         val minutesLeft = Duration.between(LocalDateTime.now(), oldDeparture).toMinutes()
-        return minutesLeft !in 0 until (FIXED_REFRESH_MINUTES + busTerm)
+        return minutesLeft !in 3 until (FIXED_REFRESH_MINUTES + busTerm)
     }
 
     /** 실시간 최대 2건 + 배차 기반 2건 → 총 4개의 도착 후보 시각 생성 */

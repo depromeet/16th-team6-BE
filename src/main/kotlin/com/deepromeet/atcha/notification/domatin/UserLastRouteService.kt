@@ -7,14 +7,14 @@ import org.springframework.stereotype.Service
 import java.time.LocalDateTime
 
 @Service
-class NotificationService(
+class UserLastRouteService(
     private val lastRouteReader: LastRouteReader,
     private val userReader: UserReader,
-    private val userNotificationManager: UserNotificationManager,
+    private val userLastRouteManager: UserLastRouteManager,
     private val messagingManager: MessagingManager,
     private val notificationContentManager: NotificationContentManager
 ) {
-    fun addRouteNotification(
+    fun addUserLastRoute(
         id: Long,
         lastRouteId: String
     ) {
@@ -27,27 +27,24 @@ class NotificationService(
         user.alertFrequencies.forEach { minute ->
             val notificationTime = departureTime.minusMinutes(minute.toLong())
             if (notificationTime.isAfter(LocalDateTime.now())) {
-                val frequency = UserNotificationFrequency.fromMinutes(minute)
-                val userNotification =
-                    UserNotification(
-                        frequency = frequency,
+                val userLastRoute =
+                    UserLastRoute(
                         token = notificationToken,
-                        notificationTime = notificationTime,
                         departureTime = departureTime,
                         routeId = lastRouteId,
                         userId = user.id
                     )
-                userNotificationManager.saveUserNotification(userNotification)
+                userLastRouteManager.saveUserNotification(userLastRoute)
             }
         }
     }
 
-    fun deleteRouteNotification(
+    fun deleteUserLastRoute(
         id: Long,
         lastRouteId: String
     ) {
         val user = userReader.read(id)
-        userNotificationManager.deleteUserNotification(user.id, lastRouteId)
+        userLastRouteManager.deleteUserNotification(user.id, lastRouteId)
     }
 
     fun suggestRouteNotification(
