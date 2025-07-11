@@ -44,7 +44,7 @@ class LastRouteOperations(
             coroutineScope {
                 itineraries
                     .map { route ->
-                        async(Dispatchers.IO) {
+                        async(Dispatchers.Default) {
                             withTimeoutOrNull(MAX_CALCULATION_TIME) {
                                 calculateRoute(route)
                             }
@@ -127,7 +127,9 @@ class LastRouteOperations(
     private suspend fun calculateLegLastArriveDateTimes(legs: List<Leg>): List<LastRouteLeg>? {
         return coroutineScope {
             legs.map { leg ->
-                async(Dispatchers.IO) {
+                async(
+                    Dispatchers.Default
+                ) {
                     when (leg.mode) {
                         "SUBWAY" -> {
                             val subwayLine = SubwayLine.fromRouteName(leg.route!!)

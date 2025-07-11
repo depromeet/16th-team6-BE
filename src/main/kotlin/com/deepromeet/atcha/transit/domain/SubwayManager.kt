@@ -4,6 +4,8 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayBranchRepository
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 
 @Component
@@ -14,24 +16,25 @@ class SubwayManager(
     private val subwayBranchRepository: SubwayBranchRepository,
     private val subwayTimeTableCache: SubwayTimeTableCache
 ) {
-    suspend fun getRoutes(subwayLine: SubwayLine) =
-        subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
-            .groupBy { it.finalStationName }
-            .values
-            .map { Route(it) }
+    suspend fun getRoutes(subwayLine: SubwayLine): List<Route> =
+        withContext(Dispatchers.IO) {
+            subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
+                .groupBy { it.finalStationName }
+                .values
+                .map { Route(it) }
+        }
 
     suspend fun getStation(
         subwayLine: SubwayLine,
         stationName: String
     ): SubwayStation {
-        val station = (
+        return withContext(Dispatchers.IO) {
             subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, stationName)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_SUBWAY_STATION,
                     "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
                 )
-        )
-        return station
+        }
     }
 
     suspend fun getTimeTable(
