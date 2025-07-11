@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.notification.domatin
 
-import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.transit.domain.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
@@ -45,18 +44,5 @@ class UserLastRouteService(
     ) {
         val user = userReader.read(id)
         userLastRouteManager.deleteUserNotification(user.id, lastRouteId)
-    }
-
-    fun suggestRouteNotification(
-        id: Long,
-        coordinate: Coordinate
-    ) {
-        val user = userReader.read(id)
-        val distance = coordinate.distanceTo(Coordinate(user.address.lat, user.address.lon))
-        if (distance > 1.0) {
-            val token = user.fcmToken
-            val suggestNotification = notificationContentManager.createSuggestNotification()
-            messagingManager.send(suggestNotification, token)
-        }
     }
 }

@@ -2,7 +2,6 @@ package com.deepromeet.atcha.notification.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.notification.api.request.NotificationRequest
-import com.deepromeet.atcha.notification.api.request.SuggestNotificationRequest
 import com.deepromeet.atcha.notification.domatin.UserLastRouteService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -34,14 +33,5 @@ class NotificationController(
         @ModelAttribute request: NotificationRequest
     ) {
         userLastRouteService.deleteUserLastRoute(id, request.lastRouteId)
-    }
-
-    @PostMapping("/suggest")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun suggestRouteNotification(
-        @CurrentUser id: Long,
-        @RequestBody request: SuggestNotificationRequest
-    ) {
-        userLastRouteService.suggestRouteNotification(id, request.toCoordinate())
     }
 }
