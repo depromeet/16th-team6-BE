@@ -11,7 +11,7 @@ data class BusRouteOperationInfo(
 data class BusServiceHours(
     val dailyType: DailyType,
     val busDirection: BusDirection? = null,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    val startTime: LocalDateTime?,
+    val endTime: LocalDateTime?,
     val term: Int
 )

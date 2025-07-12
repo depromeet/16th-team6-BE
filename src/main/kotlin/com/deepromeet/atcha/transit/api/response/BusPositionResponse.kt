@@ -18,7 +18,9 @@ data class BusPositionResponse(
     ) : this(
         vehicleId = busPosition.vehicleId,
         sectionOrder = busPosition.sectionOrder,
-        vehicleNumber = busPosition.vehicleNumber,
+        vehicleNumber =
+            busPosition.vehicleNumber
+                .substring(busPosition.vehicleNumber.length - 4),
         sectionProgress = busPosition.calculateSectionProgress(),
         busCongestion = busPosition.busCongestion,
         remainSeats =

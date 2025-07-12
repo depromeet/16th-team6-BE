@@ -3,10 +3,10 @@ package com.deepromeet.atcha.transit.infrastructure.client.kakao.response
 import com.deepromeet.atcha.transit.domain.Fare
 
 data class KakaoRouteResponse(
-    val results: List<RouteResult>
+    val results: List<RouteResult>?
 ) {
     fun firstTaxiFare(): Fare? {
-        return results.firstOrNull()?.summary?.fare?.taxi?.let { Fare(it) }
+        return results?.firstOrNull()?.summary?.fare?.taxi?.let { Fare(it) }
     }
 }
 

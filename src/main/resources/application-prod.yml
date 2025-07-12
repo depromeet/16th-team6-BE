@@ -29,6 +29,7 @@ tmap:
 redis:
   host: ${secret.prod.REDIS_HOST}
   port: ${secret.prod.REDIS_PORT}
+  password: ${secret.prod.REDIS_PASSWORD}
 
 kakao:
   client-id: ${secret.prod.OAUTH_KAKAO_CLIENT_ID}
@@ -36,11 +37,19 @@ kakao:
 open-api:
   api:
     service-key: ${secret.prod.OPEN_API_SERVICE_KEY}
-    spare-key : ${secret.dev.OPEN_API_SPARE_KEY}
+    spare-key : ${secret.prod.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.prod.OPEN_API_REAL_LAST_KEY}
 
 kric:
   api:
     service-key: ${secret.prod.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    url: https://api.odsay.com
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
 
 jwt:
   access:

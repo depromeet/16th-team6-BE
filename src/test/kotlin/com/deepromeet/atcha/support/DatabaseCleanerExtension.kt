@@ -4,6 +4,7 @@ import jakarta.persistence.EntityManager
 import org.junit.jupiter.api.extension.BeforeEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.springframework.context.ApplicationContext
+import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.test.context.junit.jupiter.SpringExtension
 import org.springframework.transaction.support.TransactionTemplate
 
@@ -16,10 +17,16 @@ class DatabaseCleanerExtension : BeforeEachCallback {
     private fun cleanup(context: ApplicationContext) {
         val em = context.getBean(EntityManager::class.java)
         val tt = context.getBean(TransactionTemplate::class.java)
+        val rt = context.getBean("stringRedisTemplate") as StringRedisTemplate
 
         tt.execute { action ->
             em.clear()
             truncateTable(em)
+        }
+
+        val keys = rt.keys("*")
+        if (keys.isNotEmpty()) {
+            rt.delete(keys)
         }
     }
 

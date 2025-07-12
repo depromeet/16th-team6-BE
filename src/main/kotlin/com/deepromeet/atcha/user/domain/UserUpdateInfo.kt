@@ -5,7 +5,7 @@ data class UserUpdateInfo(
     val profileImageUrl: String?,
     val address: String?,
     val lat: Double?,
-    val log: Double?,
-    val alertFrequencies: Set<Int>?,
+    val lon: Double?,
+    val alertFrequencies: MutableSet<Int>?,
     val fcmToken: String?
 )

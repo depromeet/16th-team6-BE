@@ -8,11 +8,11 @@ import com.deepromeet.atcha.transit.api.request.LastRoutesRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
 import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
-import com.deepromeet.atcha.transit.api.response.LastRoutesResponse
+import com.deepromeet.atcha.transit.api.response.LastRouteResponse
 import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.TransitService
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PathVariable
@@ -41,7 +41,7 @@ class TransitController(
     ): ApiResponse<BusArrivalResponse> {
         return ApiResponse.success(
             BusArrivalResponse(
-                transitService.getBusArrivalInfo(
+                transitService.getBusArrival(
                     request.toRouteName(),
                     request.toBusStationMeta()
                 )
@@ -50,7 +50,7 @@ class TransitController(
     }
 
     @GetMapping("/bus-routes/positions")
-    fun getBusRoutePositions(
+    suspend fun getBusRoutePositions(
         @ModelAttribute request: BusRouteRequest
     ): ApiResponse<BusRoutePositionResponse> {
         return ApiResponse.success(
@@ -71,21 +71,20 @@ class TransitController(
     suspend fun getLastRoutes(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
-    ): ApiResponse<List<LastRoutesResponse>> =
+    ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
             transitService.getLastRoutes(
                 id,
                 request.toStart(),
-                request.endLat,
-                request.endLon,
+                request.toEnd(),
                 request.sortType
-            )
+            ).map { LastRouteResponse(it) }
         )
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String
-    ): ApiResponse<LastRoutesResponse> =
+    ): ApiResponse<LastRoute> =
         ApiResponse.success(
             transitService.getRoute(routeId)
         )

@@ -10,7 +10,8 @@ class SubwayManager(
     private val subwayStationRepository: SubwayStationRepository,
     private val subwayInfoClient: SubwayInfoClient,
     private val dailyTypeResolver: DailyTypeResolver,
-    private val subwayBranchRepository: SubwayBranchRepository
+    private val subwayBranchRepository: SubwayBranchRepository,
+    private val subwayTimeTableCache: SubwayTimeTableCache
 ) {
     fun getRoutes(subwayLine: SubwayLine) =
         subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
@@ -23,20 +24,26 @@ class SubwayManager(
         stationName: String
     ): SubwayStation {
         return subwayStationRepository.findByRouteCodeAndNameOrLike(subwayLine.lnCd, stationName)
-            ?: throw TransitException.NotFoundSubwayStation
+            ?: run {
+                log.warn { "지하철역 조회 실패: [노선코드=${subwayLine.lnCd}, 역이름=$stationName]" }
+                throw TransitException.NotFoundSubwayStation
+            }
     }
 
-    fun getTimeTable(
+    suspend fun getTimeTable(
         startStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
     ): SubwayTimeTable? {
-        val timeTable =
-            subwayInfoClient.getTimeTable(
-                startStation,
-                dailyTypeResolver.resolve(),
-                SubwayDirection.resolve(routes, startStation, endStation)
-            )
-        return timeTable
+        val dailyType = dailyTypeResolver.resolve()
+        val direction = SubwayDirection.resolve(routes, startStation, endStation)
+
+        subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
+            return it
+        }
+
+        return subwayInfoClient.getTimeTable(startStation, dailyType, direction)?.also { timeTable ->
+            subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.user.domain
 
+import com.deepromeet.atcha.location.domain.Coordinate
 import jakarta.persistence.CollectionTable
 import jakarta.persistence.Column
 import jakarta.persistence.ElementCollection
@@ -30,6 +31,10 @@ class User(
     var fcmToken: String,
     var isDeleted: Boolean = false
 ) {
+    fun getHomeCoordinate(): Coordinate {
+        return address.resolveCoordinate()
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

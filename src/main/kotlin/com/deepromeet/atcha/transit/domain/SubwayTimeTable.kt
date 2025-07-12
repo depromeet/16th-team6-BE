@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 data class SubwayTimeTable(
     val startStation: SubwayStation,
@@ -11,35 +10,32 @@ data class SubwayTimeTable(
     val schedule: List<SubwayTime>
 ) {
     fun getLastTime(
-        endStation: SubwayStation,
+        destinationStation: SubwayStation,
         routes: List<Route>
-    ): SubwayTime? =
+    ): SubwayTime =
         schedule
-            .filter {
-                it.departureTime
-                    ?.isAfter(LocalDateTime.of(it.departureTime.toLocalDate(), LocalTime.of(21, 0)))
-                    ?: false
-            }
-            .filter { isReachable(startStation, endStation, it.finalStation, routes) }
-            .maxWithOrNull(compareBy(nullsLast()) { it.departureTime })
+            .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
+            .filter { it.departureTime != null }
+            .maxByOrNull { it.departureTime!! }
+            ?: throw TransitException.NotFoundSubwayLastTime
 
     fun findNearestTime(
         time: LocalDateTime,
         direction: TimeDirection
-    ): SubwayTime =
+    ): SubwayTime? =
         when (direction) {
             TimeDirection.AFTER -> {
                 schedule
                     .filter { it.departureTime?.isAfter(time) ?: false }
-                    .minByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
+                    .minByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
             }
 
             TimeDirection.BEFORE -> {
                 schedule
                     .filter { it.departureTime?.isBefore(time) ?: false }
-                    .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundBusTime }
+                    .maxByOrNull { it.departureTime ?: throw TransitException.NotFoundTime }
             }
-        } ?: throw TransitException.NotFoundBusTime
+        }
 
     private fun isReachable(
         startStation: SubwayStation,

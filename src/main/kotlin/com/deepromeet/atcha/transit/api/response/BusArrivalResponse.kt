@@ -12,20 +12,20 @@ data class BusArrivalResponse(
     val serviceRegion: ServiceRegion,
     val busStationId: BusStationId,
     val stationName: String,
-    val lastTime: LocalDateTime,
+    val lastTime: LocalDateTime?,
     val term: Int,
     val realTimeBusArrival: List<RealTimeBusArrivalResponse>
 ) {
     constructor(
         busArrival: BusArrival
     ) : this(
-        busArrival.busRoute.id,
-        busArrival.busRoute.name,
-        busArrival.busRoute.serviceRegion,
-        busArrival.busStationId,
-        busArrival.stationName,
-        busArrival.lastTime,
-        busArrival.term,
-        busArrival.realTimeInfo.map { RealTimeBusArrivalResponse(it) }
+        busArrival.schedule.busRoute.id,
+        busArrival.schedule.busRoute.name,
+        busArrival.schedule.busRoute.serviceRegion,
+        busArrival.schedule.busStation.id,
+        busArrival.schedule.busStation.busStationMeta.name,
+        busArrival.schedule.busTimeTable.lastTime,
+        busArrival.schedule.busTimeTable.term,
+        busArrival.realTimeArrival.realTimeInfoList.map { RealTimeBusArrivalResponse(it) }
     )
 }

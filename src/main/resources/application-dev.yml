@@ -18,15 +18,24 @@ tmap:
 redis:
   host: redis
   port: 6379
+  password: ${secret.dev.REDIS_PASSWORD}
 
 open-api:
   api:
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
     spare-key : ${secret.dev.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
 
 kric:
   api:
     service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    url: https://api.odsay.com
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
 
 jwt:
   access:
@@ -35,3 +44,24 @@ jwt:
   refresh:
     secret: ${secret.dev.JWT_REFRESH_SECRET}
     expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
+
+management:
+  server:
+    port: ${secret.dev.MANAGEMENT_PORT}
+
+  endpoints:
+    web:
+      exposure:
+        include: prometheus, health
+      base-path: ${secret.dev.MANAGEMENT_BASE_PATH}
+    jmx:
+      exposure:
+        exclude: "*"
+    access:
+      default: none
+  endpoint:
+    prometheus:
+      enabled: true
+    health:
+      enabled: true
+      show-components: never
