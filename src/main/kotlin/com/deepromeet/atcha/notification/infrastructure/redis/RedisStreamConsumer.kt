@@ -26,7 +26,7 @@ private const val PAYLOAD = "payload"
 private const val IDEMPOTENCY_KEY_PREFIX = "notification:processed"
 
 @Service
-class RedisStreamRepository(
+class RedisStreamConsumer(
     private val messagingProvider: MessagingProvider,
     private val redisTemplate: RedisTemplate<String, String>,
     private val notificationContentManager: NotificationContentManager,
@@ -146,7 +146,7 @@ class RedisStreamRepository(
     }
 
     private fun createIdempotencyKey(userLastRoute: UserLastRoute): String {
-        return "$IDEMPOTENCY_KEY_PREFIX:${userLastRoute.userId}:${userLastRoute.lastRouteId}"
+        return "$IDEMPOTENCY_KEY_PREFIX:${userLastRoute.userId}:${userLastRoute.lastRouteId}:${userLastRoute.updatedAt}"
     }
 
     private fun handleDeadLetter(
