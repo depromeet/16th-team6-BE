@@ -34,10 +34,18 @@ open-api:
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
     spare-key: ${secret.dev.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
 
 kric:
   api:
     service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    url: https://api.odsay.com
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
 
 jwt:
   access:

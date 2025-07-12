@@ -1,20 +1,20 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.BusArrival
 import com.deepromeet.atcha.transit.domain.BusCongestion
 import com.deepromeet.atcha.transit.domain.BusPosition
+import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.BusRoute
 import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.BusRouteStation
-import com.deepromeet.atcha.transit.domain.BusServiceHours
+import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.BusStation
 import com.deepromeet.atcha.transit.domain.BusStationId
 import com.deepromeet.atcha.transit.domain.BusStationMeta
+import com.deepromeet.atcha.transit.domain.BusStationNumber
 import com.deepromeet.atcha.transit.domain.BusStatus
-import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.RealTimeBusArrival
+import com.deepromeet.atcha.transit.domain.BusTimeTable
 import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
@@ -59,7 +59,8 @@ data class StationResponse(
 ) {
     fun toBusStation(): BusStation =
         BusStation(
-            id = BusStationId(arsId),
+            id = BusStationId(stId),
+            busStationNumber = BusStationNumber(arsId),
             busStationMeta =
                 BusStationMeta(
                     name = stNm,
@@ -134,8 +135,25 @@ data class BusArrivalResponse(
     @JacksonXmlProperty(localName = "vehId2")
     val vehId2: String
 ) {
-    fun toBusArrival(): BusArrival {
-        val realTimeBusArrivals =
+    fun toBusSchedule(station: BusStation): BusSchedule =
+        BusSchedule(
+            busRoute =
+                BusRoute(
+                    id = BusRouteId(busRouteId),
+                    name = busRouteAbrv,
+                    serviceRegion = ServiceRegion.SEOUL
+                ),
+            busStation = station,
+            busTimeTable =
+                BusTimeTable(
+                    firstTime = parseDateTime(firstTm),
+                    lastTime = parseDateTime(lastTm),
+                    term = term.toInt()
+                )
+        )
+
+    fun toBusRealTimeArrival(): BusRealTimeArrival {
+        return BusRealTimeArrival(
             listOf(
                 createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg1,
@@ -156,20 +174,6 @@ data class BusArrivalResponse(
                     vehId = vehId2
                 )
             )
-
-        return BusArrival(
-            busRoute =
-                BusRoute(
-                    id = BusRouteId(busRouteId),
-                    name = busRouteAbrv,
-                    serviceRegion = ServiceRegion.SEOUL
-                ),
-            busStationId = BusStationId(arsId),
-            stationName = stNm,
-            firstTime = parseDateTime(firstTm),
-            lastTime = parseDateTime(lastTm),
-            term = term.toInt(),
-            realTimeInfo = realTimeBusArrivals
         )
     }
 
@@ -181,13 +185,13 @@ data class BusArrivalResponse(
         rerdieDiv: Int,
         rerideNum: Int,
         vehId: String
-    ): RealTimeBusArrival {
+    ): BusRealTimeInfo {
         val busStatus = determineBusStatus(arrivalMessage)
 
         val busCongestion =
             when (rerdieDiv) {
-                0 -> null
-                2 -> null
+                0 -> BusCongestion.UNKNOWN
+                2 -> BusCongestion.UNKNOWN
                 4 ->
                     when (rerideNum) {
                         0 -> BusCongestion.UNKNOWN
@@ -201,13 +205,13 @@ data class BusArrivalResponse(
 
         val remainingSeats =
             when (rerdieDiv) {
-                0 -> null
+                0 -> 0
                 2 -> rerideNum
-                4 -> null
+                4 -> 0
                 else -> throw IllegalArgumentException("Unknown rerdieDiv: $rerdieDiv")
             }
 
-        return RealTimeBusArrival(
+        return BusRealTimeInfo(
             vehicleId = vehId,
             busStatus = busStatus,
             remainingTime = remainingTime.toInt(),
@@ -226,8 +230,12 @@ data class BusArrivalResponse(
             else -> BusStatus.OPERATING
         }
 
-    private fun parseDateTime(dateTimeString: String): LocalDateTime =
-        LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    private fun parseDateTime(dateTimeString: String): LocalDateTime? {
+        if (dateTimeString.length == 10) {
+            return null
+        }
+        return LocalDateTime.parse(dateTimeString, DATE_TIME_FORMATTER)
+    }
 
     companion object {
         private val DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
@@ -274,41 +282,6 @@ data class BusPositionResponse(
     }
 }
 
-data class BusRouteInfoResponse(
-    @JacksonXmlProperty(localName = "busRouteAbrv")
-    val busRouteAbrv: String,
-    @JacksonXmlProperty(localName = "busRouteId")
-    val busRouteId: String,
-    @JacksonXmlProperty(localName = "stStationNm")
-    val stStationNm: String,
-    @JacksonXmlProperty(localName = "edStationNm")
-    val edStationNm: String,
-    @JacksonXmlProperty(localName = "term")
-    val term: String,
-    @JacksonXmlProperty(localName = "firstBusTm")
-    val firstBusTm: String,
-    @JacksonXmlProperty(localName = "lastBusTm")
-    val lastBusTm: String
-) {
-    fun toBusRouteOperationInfo(): BusRouteOperationInfo {
-        val formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-
-        return BusRouteOperationInfo(
-            startStationName = stStationNm,
-            endStationName = edStationNm,
-            serviceHours =
-                listOf(
-                    BusServiceHours(
-                        dailyType = DailyType.WEEKDAY,
-                        startTime = LocalDateTime.parse(firstBusTm, formatter),
-                        endTime = LocalDateTime.parse(lastBusTm, formatter),
-                        term = term.toIntOrNull() ?: 0
-                    )
-                )
-        )
-    }
-}
-
 data class BusRouteStationResponse(
     @JacksonXmlProperty(localName = "busRouteId")
     val busRouteId: String,
@@ -320,6 +293,8 @@ data class BusRouteStationResponse(
     val arsId: String,
     @JacksonXmlProperty(localName = "stationNm")
     val stationNm: String,
+    @JacksonXmlProperty(localName = "station")
+    val station: String,
     @JacksonXmlProperty(localName = "gpsX")
     val gpsX: String,
     @JacksonXmlProperty(localName = "gpsY")
@@ -338,7 +313,8 @@ data class BusRouteStationResponse(
             order = seq.toInt(),
             busStation =
                 BusStation(
-                    id = BusStationId(arsId),
+                    id = BusStationId(station),
+                    busStationNumber = BusStationNumber(arsId),
                     busStationMeta =
                         BusStationMeta(
                             name = stationNm,

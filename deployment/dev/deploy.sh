@@ -1,18 +1,23 @@
 #!/usr/bin/env bash
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
-MAX_RETRIES=30
+DEFAULT_CONF="data/nginx/nginx.conf"
+MAX_RETRIES=150
 
 check_service() {
   local RETRIES=0
   local SERVICE_NAME=$1
+
   local container_ids=($(docker compose ps -q $SERVICE_NAME))
 
+  # 최대 재시도 횟수
   while [ $RETRIES -lt $MAX_RETRIES ]; do
     echo "Checking service $SERVICE_NAME (attempt: $((RETRIES+1)))"
     sleep 3
+
     local all_healthy=true
 
+    # 각 컨테이너의 헬스 상태 검사
     for id in "${container_ids[@]}"; do
       local health_status
       health_status=$(docker container inspect --format='{{.State.Health.Status}}' "$id")
@@ -41,7 +46,8 @@ ensure_nginx_running() {
   if [ -z "$nginx_exists" ]; then
     echo "nginx 컨테이너가 존재하지 않습니다. nginx 컨테이너를 실행합니다."
     docker compose up -d nginx
-    sleep 5  # nginx가 완전히 실행될 때까지 대기
+    # nginx가 완전히 실행될 때까지 잠시 대기
+    sleep 5
   else
     echo "nginx 컨테이너가 이미 실행 중입니다."
   fi
@@ -59,7 +65,7 @@ if [ -z "$IS_BLUE" ]; then
   docker compose pull atcha-blue
 
   echo "2. BLUE 컨테이너 실행"
-  docker compose up -d atcha-blue
+  docker compose up -d atcha-blue --scale atcha-blue=2
 
   echo "3. BLUE 컨테이너 헬스 체크"
   if ! check_service "atcha-blue"; then
@@ -67,9 +73,9 @@ if [ -z "$IS_BLUE" ]; then
     exit 1
   fi
 
-  echo "4. nginx 재시작 및 설정 반영"
+  echo "4. nginx 재실행"
   ensure_nginx_running
-  sudo cp data/nginx/nginx-blue.conf data/nginx/nginx.conf
+  sudo cp -f /home/atcha/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx.conf
   restart_nginx
 
   echo "5. GREEN 컨테이너 중지 및 삭제"
@@ -83,7 +89,7 @@ else
   docker compose pull atcha-green
 
   echo "2. GREEN 컨테이너 실행"
-  docker compose up -d atcha-green
+  docker compose up -d atcha-green --scale atcha-green=2
 
   echo "3. GREEN 컨테이너 헬스 체크"
   if ! check_service "atcha-green"; then
@@ -91,9 +97,9 @@ else
     exit 1
   fi
 
-  echo "4. nginx 재시작 및 설정 반영"
+  echo "4. nginx 재실행"
   ensure_nginx_running
-  sudo cp data/nginx/nginx-green.conf data/nginx/nginx.conf
+  sudo cp -f /home/atcha/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx.conf
   restart_nginx
 
   echo "5. BLUE 컨테이너 중지 및 삭제"

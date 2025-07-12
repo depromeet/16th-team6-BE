@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.notification.domatin
 
-enum class NotificationFrequency(val minutes: Long) {
+enum class UserNotificationFrequency(val minutes: Long) {
     ONE(1),
     FIVE(5),
     TEN(10),
@@ -10,7 +10,7 @@ enum class NotificationFrequency(val minutes: Long) {
     ;
 
     companion object {
-        fun fromMinutes(minute: Int): NotificationFrequency =
+        fun fromMinutes(minute: Int): UserNotificationFrequency =
             entries.find { it.minutes == minute.toLong() }
                 ?: throw IllegalArgumentException("Invalid minute value: $minute")
     }
