@@ -50,15 +50,17 @@ class RedisStreamConsumer(
     private val streamOps = redisTemplate.opsForStream<String, String>()
     private val valueOps = redisTemplate.opsForValue()
     private val consumerId: String = InetAddress.getLocalHost().hostName
+    private val consumer = Consumer.from(groupName, consumerId)
+    private val readOptions = StreamReadOptions.empty().block(Duration.ofSeconds(1))
+    private val streams = StreamOffset.create(streamKey, ReadOffset.lastConsumed())
 
     @Scheduled(cron = "*/10 * * * * ?")
     fun consumeStreamMessages() {
         val messages =
             streamOps.read(
-                Consumer.from(groupName, consumerId),
-                StreamReadOptions.empty()
-                    .block(Duration.ofSeconds(1)),
-                StreamOffset.create(streamKey, ReadOffset.lastConsumed())
+                consumer,
+                readOptions,
+                streams
             )
 
         messages?.forEach { message ->
