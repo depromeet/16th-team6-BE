@@ -21,7 +21,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-@Profile("dev", "test", "local")
+@Profile("staging", "dev", "test", "local")
 @EnableRedisRepositories(basePackages = ["com.deepromeet.atcha"])
 class DefaultRedisConfig(
     @Value("\${redis.host}")
