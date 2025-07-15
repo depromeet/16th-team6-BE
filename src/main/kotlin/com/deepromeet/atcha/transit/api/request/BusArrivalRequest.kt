@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.api.request
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.BusStationMeta
-import com.deepromeet.atcha.transit.domain.Station
+import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
+import com.deepromeet.atcha.transit.domain.route.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 
 data class BusArrivalRequest(

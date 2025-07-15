@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.api.request
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.LastRouteSortType
+import com.deepromeet.atcha.transit.domain.route.LastRouteSortType
 
 data class LastRoutesRequest(
     val startLat: String,

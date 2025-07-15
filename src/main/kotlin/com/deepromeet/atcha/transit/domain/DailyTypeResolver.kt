@@ -14,21 +14,11 @@ class DailyTypeResolver(
         date: LocalDate = LocalDate.now()
     ): DailyType {
         return when (transitType) {
-            TransitType.SUBWAY -> resolveSubway(date)
-            TransitType.BUS -> resolveBus(date)
+            TransitType.SUBWAY, TransitType.BUS -> resolveDailyType(date)
         }
     }
 
-    private suspend fun resolveSubway(date: LocalDate): DailyType {
-        return when {
-            isHoliday(date) -> DailyType.HOLIDAY
-            date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY
-            date.dayOfWeek == DayOfWeek.SUNDAY -> DailyType.SUNDAY
-            else -> DailyType.WEEKDAY
-        }
-    }
-
-    private suspend fun resolveBus(date: LocalDate): DailyType {
+    private suspend fun resolveDailyType(date: LocalDate): DailyType {
         return when {
             isHoliday(date) -> DailyType.HOLIDAY
             date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY

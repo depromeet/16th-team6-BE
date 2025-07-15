@@ -1,28 +1,22 @@
 package com.deepromeet.atcha.notification.infrastructure.scheduler
 
-import com.deepromeet.atcha.transit.domain.DepartureDelayNotifier
-import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
-import com.deepromeet.atcha.transit.domain.ScheduledNotificationPublisher
+import com.deepromeet.atcha.notification.domain.UserLastRouteStreamProducer
+import com.deepromeet.atcha.transit.domain.route.LastRouteDepartureTimeRefresher
+import kotlinx.coroutines.runBlocking
+import net.javacrumbs.shedlock.spring.annotation.SchedulerLock
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
 class NotificationScheduler(
-    private val routeDepartureTimeRefresher: RouteDepartureTimeRefresher,
-    private val departureDelayNotifier: DepartureDelayNotifier,
-    private val scheduledNotificationPublisher: ScheduledNotificationPublisher
+    private val lastRouteDepartureTimeRefresher: LastRouteDepartureTimeRefresher,
+    private val userLastRouteStreamProducer: UserLastRouteStreamProducer
 ) {
     @Scheduled(cron = "0 * * * * ?")
-    suspend fun checkAndSendNotifications() {
-        // 예상 출발 시간 갱신
-        val updatedNotifications = routeDepartureTimeRefresher.refreshAll()
-
-        // 지연 알림 전송
-        updatedNotifications.forEach {
-            departureDelayNotifier.notifyIfDelayed(it)
+    @SchedulerLock(name = "refresh_push", lockAtMostFor = "PT2S", lockAtLeastFor = "PT2S")
+    fun checkAndSendNotifications() =
+        runBlocking {
+            val updatedNotifications = lastRouteDepartureTimeRefresher.refreshAll()
+            userLastRouteStreamProducer.produceAll(updatedNotifications)
         }
-
-        // 예약된 알림 발행
-        scheduledNotificationPublisher.publish()
-    }
 }

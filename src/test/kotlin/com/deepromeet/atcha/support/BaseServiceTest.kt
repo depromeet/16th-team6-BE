@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.notification.domatin.UserNotificationReader
-import com.deepromeet.atcha.transit.domain.LastRouteAppender
+import com.deepromeet.atcha.notification.domain.UserLastRouteReader
+import com.deepromeet.atcha.transit.domain.route.LastRouteAppender
 import com.deepromeet.atcha.user.domain.UserAppender
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest
 )
 abstract class BaseServiceTest {
     @Autowired
-    protected lateinit var userNotificationReader: UserNotificationReader
+    protected lateinit var userLastRouteReader: UserLastRouteReader
 
     @Autowired
     protected lateinit var userAppender: UserAppender
