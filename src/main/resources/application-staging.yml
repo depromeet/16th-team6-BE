@@ -7,6 +7,12 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+
+kakao:
+  client-id: ${secret.staging.OAUTH_KAKAO_CLIENT_ID}
 
 tmap:
   api:
@@ -15,10 +21,6 @@ tmap:
 redis:
   host: ${secret.staging.REDIS_HOST}
   port: ${secret.staging.REDIS_PORT}
-  password: ${secret.staging.REDIS_PASSWORD}
-
-kakao:
-  client-id: ${secret.staging.OAUTH_KAKAO_CLIENT_ID}
 
 open-api:
   api:
@@ -29,6 +31,13 @@ open-api:
 kric:
   api:
     service-key: ${secret.staging.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    url: https://api.odsay.com
+    service-key: ${secret.staging.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.staging.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.staging.ODSAY_REAL_LAST_KEY}
 
 jwt:
   access:

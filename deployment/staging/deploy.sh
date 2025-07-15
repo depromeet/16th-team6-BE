@@ -76,6 +76,8 @@ if [ -z "$IS_BLUE" ]; then
   docker compose stop atcha-green
   docker compose rm -f atcha-green
 
+  echo "불필요한 이미지 정리"
+  docker image prune -f || true
 else
   echo "### BLUE => GREEN ###"
 
@@ -99,4 +101,7 @@ else
   echo "5. BLUE 컨테이너 중지 및 삭제"
   docker compose stop atcha-blue
   docker compose rm -f atcha-blue
+
+  echo "불필요한 이미지 정리"
+  docker image prune -f || true
 fi

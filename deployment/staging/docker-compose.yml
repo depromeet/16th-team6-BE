@@ -11,7 +11,7 @@ services:
       - SPRING_PROFILES_ACTIVE=staging
     restart: always
     healthcheck:
-      test: "curl -f http://localhost:8080/health || exit 1"
+      test: "curl -f http://localhost:8080/api/health || exit 1"
       interval: 1m
       timeout: 10s
       retries: 3
@@ -26,7 +26,7 @@ services:
       - SPRING_PROFILES_ACTIVE=staging
     restart: always
     healthcheck:
-      test: "curl -f http://localhost:8080/health || exit 1"
+      test: "curl -f http://localhost:8080/api/health || exit 1"
       interval: 1m
       timeout: 10s
       retries: 3

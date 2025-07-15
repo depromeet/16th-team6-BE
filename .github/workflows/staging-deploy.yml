@@ -2,8 +2,8 @@ name: STAGING CD
 
 on:
   workflow_dispatch:
-  push:
-    branches: [ staging ]
+  pull_request:
+    branches: [ dev ]
 
 jobs:
   build:
@@ -15,7 +15,7 @@ jobs:
         with:
           submodules: true
           token: ${{ secrets.SUBMODULE_TOKEN }}
-
+#
       - name: Debug - List submodule folder contents
         run: |
           echo "=== Submodule (16th-team6-BE-submodule) Contents ==="
