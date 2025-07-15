@@ -34,7 +34,7 @@ class RouteDepartureTimeRefresher(
 
         val timeTable = (firstTransit.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
 
-//        if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
+        if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
 
         // 2) 실시간 도착 정보
         val arrivalInfos =
