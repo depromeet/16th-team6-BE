@@ -9,7 +9,10 @@ enum class UserRouteError(
     override val errorCode: String,
     override val message: String,
     override val logLevel: LogLevel
-) : BaseErrorType
+) : BaseErrorType {
+    USER_ROUTE_NOT_FOUND(404, "URT_001", "해당 유저가 등록한 경로를 찾을 수 없습니다.", LogLevel.ERROR),
+    USER_ROUTE_REFRESH_ERROR(500, "URT_002", "현재 출발 시간을 갱신 할 수 없습니다.", LogLevel.ERROR)
+}
 
 class UserRouteException(
     errorCode: BaseErrorType,

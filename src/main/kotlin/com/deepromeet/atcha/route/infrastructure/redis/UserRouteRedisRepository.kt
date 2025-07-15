@@ -21,14 +21,11 @@ class UserRouteRedisRepository(
             .build()
 
     override fun save(userRoute: UserRoute): UserRoute {
-        valueOps.set(getKey(userRoute), userRoute, duration)
+        valueOps.set(getKey(userRoute.userId), userRoute, duration)
         return userRoute
     }
 
-    override fun findById(
-        userId: Long,
-        routeId: String
-    ): UserRoute? = valueOps.get(getKey(userId, routeId))
+    override fun findById(userId: Long): UserRoute? = valueOps.get(getKey(userId))
 
     override fun findAll(): List<UserRoute> {
         val result = mutableListOf<UserRoute>()
@@ -48,17 +45,9 @@ class UserRouteRedisRepository(
         save(userRoute)
     }
 
-    override fun delete(
-        userId: Long,
-        routeId: String
-    ) {
-        userRouteRedisTemplate.delete(getKey(userId, routeId))
+    override fun delete(userId: Long) {
+        userRouteRedisTemplate.delete(getKey(userId))
     }
 
-    private fun getKey(userRoute: UserRoute) = "user-routes:${userRoute.userId}:${userRoute.lastRouteId}"
-
-    private fun getKey(
-        userId: Long,
-        lastRouteId: String
-    ) = "user-routes:$userId:$lastRouteId"
+    private fun getKey(userId: Long) = "user-routes:$userId"
 }

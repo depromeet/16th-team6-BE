@@ -5,6 +5,7 @@ import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.route.api.request.LastRoutesRequest
 import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
+import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.route.domain.LastRoute
 import kotlinx.coroutines.flow.Flow
@@ -108,6 +109,16 @@ class RouteController(
         @CurrentUser id: Long,
         @ModelAttribute request: UserRouteRequest
     ) {
-        routeService.deleteUserRoute(id, request.lastRouteId)
+        routeService.deleteUserRoute(id)
     }
+
+    @GetMapping("/user-routes/refresh")
+    suspend fun refreshUserRoute(
+        @CurrentUser id: Long
+    ): ApiResponse<UserRouteResponse> =
+        ApiResponse.success(
+            UserRouteResponse(
+                routeService.refreshUserRoute(id)
+            )
+        )
 }

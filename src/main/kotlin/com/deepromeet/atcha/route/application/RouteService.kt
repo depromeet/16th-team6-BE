@@ -4,7 +4,10 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.ItineraryValidator
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteSortType
+import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.route.domain.sort
+import com.deepromeet.atcha.route.exception.UserRouteError
+import com.deepromeet.atcha.route.exception.UserRouteException
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
@@ -25,6 +28,7 @@ class RouteService(
     private val serviceRegionValidator: ServiceRegionValidator,
     private val startedBusCache: StartedBusCache,
     private val busManager: BusManager,
+    private val userRouteDepartureTimeRefresher: UserRouteDepartureTimeRefresher,
     private val lastRouteOperationsV2: LastRouteOperationsV2,
     private val transitRouteClientV2: TransitRouteClientV2
 ) {
@@ -104,11 +108,15 @@ class RouteService(
         userRouteManager.update(user, route)
     }
 
-    fun deleteUserRoute(
-        id: Long,
-        lastRouteId: String
-    ) {
+    fun deleteUserRoute(id: Long) {
         val user = userReader.read(id)
-        userRouteManager.delete(user.id, lastRouteId)
+        userRouteManager.delete(user)
+    }
+
+    suspend fun refreshUserRoute(id: Long): UserRoute {
+        val user = userReader.read(id)
+        val userRoute = userRouteManager.read(user)
+        return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)
+            ?: throw UserRouteException.of(UserRouteError.USER_ROUTE_REFRESH_ERROR)
     }
 }

@@ -12,6 +12,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 3
 private const val FIXED_REFRESH_MINUTES = 20
 private const val BUFFER_SEC_SECONDS = 2 * 60L
 
@@ -29,17 +30,27 @@ class UserRouteDepartureTimeRefresher(
 ) {
     private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 
-    suspend fun refreshAll(): List<UserRoute> = userRouteManager.readAll().mapNotNull { refreshDepartureTime(it) }
+    suspend fun refreshAll(): List<UserRoute> =
+        userRouteManager.readAll().mapNotNull { userRoute ->
+            val oldDeparture = LocalDateTime.parse(userRoute.departureTime, formatter)
+            val route = lastRouteReader.read(userRoute.lastRouteId)
+
+            val firstBusLeg = extractFirstBusTransit(route) ?: return@mapNotNull null
+            val timeTable = extractBusTimeTable(firstBusLeg) ?: return@mapNotNull null
+
+            if (isNotRefreshTarget(oldDeparture, timeTable.term)) {
+                return@mapNotNull null
+            }
+
+            refreshDepartureTime(userRoute)
+        }
 
     suspend fun refreshDepartureTime(userRoute: UserRoute): UserRoute? {
-        val oldDeparture = LocalDateTime.parse(userRoute.departureTime, formatter)
         val route = lastRouteReader.read(userRoute.lastRouteId)
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
         val timeTable = extractBusTimeTable(firstBusLeg) ?: return null
-
-//        if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
 
         // 2) 실시간 도착 정보 조회
         val arrivalInfos = getBusRealTimeInfo(firstBusLeg) ?: return null
@@ -135,7 +146,7 @@ class UserRouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         val minutesLeft = Duration.between(LocalDateTime.now(), oldDeparture).toMinutes()
-        return minutesLeft !in 3 until (FIXED_REFRESH_MINUTES + busTerm)
+        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until (FIXED_REFRESH_MINUTES + busTerm)
     }
 
     /** 실시간 최대 2건 + 배차 기반 2건 → 총 4개의 도착 후보 시각 생성 */
