@@ -2,7 +2,7 @@ package com.deepromeet.atcha.userroute.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.userroute.api.request.UserRouteRequest
-import com.deepromeet.atcha.userroute.domain.UserRouteService
+import com.deepromeet.atcha.userroute.application.UserRouteService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute

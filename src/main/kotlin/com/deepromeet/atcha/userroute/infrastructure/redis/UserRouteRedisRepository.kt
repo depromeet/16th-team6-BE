@@ -16,7 +16,7 @@ class UserRouteRedisRepository(
     private val scanOptions =
         ScanOptions
             .scanOptions()
-            .match("notification:[0-9]*")
+            .match("user-routes:[0-9]*")
             .count(1000)
             .build()
 
@@ -55,10 +55,10 @@ class UserRouteRedisRepository(
         userRouteRedisTemplate.delete(getKey(userId, routeId))
     }
 
-    private fun getKey(userRoute: UserRoute) = "notification:${userRoute.userId}:${userRoute.lastRouteId}"
+    private fun getKey(userRoute: UserRoute) = "user-routes:${userRoute.userId}:${userRoute.lastRouteId}"
 
     private fun getKey(
         userId: Long,
         lastRouteId: String
-    ) = "notification:$userId:$lastRouteId"
+    ) = "user-routes:$userId:$lastRouteId"
 }

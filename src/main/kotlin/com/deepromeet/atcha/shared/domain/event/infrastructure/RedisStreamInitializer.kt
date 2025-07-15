@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.userroute.infrastructure.redis
+package com.deepromeet.atcha.shared.domain.event.infrastructure
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.RedisBusyException
@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component
 @Component
 class RedisStreamInitializer(
     private val redisTemplate: RedisTemplate<String, String>,
-    @Value("\${redis.stream.notification.key}")
+    @Value("\${redis.stream.event.key}")
     private val streamKey: String,
-    @Value("\${redis.stream.notification.group}")
+    @Value("\${redis.stream.event.group}")
     private val groupName: String
 ) : InitializingBean {
     private val streamOps = redisTemplate.opsForStream<String, String>()

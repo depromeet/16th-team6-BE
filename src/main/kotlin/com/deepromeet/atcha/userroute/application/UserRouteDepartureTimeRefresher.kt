@@ -1,11 +1,14 @@
-package com.deepromeet.atcha.transit.domain.route
+package com.deepromeet.atcha.userroute.application
 
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusManager
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
+import com.deepromeet.atcha.transit.domain.route.LastRoute
+import com.deepromeet.atcha.transit.domain.route.LastRouteAppender
+import com.deepromeet.atcha.transit.domain.route.LastRouteLeg
+import com.deepromeet.atcha.transit.domain.route.LastRouteReader
 import com.deepromeet.atcha.userroute.domain.UserRoute
-import com.deepromeet.atcha.userroute.domain.UserRouteManager
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -20,7 +23,7 @@ data class OptimalDepartureTime(
 )
 
 @Component
-class LastRouteDepartureTimeRefresher(
+class UserRouteDepartureTimeRefresher(
     private val userRouteManager: UserRouteManager,
     private val lastRouteAppender: LastRouteAppender,
     private val busManager: BusManager,
@@ -38,7 +41,7 @@ class LastRouteDepartureTimeRefresher(
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
         val timeTable = extractBusTimeTable(firstBusLeg) ?: return null
 
-        if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
+//        if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
 
         // 2) 실시간 도착 정보 조회
         val arrivalInfos = getBusRealTimeInfo(firstBusLeg) ?: return null

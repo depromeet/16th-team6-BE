@@ -1,7 +1,9 @@
-package com.deepromeet.atcha.userroute.domain
+package com.deepromeet.atcha.userroute.application
 
 import com.deepromeet.atcha.transit.domain.route.LastRoute
 import com.deepromeet.atcha.user.domain.User
+import com.deepromeet.atcha.userroute.domain.UserRoute
+import com.deepromeet.atcha.userroute.domain.UserRouteRepository
 import org.springframework.stereotype.Component
 
 @Component

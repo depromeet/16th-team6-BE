@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.userroute.domain
+package com.deepromeet.atcha.userroute.application
 
 import com.deepromeet.atcha.transit.domain.route.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
