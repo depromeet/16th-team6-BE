@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
-import com.deepromeet.atcha.auth.domain.AuthProvider
+import com.deepromeet.atcha.auth.application.AuthProvider
 import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import org.springframework.stereotype.Component

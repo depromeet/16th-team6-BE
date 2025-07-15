@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
+import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
-import com.deepromeet.atcha.transit.domain.route.LastRoute
-import com.deepromeet.atcha.userroute.domain.UserRoute
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature

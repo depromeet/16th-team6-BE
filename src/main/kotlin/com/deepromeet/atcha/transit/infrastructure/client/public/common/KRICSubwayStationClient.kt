@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
+import com.deepromeet.atcha.transit.application.subway.SubwayStationFetcher
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
-import com.deepromeet.atcha.transit.domain.subway.SubwayStationFetcher
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

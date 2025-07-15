@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.location.infrastructure.client
 
+import com.deepromeet.atcha.location.application.POIFinder
+import com.deepromeet.atcha.location.application.ReverseGeocoder
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.Location
 import com.deepromeet.atcha.location.domain.POI
-import com.deepromeet.atcha.location.domain.POIFinder
-import com.deepromeet.atcha.location.domain.ReverseGeocoder
 import org.springframework.stereotype.Component
 
 @Component

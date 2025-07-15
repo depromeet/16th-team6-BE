@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.route.LastRouteIndexCache
+import com.deepromeet.atcha.route.application.LastRouteIndexCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.util.concurrent.TimeUnit

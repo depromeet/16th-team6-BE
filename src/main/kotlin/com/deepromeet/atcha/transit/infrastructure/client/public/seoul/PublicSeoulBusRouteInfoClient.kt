@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul
 
+import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
+import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRouteInfoClient
-import com.deepromeet.atcha.transit.domain.bus.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule

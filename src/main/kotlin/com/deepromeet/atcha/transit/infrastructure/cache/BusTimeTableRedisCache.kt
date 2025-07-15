@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.transit.application.bus.BusTimeTableCache
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.bus.BusTimeTableCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime

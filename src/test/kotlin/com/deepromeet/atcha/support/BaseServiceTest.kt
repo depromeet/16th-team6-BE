@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.transit.domain.route.LastRouteAppender
-import com.deepromeet.atcha.user.domain.UserAppender
+import com.deepromeet.atcha.route.application.LastRouteAppender
+import com.deepromeet.atcha.user.application.UserAppender
 import org.junit.jupiter.api.extension.ExtendWith
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest

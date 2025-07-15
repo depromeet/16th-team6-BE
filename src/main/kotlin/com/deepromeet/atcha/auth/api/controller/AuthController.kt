@@ -5,7 +5,7 @@ import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
-import com.deepromeet.atcha.auth.domain.AuthService
+import com.deepromeet.atcha.auth.application.AuthService
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import com.deepromeet.atcha.common.token.Token
 import com.deepromeet.atcha.common.web.ApiResponse

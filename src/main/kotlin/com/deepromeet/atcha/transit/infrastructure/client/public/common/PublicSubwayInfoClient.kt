@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
+import com.deepromeet.atcha.transit.application.TransitNameComparer
+import com.deepromeet.atcha.transit.application.subway.SubwayInfoClient
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.TransitNameComparer
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
-import com.deepromeet.atcha.transit.domain.subway.SubwayInfoClient
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
 import com.deepromeet.atcha.transit.domain.subway.SubwayTime

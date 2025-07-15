@@ -1,12 +1,12 @@
 package com.deepromeet.atcha.user.api.controller
 
-import com.deepromeet.atcha.app.domain.AppService
+import com.deepromeet.atcha.app.application.AppService
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
-import com.deepromeet.atcha.user.domain.UserService
+import com.deepromeet.atcha.user.application.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
