@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.notification.domatin.UserLastRoute
-import com.deepromeet.atcha.notification.domatin.UserLastRouteManager
-import com.deepromeet.atcha.notification.domatin.UserLastRouteReader
+import com.deepromeet.atcha.notification.domain.UserLastRoute
+import com.deepromeet.atcha.notification.domain.UserLastRouteManager
+import com.deepromeet.atcha.notification.domain.UserLastRouteReader
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -28,30 +28,61 @@ class RouteDepartureTimeRefresher(
         val oldDeparture = LocalDateTime.parse(notification.departureTime, formatter)
         val route = lastRouteReader.read(notification.lastRouteId)
 
-        // 1) 버스 구간 및 시간표
-        val firstTransit = route.findFirstTransit()
-        if (!firstTransit.isBus()) return null
-
-        val timeTable = (firstTransit.transitInfo as? TransitInfo.BusInfo)?.timeTable ?: return null
+        // 1) 버스 구간 및 시간표 추출
+        val firstTransit = extractFirstBusTransit(route) ?: return null
+        val timeTable = extractBusTimeTable(firstTransit) ?: return null
 
         if (isNotRefreshTarget(oldDeparture, timeTable.term)) return null
 
-        // 2) 실시간 도착 정보
-        val arrivalInfos =
-            busManager.getRealTimeArrival(
-                firstTransit.resolveRouteName(),
-                firstTransit.toBusStationMeta(),
-                firstTransit.passStopList!!
-            ).realTimeInfoList.ifEmpty { return null }
+        // 2) 실시간 도착 정보 조회
+        val arrivalInfos = getBusRealTimeInfo(firstTransit) ?: return null
 
-        // 3) 도착 후보 시각 계산
+        // 3) 도착 후보 시각 계산 및 최적 출발시간 결정
+        val optimalTimes =
+            calculateOptimalDepartureTimes(
+                arrivalInfos,
+                timeTable,
+                firstTransit,
+                route
+            ) ?: return null
+
+        // 4) 갱신된 route 및 알림 저장
+        return saveUpdatedRoute(notification, route, firstTransit, optimalTimes)
+    }
+
+    private fun extractFirstBusTransit(route: LastRoute): LastRouteLeg? {
+        val firstTransit = route.findFirstTransit()
+        return if (firstTransit.isBus()) firstTransit else null
+    }
+
+    private fun extractBusTimeTable(transit: LastRouteLeg): BusTimeTable? {
+        return (transit.transitInfo as? TransitInfo.BusInfo)?.timeTable
+    }
+
+    private suspend fun getBusRealTimeInfo(firstTransit: LastRouteLeg): List<BusRealTimeInfo>? {
+        return busManager.getRealTimeArrival(
+            firstTransit.resolveRouteName(),
+            firstTransit.toBusStationMeta(),
+            firstTransit.passStopList!!
+        ).realTimeInfoList.ifEmpty { null }
+    }
+
+    private fun calculateOptimalDepartureTimes(
+        arrivalInfos: List<BusRealTimeInfo>,
+        timeTable: BusTimeTable,
+        firstTransit: LastRouteLeg,
+        route: LastRoute
+    ): Pair<LocalDateTime, LocalDateTime>? {
+        // 도착 후보 시각 생성
         val candidateArrivals =
             createArrivalCandidates(arrivalInfos, timeTable.term)
                 .filter { it.isBefore(timeTable.lastTime) }
                 .toSet()
 
+        // 실행 가능한 출발시간 계산
         val now = LocalDateTime.now()
         val walkSec = calcWalkSecBefore(firstTransit, route)
+
         val feasible =
             candidateArrivals.mapNotNull { arrival ->
                 val dep =
@@ -61,10 +92,18 @@ class RouteDepartureTimeRefresher(
                 if (dep.isAfter(now)) arrival to dep else null
             }
 
-        val (chosenArrival, newDeparture) = feasible.minByOrNull { it.second } ?: return null
+        return feasible.minByOrNull { it.second }
+    }
 
-        // 5) 갱신된 route 및 알림 저장
-        val updatedRoute = route.updateWithNewTimes(firstTransit, chosenArrival, newDeparture)
+    private suspend fun saveUpdatedRoute(
+        notification: UserLastRoute,
+        route: LastRoute,
+        busLeg: LastRouteLeg,
+        optimalTimes: Pair<LocalDateTime, LocalDateTime>
+    ): UserLastRoute {
+        val (chosenArrival, newDeparture) = optimalTimes
+
+        val updatedRoute = updateRouteWithNewTimes(route, busLeg, chosenArrival, newDeparture)
         lastRouteAppender.append(updatedRoute)
 
         return userLastRouteManager.saveUserNotification(
@@ -72,7 +111,7 @@ class RouteDepartureTimeRefresher(
         )
     }
 
-    /** “20분 + 배차 간격” 이내가 아니면 갱신 금지 */
+    /** "20분 + 배차 간격" 이내가 아니면 갱신 금지 */
     private fun isNotRefreshTarget(
         oldDeparture: LocalDateTime,
         busTerm: Int
@@ -108,15 +147,16 @@ class RouteDepartureTimeRefresher(
             .filter { it.mode == "WALK" }
             .sumOf { it.sectionTime }
 
-    private fun LastRoute.updateWithNewTimes(
+    private fun updateRouteWithNewTimes(
+        route: LastRoute,
         busLeg: LastRouteLeg,
         newBusDeparture: LocalDateTime,
         newRouteDeparture: LocalDateTime
     ): LastRoute {
         val updatedBusLeg = busLeg.copy(departureDateTime = newBusDeparture.format(formatter))
-        val updatedLegs = legs.map { if (it == busLeg) updatedBusLeg else it }
+        val updatedLegs = route.legs.map { if (it == busLeg) updatedBusLeg else it }
 
-        return copy(
+        return route.copy(
             departureDateTime = newRouteDeparture.format(formatter),
             legs = updatedLegs
         )

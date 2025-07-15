@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.domain
 
 enum class NotificationType(
     val value: Int

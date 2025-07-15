@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.notification.domatin.UserLastRouteReader
+import com.deepromeet.atcha.notification.domain.UserLastRouteReader
 import com.deepromeet.atcha.transit.domain.LastRouteAppender
 import com.deepromeet.atcha.user.domain.UserAppender
 import org.junit.jupiter.api.extension.ExtendWith

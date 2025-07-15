@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.domain
 
 interface UserLastRouteRepository {
     fun save(userLastRoute: UserLastRoute): UserLastRoute

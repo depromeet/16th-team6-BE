@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
-import com.deepromeet.atcha.notification.domatin.UserLastRoute
-import com.deepromeet.atcha.notification.domatin.UserLastRouteStreamProducer
+import com.deepromeet.atcha.notification.domain.UserLastRoute
+import com.deepromeet.atcha.notification.domain.UserLastRouteStreamProducer
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.connection.stream.StreamRecords

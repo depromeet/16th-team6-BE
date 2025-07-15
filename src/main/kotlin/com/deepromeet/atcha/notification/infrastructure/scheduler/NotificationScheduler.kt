@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.notification.infrastructure.scheduler
 
-import com.deepromeet.atcha.notification.domatin.UserLastRouteStreamProducer
+import com.deepromeet.atcha.notification.domain.UserLastRouteStreamProducer
 import com.deepromeet.atcha.transit.domain.RouteDepartureTimeRefresher
 import kotlinx.coroutines.runBlocking
 import net.javacrumbs.shedlock.spring.annotation.SchedulerLock

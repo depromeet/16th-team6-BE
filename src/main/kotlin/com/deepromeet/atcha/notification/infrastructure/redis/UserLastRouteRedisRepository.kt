@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
-import com.deepromeet.atcha.notification.domatin.UserLastRoute
-import com.deepromeet.atcha.notification.domatin.UserLastRouteRepository
+import com.deepromeet.atcha.notification.domain.UserLastRoute
+import com.deepromeet.atcha.notification.domain.UserLastRouteRepository
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.stereotype.Component

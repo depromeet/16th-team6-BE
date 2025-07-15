@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.notification.domatin.UserLastRoute
+import com.deepromeet.atcha.notification.domain.UserLastRoute
 import com.deepromeet.atcha.transit.domain.BusPosition
 import com.deepromeet.atcha.transit.domain.LastRoute
 import com.fasterxml.jackson.databind.DeserializationFeature

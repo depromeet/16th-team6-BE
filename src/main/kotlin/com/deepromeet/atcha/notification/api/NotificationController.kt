@@ -2,7 +2,7 @@ package com.deepromeet.atcha.notification.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
 import com.deepromeet.atcha.notification.api.request.NotificationRequest
-import com.deepromeet.atcha.notification.domatin.UserLastRouteService
+import com.deepromeet.atcha.notification.domain.UserLastRouteService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute

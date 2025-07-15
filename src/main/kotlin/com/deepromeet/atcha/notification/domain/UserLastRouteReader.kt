@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.domain
 
 import com.deepromeet.atcha.notification.exception.NotificationError
 import com.deepromeet.atcha.notification.exception.NotificationException

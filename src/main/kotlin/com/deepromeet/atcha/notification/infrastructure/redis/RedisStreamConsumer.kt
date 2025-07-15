@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
-import com.deepromeet.atcha.notification.domatin.Messaging
-import com.deepromeet.atcha.notification.domatin.MessagingProvider
-import com.deepromeet.atcha.notification.domatin.NotificationContentManager
-import com.deepromeet.atcha.notification.domatin.NotificationType
-import com.deepromeet.atcha.notification.domatin.UserLastRoute
+import com.deepromeet.atcha.notification.domain.Messaging
+import com.deepromeet.atcha.notification.domain.MessagingProvider
+import com.deepromeet.atcha.notification.domain.NotificationContentManager
+import com.deepromeet.atcha.notification.domain.NotificationType
+import com.deepromeet.atcha.notification.domain.UserLastRoute
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value

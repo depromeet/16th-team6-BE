@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.domain
 
 import org.springframework.stereotype.Component
 

@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.domatin
+package com.deepromeet.atcha.notification.domain
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
