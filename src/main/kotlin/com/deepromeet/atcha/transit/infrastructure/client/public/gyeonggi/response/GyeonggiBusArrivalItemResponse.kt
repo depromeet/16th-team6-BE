@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response
 
-import com.deepromeet.atcha.transit.domain.BusCongestion
-import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.BusRealTimeInfo
-import com.deepromeet.atcha.transit.domain.BusStatus
+import com.deepromeet.atcha.transit.domain.bus.BusCongestion
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
 data class GyeonggiBusArrivalItemResponse(

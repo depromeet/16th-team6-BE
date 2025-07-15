@@ -1,5 +1,10 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusStation
+import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
+import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.fasterxml.jackson.annotation.JsonSubTypes
 import com.fasterxml.jackson.annotation.JsonTypeInfo
 

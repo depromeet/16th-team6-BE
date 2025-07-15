@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
-import com.deepromeet.atcha.transit.domain.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils

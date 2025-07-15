@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.domain.route.LastRouteSortType
 import org.springframework.core.convert.converter.Converter
 import org.springframework.stereotype.Component
 

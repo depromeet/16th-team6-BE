@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteStationList
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
 import com.fasterxml.jackson.core.type.TypeReference

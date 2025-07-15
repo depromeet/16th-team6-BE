@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
-import com.deepromeet.atcha.transit.domain.BusSchedule
-import com.deepromeet.atcha.transit.domain.BusScheduleProvider
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusScheduleProvider
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

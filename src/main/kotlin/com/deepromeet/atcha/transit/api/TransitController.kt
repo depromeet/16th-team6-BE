@@ -9,10 +9,10 @@ import com.deepromeet.atcha.transit.api.request.TaxiFareRequest
 import com.deepromeet.atcha.transit.api.response.BusArrivalResponse
 import com.deepromeet.atcha.transit.api.response.BusRoutePositionResponse
 import com.deepromeet.atcha.transit.api.response.LastRouteResponse
-import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.Fare
-import com.deepromeet.atcha.transit.domain.LastRoute
 import com.deepromeet.atcha.transit.domain.TransitService
+import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.route.LastRoute
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.springframework.http.MediaType

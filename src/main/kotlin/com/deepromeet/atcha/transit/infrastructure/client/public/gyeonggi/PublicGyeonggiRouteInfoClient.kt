@@ -1,14 +1,14 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi
 
-import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
-import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
-import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
-import com.deepromeet.atcha.transit.domain.BusRouteStationList
-import com.deepromeet.atcha.transit.domain.BusSchedule
 import com.deepromeet.atcha.transit.domain.DailyTypeResolver
 import com.deepromeet.atcha.transit.domain.TransitType
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils

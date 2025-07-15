@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi
 
-import com.deepromeet.atcha.transit.domain.BusPosition
-import com.deepromeet.atcha.transit.domain.BusPositionFetcher
-import com.deepromeet.atcha.transit.domain.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusPosition
+import com.deepromeet.atcha.transit.domain.bus.BusPositionFetcher
+import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils

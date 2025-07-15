@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.transit.domain.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule

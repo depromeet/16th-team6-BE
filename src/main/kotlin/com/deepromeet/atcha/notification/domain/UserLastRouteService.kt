@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.notification.domain
 
-import com.deepromeet.atcha.transit.domain.LastRouteReader
+import com.deepromeet.atcha.transit.domain.route.LastRouteReader
 import com.deepromeet.atcha.user.domain.UserReader
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime

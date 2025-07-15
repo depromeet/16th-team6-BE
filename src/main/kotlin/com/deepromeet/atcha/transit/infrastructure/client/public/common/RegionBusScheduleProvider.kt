@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
-import com.deepromeet.atcha.transit.domain.BusRouteInfo
-import com.deepromeet.atcha.transit.domain.BusRouteInfoClient
-import com.deepromeet.atcha.transit.domain.BusSchedule
-import com.deepromeet.atcha.transit.domain.BusScheduleProvider
-import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfoClient
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusScheduleProvider
+import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.CancellationException
 import org.springframework.core.annotation.Order
