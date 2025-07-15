@@ -1,11 +1,11 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.response
 
+import com.deepromeet.atcha.transit.application.subway.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationId
-import com.deepromeet.atcha.transit.domain.subway.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.ItemDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize

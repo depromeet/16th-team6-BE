@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.notification.application
 
 import com.deepromeet.atcha.notification.domain.RouteRefreshNotificationData
+import com.deepromeet.atcha.route.domain.UserRoute
+import com.deepromeet.atcha.route.domain.event.UserRouteRefreshedEvent
 import com.deepromeet.atcha.shared.domain.event.domain.EventHandler
-import com.deepromeet.atcha.userroute.domain.UserRoute
-import com.deepromeet.atcha.userroute.domain.event.UserRouteRefreshedEvent
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component

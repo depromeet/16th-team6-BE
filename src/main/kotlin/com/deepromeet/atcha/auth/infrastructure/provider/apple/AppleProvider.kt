@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.apple
 
-import com.deepromeet.atcha.auth.domain.AuthProvider
+import com.deepromeet.atcha.auth.application.AuthProvider
 import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import org.springframework.stereotype.Component

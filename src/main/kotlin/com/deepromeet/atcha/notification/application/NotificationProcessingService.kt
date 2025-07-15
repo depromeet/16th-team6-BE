@@ -3,7 +3,6 @@ package com.deepromeet.atcha.notification.application
 import com.deepromeet.atcha.notification.domain.Messaging
 import com.deepromeet.atcha.notification.domain.NotificationContentCreator
 import com.deepromeet.atcha.notification.domain.NotificationData
-import com.deepromeet.atcha.notification.domain.NotificationDuplicateChecker
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 

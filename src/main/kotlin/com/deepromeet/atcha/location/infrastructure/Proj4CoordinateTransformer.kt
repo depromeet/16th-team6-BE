@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.location.infrastructure
 
+import com.deepromeet.atcha.location.application.CoordinateTransformer
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.location.domain.CoordinateTransformer
 import org.locationtech.proj4j.BasicCoordinateTransform
 import org.locationtech.proj4j.CRSFactory
 import org.locationtech.proj4j.ProjCoordinate

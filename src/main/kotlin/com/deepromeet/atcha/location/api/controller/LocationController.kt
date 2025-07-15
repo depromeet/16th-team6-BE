@@ -6,8 +6,8 @@ import com.deepromeet.atcha.location.api.request.POIHistoryRequest
 import com.deepromeet.atcha.location.api.request.POISearchRequest
 import com.deepromeet.atcha.location.api.response.LocationResponse
 import com.deepromeet.atcha.location.api.response.POIResponse
+import com.deepromeet.atcha.location.application.LocationService
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.location.domain.LocationService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping

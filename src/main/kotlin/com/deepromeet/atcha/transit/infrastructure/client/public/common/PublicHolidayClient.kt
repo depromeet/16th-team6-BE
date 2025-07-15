@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
-import com.deepromeet.atcha.transit.domain.HolidayFetcher
+import com.deepromeet.atcha.transit.application.HolidayFetcher
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.HolidayResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import io.github.oshai.kotlinlogging.KotlinLogging

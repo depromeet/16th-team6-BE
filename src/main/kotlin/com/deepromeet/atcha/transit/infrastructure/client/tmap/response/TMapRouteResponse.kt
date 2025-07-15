@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.route.Station
+import com.deepromeet.atcha.route.domain.Station
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
 data class TMapRouteResponse(

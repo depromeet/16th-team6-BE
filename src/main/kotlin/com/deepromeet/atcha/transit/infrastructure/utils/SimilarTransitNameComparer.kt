@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.utils
 
-import com.deepromeet.atcha.transit.domain.TransitNameComparer
+import com.deepromeet.atcha.transit.application.TransitNameComparer
 import org.apache.commons.text.similarity.JaroWinklerSimilarity
 import org.springframework.stereotype.Component
 

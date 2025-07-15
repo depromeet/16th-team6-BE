@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.location.infrastructure.cache
 
+import com.deepromeet.atcha.location.application.POIHistoryQueue
 import com.deepromeet.atcha.location.domain.POI
-import com.deepromeet.atcha.location.domain.POIHistoryQueue
 import com.deepromeet.atcha.user.domain.User
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate

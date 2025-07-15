@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.kakao
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.application.TaxiFareFetcher
 import com.deepromeet.atcha.transit.domain.Fare
-import com.deepromeet.atcha.transit.domain.TaxiFareFetcher
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import org.springframework.stereotype.Component

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
-import com.deepromeet.atcha.transit.domain.HolidayCache
+import com.deepromeet.atcha.transit.application.HolidayCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.time.LocalDate

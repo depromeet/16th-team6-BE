@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.notification.infrastructure.fcm
 
+import com.deepromeet.atcha.notification.application.MessagingProvider
 import com.deepromeet.atcha.notification.domain.Messaging
-import com.deepromeet.atcha.notification.domain.MessagingProvider
 import com.google.firebase.messaging.FirebaseMessaging
 import com.google.firebase.messaging.FirebaseMessagingException
 import com.google.firebase.messaging.Message

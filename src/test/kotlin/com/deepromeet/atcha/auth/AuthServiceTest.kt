@@ -1,15 +1,15 @@
 package com.deepromeet.atcha.auth
 
-import com.deepromeet.atcha.auth.domain.AuthService
+import com.deepromeet.atcha.auth.application.AuthService
+import com.deepromeet.atcha.auth.application.UserProviderAppender
 import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.ProviderToken
-import com.deepromeet.atcha.auth.domain.UserProviderAppender
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.support.fixture.UserFixture
-import com.deepromeet.atcha.user.domain.UserAppender
+import com.deepromeet.atcha.user.application.UserAppender
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test

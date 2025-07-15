@@ -1,15 +1,15 @@
 package com.deepromeet.atcha.user
 
-import com.deepromeet.atcha.app.domain.AppVersionAppender
+import com.deepromeet.atcha.app.application.AppVersionAppender
 import com.deepromeet.atcha.common.token.TokenGenerator
 import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
+import com.deepromeet.atcha.user.application.UserAppender
+import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.User
-import com.deepromeet.atcha.user.domain.UserAppender
-import com.deepromeet.atcha.user.domain.UserReader
 import com.deepromeet.atcha.user.exception.UserException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
