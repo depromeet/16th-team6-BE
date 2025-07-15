@@ -22,7 +22,7 @@ object LastRouteFixture {
         legs: List<LastRouteLeg> = listOf(createLastRouteLegFixture())
     ): LastRoute {
         return LastRoute(
-            routeId = routeId,
+            id = routeId,
             departureDateTime = departureDateTime,
             totalTime = totalTime,
             totalWalkTime = totalWalkTime,

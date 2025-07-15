@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.notification.domain.UserLastRoute
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.deepromeet.atcha.transit.domain.route.LastRoute
+import com.deepromeet.atcha.userroute.domain.UserRoute
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -107,7 +107,7 @@ class ProdRedisConfig(
     @Bean
     fun routeNotificationRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, UserLastRoute> {
-        return createRedisTemplate(redisConnectionFactory, UserLastRoute::class.java)
+    ): RedisTemplate<String, UserRoute> {
+        return createRedisTemplate(redisConnectionFactory, UserRoute::class.java)
     }
 }

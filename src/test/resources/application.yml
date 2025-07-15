@@ -57,11 +57,11 @@ redis:
   host: localhost
   port: 6379
   stream:
-    notification:
-      key: "stream:notification"
-      group: "notification-group"
+    event:
+      key: "atcha:events"
+      group: "event-processor"
       dead-letter:
-        key: "stream:notification:dead-letter"
+        key: "atcha:events:dead-letter"
 
 open-api:
   limits:

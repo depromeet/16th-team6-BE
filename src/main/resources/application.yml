@@ -63,8 +63,6 @@ open-api:
       incheon-arrival: 10
       incheon-position: 10
 
-
-
 kric:
   api:
     url:
@@ -72,8 +70,8 @@ kric:
 
 redis:
   stream:
-    notification:
-      key: "stream:notification"
-      group: "notification-group"
+    event:
+      key: "atcha:events"
+      group: "event-processor"
       dead-letter:
-        key: "stream:notification:dead-letter"
+        key: "atcha:events:dead-letter"

@@ -53,65 +53,11 @@ class TransitRouteClientV2(
             }
         }
 
-        return filterValidItinerariesV2(
-            response.metaData?.plan?.itineraries
-                ?: throw TransitException.of(
-                    TransitError.TRANSIT_API_ERROR,
-                    "경로 검색 API에서 유효한 여행 경로를 반환하지 않았습니다."
-                )
-        )
-    }
-
-    private fun filterValidItinerariesV2(itineraries: List<Itinerary>): List<Itinerary> {
-        fun isValidItinerary(itinerary: Itinerary): Boolean {
-            var hasValidModes = false
-            var hasExpressSubway = false
-            var busCount = 0
-            var transitCount = 0
-            var isFirstTransit = true
-            var hasInvalid = false
-            var hasNBUS = false
-
-            for (leg in itinerary.legs) {
-                when (leg.mode) {
-                    "WALK" -> hasValidModes = true
-                    "SUBWAY" -> {
-                        transitCount++
-                        if (leg.route?.contains("(급행)") == true) {
-                            hasExpressSubway = true
-                        } else {
-                            hasValidModes = true
-                        }
-                    }
-                    "BUS" -> {
-                        transitCount++
-                        if (!isFirstTransit) {
-                            busCount++
-                        }
-                        hasValidModes = true
-                        if (leg.route!!.contains("N")) {
-                            hasNBUS = true
-                        }
-                        isFirstTransit = false
-                    }
-                    else -> {
-                        hasInvalid = true
-                        break
-                    }
-                }
-            }
-
-            return !hasInvalid &&
-                !hasExpressSubway &&
-                hasValidModes &&
-                !hasNBUS &&
-                busCount <= 2 &&
-                transitCount < 4
-        }
-
-        val filtered = itineraries.filter { itinerary -> isValidItinerary(itinerary) }
-        log.info { "필터링 로직에서 ${itineraries.size}개의 경로 중 ${filtered.size}개가 유효한 경로로 필터링되었습니다." }
-        return filtered
+        return response.metaData?.plan?.itineraries
+            ?: throw TransitException.of(
+                TransitError.TRANSIT_API_ERROR,
+                "경로 검색 API에서 유효한 여행 경로를 반환하지 않았습니다."
+            )
     }
 
     private fun validateServiceRegion(

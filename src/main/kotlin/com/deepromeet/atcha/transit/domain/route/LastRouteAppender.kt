@@ -17,7 +17,7 @@ class LastRouteAppender(
         end: Coordinate,
         routes: List<LastRoute>
     ) {
-        lastRouteIndexCache.cache(start, end, routes.map { it.routeId })
+        lastRouteIndexCache.cache(start, end, routes.map { it.id })
         routes.forEach { route ->
             lastRouteCache.cache(route)
         }
