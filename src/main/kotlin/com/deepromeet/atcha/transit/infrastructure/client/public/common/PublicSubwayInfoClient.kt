@@ -1,13 +1,13 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.SubwayInfoClient
-import com.deepromeet.atcha.transit.domain.SubwayStation
-import com.deepromeet.atcha.transit.domain.SubwayTime
-import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.domain.TransitNameComparer
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
+import com.deepromeet.atcha.transit.domain.subway.SubwayInfoClient
+import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
+import com.deepromeet.atcha.transit.domain.subway.SubwayTime
+import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayJsonResponse.Companion.isSubwayApiLimitExceeded

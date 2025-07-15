@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.SubwayStation
-import com.deepromeet.atcha.transit.domain.SubwayTimeTable
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
+import com.deepromeet.atcha.transit.domain.subway.SubwayStation
+import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTableCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
