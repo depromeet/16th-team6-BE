@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
-import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
-import com.deepromeet.atcha.transit.domain.BusServiceHours
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
+import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.bus.BusServiceHours
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 

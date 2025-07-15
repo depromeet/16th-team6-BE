@@ -10,7 +10,8 @@ enum class NotificationError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    INVALID_ROUTE_ID(400, "NTF_001", "유효하지 않은 경로 ID 입니다.", LogLevel.ERROR)
+    INVALID_ROUTE_ID(400, "NTF_001", "유효하지 않은 경로 ID 입니다.", LogLevel.ERROR),
+    NOTIFICATION_NOT_FOUND(404, "NTF_002", "해당하는 알림을 찾을 수 없습니다.", LogLevel.ERROR)
 }
 
 class NotificationException(

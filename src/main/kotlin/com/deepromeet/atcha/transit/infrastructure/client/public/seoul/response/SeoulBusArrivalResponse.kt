@@ -1,15 +1,15 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
-import com.deepromeet.atcha.transit.domain.BusCongestion
-import com.deepromeet.atcha.transit.domain.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.BusRealTimeInfo
-import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusSchedule
-import com.deepromeet.atcha.transit.domain.BusStation
-import com.deepromeet.atcha.transit.domain.BusStatus
-import com.deepromeet.atcha.transit.domain.BusTimeTable
-import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.bus.BusCongestion
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusStation
+import com.deepromeet.atcha.transit.domain.bus.BusStatus
+import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
+import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty

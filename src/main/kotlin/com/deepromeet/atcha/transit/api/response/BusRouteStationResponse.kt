@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.api.response
 
-import com.deepromeet.atcha.transit.domain.BusRouteStation
+import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
 
 data class BusRouteStationResponse(
     val busRouteId: String,

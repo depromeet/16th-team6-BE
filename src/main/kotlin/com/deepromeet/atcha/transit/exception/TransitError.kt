@@ -11,7 +11,8 @@ enum class TransitError(
     override val logLevel: LogLevel
 ) : BaseErrorType {
     TRANSIT_API_ERROR(500, "TRS_001", "대중교통 API 호출 중 에러가 발생했습니다", LogLevel.ERROR),
-    TAXI_FARE_FETCH_FAILED(500, "TRS_002", "택시 요금 조회에 실패했습니다", LogLevel.ERROR),
+    TAXI_FARE_FETCH_FAILED(500, "TRS_002", "알수 없는 이유로 택시 요금 조회에 실패했습니다", LogLevel.ERROR),
+    TAXI_START_NOT_FOUND(400, "TRS_003", "출발지 주변에 도로가 없습니다. 다시 설정해주세요.", LogLevel.WARN),
     NOT_FOUND_SUBWAY_STATION(404, "TRS_006", "지하철 역을 찾을 수 없습니다", LogLevel.ERROR),
     NOT_FOUND_SUBWAY_ROUTE(404, "TRS_009", "지하철 노선을 찾을 수 없습니다", LogLevel.ERROR),
     DISTANCE_TOO_SHORT(400, "TRS_011", "출발지와 도착지 간 거리가 너무 가깝습니다.", LogLevel.ERROR),

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.RegionIdentifier
+import com.deepromeet.atcha.transit.domain.region.RegionIdentifier
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest

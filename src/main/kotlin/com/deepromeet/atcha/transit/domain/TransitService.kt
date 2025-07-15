@@ -1,6 +1,21 @@
 package com.deepromeet.atcha.transit.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
+import com.deepromeet.atcha.transit.domain.bus.BusManager
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
+import com.deepromeet.atcha.transit.domain.bus.StartedBusCache
+import com.deepromeet.atcha.transit.domain.region.ServiceRegionValidator
+import com.deepromeet.atcha.transit.domain.route.ItineraryValidator
+import com.deepromeet.atcha.transit.domain.route.LastRoute
+import com.deepromeet.atcha.transit.domain.route.LastRouteOperations
+import com.deepromeet.atcha.transit.domain.route.LastRouteOperationsV2
+import com.deepromeet.atcha.transit.domain.route.LastRouteReader
+import com.deepromeet.atcha.transit.domain.route.LastRouteSortType
+import com.deepromeet.atcha.transit.domain.route.sort
+import com.deepromeet.atcha.transit.domain.subway.SubwayStationBatchAppender
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.user.domain.UserReader
@@ -54,9 +69,6 @@ class TransitService(
         sortType: LastRouteSortType
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes.sort(sortType)
-        }
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)

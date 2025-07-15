@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.incheon.response
 
-import com.deepromeet.atcha.transit.domain.BusCongestion
-import com.deepromeet.atcha.transit.domain.BusPosition
+import com.deepromeet.atcha.transit.domain.bus.BusCongestion
+import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
 data class IncheonBusPositionResponse(

@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.notification.infrastructure.redis
 
-import com.deepromeet.atcha.notification.domatin.Messaging
-import com.deepromeet.atcha.notification.domatin.MessagingProvider
-import com.deepromeet.atcha.notification.domatin.NotificationContentManager
-import com.deepromeet.atcha.notification.domatin.UserNotification
-import com.deepromeet.atcha.notification.domatin.UserNotificationFrequency
+import com.deepromeet.atcha.notification.domain.Messaging
+import com.deepromeet.atcha.notification.domain.MessagingProvider
+import com.deepromeet.atcha.notification.domain.NotificationContentManager
+import com.deepromeet.atcha.notification.domain.NotificationType
+import com.deepromeet.atcha.notification.domain.UserLastRoute
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -23,15 +23,7 @@ import java.net.InetAddress
 import java.time.Duration
 
 private const val PAYLOAD = "payload"
-private const val IDEMPOTENCY_KEY_PREFIX = "notification:processed:"
-private val IDEMPOTENCY_KEY_TTL =
-    Duration.ofMinutes(
-        UserNotificationFrequency
-            .entries
-            .toTypedArray()
-            .max()
-            .minutes
-    )
+private const val IDEMPOTENCY_KEY_PREFIX = "notification:processed"
 
 @Service
 class RedisStreamConsumer(
@@ -64,26 +56,30 @@ class RedisStreamConsumer(
             )
 
         messages?.forEach { message ->
-            val userNotification =
+            val userLastRoute =
                 runCatching {
-                    objectMapper.readValue(message.value[PAYLOAD], UserNotification::class.java)
+                    objectMapper.readValue(message.value[PAYLOAD], UserLastRoute::class.java)
                 }.getOrElse {
                     log.error("메시지 역직렬화 실패. Dead Letter로 이동: ${message.id}", it)
                     handleDeadLetter(false, message, message.value[PAYLOAD])
                     return@forEach
                 }
 
-            val idempotencyKey = createIdempotencyKey(userNotification)
+            val idempotencyKey = createIdempotencyKey(userLastRoute)
             val isNew =
                 valueOps.setIfAbsent(
                     idempotencyKey,
                     message.id.toString(),
-                    IDEMPOTENCY_KEY_TTL
+                    Duration.ofHours(2)
                 )
 
             if (isNew == true) {
-                val content = notificationContentManager.createPushNotification(userNotification)
-                val messaging = Messaging(content, userNotification.token)
+                val content =
+                    notificationContentManager.createPushNotification(
+                        userLastRoute,
+                        NotificationType.REFRESH
+                    )
+                val messaging = Messaging(content, userLastRoute.token)
 
                 if (!messagingProvider.send(messaging)) {
                     log.warn("⚠️️ 알림 전송 실패: $idempotencyKey")
@@ -129,7 +125,7 @@ class RedisStreamConsumer(
         claimedMessages.forEach { message ->
             val json = message.value[PAYLOAD]
             runCatching {
-                objectMapper.readValue(json, UserNotification::class.java)
+                objectMapper.readValue(json, UserLastRoute::class.java)
             }.getOrElse {
                 streamOps.add(deadLetterKey, mapOf(PAYLOAD to json))
                 streamOps.acknowledge(streamKey, groupName, message.id)
@@ -145,14 +141,14 @@ class RedisStreamConsumer(
 
     private fun createMessaging(message: MapRecord<String, String, String>): Messaging {
         val json = message.value[PAYLOAD]
-        val userNotification = objectMapper.readValue(json, UserNotification::class.java)
-        val content = notificationContentManager.createPushNotification(userNotification)
-        val messaging = Messaging(content, userNotification.token)
+        val userLastRoute = objectMapper.readValue(json, UserLastRoute::class.java)
+        val content = notificationContentManager.createPushNotification(userLastRoute, NotificationType.REFRESH)
+        val messaging = Messaging(content, userLastRoute.token)
         return messaging
     }
 
-    private fun createIdempotencyKey(userNotification: UserNotification): String {
-        return "$IDEMPOTENCY_KEY_PREFIX${userNotification.lastRouteId}-${userNotification.userNotificationFrequency}"
+    private fun createIdempotencyKey(userLastRoute: UserLastRoute): String {
+        return "$IDEMPOTENCY_KEY_PREFIX:${userLastRoute.userId}:${userLastRoute.lastRouteId}:${userLastRoute.updatedAt}"
     }
 
     private fun handleDeadLetter(

@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.support.fixture
 
-import com.deepromeet.atcha.transit.domain.LastRoute
-import com.deepromeet.atcha.transit.domain.LastRouteLeg
-import com.deepromeet.atcha.transit.domain.Station
 import com.deepromeet.atcha.transit.domain.TransitInfo
+import com.deepromeet.atcha.transit.domain.route.LastRoute
+import com.deepromeet.atcha.transit.domain.route.LastRouteLeg
+import com.deepromeet.atcha.transit.domain.route.Station
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step

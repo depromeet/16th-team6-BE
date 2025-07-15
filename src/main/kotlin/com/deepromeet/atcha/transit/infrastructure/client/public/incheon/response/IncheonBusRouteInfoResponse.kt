@@ -1,16 +1,16 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.incheon.response
 
-import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusRouteOperationInfo
-import com.deepromeet.atcha.transit.domain.BusRouteStation
-import com.deepromeet.atcha.transit.domain.BusSchedule
-import com.deepromeet.atcha.transit.domain.BusServiceHours
-import com.deepromeet.atcha.transit.domain.BusTimeTable
-import com.deepromeet.atcha.transit.domain.BusTravelTimeCalculator
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusServiceHours
+import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
+import com.deepromeet.atcha.transit.domain.bus.BusTravelTimeCalculator
+import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
