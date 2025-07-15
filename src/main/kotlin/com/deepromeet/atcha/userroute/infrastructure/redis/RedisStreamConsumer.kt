@@ -1,10 +1,10 @@
-package com.deepromeet.atcha.notification.infrastructure.redis
+package com.deepromeet.atcha.userroute.infrastructure.redis
 
 import com.deepromeet.atcha.notification.domain.Messaging
 import com.deepromeet.atcha.notification.domain.MessagingProvider
 import com.deepromeet.atcha.notification.domain.NotificationContentManager
 import com.deepromeet.atcha.notification.domain.NotificationType
-import com.deepromeet.atcha.notification.domain.UserLastRoute
+import com.deepromeet.atcha.userroute.domain.UserRoute
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
@@ -56,16 +56,16 @@ class RedisStreamConsumer(
             )
 
         messages?.forEach { message ->
-            val userLastRoute =
+            val userRoute =
                 runCatching {
-                    objectMapper.readValue(message.value[PAYLOAD], UserLastRoute::class.java)
+                    objectMapper.readValue(message.value[PAYLOAD], UserRoute::class.java)
                 }.getOrElse {
                     log.error("메시지 역직렬화 실패. Dead Letter로 이동: ${message.id}", it)
                     handleDeadLetter(false, message, message.value[PAYLOAD])
                     return@forEach
                 }
 
-            val idempotencyKey = createIdempotencyKey(userLastRoute)
+            val idempotencyKey = createIdempotencyKey(userRoute)
             val isNew =
                 valueOps.setIfAbsent(
                     idempotencyKey,
@@ -76,10 +76,10 @@ class RedisStreamConsumer(
             if (isNew == true) {
                 val content =
                     notificationContentManager.createPushNotification(
-                        userLastRoute,
+                        userRoute,
                         NotificationType.REFRESH
                     )
-                val messaging = Messaging(content, userLastRoute.token)
+                val messaging = Messaging(content, userRoute.token)
 
                 if (!messagingProvider.send(messaging)) {
                     log.warn("⚠️️ 알림 전송 실패: $idempotencyKey")
@@ -125,7 +125,7 @@ class RedisStreamConsumer(
         claimedMessages.forEach { message ->
             val json = message.value[PAYLOAD]
             runCatching {
-                objectMapper.readValue(json, UserLastRoute::class.java)
+                objectMapper.readValue(json, UserRoute::class.java)
             }.getOrElse {
                 streamOps.add(deadLetterKey, mapOf(PAYLOAD to json))
                 streamOps.acknowledge(streamKey, groupName, message.id)
@@ -141,14 +141,14 @@ class RedisStreamConsumer(
 
     private fun createMessaging(message: MapRecord<String, String, String>): Messaging {
         val json = message.value[PAYLOAD]
-        val userLastRoute = objectMapper.readValue(json, UserLastRoute::class.java)
-        val content = notificationContentManager.createPushNotification(userLastRoute, NotificationType.REFRESH)
-        val messaging = Messaging(content, userLastRoute.token)
+        val userRoute = objectMapper.readValue(json, UserRoute::class.java)
+        val content = notificationContentManager.createPushNotification(userRoute, NotificationType.REFRESH)
+        val messaging = Messaging(content, userRoute.token)
         return messaging
     }
 
-    private fun createIdempotencyKey(userLastRoute: UserLastRoute): String {
-        return "$IDEMPOTENCY_KEY_PREFIX:${userLastRoute.userId}:${userLastRoute.lastRouteId}:${userLastRoute.updatedAt}"
+    private fun createIdempotencyKey(userRoute: UserRoute): String {
+        return "$IDEMPOTENCY_KEY_PREFIX:${userRoute.userId}:${userRoute.lastRouteId}:${userRoute.updatedAt}"
     }
 
     private fun handleDeadLetter(

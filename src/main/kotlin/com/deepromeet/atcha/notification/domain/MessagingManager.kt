@@ -6,9 +6,7 @@ import org.springframework.stereotype.Component
 class MessagingManager(
     private val messagingProvider: MessagingProvider
 ) {
-    fun send(messaging: Messaging) {
-        messagingProvider.send(messaging)
-    }
+    fun send(messaging: Messaging): Boolean = messagingProvider.send(messaging)
 
     fun send(
         notificationContent: NotificationContent,

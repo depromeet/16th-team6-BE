@@ -18,7 +18,7 @@ data class LastRouteResponse(
     val legs: List<LastRouteLegResponse>
 ) {
     constructor(lastRoute: LastRoute) : this(
-        routeId = lastRoute.routeId,
+        routeId = lastRoute.id,
         departureDateTime = lastRoute.departureDateTime,
         totalTime = lastRoute.totalTime,
         totalWalkTime = lastRoute.totalWalkTime,

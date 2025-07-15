@@ -114,7 +114,7 @@ class LastRouteOperations(
             val totalTime = calculateTotalTime(adjustedLegs, departureDateTime)
 
             return LastRoute(
-                routeId = UUID.randomUUID().toString(),
+                id = UUID.randomUUID().toString(),
                 departureDateTime = departureDateTime.toString(),
                 totalTime = totalTime.toInt(),
                 totalWalkTime = route.totalWalkTime,

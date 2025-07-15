@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.infrastructure.scheduler
+package com.deepromeet.atcha.userroute.infrastructure.scheduler
 
 import net.javacrumbs.shedlock.core.LockProvider
 import net.javacrumbs.shedlock.provider.redis.spring.RedisLockProvider

@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import kotlin.math.absoluteValue
 
 data class LastRoute(
-    val routeId: String,
+    val id: String,
     val departureDateTime: String,
     val totalTime: Int,
     val totalWalkTime: Int,
@@ -35,6 +35,12 @@ data class LastRoute(
     fun findFirstTransit(): LastRouteLeg {
         return legs.first { it.mode == "BUS" || it.mode == "SUBWAY" }
     }
+
+    fun calcWalkingTimeBeforeLeg(targetLeg: LastRouteLeg): Long =
+        legs.takeWhile { it != targetLeg }
+            .filter { it.mode == "WALK" }
+            .sumOf { it.sectionTime }
+            .toLong()
 }
 
 data class LastRouteLeg(

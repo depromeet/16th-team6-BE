@@ -1,9 +1,9 @@
-package com.deepromeet.atcha.notification.domain
+package com.deepromeet.atcha.userroute.domain
 
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-data class UserLastRoute(
+data class UserRoute(
     val departureTime: String,
     val updatedAt: String,
     val token: String,
@@ -16,13 +16,13 @@ data class UserLastRoute(
 
     constructor(
         token: String,
-        departureTime: LocalDateTime,
+        departureTime: String,
         routeId: String,
         userId: Long
     ) : this(
         token = token,
         updatedAt = LocalDateTime.now().format(dateTimeFormatter),
-        departureTime = departureTime.format(dateTimeFormatter),
+        departureTime = departureTime,
         lastRouteId = routeId,
         userId = userId
     )

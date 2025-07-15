@@ -54,7 +54,7 @@ class LastRouteOperationsV2(
             val departAt = calculateDepartureDateTime(walkFixed)
             val totalSec = calculateTotalTime(walkFixed, departAt)
             return LastRoute(
-                routeId = UUID.randomUUID().toString(),
+                id = UUID.randomUUID().toString(),
                 departureDateTime = departAt.toString(),
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,

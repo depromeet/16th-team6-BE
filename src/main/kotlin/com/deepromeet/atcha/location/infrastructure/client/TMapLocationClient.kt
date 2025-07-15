@@ -5,10 +5,7 @@ import com.deepromeet.atcha.location.domain.Location
 import com.deepromeet.atcha.location.domain.POI
 import com.deepromeet.atcha.location.domain.POIFinder
 import com.deepromeet.atcha.location.domain.ReverseGeocoder
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
-
-private val logger = KotlinLogging.logger {}
 
 @Component
 class TMapLocationClient(

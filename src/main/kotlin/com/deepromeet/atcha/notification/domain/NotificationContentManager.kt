@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.notification.domain
 
+import com.deepromeet.atcha.userroute.domain.UserRoute
 import org.springframework.stereotype.Component
 
 private const val DEFAULT_TITLE = "앗차"
@@ -7,14 +8,14 @@ private const val DEFAULT_TITLE = "앗차"
 @Component
 class NotificationContentManager {
     fun createPushNotification(
-        notification: UserLastRoute,
+        userRoute: UserRoute,
         type: NotificationType
     ): NotificationContent {
-        return createNotificationContent(notification, type)
+        return createNotificationContent(userRoute, type)
     }
 
     private fun createNotificationContent(
-        notification: UserLastRoute,
+        notification: UserRoute,
         type: NotificationType
     ): NotificationContent {
         return NotificationContent(

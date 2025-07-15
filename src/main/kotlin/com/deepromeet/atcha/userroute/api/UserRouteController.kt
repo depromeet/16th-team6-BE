@@ -1,8 +1,8 @@
-package com.deepromeet.atcha.notification.api
+package com.deepromeet.atcha.userroute.api
 
 import com.deepromeet.atcha.common.token.CurrentUser
-import com.deepromeet.atcha.notification.api.request.NotificationRequest
-import com.deepromeet.atcha.notification.domain.UserLastRouteService
+import com.deepromeet.atcha.userroute.api.request.UserRouteRequest
+import com.deepromeet.atcha.userroute.domain.UserRouteService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.ModelAttribute
@@ -13,25 +13,25 @@ import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-@RequestMapping("/api/notifications")
-class NotificationController(
-    private val userLastRouteService: UserLastRouteService
+@RequestMapping("/api/user-routes")
+class UserRouteController(
+    private val userRouteService: UserRouteService
 ) {
-    @PostMapping("/route")
+    @PostMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun addRouteNotification(
+    fun addUserRoute(
         @CurrentUser id: Long,
-        @RequestBody request: NotificationRequest
+        @RequestBody request: UserRouteRequest
     ) {
-        userLastRouteService.addUserLastRoute(id, request.lastRouteId)
+        userRouteService.addUserRoute(id, request.lastRouteId)
     }
 
-    @DeleteMapping("/route")
+    @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    fun deleteRouteNotification(
+    fun deleteUserRoute(
         @CurrentUser id: Long,
-        @ModelAttribute request: NotificationRequest
+        @ModelAttribute request: UserRouteRequest
     ) {
-        userLastRouteService.deleteUserLastRoute(id, request.lastRouteId)
+        userRouteService.deleteUserRoute(id, request.lastRouteId)
     }
 }

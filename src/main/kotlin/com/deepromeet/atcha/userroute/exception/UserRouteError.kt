@@ -1,20 +1,17 @@
-package com.deepromeet.atcha.notification.exception
+package com.deepromeet.atcha.userroute.exception
 
 import com.deepromeet.atcha.common.exception.BaseErrorType
 import com.deepromeet.atcha.common.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
-enum class NotificationError(
+enum class UserRouteError(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
     override val logLevel: LogLevel
-) : BaseErrorType {
-    INVALID_ROUTE_ID(400, "NTF_001", "유효하지 않은 경로 ID 입니다.", LogLevel.ERROR),
-    NOTIFICATION_NOT_FOUND(404, "NTF_002", "해당하는 알림을 찾을 수 없습니다.", LogLevel.ERROR)
-}
+) : BaseErrorType
 
-class NotificationException(
+class UserRouteException(
     errorCode: BaseErrorType,
     customMessage: String? = null,
     cause: Throwable? = null
@@ -22,30 +19,30 @@ class NotificationException(
     override fun readResolve(): Any = this
 
     companion object {
-        fun of(errorType: BaseErrorType): NotificationException {
-            return NotificationException(errorType)
+        fun of(errorType: BaseErrorType): UserRouteException {
+            return UserRouteException(errorType)
         }
 
         fun of(
             errorType: BaseErrorType,
             message: String
-        ): NotificationException {
-            return NotificationException(errorType, customMessage = message)
+        ): UserRouteException {
+            return UserRouteException(errorType, customMessage = message)
         }
 
         fun of(
             errorType: BaseErrorType,
             cause: Throwable
-        ): NotificationException {
-            return NotificationException(errorType, cause = cause)
+        ): UserRouteException {
+            return UserRouteException(errorType, cause = cause)
         }
 
         fun of(
             errorType: BaseErrorType,
             message: String,
             cause: Throwable
-        ): NotificationException {
-            return NotificationException(errorType, customMessage = message, cause = cause)
+        ): UserRouteException {
+            return UserRouteException(errorType, customMessage = message, cause = cause)
         }
     }
 }

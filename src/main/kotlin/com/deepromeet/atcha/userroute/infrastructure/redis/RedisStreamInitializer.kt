@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.notification.infrastructure.redis
+package com.deepromeet.atcha.userroute.infrastructure.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.RedisBusyException

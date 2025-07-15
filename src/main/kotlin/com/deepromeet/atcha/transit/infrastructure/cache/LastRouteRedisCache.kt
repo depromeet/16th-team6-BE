@@ -15,7 +15,7 @@ class LastRouteRedisCache(
     }
 
     override fun cache(route: LastRoute) {
-        lastRouteRedisTemplate.opsForValue().set(getKey(route.routeId), route, Duration.ofHours(12))
+        lastRouteRedisTemplate.opsForValue().set(getKey(route.id), route, Duration.ofHours(12))
     }
 
     fun getKey(routeId: String): String {
