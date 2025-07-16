@@ -2,9 +2,9 @@ package com.deepromeet.atcha.route.api.response
 
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
-import com.deepromeet.atcha.route.domain.Station
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Location
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Step
+import com.deepromeet.atcha.route.domain.RouteLocation
+import com.deepromeet.atcha.route.domain.RoutePassStop
+import com.deepromeet.atcha.route.domain.RouteStep
 
 data class LastRouteResponse(
     val routeId: String,
@@ -38,24 +38,54 @@ data class LastRouteLegResponse(
     val route: String? = null,
     val type: String? = null,
     val service: String? = null,
-    val start: Location,
-    val end: Location,
-    val passStopList: List<Station>? = null,
-    val step: List<Step>? = null,
+    val start: RouteLocationResponse,
+    val end: RouteLocationResponse,
+    val passStopList: List<RoutePassStopResponse>? = null,
+    val step: List<RouteStep>? = null,
     val passShape: String? = null
 ) {
     constructor(lastRouteLeg: LastRouteLeg) : this(
         distance = lastRouteLeg.distance,
         sectionTime = lastRouteLeg.sectionTime,
-        mode = lastRouteLeg.mode,
+        mode = lastRouteLeg.mode.value,
         departureDateTime = lastRouteLeg.departureDateTime,
         route = lastRouteLeg.route,
         type = lastRouteLeg.type,
         service = lastRouteLeg.service,
-        start = lastRouteLeg.start,
-        end = lastRouteLeg.end,
-        passStopList = lastRouteLeg.passStopList?.stationList,
-        step = lastRouteLeg.step,
-        passShape = lastRouteLeg.passShape
+        start = RouteLocationResponse(lastRouteLeg.start),
+        end = RouteLocationResponse(lastRouteLeg.end),
+        passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
+        step = lastRouteLeg.steps,
+        passShape = lastRouteLeg.pathCoordinates
+    )
+}
+
+data class RouteLocationResponse(
+    val lat: Double,
+    val lon: Double,
+    val name: String
+) {
+    constructor(
+        routeLocation: RouteLocation
+    ) : this(
+        routeLocation.latitude,
+        routeLocation.longitude,
+        routeLocation.name
+    )
+}
+
+data class RoutePassStopResponse(
+    val index: Int,
+    val stationName: String,
+    val lon: String,
+    val lat: String
+) {
+    constructor(
+        routePassStop: RoutePassStop
+    ) : this(
+        routePassStop.index,
+        routePassStop.stationName,
+        routePassStop.location.longitude.toString(),
+        routePassStop.location.latitude.toString()
     )
 }

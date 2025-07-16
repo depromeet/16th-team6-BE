@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay.response
 
+import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Leg
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Leg
 
 data class ODSayRouteResponse(
     val metaData: MetaData?,

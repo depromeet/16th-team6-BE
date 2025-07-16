@@ -1,8 +1,6 @@
-package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
+package com.deepromeet.atcha.route.infrastructure.client.tmap.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.route.domain.Station
-import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoFare
 
 data class TMapRouteResponse(
     val metaData: MetaData?,
@@ -33,7 +31,7 @@ data class Itinerary(
     val totalDistance: Int,
     // 총 보행 소요 시간 (초)
     val totalWalkTime: Int,
-    val fare: KakaoFare,
+    val fare: TMapFare,
     val legs: List<Leg>,
     val pathType: Int
 )
@@ -133,4 +131,11 @@ data class PassShape(
 
 data class PassStopList(
     val stationList: List<Station> = emptyList()
+)
+
+data class Station(
+    val index: Int,
+    val stationName: String,
+    val lon: String,
+    val lat: String
 )

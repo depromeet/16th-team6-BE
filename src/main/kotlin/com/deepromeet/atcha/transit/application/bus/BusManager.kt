@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.application.bus
 
 import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
@@ -11,7 +12,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -30,7 +30,7 @@ class BusManager(
     suspend fun getSchedule(
         routeName: String,
         stationMeta: BusStationMeta,
-        passStops: PassStopList
+        passStops: RoutePassStops
     ): BusSchedule {
         busTimeTableCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
@@ -49,7 +49,7 @@ class BusManager(
     suspend fun getRealTimeArrival(
         routeName: String,
         meta: BusStationMeta,
-        passStopList: PassStopList
+        passStopList: RoutePassStops
     ): BusRealTimeArrival {
         val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)

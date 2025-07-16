@@ -1,11 +1,12 @@
-package com.deepromeet.atcha.transit.infrastructure.client.tmap
+package com.deepromeet.atcha.route.infrastructure.client.tmap
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.route.domain.RouteItinerary
+import com.deepromeet.atcha.route.infrastructure.client.tmap.mapper.toDomain
+import com.deepromeet.atcha.route.infrastructure.client.tmap.request.TMapRouteRequest
 import com.deepromeet.atcha.transit.application.region.RegionIdentifier
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
 import feign.RetryableException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
@@ -22,9 +23,7 @@ class TransitRouteClientV2(
     fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
-    ): List<Itinerary> {
-        validateServiceRegion(start, end)
-
+    ): List<RouteItinerary> {
         val today = LocalDate.now()
         val dateFormatter = DateTimeFormatter.ofPattern("yyyyMMdd")
         val baseDate = today.format(dateFormatter) + "2300"
@@ -53,18 +52,13 @@ class TransitRouteClientV2(
             }
         }
 
-        return response.metaData?.plan?.itineraries
-            ?: throw TransitException.of(
-                TransitError.TRANSIT_API_ERROR,
-                "경로 검색 API에서 유효한 여행 경로를 반환하지 않았습니다."
-            )
-    }
+        val itineraries =
+            response.metaData?.plan?.itineraries
+                ?: throw TransitException.of(
+                    TransitError.TRANSIT_API_ERROR,
+                    "경로 검색 API에서 유효한 여행 경로를 반환하지 않았습니다."
+                )
 
-    private fun validateServiceRegion(
-        start: Coordinate,
-        destination: Coordinate
-    ) {
-        regionIdentifier.identify(start)
-        regionIdentifier.identify(destination)
+        return itineraries.map { it.toDomain() }
     }
 }

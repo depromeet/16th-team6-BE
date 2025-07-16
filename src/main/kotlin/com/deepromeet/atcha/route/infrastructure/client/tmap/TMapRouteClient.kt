@@ -1,8 +1,8 @@
-package com.deepromeet.atcha.transit.infrastructure.client.tmap
+package com.deepromeet.atcha.route.infrastructure.client.tmap
 
+import com.deepromeet.atcha.route.infrastructure.client.tmap.request.TMapRouteRequest
+import com.deepromeet.atcha.route.infrastructure.client.tmap.response.TMapRouteResponse
 import com.deepromeet.atcha.transit.infrastructure.client.tmap.config.TMapFeignConfig
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapRouteResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.PostMapping
 

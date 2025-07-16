@@ -81,7 +81,7 @@ class UserRouteDepartureTimeRefresher(
         return busManager.getRealTimeArrival(
             firstTransit.resolveRouteName(),
             firstTransit.toBusStationMeta(),
-            firstTransit.passStopList!!
+            firstTransit.passStops!!
         ).realTimeInfoList.ifEmpty { null }
     }
 
