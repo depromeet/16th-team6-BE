@@ -20,8 +20,8 @@ logging:
       hibernate:
         orm:
           jdbc:
-            bind: trace
-        SQL: trace
+            bind: INFO
+        SQL: INFO
     root: INFO
 
 tmap:
