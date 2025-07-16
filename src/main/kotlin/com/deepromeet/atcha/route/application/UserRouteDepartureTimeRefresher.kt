@@ -4,7 +4,6 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
-import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import org.springframework.stereotype.Component
@@ -36,7 +35,7 @@ class UserRouteDepartureTimeRefresher(
             val route = lastRouteReader.read(userRoute.lastRouteId)
 
             val firstBusLeg = extractFirstBusTransit(route) ?: return@mapNotNull null
-            val timeTable = extractBusTimeTable(firstBusLeg) ?: return@mapNotNull null
+            val timeTable = firstBusLeg.busInfo?.timeTable ?: return@mapNotNull null
 
             if (isNotRefreshTarget(oldDeparture, timeTable.term)) {
                 return@mapNotNull null
@@ -50,7 +49,7 @@ class UserRouteDepartureTimeRefresher(
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
-        val timeTable = extractBusTimeTable(firstBusLeg) ?: return null
+        val timeTable = firstBusLeg.busInfo?.timeTable ?: return null
 
         // 2) 실시간 도착 정보 조회
         val arrivalInfos = getBusRealTimeInfo(firstBusLeg) ?: return null
@@ -71,10 +70,6 @@ class UserRouteDepartureTimeRefresher(
     private fun extractFirstBusTransit(route: LastRoute): LastRouteLeg? {
         val firstTransit = route.findFirstTransit()
         return if (firstTransit.isBus()) firstTransit else null
-    }
-
-    private fun extractBusTimeTable(transit: LastRouteLeg): BusTimeTable? {
-        return (transit.transitInfo as? TransitInfo.BusInfo)?.timeTable
     }
 
     private suspend fun getBusRealTimeInfo(firstTransit: LastRouteLeg): List<BusRealTimeInfo>? {
@@ -99,7 +94,7 @@ class UserRouteDepartureTimeRefresher(
 
         // 실행 가능한 출발시간 계산
         val now = LocalDateTime.now()
-        val walkingTime = route.calcWalkingTimeBeforeLeg(firstBusLeg)
+        val walkingTime = route.calcWalkingTimeBefore(firstBusLeg)
 
         val feasible =
             candidateArrivals.mapNotNull { arrival ->

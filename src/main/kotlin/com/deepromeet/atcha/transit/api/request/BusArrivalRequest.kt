@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.api.request
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.route.api.request.RoutePassStopRequest
 import com.deepromeet.atcha.route.domain.RoutePassStop
 import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta

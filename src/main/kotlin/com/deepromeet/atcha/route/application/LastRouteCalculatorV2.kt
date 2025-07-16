@@ -71,7 +71,7 @@ class LastRouteCalculatorV2(
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 transferCount = itinerary.transferCount,
-                totalWorkDistance = itinerary.totalWalkDistance,
+                totalWalkDistance = itinerary.totalWalkDistance,
                 totalDistance = itinerary.totalDistance,
                 pathType = itinerary.pathType,
                 legs = walkFixed

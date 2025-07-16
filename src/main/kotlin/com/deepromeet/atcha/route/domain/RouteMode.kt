@@ -4,8 +4,10 @@ enum class RouteMode(val value: String) {
     WALK("WALK"),
     SUBWAY("SUBWAY"),
     BUS("BUS"),
-    TAXI("TAXI"),
-    CAR("CAR");
+    EXPRESS_BUS("EXPRESSBUS"),
+    TRAIN("TRAIN"),
+    AIRPLANE("AIRPLANE"),
+    FERRY("FERRY");
 
     fun isTransit(): Boolean = this == SUBWAY || this == BUS
 

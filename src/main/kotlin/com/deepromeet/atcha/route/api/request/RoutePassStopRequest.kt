@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.api.request
+package com.deepromeet.atcha.route.api.request
 
 data class RoutePassStopRequest(
     val index: Int,

@@ -2,7 +2,6 @@ package com.deepromeet.atcha.transit.application.bus
 
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.RoutePassStops
-import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
@@ -70,7 +69,7 @@ class BusManager(
 
     suspend fun isBusStarted(lastRoute: LastRoute): Boolean {
         val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus.transitInfo as TransitInfo.BusInfo
+        val busInfo = firstBus?.busInfo ?: return false
 
         val busPositions =
             runCatching {

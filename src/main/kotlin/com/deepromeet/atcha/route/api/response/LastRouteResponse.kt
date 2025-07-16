@@ -22,7 +22,7 @@ data class LastRouteResponse(
         departureDateTime = lastRoute.departureDateTime,
         totalTime = lastRoute.totalTime,
         totalWalkTime = lastRoute.totalWalkTime,
-        totalWorkDistance = lastRoute.totalWorkDistance,
+        totalWorkDistance = lastRoute.totalWalkDistance,
         transferCount = lastRoute.transferCount,
         totalDistance = lastRoute.totalDistance,
         pathType = lastRoute.pathType,

@@ -14,7 +14,7 @@ class DefaultRegionCandidatePolicy(
         val fallback =
             when (primary) {
                 ServiceRegion.SEOUL -> listOf(ServiceRegion.GYEONGGI)
-                ServiceRegion.GYEONGGI -> listOf(ServiceRegion.SEOUL)
+                ServiceRegion.GYEONGGI -> listOf(ServiceRegion.SEOUL, ServiceRegion.INCHEON)
                 ServiceRegion.INCHEON -> listOf(ServiceRegion.GYEONGGI)
             }
 
