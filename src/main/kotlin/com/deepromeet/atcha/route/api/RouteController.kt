@@ -1,13 +1,13 @@
 package com.deepromeet.atcha.route.api
 
-import com.deepromeet.atcha.common.token.CurrentUser
-import com.deepromeet.atcha.common.web.ApiResponse
 import com.deepromeet.atcha.route.api.request.LastRoutesRequest
 import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
 import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.CurrentUser
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.springframework.http.HttpStatus

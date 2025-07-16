@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.location.domain
 
-import com.deepromeet.atcha.common.annotation.NoArg
+import com.deepromeet.atcha.shared.annotation.NoArg
 
 @NoArg
 data class POI(

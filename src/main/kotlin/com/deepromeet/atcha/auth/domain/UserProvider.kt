@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.common.BaseTimeEntity
+import com.deepromeet.atcha.shared.infrastructure.jpa.BaseTimeEntity
 import com.deepromeet.atcha.user.domain.User
 import jakarta.persistence.Embedded
 import jakarta.persistence.Entity

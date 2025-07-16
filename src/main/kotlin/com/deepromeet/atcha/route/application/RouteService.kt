@@ -6,13 +6,13 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteSortType
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.route.domain.sort
-import com.deepromeet.atcha.route.exception.UserRouteError
-import com.deepromeet.atcha.route.exception.UserRouteException
+import com.deepromeet.atcha.route.exception.RouteError
+import com.deepromeet.atcha.route.exception.RouteException
+import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
 import com.deepromeet.atcha.transit.application.region.ServiceRegionValidator
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.user.application.UserReader
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -24,12 +24,12 @@ class RouteService(
     private val userReader: UserReader,
     private val userRouteManager: UserRouteManager,
     private val transitRouteSearchClient: TransitRouteSearchClient,
-    private val lastRouteOperations: LastRouteOperations,
+    private val lastRouteCalculator: LastRouteCalculator,
     private val serviceRegionValidator: ServiceRegionValidator,
     private val startedBusCache: StartedBusCache,
     private val busManager: BusManager,
     private val userRouteDepartureTimeRefresher: UserRouteDepartureTimeRefresher,
-    private val lastRouteOperationsV2: LastRouteOperationsV2,
+    private val lastRouteCalculatorV2: LastRouteCalculatorV2,
     private val transitRouteClientV2: TransitRouteClientV2
 ) {
     suspend fun getLastRoutes(
@@ -45,8 +45,8 @@ class RouteService(
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
-        return lastRouteOperations
-            .calculateLastRoutes(start, destination, validItineraries)
+        return lastRouteCalculator
+            .calcLastRoutes(start, destination, validItineraries)
             .sort(sortType)
     }
 
@@ -60,7 +60,7 @@ class RouteService(
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
-        return lastRouteOperationsV2
+        return lastRouteCalculatorV2
             .calculateRoutesV2(start, destination, validItineraries)
             .sort(sortType)
     }
@@ -81,7 +81,7 @@ class RouteService(
 
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
 
-            lastRouteOperations.streamLastRoutes(start, destination, itineraries)
+            lastRouteCalculator.streamLastRoutes(start, destination, itineraries)
                 .collect { route -> emit(route) }
         }
 
@@ -117,6 +117,6 @@ class RouteService(
         val user = userReader.read(id)
         val userRoute = userRouteManager.read(user)
         return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)
-            ?: throw UserRouteException.of(UserRouteError.USER_ROUTE_REFRESH_ERROR)
+            ?: throw RouteException.of(RouteError.USER_ROUTE_REFRESH_ERROR)
     }
 }

@@ -7,8 +7,8 @@ import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.auth.application.AuthService
 import com.deepromeet.atcha.auth.domain.ProviderToken
-import com.deepromeet.atcha.common.token.Token
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.Token
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping

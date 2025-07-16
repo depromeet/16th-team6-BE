@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
-import com.deepromeet.atcha.common.exception.ExternalApiError
-import com.deepromeet.atcha.common.exception.ExternalApiException
-import com.deepromeet.atcha.common.exception.InfrastructureError
-import com.deepromeet.atcha.common.exception.InfrastructureException
+import com.deepromeet.atcha.shared.exception.ExternalApiError
+import com.deepromeet.atcha.shared.exception.ExternalApiException
+import com.deepromeet.atcha.shared.exception.InfrastructureError
+import com.deepromeet.atcha.shared.exception.InfrastructureException
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.data.redis.core.script.RedisScript

@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.location.domain
 
-import com.deepromeet.atcha.common.annotation.NoArg
 import com.deepromeet.atcha.location.exception.LocationError
 import com.deepromeet.atcha.location.exception.LocationException
+import com.deepromeet.atcha.shared.annotation.NoArg
 import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.pow

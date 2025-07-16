@@ -23,7 +23,7 @@ interface SubwayStationRepository : JpaRepository<SubwayStation, SubwayStationId
         SELECT s
         FROM SubwayStation s
         WHERE s.routeCode = :routeCode
-        AND ( s.name = :name OR s.name LIKE CONCAT(:name, '(%') )
+        AND ( s.name = :name OR s.name LIKE CONCAT(:name, '%') )
         """
     )
     fun findStationByNameAndRoute(

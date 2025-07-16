@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.common.token.TokenInfo
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.shared.web.token.TokenInfo
 import com.deepromeet.atcha.user.domain.User
 
 data class UserAuthInfo(

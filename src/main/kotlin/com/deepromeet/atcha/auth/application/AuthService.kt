@@ -6,8 +6,8 @@ import com.deepromeet.atcha.auth.domain.UserAuthInfo
 import com.deepromeet.atcha.auth.domain.UserTokenInfo
 import com.deepromeet.atcha.auth.exception.AuthError
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.common.token.TokenGenerator
-import com.deepromeet.atcha.common.token.TokenType
+import com.deepromeet.atcha.shared.web.token.TokenGenerator
+import com.deepromeet.atcha.shared.web.token.TokenType
 import com.deepromeet.atcha.user.application.UserAppender
 import com.deepromeet.atcha.user.application.UserReader
 import org.springframework.stereotype.Service

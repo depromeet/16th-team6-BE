@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.user.api.controller
 
 import com.deepromeet.atcha.app.application.AppService
-import com.deepromeet.atcha.common.token.CurrentUser
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse

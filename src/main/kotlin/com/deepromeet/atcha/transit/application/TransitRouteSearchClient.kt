@@ -1,11 +1,11 @@
 package com.deepromeet.atcha.transit.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.Itinerary
+import com.deepromeet.atcha.route.domain.RouteItinerary
 
 interface TransitRouteSearchClient {
     fun searchRoutes(
         start: Coordinate,
         end: Coordinate
-    ): List<Itinerary>
+    ): List<RouteItinerary>
 }

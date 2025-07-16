@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.application.bus
 
+import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.application.TransitNameComparer
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
@@ -7,7 +8,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
@@ -23,10 +23,10 @@ class BusRouteMatcher(
     suspend fun getMatchedRoute(
         busRoutes: List<BusRoute>,
         stationMeta: BusStationMeta,
-        passStopList: PassStopList
+        passStopList: RoutePassStops
     ): BusRouteInfo =
         coroutineScope {
-            val plannedStops = passStopList.stationList.map { it.stationName }
+            val plannedStops = passStopList.stops.map { it.stationName }
 
             val routeMatching =
                 busRoutes.map { route ->

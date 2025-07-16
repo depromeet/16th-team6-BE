@@ -1,12 +1,12 @@
 package com.deepromeet.atcha.transit.application.bus
 
+import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.application.region.ServiceRegionCandidatePolicy
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.PassStopList
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -21,7 +21,7 @@ class BusRouteResolver(
     suspend fun resolve(
         routeName: String,
         station: BusStationMeta,
-        passStopList: PassStopList
+        passStopList: RoutePassStops
     ): BusRouteInfo {
         val candidateRegions = regionPolicy.candidates(station)
 
@@ -42,7 +42,7 @@ class BusRouteResolver(
         region: ServiceRegion,
         routeName: String,
         station: BusStationMeta,
-        passStopList: PassStopList
+        passStopList: RoutePassStops
     ): BusRouteInfo? =
         runCatching {
             val routes = clientMap[region]!!.getBusRoute(routeName)

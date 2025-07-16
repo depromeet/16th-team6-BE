@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.auth
 
-import com.deepromeet.atcha.common.token.TokenBlacklist
-import com.deepromeet.atcha.common.token.TokenGenerator
-import com.deepromeet.atcha.common.token.TokenType
-import com.deepromeet.atcha.common.token.exception.TokenException
+import com.deepromeet.atcha.shared.web.token.TokenBlacklist
+import com.deepromeet.atcha.shared.web.token.TokenGenerator
+import com.deepromeet.atcha.shared.web.token.TokenType
+import com.deepromeet.atcha.shared.web.token.exception.TokenException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth.exception
 
-import com.deepromeet.atcha.common.exception.BaseErrorType
-import com.deepromeet.atcha.common.exception.CustomException
+import com.deepromeet.atcha.shared.exception.BaseErrorType
+import com.deepromeet.atcha.shared.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
 enum class AuthError(
