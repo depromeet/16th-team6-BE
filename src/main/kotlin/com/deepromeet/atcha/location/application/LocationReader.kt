@@ -1,11 +1,11 @@
 package com.deepromeet.atcha.location.application
 
-import com.deepromeet.atcha.common.exception.ExternalApiException
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.Location
 import com.deepromeet.atcha.location.domain.POI
 import com.deepromeet.atcha.location.exception.LocationError
 import com.deepromeet.atcha.location.exception.LocationException
+import com.deepromeet.atcha.shared.exception.ExternalApiException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 

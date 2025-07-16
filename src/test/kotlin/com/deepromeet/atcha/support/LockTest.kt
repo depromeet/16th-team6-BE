@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.support
 
-import com.deepromeet.atcha.transit.infrastructure.cache.config.LockRedisManager
+import com.deepromeet.atcha.shared.infrastructure.cache.config.LockRedisManager
 import org.assertj.core.api.Assertions
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.common.token.TokenInfo
+import com.deepromeet.atcha.shared.web.token.TokenInfo
 
 data class UserTokenInfo(
     val id: Long,

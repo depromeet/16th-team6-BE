@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.utils
 
-import com.deepromeet.atcha.common.exception.ExternalApiError
-import com.deepromeet.atcha.common.exception.ExternalApiException
+import com.deepromeet.atcha.shared.exception.ExternalApiError
+import com.deepromeet.atcha.shared.exception.ExternalApiException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.ServiceResult
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.PublicGyeonggiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging

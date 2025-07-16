@@ -4,7 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.domain.withIncreasedWalkTime
-import com.deepromeet.atcha.transit.infrastructure.cache.LastRouteMetricsRepository
+import com.deepromeet.atcha.route.infrastructure.cache.LastRouteMetricsRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.api
 
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.transit.api.request.BusArrivalRequest
 import com.deepromeet.atcha.transit.api.request.BusRouteRequest
 import com.deepromeet.atcha.transit.api.request.TaxiFareRequest

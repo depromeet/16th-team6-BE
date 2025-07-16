@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.app
 
 import com.deepromeet.atcha.app.api.request.AppVersionUpdateRequest
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
 import io.restassured.RestAssured
 import org.assertj.core.api.Assertions

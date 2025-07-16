@@ -3,7 +3,7 @@ package com.deepromeet.atcha.auth
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper

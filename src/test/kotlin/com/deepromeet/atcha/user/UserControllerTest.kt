@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.user
 
 import com.deepromeet.atcha.app.application.AppVersionAppender
-import com.deepromeet.atcha.common.token.TokenGenerator
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.TokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest

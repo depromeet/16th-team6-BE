@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.app.domain
 
-import com.deepromeet.atcha.common.BaseTimeEntity
+import com.deepromeet.atcha.shared.infrastructure.jpa.BaseTimeEntity
 import jakarta.persistence.Entity
 import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
