@@ -33,12 +33,10 @@ data class LastRoute(
         return legs.firstOrNull { it.isBus() }
     }
 
-    fun calcWalkingTimeBefore(targetLeg: LastRouteLeg): Long {
-        return legs.takeWhile { it != targetLeg }
-            .filter { it.isWalk() }
+    fun calcWalkingTimeToFirstTransit(): Long =
+        legs.takeWhile { !it.isTransit() }
             .sumOf { it.sectionTime }
             .toLong()
-    }
 
     fun validate(): LastRoute {
         val isValid =

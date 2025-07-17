@@ -59,7 +59,6 @@ class UserRouteDepartureTimeRefresher(
             calculateOptimalDepartureTime(
                 arrivalInfos,
                 timeTable,
-                firstBusLeg,
                 route
             ) ?: return null
 
@@ -83,7 +82,6 @@ class UserRouteDepartureTimeRefresher(
     private fun calculateOptimalDepartureTime(
         arrivalInfos: List<BusRealTimeInfo>,
         timeTable: BusTimeTable,
-        firstBusLeg: LastRouteLeg,
         route: LastRoute
     ): OptimalDepartureTime? {
         // 도착 후보 시각 생성
@@ -94,7 +92,7 @@ class UserRouteDepartureTimeRefresher(
 
         // 실행 가능한 출발시간 계산
         val now = LocalDateTime.now()
-        val walkingTime = route.calcWalkingTimeBefore(firstBusLeg)
+        val walkingTime = route.calcWalkingTimeToFirstTransit()
 
         val feasible =
             candidateArrivals.mapNotNull { arrival ->
