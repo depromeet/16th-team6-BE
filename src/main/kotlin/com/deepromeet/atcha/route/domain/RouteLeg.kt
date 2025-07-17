@@ -18,14 +18,6 @@ data class RouteLeg(
     val pathCoordinates: String?,
     val transitInfo: TransitInfo
 ) {
-    fun isTransit(): Boolean = mode.isTransit()
-
-    fun isWalk(): Boolean = mode.isWalk()
-
-    fun isBus(): Boolean = mode == RouteMode.BUS
-
-    fun isSubway(): Boolean = mode == RouteMode.SUBWAY
-
     fun isExpress(): Boolean = route?.contains("(급행)") == true
 
     fun resolveRouteName(): String {
@@ -38,10 +30,6 @@ data class RouteLeg(
             start.coordinate
         )
     }
-
-    fun hasWalkDetails(): Boolean = !steps.isNullOrEmpty()
-
-    fun hasPassStops(): Boolean = passStops?.hasStops() == true
 
     fun toLastWalkLeg() =
         LastRouteLeg(

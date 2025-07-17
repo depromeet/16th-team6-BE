@@ -35,13 +35,13 @@ class UserRouteRefreshedEventHandler(
 
         when (result.status) {
             NotificationResult.Status.SUCCESS -> {
-                log.info { "UserRoute 갱신 알림 처리 성공: ${result.idempotencyKey}" }
+                log.info { "✅ 갱신 알림 처리 성공: ${result.idempotencyKey}" }
             }
             NotificationResult.Status.DUPLICATE -> {
-                log.debug { "중복 처리된 알림: ${result.idempotencyKey}" }
+                log.debug { "🔄 중복 처리된 알림: ${result.idempotencyKey}" }
             }
             else -> {
-                log.warn { "UserRoute 갱신 알림 처리 실패: ${result.idempotencyKey}" }
+                log.warn { "❌ 갱신 알림 처리 실패: ${result.idempotencyKey}" }
             }
         }
     }

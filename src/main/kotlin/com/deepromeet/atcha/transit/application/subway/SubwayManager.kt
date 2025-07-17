@@ -39,7 +39,7 @@ class SubwayManager(
             subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, stationName)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_SUBWAY_STATION,
-                    "지하철 노선 '${subwayLine.name}'에서 역 '$stationName'을 찾을 수 없습니다."
+                    "DB에서 지하철 노선 '${subwayLine.mainName()}'의 역 '$stationName'을 찾을 수 없습니다."
                 )
         }
     }

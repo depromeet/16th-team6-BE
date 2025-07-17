@@ -3,6 +3,7 @@ package com.deepromeet.atcha.shared.domain.event.infrastructure
 import com.deepromeet.atcha.shared.domain.event.domain.DomainEvent
 import com.deepromeet.atcha.shared.domain.event.domain.EventBus
 import com.fasterxml.jackson.databind.ObjectMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.data.redis.connection.stream.StreamRecords
 import org.springframework.data.redis.core.RedisTemplate
@@ -13,6 +14,8 @@ private const val EVENT_ID = "eventId"
 private const val PAYLOAD = "payload"
 private const val OCCURRED_AT = "occurredAt"
 private const val AGGREGATE_ID = "aggregateId"
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class RedisStreamEventProducer(
@@ -37,16 +40,24 @@ class RedisStreamEventProducer(
 
         val records =
             events.map { event ->
+                log.debug { "📤 이벤트 발송 - 타입: ${event.eventType}, 집계ID: ${event.aggregateId}" }
+
                 StreamRecords.newRecord()
                     .ofMap(createEventMap(event))
                     .withStreamKey(streamKey)
             }
 
-        redisTemplate.executePipelined { connection ->
-            records.forEach { record ->
-                streamOps.add(record)
+        try {
+            redisTemplate.executePipelined { connection ->
+                records.forEach { record ->
+                    streamOps.add(record)
+                }
+                null
             }
-            null
+            log.info { "✅ 도메인 이벤트 ${events.size}개 발송 완료" }
+        } catch (e: Exception) {
+            log.error(e) { "❌ 도메인 이벤트 발송 실패: ${events.map { "${it.eventType}(${it.aggregateId})" }}" }
+            throw e
         }
     }
 

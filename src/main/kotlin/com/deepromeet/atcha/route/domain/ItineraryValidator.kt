@@ -35,7 +35,6 @@ object ItineraryValidator {
                     isFirstTransit = false
                 }
                 else -> {
-                    // 지원하지 않는 교통수단
                     hasInvalidMode = true
                     break
                 }

@@ -80,8 +80,8 @@ class RouteService(
             }
 
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
-
-            lastRouteCalculator.streamLastRoutes(start, destination, itineraries)
+            val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
+            lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
                 .collect { route -> emit(route) }
         }
 
