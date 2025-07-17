@@ -5,19 +5,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
-import com.fasterxml.jackson.annotation.JsonSubTypes
-import com.fasterxml.jackson.annotation.JsonTypeInfo
 
-@JsonTypeInfo(
-    use = JsonTypeInfo.Id.NAME,
-    include = JsonTypeInfo.As.PROPERTY,
-    property = "type"
-)
-@JsonSubTypes(
-    JsonSubTypes.Type(value = TransitInfo.SubwayInfo::class, name = "subway"),
-    JsonSubTypes.Type(value = TransitInfo.BusInfo::class, name = "bus"),
-    JsonSubTypes.Type(value = TransitInfo.NoInfoTable::class, name = "none")
-)
 sealed class TransitInfo {
     data class SubwayInfo(val timeTable: SubwayTimeTable) : TransitInfo()
 

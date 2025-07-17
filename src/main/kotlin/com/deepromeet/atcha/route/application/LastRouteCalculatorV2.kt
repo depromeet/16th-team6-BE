@@ -106,8 +106,8 @@ class LastRouteCalculatorV2(
                                 transitInfo = TransitInfo.SubwayInfo(timeTable)
                             )
                         } catch (e: Exception) {
-                            log.warn(e) { "지하철 정보 조회 실패, 기본값 사용: ${leg.route}" }
-                            leg.toLastWalkLeg()
+                            log.warn(e) { "지하철 정보 조회 실패, 기본값 사용: ${leg.route}, ${leg.start.name}, ${leg.end.name}" }
+                            return null
                         }
                     }
 
@@ -124,7 +124,7 @@ class LastRouteCalculatorV2(
                             )
                         } catch (e: Exception) {
                             log.warn(e) { "버스 정보 조회 실패, 기본값 사용: ${leg.route}" }
-                            leg.toLastWalkLeg()
+                            return null
                         }
                     }
 
