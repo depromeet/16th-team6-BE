@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.api.request
 
-import com.deepromeet.atcha.transit.domain.SubwayStationMeta
+import com.deepromeet.atcha.transit.application.subway.SubwayStationMeta
 
 data class SubwayLastTimeRequest(
     val startStationName: String,

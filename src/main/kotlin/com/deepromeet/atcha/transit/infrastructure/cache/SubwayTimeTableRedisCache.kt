@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.transit.application.subway.SubwayTimeTableCache
 import com.deepromeet.atcha.transit.domain.DailyType
-import com.deepromeet.atcha.transit.domain.SubwayDirection
-import com.deepromeet.atcha.transit.domain.SubwayStation
-import com.deepromeet.atcha.transit.domain.SubwayTimeTable
-import com.deepromeet.atcha.transit.domain.SubwayTimeTableCache
+import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
+import com.deepromeet.atcha.transit.domain.subway.SubwayStation
+import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -40,7 +40,7 @@ class SubwayTimeTableRedisCache(
         dailyType: DailyType,
         direction: SubwayDirection
     ): String {
-        return "time:subway:${startStation.name}:${dailyType.code}:${direction.name}"
+        return "routes:time:subway:${startStation.routeCode}-${startStation.name}:${dailyType.code}:${direction.name}"
     }
 
     private fun calculateTtlUntilMidnight(): Long {

@@ -2,9 +2,9 @@ package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
 import com.deepromeet.atcha.transit.infrastructure.client.odsay.response.ODSayBusArrivalResponse
 import com.deepromeet.atcha.transit.infrastructure.client.odsay.response.ODSayBusStationInfoResponse
-import com.deepromeet.atcha.transit.infrastructure.client.public.config.PublicFeignConfig
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.BusArrivalResponse
-import com.deepromeet.atcha.transit.infrastructure.client.public.response.ServiceResult
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.PublicFeignConfig
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.ServiceResult
+import com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response.SeoulBusArrivalResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -19,7 +19,7 @@ interface ODSayBusFeignClient {
     fun getArrivalInfoByRoute(
         @RequestParam busID: String,
         @RequestParam apiKey: String
-    ): ServiceResult<BusArrivalResponse>
+    ): ServiceResult<SeoulBusArrivalResponse>
 
     @GetMapping("/v1/api/searchStation")
     fun getStationByStationName(
@@ -29,7 +29,7 @@ interface ODSayBusFeignClient {
     ): ODSayBusArrivalResponse
 
     @GetMapping("/v1/api/busStationInfo")
-    fun getStationInfoBystationID(
+    fun getStationInfoByStationID(
         @RequestParam apiKey: String,
         @RequestParam stationID: String,
         @RequestParam lang: String = "0"

@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.api.response
 
-import com.deepromeet.atcha.transit.domain.BusCongestion
-import com.deepromeet.atcha.transit.domain.BusPosition
+import com.deepromeet.atcha.transit.domain.bus.BusCongestion
+import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.fasterxml.jackson.annotation.JsonInclude
 
 @JsonInclude(JsonInclude.Include.NON_NULL)

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.transit.domain.BusTimeTable
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
 import com.fasterxml.jackson.module.kotlin.KotlinModule
@@ -14,17 +14,17 @@ import org.springframework.data.redis.serializer.StringRedisSerializer
 @Configuration
 class BusTimeTableRedisConfig {
     @Bean
-    fun busTimeTableRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, BusTimeTable> {
+    fun busTimeTableRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, BusSchedule> {
         // 커스텀 ObjectMapper 생성
         val kotlinModule = KotlinModule.Builder().build()
         val objectMapper =
             ObjectMapper()
                 .registerModule(JavaTimeModule())
                 .registerModules(kotlinModule)
-        val jsonSerializer = Jackson2JsonRedisSerializer(objectMapper, BusTimeTable::class.java)
+        val jsonSerializer = Jackson2JsonRedisSerializer(objectMapper, BusSchedule::class.java)
 
         // RedisTemplate 설정
-        val redisTemplate = RedisTemplate<String, BusTimeTable>()
+        val redisTemplate = RedisTemplate<String, BusSchedule>()
         redisTemplate.connectionFactory = redisConnectionFactory
         redisTemplate.keySerializer = StringRedisSerializer()
         redisTemplate.valueSerializer = jsonSerializer

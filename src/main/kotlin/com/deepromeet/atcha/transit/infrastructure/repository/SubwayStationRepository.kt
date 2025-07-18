@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.repository
 
-import com.deepromeet.atcha.transit.domain.SubwayStation
-import com.deepromeet.atcha.transit.domain.SubwayStationId
+import com.deepromeet.atcha.transit.domain.subway.SubwayStation
+import com.deepromeet.atcha.transit.domain.subway.SubwayStationId
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.jpa.repository.Query
 
@@ -26,7 +26,7 @@ interface SubwayStationRepository : JpaRepository<SubwayStation, SubwayStationId
         AND ( s.name = :name OR s.name LIKE CONCAT(:name, '(%') )
         """
     )
-    fun findByRouteCodeAndNameOrLike(
+    fun findStationByNameAndRoute(
         routeCode: String,
         name: String
     ): SubwayStation?

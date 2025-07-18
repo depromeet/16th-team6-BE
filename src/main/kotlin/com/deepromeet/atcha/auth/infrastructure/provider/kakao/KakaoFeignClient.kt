@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
-import com.deepromeet.atcha.common.feign.FeignConfig
+import com.deepromeet.atcha.shared.infrastructure.feign.FeignConfig
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestHeader

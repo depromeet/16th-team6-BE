@@ -1,15 +1,15 @@
 package com.deepromeet.atcha.user
 
-import com.deepromeet.atcha.app.domain.AppVersionAppender
-import com.deepromeet.atcha.common.token.TokenGenerator
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.app.application.AppVersionAppender
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.TokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
+import com.deepromeet.atcha.user.application.UserAppender
+import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.User
-import com.deepromeet.atcha.user.domain.UserAppender
-import com.deepromeet.atcha.user.domain.UserReader
 import com.deepromeet.atcha.user.exception.UserException
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
@@ -36,7 +36,7 @@ class UserControllerTest(
 
     @BeforeEach
     fun issueToken() {
-        user = userAppender.save(user)
+        user = userAppender.append(user)
         val generateToken = tokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
@@ -83,9 +83,7 @@ class UserControllerTest(
         val findUser = userReader.read(user.id)
 
         // then
-        assertThat(findUser.nickname).isEqualTo(userInfoUpdateRequest.nickname)
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
-        assertThat(findUser.profileImageUrl).isEqualTo(userInfoUpdateRequest.profileImageUrl)
         assertThat(findUser.address.address).isEqualTo(userInfoUpdateRequest.address)
         assertThat(findUser.address.lat).isEqualTo(userInfoUpdateRequest.lat)
         assertThat(findUser.address.lon).isEqualTo(userInfoUpdateRequest.lon)
@@ -103,6 +101,6 @@ class UserControllerTest(
 
         // then
         assertThatThrownBy { userReader.read(user.id) }
-            .isInstanceOf(UserException.UserNotFound::class.java)
+            .isInstanceOf(UserException::class.java)
     }
 }

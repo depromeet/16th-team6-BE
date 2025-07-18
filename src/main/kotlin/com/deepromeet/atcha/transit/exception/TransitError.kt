@@ -1,101 +1,70 @@
 package com.deepromeet.atcha.transit.exception
 
-import com.deepromeet.atcha.common.exception.BaseErrorType
-import com.deepromeet.atcha.common.exception.CustomException
+import com.deepromeet.atcha.shared.exception.BaseErrorType
+import com.deepromeet.atcha.shared.exception.CustomException
 import org.springframework.boot.logging.LogLevel
 
-enum class TransitErrorType(
+enum class TransitError(
     override val status: Int,
     override val errorCode: String,
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
     TRANSIT_API_ERROR(500, "TRS_001", "대중교통 API 호출 중 에러가 발생했습니다", LogLevel.ERROR),
-    TAXI_FARE_FETCH_FAILED(500, "TRS_002", "택시 요금 조회에 실패했습니다", LogLevel.ERROR),
+    TAXI_FARE_FETCH_FAILED(500, "TRS_002", "알수 없는 이유로 택시 요금 조회에 실패했습니다", LogLevel.ERROR),
+    TAXI_START_NOT_FOUND(400, "TRS_003", "출발지 주변에 도로가 없습니다. 다시 설정해주세요.", LogLevel.WARN),
     NOT_FOUND_SUBWAY_STATION(404, "TRS_006", "지하철 역을 찾을 수 없습니다", LogLevel.ERROR),
     NOT_FOUND_SUBWAY_ROUTE(404, "TRS_009", "지하철 노선을 찾을 수 없습니다", LogLevel.ERROR),
-    NOT_FOUND_TIME(404, "TRS_010", "시간표를 찾을 수 없습니다", LogLevel.ERROR),
     DISTANCE_TOO_SHORT(400, "TRS_011", "출발지와 도착지 간 거리가 너무 가깝습니다.", LogLevel.ERROR),
     SERVICE_AREA_NOT_SUPPORTED(400, "TRS_012", "서비스 지역이 아닙니다.", LogLevel.ERROR),
     NOT_FOUND_ROUTE(404, "TRS_013", "경로를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_POSITION(404, "TRS_014", "버스 위치를 찾을 수 없습니다.", LogLevel.ERROR),
     BUS_ROUTE_STATION_LIST_FETCH_FAILED(500, "TRS_015", "버스 노선 경유 정류소를 가져오는데 실패했습니다.", LogLevel.ERROR),
-    NOT_FOUND_BUS_SCHEDULE(404, "TRS_016", "버스 도착 정보를 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_BUS_SCHEDULE(404, "TRS_016", "버스 시간표를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_REAL_TIME(404, "TRS_017", "버스 실시간 정보를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_OPERATION_INFO(404, "TRS_017", "버스 운행 정보를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_STATION(404, "TRS_018", "버스 정류소를 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_BUS_ROUTE(404, "TRS_019", "버스 노선을 찾을 수 없습니다.", LogLevel.ERROR),
-    NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.ERROR)
+    NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.ERROR),
+    NOT_FOUND_SUBWAY_SCHEDULE(404, "TRS_022", "지하철 시간표를 찾을 수 없습니다.", LogLevel.ERROR),
+    INVALID_DIRECTION_NAME(400, "TRS_021", "유효하지 않은 지하철 방향 이름입니다.", LogLevel.ERROR),
+    NOT_FOUND_SPECIFIED_TIME(404, "TRS_023", "특정 시간에 해당하는 대중교통을 찾을 수 없습니다.", LogLevel.ERROR),
+    INVALID_TIME_FORMAT(400, "TRS_024", "유효하지 않은 시간 형식입니다.", LogLevel.ERROR),
+    API_TIME_OUT(500, "TRS_025", "TMap이 응답하지 않습니다.", LogLevel.ERROR)
 }
 
-sealed class TransitException(
-    errorCode: BaseErrorType
-) : CustomException(errorCode) {
-    data object TransitApiError : TransitException(TransitErrorType.TRANSIT_API_ERROR) {
-        override fun readResolve(): Any = TransitApiError
-    }
+class TransitException(
+    errorCode: BaseErrorType,
+    customMessage: String? = null,
+    cause: Throwable? = null
+) : CustomException(errorCode, customMessage, cause) {
+    override fun readResolve(): Any = this
 
-    data object TaxiFareFetchFailed : TransitException(TransitErrorType.TAXI_FARE_FETCH_FAILED) {
-        override fun readResolve(): Any = TaxiFareFetchFailed
-    }
+    companion object {
+        fun of(errorType: BaseErrorType): TransitException {
+            return TransitException(errorType)
+        }
 
-    data object NotFoundTime : TransitException(TransitErrorType.NOT_FOUND_TIME) {
-        override fun readResolve(): Any = NotFoundTime
-    }
+        fun of(
+            errorType: BaseErrorType,
+            message: String
+        ): TransitException {
+            return TransitException(errorType, customMessage = message)
+        }
 
-    data object NotFoundSubwayStation : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_STATION) {
-        override fun readResolve(): Any = NotFoundSubwayStation
-    }
+        fun of(
+            errorType: BaseErrorType,
+            cause: Throwable
+        ): TransitException {
+            return TransitException(errorType, cause = cause)
+        }
 
-    data object NotFoundSubwayRoute : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_ROUTE) {
-        override fun readResolve(): Any = NotFoundSubwayRoute
-    }
-
-    data object DistanceTooShort : TransitException(TransitErrorType.DISTANCE_TOO_SHORT) {
-        override fun readResolve(): Any = DistanceTooShort
-    }
-
-    data object ServiceAreaNotSupported : TransitException(TransitErrorType.SERVICE_AREA_NOT_SUPPORTED) {
-        override fun readResolve(): Any = ServiceAreaNotSupported
-    }
-
-    data object NotFoundRoute : TransitException(TransitErrorType.NOT_FOUND_ROUTE) {
-        override fun readResolve(): Any = NotFoundRoute
-    }
-
-    data object NotFoundBusPosition : TransitException(TransitErrorType.NOT_FOUND_BUS_POSITION) {
-        override fun readResolve(): Any = NotFoundBusPosition
-    }
-
-    data object BusRouteStationListFetchFailed : TransitException(
-        TransitErrorType.BUS_ROUTE_STATION_LIST_FETCH_FAILED
-    ) {
-        override fun readResolve(): Any = BusRouteStationListFetchFailed
-    }
-
-    data object NotFoundBusArrival : TransitException(TransitErrorType.NOT_FOUND_BUS_SCHEDULE) {
-        override fun readResolve(): Any = NotFoundBusArrival
-    }
-
-    data object BusRouteOperationInfoFetchFailed : TransitException(
-        TransitErrorType.NOT_FOUND_BUS_OPERATION_INFO
-    ) {
-        override fun readResolve(): Any = BusRouteOperationInfoFetchFailed
-    }
-
-    data object NotFoundBusStation : TransitException(TransitErrorType.NOT_FOUND_BUS_STATION) {
-        override fun readResolve(): Any = NotFoundBusStation
-    }
-
-    data object NotFoundBusRoute : TransitException(TransitErrorType.NOT_FOUND_BUS_ROUTE) {
-        override fun readResolve(): Any = NotFoundBusRoute
-    }
-
-    data object NotFoundSubwayLastTime : TransitException(TransitErrorType.NOT_FOUND_SUBWAY_LAST_TIME) {
-        override fun readResolve(): Any = NotFoundSubwayLastTime
-    }
-
-    data object NotFoundBusRealTime : TransitException(TransitErrorType.NOT_FOUND_BUS_REAL_TIME) {
-        override fun readResolve(): Any = NotFoundBusRealTime
+        fun of(
+            errorType: BaseErrorType,
+            message: String,
+            cause: Throwable
+        ): TransitException {
+            return TransitException(errorType, customMessage = message, cause = cause)
+        }
     }
 }

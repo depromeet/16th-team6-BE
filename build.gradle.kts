@@ -45,6 +45,13 @@ dependencies {
     // xml parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 
+    // OKHttp
+    implementation("io.github.openfeign:feign-okhttp")
+    implementation("com.squareup.okhttp3:okhttp")
+
+    // Rate Limiting
+    implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
+
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
 
@@ -64,6 +71,17 @@ dependencies {
 
     // fcm
     implementation("com.google.firebase:firebase-admin:9.4.3")
+
+    // geometry
+    implementation("org.locationtech.proj4j:proj4j:1.3.0")
+    implementation("org.locationtech.proj4j:proj4j-epsg:1.3.0")
+
+    // similarity
+    implementation("org.apache.commons:commons-text:1.10.0")
+
+    // shedlock - schedule lock
+    implementation("net.javacrumbs.shedlock:shedlock-spring:5.10.0")
+    implementation("net.javacrumbs.shedlock:shedlock-provider-redis-spring:5.10.0")
 
     runtimeOnly("com.mysql:mysql-connector-j")
     testImplementation("org.springframework.boot:spring-boot-starter-test")

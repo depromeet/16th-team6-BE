@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.app.api
 
 import com.deepromeet.atcha.app.api.request.AppVersionUpdateRequest
-import com.deepromeet.atcha.app.domain.AppService
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.app.application.AppService
+import com.deepromeet.atcha.shared.web.ApiResponse
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping

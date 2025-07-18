@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.tmap.response
 
-import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 
 data class TMapAddressResponse(
     val addressInfo: TMapAddressInfo

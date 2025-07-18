@@ -3,7 +3,7 @@ networks:
     driver: bridge
 services:
   atcha-blue:
-    container_name: atcha-blue
+    container_name: prod-atcha-blue
     networks:
       - app-tier
     image: atchadockerhub/atcha_prod:latest
@@ -18,7 +18,7 @@ services:
       start_period: 30s
 
   atcha-green:
-    container_name: atcha-green
+    container_name: prod-atcha-green
     networks:
       - app-tier
     image: atchadockerhub/atcha_prod:latest

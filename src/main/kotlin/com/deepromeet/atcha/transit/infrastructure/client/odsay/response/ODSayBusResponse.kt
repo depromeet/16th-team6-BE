@@ -1,15 +1,17 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay.response
 
-import com.deepromeet.atcha.transit.domain.BusRoute
-import com.deepromeet.atcha.transit.domain.BusRouteId
-import com.deepromeet.atcha.transit.domain.BusSchedule
-import com.deepromeet.atcha.transit.domain.BusStation
-import com.deepromeet.atcha.transit.domain.BusTimeTable
-import com.deepromeet.atcha.transit.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusSchedule
+import com.deepromeet.atcha.transit.domain.bus.BusStation
+import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
+import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
+import java.lang.Exception
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
-import java.time.format.DateTimeFormatter
 
 data class ODSayBusArrivalResponse(
     val result: ODSayBusArrivalResponseResult
@@ -63,7 +65,7 @@ data class ODSayLaneResponse(
     var busInterval: String,
     var busLocalBlID: String
 ) {
-    fun toBusArrival(station: BusStation): BusSchedule {
+    fun toBusSchedule(station: BusStation): BusSchedule {
         val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
@@ -75,29 +77,38 @@ data class ODSayLaneResponse(
             busStation = station,
             busTimeTable =
                 BusTimeTable(
-                    toBusArrivalTime(busFirstTime),
-                    toBusArrivalTime(busLastTime),
+                    parseTime(busFirstTime, LocalDate.now()),
+                    parseTime(busLastTime, LocalDate.now()),
                     busInterval.toInt()
                 )
         )
     }
 
-    // TODO : "xx:xx" -> LocalDateTime 변환, Util로 옮기기
-    fun toBusArrivalTime(time: String): LocalDateTime {
-        val formatter = DateTimeFormatter.ofPattern("HH:mm")
-        val overDay = time.substring(0, 2).toInt() > 24
-        val checkTime =
-            if (overDay) {
-                "0" + time.substring(0, 2).toInt().minus(24).toString() + time.substring(2)
-            } else {
-                time
+    fun parseTime(
+        timeStr: String?,
+        referenceDate: LocalDate
+    ): LocalDateTime {
+        return try {
+            if (timeStr.isNullOrBlank()) {
+                throw TransitException.of(TransitError.INVALID_TIME_FORMAT)
             }
-        val localTime = LocalTime.parse(checkTime, formatter)
-        if (overDay) {
-            return LocalDateTime.of(LocalDate.now(), localTime)
-                .plusDays(1)
+
+            val parts = timeStr.split(":")
+            var hour = parts[0].toInt()
+            val minute = parts[1].toInt()
+
+            var date = referenceDate
+
+            if (hour >= 24) {
+                hour -= 24
+                date = referenceDate.plusDays(1)
+            }
+
+            val localTime = LocalTime.of(hour, minute)
+            LocalDateTime.of(date, localTime)
+        } catch (e: Exception) {
+            throw TransitException.of(TransitError.INVALID_TIME_FORMAT)
         }
-        return LocalDateTime.of(LocalDate.now(), localTime)
     }
 }
 

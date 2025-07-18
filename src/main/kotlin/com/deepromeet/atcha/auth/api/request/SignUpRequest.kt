@@ -4,6 +4,7 @@ import com.deepromeet.atcha.auth.domain.SignUpInfo
 
 data class SignUpRequest(
     val provider: Int,
+    val userName: String? = null,
     val address: String,
     val lat: Double,
     val lon: Double,
@@ -12,7 +13,6 @@ data class SignUpRequest(
 ) {
     fun toSignUpInfo() =
         SignUpInfo(
-            provider = provider,
             address = address,
             lat = lat,
             lon = lon,

@@ -5,9 +5,10 @@ import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
-import com.deepromeet.atcha.auth.domain.AuthService
-import com.deepromeet.atcha.common.token.Token
-import com.deepromeet.atcha.common.web.ApiResponse
+import com.deepromeet.atcha.auth.application.AuthService
+import com.deepromeet.atcha.auth.domain.ProviderToken
+import com.deepromeet.atcha.shared.web.ApiResponse
+import com.deepromeet.atcha.shared.web.token.Token
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
@@ -27,7 +28,7 @@ class AuthController(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
-        val exist = authService.checkUserExists(providerToken, provider)
+        val exist = authService.checkUserExists(ProviderToken.of(providerToken, provider))
         val result = ExistsUserResponse(exist)
         return ApiResponse.success(result)
     }
@@ -39,7 +40,7 @@ class AuthController(
         @RequestBody signUpRequest: SignUpRequest
     ): ApiResponse<SignUpResponse> {
         val signUpInfo = signUpRequest.toSignUpInfo()
-        val userToken = authService.signUp(providerToken, signUpInfo)
+        val userToken = authService.signUp(ProviderToken.of(providerToken, signUpRequest.provider), signUpInfo)
         val result = SignUpResponse(userToken)
         return ApiResponse.success(result)
     }
@@ -50,7 +51,7 @@ class AuthController(
         @RequestParam("provider") provider: Int,
         @RequestParam("fcmToken") fcmToken: String
     ): ApiResponse<LoginResponse> {
-        val userToken = authService.login(providerToken, provider, fcmToken)
+        val userToken = authService.login(ProviderToken.of(providerToken, provider), fcmToken)
         val result = LoginResponse(userToken)
         return ApiResponse.success(result)
     }
