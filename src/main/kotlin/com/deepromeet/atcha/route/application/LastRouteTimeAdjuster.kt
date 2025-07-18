@@ -87,7 +87,7 @@ class LastRouteTimeAdjuster {
             }
 
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
-            val boardingTime = leg.calculateBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
+            val boardingTime = leg.calcBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
 
             legs[i] = leg.copy(departureDateTime = boardingTime.toString())
             adjustBaseTime = boardingTime
@@ -115,7 +115,7 @@ class LastRouteTimeAdjuster {
                 continue
             }
 
-            val boardingTime = leg.calculateBoardingTime(adjustBaseTime, TimeDirection.AFTER)
+            val boardingTime = leg.calcBoardingTime(adjustBaseTime, TimeDirection.AFTER)
             legs[i] = leg.copy(departureDateTime = boardingTime.toString())
             adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
         }

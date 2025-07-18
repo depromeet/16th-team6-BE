@@ -86,8 +86,7 @@ object ApiClientUtils {
     fun <T> isServiceResultApiLimitExceeded(response: ServiceResult<T>): Boolean {
         val limitMessages =
             listOf(
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
-                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
+                "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR"
             )
         val limited =
             response.msgHeader.headerCd == 7 ||

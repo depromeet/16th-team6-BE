@@ -1,13 +1,17 @@
 package com.deepromeet.atcha.route.domain
 
-enum class RouteMode(val value: String) {
-    WALK("WALK"),
-    SUBWAY("SUBWAY"),
-    BUS("BUS"),
-    EXPRESS_BUS("EXPRESSBUS"),
-    TRAIN("TRAIN"),
-    AIRPLANE("AIRPLANE"),
-    FERRY("FERRY");
+enum class RouteMode(
+    val value: String,
+    val isSupported: Boolean = true,
+    val requiresDepartureTime: Boolean = false
+) {
+    WALK("WALK", isSupported = true, requiresDepartureTime = false),
+    SUBWAY("SUBWAY", isSupported = true, requiresDepartureTime = true),
+    BUS("BUS", isSupported = true, requiresDepartureTime = true),
+    EXPRESS_BUS("EXPRESSBUS", isSupported = false),
+    TRAIN("TRAIN", isSupported = false),
+    AIRPLANE("AIRPLANE", isSupported = false),
+    FERRY("FERRY", isSupported = false);
 
     fun isTransit(): Boolean = this == SUBWAY || this == BUS
 

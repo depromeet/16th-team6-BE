@@ -23,7 +23,7 @@ class LastRouteLegCalculator(
     private val subwayManager: SubwayManager,
     private val busManager: BusManager
 ) {
-    suspend fun calcWithLastTime(legs: List<RouteLeg>): List<LastRouteLeg>? {
+    suspend fun calcWithLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
         return coroutineScope {
             legs.map { leg ->
                 async(Dispatchers.Default) {
@@ -56,11 +56,10 @@ class LastRouteLegCalculator(
 
                 val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
                 val lastDepartureTime = timeTable.getLastTime(endStation, routes, leg.isExpress())
-                val transitInfo = TransitInfo.SubwayInfo(timeTable)
 
                 leg.toLastTransitLeg(
                     departureDateTime = lastDepartureTime.departureTime.toString(),
-                    transitInfo = transitInfo
+                    transitInfo = TransitInfo.SubwayInfo(timeTable)
                 )
             }
         } catch (e: Exception) {
@@ -75,11 +74,10 @@ class LastRouteLegCalculator(
 
         val busSchedule = busManager.getSchedule(routeName, stationMeta, leg.passStops!!)
         val lastDepartureTime = busSchedule.busTimeTable.lastTime
-        val transitInfo = TransitInfo.BusInfo(busSchedule)
 
         return leg.toLastTransitLeg(
             departureDateTime = lastDepartureTime.toString(),
-            transitInfo = transitInfo
+            transitInfo = TransitInfo.BusInfo(busSchedule)
         )
     }
 }

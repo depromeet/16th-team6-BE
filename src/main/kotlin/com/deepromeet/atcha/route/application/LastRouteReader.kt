@@ -4,7 +4,6 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -28,16 +27,9 @@ class LastRouteReader(
         end: Coordinate
     ): List<LastRoute>? =
         coroutineScope {
-            val routeIds = lastRouteIndexCache.get(start, end)
-            return@coroutineScope if (routeIds.isNotEmpty()) {
-                val routes =
-                    routeIds
-                        .map { id -> async(Dispatchers.IO) { read(id) } }
-                        .awaitAll()
-                routes
-            } else {
-                null
-            }
+            lastRouteIndexCache.get(start, end).takeIf { it.isNotEmpty() }?.map {
+                async { read(it) }
+            }?.awaitAll()
         }
 
     fun readRemainingTime(routeId: String): Int = read(routeId).calculateRemainingTime()

@@ -15,8 +15,7 @@ data class RouteLeg(
     val end: RouteLocation,
     val steps: List<RouteStep>?,
     val passStops: RoutePassStops?,
-    val pathCoordinates: String?,
-    val transitInfo: TransitInfo
+    val pathCoordinates: String?
 ) {
     fun isExpress(): Boolean = route?.contains("(급행)") == true
 
@@ -45,7 +44,7 @@ data class RouteLeg(
             steps = this.steps,
             passStops = this.passStops,
             pathCoordinates = this.pathCoordinates,
-            transitInfo = transitInfo
+            transitInfo = TransitInfo.NoInfoTable
         )
 
     fun toLastTransitLeg(

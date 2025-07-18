@@ -3,7 +3,6 @@ package com.deepromeet.atcha.route.application
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.RouteItinerary
-import com.deepromeet.atcha.route.domain.withIncreasedWalkTime
 import com.deepromeet.atcha.route.infrastructure.cache.LastRouteMetricsRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +23,7 @@ private const val MAX_CALCULATION_TIME = 15_000L
 @Component
 class LastRouteCalculator(
     private val legCalculator: LastRouteLegCalculator,
-    private val timeAdjustmentService: LastRouteTimeAdjuster,
+    private val timeAdjuster: LastRouteTimeAdjuster,
     private val lastRouteAppender: LastRouteAppender,
     private val metricsRepository: LastRouteMetricsRepository
 ) {
@@ -34,7 +33,6 @@ class LastRouteCalculator(
         itineraries: List<RouteItinerary>
     ): List<LastRoute> {
         metricsRepository.incrTotal(itineraries.size.toLong())
-
         val routes =
             coroutineScope {
                 itineraries
@@ -49,11 +47,7 @@ class LastRouteCalculator(
                     .filterNotNull()
             }
 
-        if (routes.isNotEmpty()) {
-            metricsRepository.incrSuccess(routes.size.toLong())
-            lastRouteAppender.appendRoutes(start, destination, routes)
-        }
-
+        if (routes.isNotEmpty()) lastRouteAppender.appendRoutes(start, destination, routes)
         log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
         return routes
     }
@@ -76,7 +70,6 @@ class LastRouteCalculator(
                         }
 
                     if (route != null) {
-                        metricsRepository.incrSuccess(1)
                         lastRouteBuffer.add(route)
                         send(route)
                     }
@@ -88,24 +81,12 @@ class LastRouteCalculator(
         }
     }
 
-    private suspend fun calculateRoute(itinerary: RouteItinerary): LastRoute? {
-        return try {
-            // 1. 경로 내 대중교통 별 막차 시간 조회
-            val calculatedLegs =
-                legCalculator
-                    .calcWithLastTime(itinerary.legs)
-                    ?.withIncreasedWalkTime()
-                    ?: return null
-
-            // 2. 막차 시간 기준, 경로 내 대중교통 탑승 가능 여부 확인
-            val timeAdjustedLegs = timeAdjustmentService.adjustTransitDepartureTimes(calculatedLegs)
-
-            LastRoute
-                .create(itinerary, timeAdjustedLegs)
-                .validate()
-        } catch (e: Exception) {
-            log.warn(e) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다." }
-            null
-        }
-    }
+    private suspend fun calculateRoute(itinerary: RouteItinerary): LastRoute? =
+        runCatching {
+            val calculatedLegs = legCalculator.calcWithLastTime(itinerary.legs)
+            val timeAdjustedLegs = timeAdjuster.adjustTransitDepartureTimes(calculatedLegs)
+            LastRoute.create(itinerary, timeAdjustedLegs)
+        }.onFailure { exception ->
+            log.warn(exception) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다." }
+        }.getOrNull()
 }

@@ -22,6 +22,11 @@ data class LastRouteLeg(
     val pathCoordinates: String?,
     val transitInfo: TransitInfo
 ) {
+    init {
+        validateRouteMode()
+        validateTransitDepartureTime()
+    }
+
     val busInfo: TransitInfo.BusInfo?
         get() = transitInfo as? TransitInfo.BusInfo
 
@@ -33,8 +38,6 @@ data class LastRouteLeg(
     fun isWalk(): Boolean = mode.isWalk()
 
     fun isBus(): Boolean = mode == RouteMode.BUS
-
-    fun hasDepartureTime(): Boolean = !departureDateTime.isNullOrBlank()
 
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
@@ -55,7 +58,7 @@ data class LastRouteLeg(
         }
     }
 
-    fun calculateBoardingTime(
+    fun calcBoardingTime(
         targetTime: LocalDateTime,
         direction: TimeDirection
     ): LocalDateTime {
@@ -87,6 +90,20 @@ data class LastRouteLeg(
                     "해당 교통수단의 막차 시간 정보가 없습니다. " +
                         "$mode - ${start.name} -> ${end.name}"
                 )
+            }
+        }
+    }
+
+    private fun validateRouteMode() {
+        require(mode.isSupported) {
+            "지원하지 않는 교통수단입니다: $mode"
+        }
+    }
+
+    private fun validateTransitDepartureTime() {
+        if (mode.requiresDepartureTime) {
+            require(!departureDateTime.isNullOrBlank()) {
+                "대중교통($mode)의 출발시간은 필수입니다"
             }
         }
     }

@@ -2,13 +2,6 @@ package com.deepromeet.atcha.route.domain
 
 import java.time.LocalDateTime
 
-fun List<LastRouteLeg>.withIncreasedWalkTime(): List<LastRouteLeg> {
-    return this.mapIndexed { index, currentLeg ->
-        val nextLeg = this.getOrNull(index + 1)
-        currentLeg.withIncreasedWalkTime(nextLeg)
-    }
-}
-
 fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
     val now = LocalDateTime.now()
     val upcomingRoutes =

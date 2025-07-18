@@ -4,7 +4,7 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import org.springframework.stereotype.Component
 import java.time.Duration
@@ -52,17 +52,21 @@ class UserRouteDepartureTimeRefresher(
         val timeTable = firstBusLeg.busInfo?.timeTable ?: return null
 
         // 2) 실시간 도착 정보 조회
-        val arrivalInfos = getBusRealTimeInfo(firstBusLeg) ?: return null
+        val arrivalInfo =
+            busManager.getRealTimeArrival(
+                firstBusLeg.resolveRouteName(),
+                firstBusLeg.toBusStationMeta(),
+                firstBusLeg.passStops!!
+            )
 
         // 3) 도착 후보 시각 계산 및 최적 출발시간 결정
         val optimalTime =
             calculateOptimalDepartureTime(
-                arrivalInfos,
+                arrivalInfo,
                 timeTable,
                 route
             ) ?: return null
 
-        // 4) 갱신된 route 및 알림 저장
         return saveUpdatedRoute(userRoute, route, firstBusLeg, optimalTime)
     }
 
@@ -71,46 +75,34 @@ class UserRouteDepartureTimeRefresher(
         return if (firstTransit.isBus()) firstTransit else null
     }
 
-    private suspend fun getBusRealTimeInfo(firstTransit: LastRouteLeg): List<BusRealTimeInfo>? {
-        return busManager.getRealTimeArrival(
-            firstTransit.resolveRouteName(),
-            firstTransit.toBusStationMeta(),
-            firstTransit.passStops!!
-        ).realTimeInfoList.ifEmpty { null }
+    /** "20분 + 배차 간격" 이내가 아니면 갱신 금지 */
+    private fun isNotRefreshTarget(
+        oldDeparture: LocalDateTime,
+        busTerm: Int
+    ): Boolean {
+        val minutesLeft = Duration.between(LocalDateTime.now(), oldDeparture).toMinutes()
+        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until (FIXED_REFRESH_MINUTES + busTerm)
     }
 
     private fun calculateOptimalDepartureTime(
-        arrivalInfos: List<BusRealTimeInfo>,
+        arrivalInfo: BusRealTimeArrival,
         timeTable: BusTimeTable,
         route: LastRoute
     ): OptimalDepartureTime? {
-        // 도착 후보 시각 생성
-        val candidateArrivals =
-            createArrivalCandidates(arrivalInfos, timeTable.term)
-                .filter { it.isBefore(timeTable.lastTime) }
-                .toSet()
-
-        // 실행 가능한 출발시간 계산
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
 
-        val feasible =
-            candidateArrivals.mapNotNull { arrival ->
-                val departure =
-                    arrival
-                        .minusSeconds(walkingTime)
-                        .minusSeconds(BUFFER_SEC_SECONDS)
-                if (departure.isAfter(now)) {
-                    OptimalDepartureTime(
-                        arrival,
-                        departure
-                    )
-                } else {
-                    null
-                }
+        return arrivalInfo
+            .createArrivalCandidates(timeTable.term)
+            .filter { it.isBefore(timeTable.lastTime) }
+            .mapNotNull { arrival ->
+                arrival
+                    .minusSeconds(walkingTime)
+                    .minusSeconds(BUFFER_SEC_SECONDS)
+                    .takeIf { it.isAfter(now) }
+                    ?.let { OptimalDepartureTime(arrival, it) }
             }
-
-        return feasible.minByOrNull { it.routeDepartureTime }
+            .minByOrNull { it.routeDepartureTime }
     }
 
     private suspend fun saveUpdatedRoute(
@@ -131,33 +123,6 @@ class UserRouteDepartureTimeRefresher(
         return userRouteManager.update(
             userRoute.updateDepartureTime(optimalTime.routeDepartureTime)
         )
-    }
-
-    /** "20분 + 배차 간격" 이내가 아니면 갱신 금지 */
-    private fun isNotRefreshTarget(
-        oldDeparture: LocalDateTime,
-        busTerm: Int
-    ): Boolean {
-        val minutesLeft = Duration.between(LocalDateTime.now(), oldDeparture).toMinutes()
-        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until (FIXED_REFRESH_MINUTES + busTerm)
-    }
-
-    /** 실시간 최대 2건 + 배차 기반 2건 → 총 4개의 도착 후보 시각 생성 */
-    private fun createArrivalCandidates(
-        infos: List<BusRealTimeInfo>,
-        busTerm: Int
-    ): List<LocalDateTime> {
-        val baseArrivals =
-            infos
-                .mapNotNull { it.expectedArrivalTime }
-                .sorted()
-                .takeLast(1)
-                .toMutableList()
-
-        val base = baseArrivals.firstOrNull() ?: return emptyList()
-        repeat(2) { i -> baseArrivals += base.plusMinutes(busTerm.toLong() * (i + 1)) }
-
-        return baseArrivals
     }
 
     private fun updateRouteWithNewTimes(

@@ -1,7 +1,5 @@
 package com.deepromeet.atcha.route.domain
 
-import com.deepromeet.atcha.route.exception.RouteError
-import com.deepromeet.atcha.route.exception.RouteException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
@@ -38,21 +36,12 @@ data class LastRoute(
             .sumOf { it.sectionTime }
             .toLong()
 
-    fun validate(): LastRoute {
-        val isValid =
-            legs.filter { it.isTransit() }
-                .all { it.hasDepartureTime() }
-
-        if (!isValid) throw RouteException.of(RouteError.INVALID_LAST_ROUTE)
-
-        return this
-    }
-
     companion object {
         fun create(
             itinerary: RouteItinerary,
             adjustedLegs: List<LastRouteLeg>
         ): LastRoute {
+            val increasedWalkTimeLegs = adjustedLegs.withIncreasedWalkTime()
             val departureDateTime = calculateDepartureTime(adjustedLegs)
             val arrivalTime = calculateArrivalTime(adjustedLegs)
             val totalTime = Duration.between(departureDateTime, arrivalTime).seconds
@@ -66,7 +55,7 @@ data class LastRoute(
                 transferCount = itinerary.transferCount,
                 totalDistance = itinerary.totalDistance,
                 pathType = itinerary.pathType,
-                legs = adjustedLegs
+                legs = increasedWalkTimeLegs
             )
         }
 
@@ -95,6 +84,13 @@ data class LastRoute(
                     .toLong()
 
             return lastTransitArrivalTime.plusSeconds(finalWalkTime)
+        }
+
+        private fun List<LastRouteLeg>.withIncreasedWalkTime(): List<LastRouteLeg> {
+            return this.mapIndexed { index, currentLeg ->
+                val nextLeg = this.getOrNull(index + 1)
+                currentLeg.withIncreasedWalkTime(nextLeg)
+            }
         }
     }
 }

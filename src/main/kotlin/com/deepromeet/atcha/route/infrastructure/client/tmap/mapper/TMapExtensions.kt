@@ -13,7 +13,6 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Step
-import com.deepromeet.atcha.transit.domain.TransitInfo
 
 fun Itinerary.toDomain(): RouteItinerary {
     return RouteItinerary(
@@ -41,8 +40,7 @@ fun Leg.toDomain(): RouteLeg {
         end = this.end.toDomain(),
         steps = this.steps?.map { it.toDomain() },
         passStops = this.passStopList?.toDomain(),
-        pathCoordinates = this.passShape?.linestring,
-        transitInfo = TransitInfo.NoInfoTable
+        pathCoordinates = this.passShape?.linestring
     )
 }
 
