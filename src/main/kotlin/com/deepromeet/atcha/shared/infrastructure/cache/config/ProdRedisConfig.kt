@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.shared.infrastructure.cache.config
 
-import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.fasterxml.jackson.databind.DeserializationFeature
@@ -90,13 +89,6 @@ class ProdRedisConfig(
         template.hashValueSerializer = serializer
 
         return template
-    }
-
-    @Bean
-    fun lastRoutesResponseRedisTemplate(
-        redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, LastRoute> {
-        return createRedisTemplate(redisConnectionFactory, LastRoute::class.java)
     }
 
     @Bean
