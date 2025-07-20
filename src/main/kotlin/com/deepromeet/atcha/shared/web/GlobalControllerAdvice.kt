@@ -32,7 +32,7 @@ class GlobalControllerAdvice {
                 RequestError.NO_MATCHED_METHOD,
                 "지원하지 않는 HTTP 메서드입니다: ${httpException.method}." +
                     " 지원되는 메서드: ${httpException.supportedMethods?.joinToString(", ") +
-                        "요청 URL ${request.requestURI}. "}",
+                        " 요청 URL: ${request.requestURI}. "}",
                 httpException
             )
         return handle(exception, request)
