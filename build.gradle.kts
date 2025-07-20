@@ -26,7 +26,7 @@ repositories {
 }
 
 noArg {
-    annotation("com.deepromeet.atcha.common.annotation.NoArg")
+    annotation("com.deepromeet.atcha.shared.annotation.NoArg")
 }
 
 extra["springCloudVersion"] = "2024.0.0"
