@@ -51,3 +51,4 @@ src/main/resources/firebase-service-account.json
 .claude/commands/*
 
 CLAUDE.md
+GEMINI.md
