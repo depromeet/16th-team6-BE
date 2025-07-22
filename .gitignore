@@ -47,3 +47,7 @@ out/
 src/main/resources/secret-env.yml
 src/main/resources/application-local.yml
 src/main/resources/firebase-service-account.json
+
+.claude/commands/*
+
+CLAUDE.md
