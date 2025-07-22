@@ -11,7 +11,7 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 5
+private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 3
 private const val FIXED_REFRESH_MINUTES = 20
 private const val BUFFER_SEC_SECONDS = 2 * 60L
 

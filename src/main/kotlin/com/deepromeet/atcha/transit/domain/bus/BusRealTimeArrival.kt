@@ -11,10 +11,9 @@ data class BusRealTimeArrival(
             realTimeInfoList
                 .mapNotNull { it.expectedArrivalTime }
                 .sorted()
-                .takeLast(1)
                 .toMutableList()
 
-        val base = baseArrivals.firstOrNull() ?: return emptyList()
+        val base = baseArrivals.lastOrNull() ?: return emptyList()
         repeat(2) { i ->
             baseArrivals += base.plusMinutes(busTerm.toLong() * (i + 1))
         }
