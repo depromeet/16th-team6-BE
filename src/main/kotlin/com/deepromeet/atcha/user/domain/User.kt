@@ -31,6 +31,24 @@ data class User(
         return copy(isDeleted = true)
     }
 
+    fun update(updateInfo: UserUpdateInfo): User {
+        var updated = this
+
+        updateInfo.alertFrequencies?.let {
+            updated = updated.updateAlertFrequencies(it)
+        }
+
+        updateInfo.getHomeAddress()?.let { newAddress ->
+            updated = updated.updateHomeAddress(newAddress)
+        }
+
+        updateInfo.fcmToken?.let {
+            updated = updated.updateFcmToken(it)
+        }
+
+        return updated
+    }
+
     companion object {
         fun create(
             providerId: String,
