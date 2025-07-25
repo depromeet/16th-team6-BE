@@ -21,22 +21,7 @@ class UserProviderRepositoryImpl(
             userEntityJpaRepository.findById(userProvider.userId.value)
                 .orElseThrow { IllegalArgumentException("User not found with id: ${userProvider.userId.value}") }
 
-        val entity =
-            if (userProvider.id.value == 0L) {
-                authMapper.toEntity(userProvider, userEntity)
-            } else {
-                val existingEntity =
-                    userProviderEntityJpaRepository
-                        .findById(userProvider.id.value)
-                        .orElseThrow {
-                            IllegalArgumentException(
-                                "UserProvider not found with id: ${userProvider.id.value}"
-                            )
-                        }
-                authMapper.updateEntity(existingEntity.provider, userProvider.provider)
-                existingEntity
-            }
-
+        val entity = authMapper.toEntity(userProvider, userEntity)
         val savedEntity = userProviderEntityJpaRepository.save(entity)
         return authMapper.toDomain(savedEntity)
     }

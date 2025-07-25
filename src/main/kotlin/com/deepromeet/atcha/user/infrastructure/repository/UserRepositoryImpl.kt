@@ -31,16 +31,7 @@ class UserRepositoryImpl(
     }
 
     override fun save(user: User): User {
-        val entity =
-            if (user.id.value == 0L) {
-                userMapper.toEntity(user)
-            } else {
-                val existingEntity =
-                    jpaRepository.findById(user.id.value)
-                        .orElseThrow { IllegalArgumentException("User not found: ${user.id.value}") }
-                userMapper.updateEntity(existingEntity, user)
-            }
-
+        val entity = userMapper.toEntity(user)
         val savedEntity = jpaRepository.save(entity)
         return userMapper.toDomain(savedEntity)
     }

@@ -49,13 +49,4 @@ class AuthMapper {
             provider = toEntity(domain.provider)
         )
     }
-
-    fun updateEntity(
-        entity: ProviderEntity,
-        domain: Provider
-    ): ProviderEntity {
-        entity.providerType = domain.providerType
-        entity.providerToken = domain.providerToken
-        return entity
-    }
 }
