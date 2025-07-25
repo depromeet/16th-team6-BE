@@ -1,7 +1,5 @@
 package com.deepromeet.atcha.user.application
 
-import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserRepository
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
@@ -15,25 +13,7 @@ class UserUpdater(
         user: User,
         userUpdateInfo: UserUpdateInfo
     ): User {
-        var updatedUser = user
-
-        userUpdateInfo.alertFrequencies?.let {
-            updatedUser = updatedUser.updateAlertFrequencies(it)
-        }
-
-        if (userUpdateInfo.address != null && userUpdateInfo.lat != null && userUpdateInfo.lon != null) {
-            val newAddress =
-                HomeAddress(
-                    address = userUpdateInfo.address,
-                    coordinate = Coordinate(lat = userUpdateInfo.lat, lon = userUpdateInfo.lon)
-                )
-            updatedUser = updatedUser.updateHomeAddress(newAddress)
-        }
-
-        userUpdateInfo.fcmToken?.let {
-            updatedUser = updatedUser.updateFcmToken(it)
-        }
-
+        val updatedUser = user.update(userUpdateInfo)
         return userRepository.save(updatedUser)
     }
 
