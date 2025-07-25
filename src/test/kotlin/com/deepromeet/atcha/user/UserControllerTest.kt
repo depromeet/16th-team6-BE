@@ -37,7 +37,7 @@ class UserControllerTest(
     @BeforeEach
     fun issueToken() {
         user = userAppender.append(user)
-        val generateToken = jwtTokenGenerator.generateTokens(user.id.value)
+        val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
     }
