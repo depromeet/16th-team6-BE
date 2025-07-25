@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.user.application
 
+import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserRepository
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
