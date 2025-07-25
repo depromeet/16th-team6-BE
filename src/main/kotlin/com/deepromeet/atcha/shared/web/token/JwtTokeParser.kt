@@ -8,20 +8,13 @@ import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
-import java.util.Date
-import java.util.UUID
 
 @Component
-class TokenGenerator(
+class JwtTokeParser(
     @Value("\${jwt.access.secret}")
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
-    private val refreshSecret: String,
-    @Value("\${jwt.access.expiration}")
-    private val accessExpiration: String,
-    @Value("\${jwt.refresh.expiration}")
-    private val refreshExpiration: String,
-    private val blacklist: TokenBlacklist
+    private val refreshSecret: String
 ) {
     private val tokenKeyMap =
         mapOf(
@@ -29,18 +22,10 @@ class TokenGenerator(
             TokenType.REFRESH to Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
         )
 
-    fun generateTokens(userId: Long): TokenInfo {
-        val now = Date()
-        val accessToken = generateAccessToken(userId, now)
-        val refreshToken = generateRefreshToken(userId, now, accessToken)
-        return TokenInfo(accessToken, refreshToken)
-    }
-
     fun validateToken(
         token: String,
         tokenType: TokenType
     ) {
-        validateContainBlacklist(token)
         try {
             validateJwtFormat(tokenType, token)
         } catch (e: ExpiredJwtException) {
@@ -50,7 +35,7 @@ class TokenGenerator(
         }
     }
 
-    fun getUserIdByToken(
+    fun getUserId(
         token: String,
         tokenType: TokenType
     ): Long {
@@ -72,17 +57,7 @@ class TokenGenerator(
         }
     }
 
-    fun expireTokensWithRefreshToken(refreshToken: String) {
-        val accessToken = getAccessTokenByRefreshToken(refreshToken)
-        expireToken(accessToken)
-        expireToken(refreshToken)
-    }
-
-    fun expireToken(token: String) {
-        blacklist.add(token)
-    }
-
-    private fun getAccessTokenByRefreshToken(refreshToken: String): String {
+    fun getAccessToken(refreshToken: String): String {
         try {
             val body =
                 Jwts.parserBuilder()
@@ -104,34 +79,6 @@ class TokenGenerator(
         }
     }
 
-    private fun generateAccessToken(
-        userId: Long,
-        now: Date
-    ): String {
-        return Jwts.builder()
-            .setSubject(userId.toString())
-            .setIssuedAt(now)
-            .setId(UUID.randomUUID().toString())
-            .setExpiration(Date(now.time + accessExpiration.toLong()))
-            .signWith(tokenKeyMap.get(TokenType.ACCESS))
-            .compact()
-    }
-
-    private fun generateRefreshToken(
-        userId: Long,
-        now: Date,
-        accessToken: String
-    ): String {
-        return Jwts.builder()
-            .setSubject(userId.toString())
-            .setIssuedAt(now)
-            .claim(TokenType.ACCESS.name, accessToken)
-            .setId(UUID.randomUUID().toString())
-            .setExpiration(Date(now.time + refreshExpiration.toLong()))
-            .signWith(tokenKeyMap.get(TokenType.REFRESH))
-            .compact()
-    }
-
     private fun validateJwtFormat(
         tokenType: TokenType,
         token: String
@@ -142,11 +89,5 @@ class TokenGenerator(
             .parseClaimsJws(token)
             .body.get("sub")
             ?: throw TokenException.Companion.of(TokenError.NOT_VALID_TOKEN, "토큰에 사용자 정보가 포함되어 있지 않습니다")
-    }
-
-    private fun validateContainBlacklist(token: String) {
-        if (blacklist.contains(token)) {
-            throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
-        }
     }
 }

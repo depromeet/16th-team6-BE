@@ -2,7 +2,7 @@ package com.deepromeet.atcha.user
 
 import com.deepromeet.atcha.app.application.AppVersionAppender
 import com.deepromeet.atcha.shared.web.ApiResponse
-import com.deepromeet.atcha.shared.web.token.TokenGenerator
+import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
@@ -23,7 +23,7 @@ import org.springframework.http.HttpHeaders
 
 class UserControllerTest(
     @Autowired
-    private val tokenGenerator: TokenGenerator,
+    private val jwtTokenGenerator: JwtTokenGenerator,
     @Autowired
     private val userReader: UserReader,
     @Autowired
@@ -37,7 +37,7 @@ class UserControllerTest(
     @BeforeEach
     fun issueToken() {
         user = userAppender.append(user)
-        val generateToken = tokenGenerator.generateTokens(user.id)
+        val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
     }
