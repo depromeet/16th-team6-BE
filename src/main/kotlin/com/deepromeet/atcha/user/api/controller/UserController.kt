@@ -53,7 +53,7 @@ class UserController(
     }
 
     @PatchMapping("/members/me/home-address")
-    fun updateAlertFrequency(
+    fun updateHomeAddress(
         @CurrentUser id: Long,
         @RequestBody request: HomeAddressUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
