@@ -37,7 +37,7 @@ class UserControllerTest(
     @BeforeEach
     fun issueToken() {
         user = userAppender.append(user)
-        val generateToken = jwtTokenGenerator.generateTokens(user.id)
+        val generateToken = jwtTokenGenerator.generateTokens(user.id.value)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
     }
@@ -84,9 +84,9 @@ class UserControllerTest(
 
         // then
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
-        assertThat(findUser.homeAddress?.address).isEqualTo(userInfoUpdateRequest.address)
-        assertThat(findUser.homeAddress?.latitude).isEqualTo(userInfoUpdateRequest.lat)
-        assertThat(findUser.homeAddress?.longitude).isEqualTo(userInfoUpdateRequest.lon)
+        assertThat(findUser.homeAddress.address).isEqualTo(userInfoUpdateRequest.address)
+        assertThat(findUser.homeAddress.coordinate.lat).isEqualTo(userInfoUpdateRequest.lat)
+        assertThat(findUser.homeAddress.coordinate.lon).isEqualTo(userInfoUpdateRequest.lon)
         assertThat(findUser.fcmToken).isEqualTo(userInfoUpdateRequest.fcmToken)
     }
 

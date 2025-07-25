@@ -19,9 +19,9 @@ data class UserInfoResponse(
         ) = UserInfoResponse(
             domain.id.value,
             domain.providerId,
-            domain.homeAddress?.address ?: "",
-            domain.homeAddress?.latitude ?: 0.0,
-            domain.homeAddress?.longitude ?: 0.0,
+            domain.homeAddress.address,
+            domain.homeAddress.coordinate.lat,
+            domain.homeAddress.coordinate.lon,
             domain.alertFrequencies,
             appVersion = appVersion.version
         )

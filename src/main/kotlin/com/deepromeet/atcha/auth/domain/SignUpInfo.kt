@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.auth.domain
 
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.user.domain.HomeAddress
 
 data class SignUpInfo(
@@ -10,5 +11,5 @@ data class SignUpInfo(
     val alertFrequencies: Set<Int>,
     val fcmToken: String
 ) {
-    fun getAddress(): HomeAddress = HomeAddress(address, lat, lon)
+    fun getAddress(): HomeAddress = HomeAddress(address, Coordinate(lat, lon))
 }
