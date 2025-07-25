@@ -1,57 +1,53 @@
 package com.deepromeet.atcha.user.domain
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import jakarta.persistence.CollectionTable
-import jakarta.persistence.Column
-import jakarta.persistence.ElementCollection
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.JoinColumn
-import jakarta.persistence.Table
 
-@Entity
-@Table(name = "users")
-class User(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
+data class User(
+    val id: UserId,
     val providerId: String,
-    @Embedded
-    var address: Address = Address(),
-    @ElementCollection(fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_alert_frequencies", joinColumns = [JoinColumn(name = "user_id")])
-    @Column(name = "alert_frequencies")
-    var alertFrequencies: MutableSet<Int> = mutableSetOf(),
-    var fcmToken: String,
-    var isDeleted: Boolean = false
+    val homeAddress: HomeAddress,
+    val alertFrequencies: Set<Int>,
+    val fcmToken: String?,
+    val isDeleted: Boolean = false
 ) {
     fun getHomeCoordinate(): Coordinate {
-        return address.resolveCoordinate()
+        return homeAddress.coordinate
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (javaClass != other?.javaClass) return false
-
-        other as User
-
-        return id == other.id
+    fun updateHomeAddress(newAddress: HomeAddress): User {
+        return copy(homeAddress = newAddress)
     }
 
-    override fun hashCode(): Int {
-        return id.hashCode()
+    fun updateAlertFrequencies(frequencies: Set<Int>): User {
+        require(frequencies.all { it > 0 }) { "Alert frequencies must be positive" }
+        return copy(alertFrequencies = frequencies)
     }
 
-    override fun toString(): String {
-        return "User(id=$id, " +
-            "providerId=$providerId, " +
-            "address=$address, " +
-            "alertFrequencies=$alertFrequencies, " +
-            "fcmToken='$fcmToken', " +
-            "isDeleted=$isDeleted)"
+    fun updateFcmToken(newToken: String?): User {
+        return copy(fcmToken = newToken)
+    }
+
+    fun markAsDeleted(): User {
+        return copy(isDeleted = true)
+    }
+
+    companion object {
+        fun create(
+            providerId: String,
+            homeAddress: HomeAddress,
+            alertFrequencies: Set<Int> = emptySet(),
+            fcmToken: String
+        ): User {
+            require(providerId.isNotBlank()) { "Provider ID cannot be blank" }
+
+            return User(
+                id = UserId(0L),
+                providerId = providerId,
+                homeAddress = homeAddress,
+                alertFrequencies = alertFrequencies,
+                fcmToken = fcmToken,
+                isDeleted = false
+            )
+        }
     }
 }

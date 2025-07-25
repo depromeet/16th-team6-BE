@@ -1,24 +1,27 @@
 package com.deepromeet.atcha.support.fixture
 
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
-import com.deepromeet.atcha.user.domain.Address
+import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
+import com.deepromeet.atcha.user.domain.UserId
 
 object UserFixture {
     fun create(
+        id: Long = 1L,
         providerId: String = "1",
-        address: Address =
-            Address(
-                "TEST_ADDRESS",
-                37.0,
-                127.0
+        homeAddress: HomeAddress =
+            HomeAddress(
+                address = "TEST_ADDRESS",
+                coordinate = Coordinate(37.0, 127.0)
             ),
-        alertFrequencies: MutableSet<Int> = mutableSetOf(1, 5, 10),
-        fcmToken: String = "TEST_FCMTOKEN"
+        alertFrequencies: Set<Int> = setOf(1, 5, 10),
+        fcmToken: String? = "TEST_FCMTOKEN"
     ): User =
         User(
+            id = UserId(id),
             providerId = providerId,
-            address = address,
+            homeAddress = homeAddress,
             alertFrequencies = alertFrequencies,
             fcmToken = fcmToken
         )
@@ -29,10 +32,10 @@ object UserFixture {
     ): SignUpRequest =
         SignUpRequest(
             provider = provider,
-            address = user.address.address,
-            lat = user.address.lat,
-            lon = user.address.lon,
-            alertFrequencies = user.alertFrequencies,
-            fcmToken = user.fcmToken
+            address = user.homeAddress.address,
+            lat = user.homeAddress.coordinate.lat,
+            lon = user.homeAddress.coordinate.lon,
+            alertFrequencies = user.alertFrequencies.toMutableSet(),
+            fcmToken = user.fcmToken ?: ""
         )
 }

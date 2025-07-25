@@ -32,12 +32,12 @@ class UserControllerTest(
     private val appVersionAppender: AppVersionAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
-    var user: User = UserFixture.create()
+    var user: User = UserFixture.create(id = 0L)
 
     @BeforeEach
     fun issueToken() {
         user = userAppender.append(user)
-        val generateToken = jwtTokenGenerator.generateTokens(user.id)
+        val generateToken = jwtTokenGenerator.generateTokens(user.id.value)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
     }
@@ -54,7 +54,7 @@ class UserControllerTest(
                 .result
         val objectMapper = jacksonObjectMapper()
         val findUser: UserInfoResponse = objectMapper.convertValue(result, UserInfoResponse::class.java)
-        assertThat(findUser.id).isEqualTo(user.id)
+        assertThat(findUser.id).isEqualTo(user.id.value)
     }
 
     @Test
@@ -80,13 +80,13 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(200)
 
-        val findUser = userReader.read(user.id)
+        val findUser = userReader.read(user.id.value)
 
         // then
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
-        assertThat(findUser.address.address).isEqualTo(userInfoUpdateRequest.address)
-        assertThat(findUser.address.lat).isEqualTo(userInfoUpdateRequest.lat)
-        assertThat(findUser.address.lon).isEqualTo(userInfoUpdateRequest.lon)
+        assertThat(findUser.homeAddress.address).isEqualTo(userInfoUpdateRequest.address)
+        assertThat(findUser.homeAddress.coordinate.lat).isEqualTo(userInfoUpdateRequest.lat)
+        assertThat(findUser.homeAddress.coordinate.lon).isEqualTo(userInfoUpdateRequest.lon)
         assertThat(findUser.fcmToken).isEqualTo(userInfoUpdateRequest.fcmToken)
     }
 
@@ -100,7 +100,7 @@ class UserControllerTest(
             .statusCode(204)
 
         // then
-        assertThatThrownBy { userReader.read(user.id) }
+        assertThatThrownBy { userReader.read(user.id.value) }
             .isInstanceOf(UserException::class.java)
     }
 }

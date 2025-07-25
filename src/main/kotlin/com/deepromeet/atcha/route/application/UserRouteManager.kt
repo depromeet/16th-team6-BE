@@ -17,10 +17,10 @@ class UserRouteManager(
     ) {
         val userRoute =
             UserRoute(
-                token = user.fcmToken,
+                token = user.fcmToken ?: "",
                 departureTime = route.departureDateTime,
                 routeId = route.id,
-                userId = user.id
+                userId = user.id.value
             )
         userRouteRepository.save(userRoute)
     }
@@ -28,14 +28,14 @@ class UserRouteManager(
     fun update(userRoute: UserRoute) = userRouteRepository.save(userRoute)
 
     fun read(user: User): UserRoute {
-        return userRouteRepository.findById(user.id)
+        return userRouteRepository.findById(user.id.value)
             ?: throw RouteException.of(
                 RouteError.USER_ROUTE_NOT_FOUND,
-                "id(${user.id}) 유저가 등록한 경로를 찾을 수 없습니다."
+                "id(${user.id.value}) 유저가 등록한 경로를 찾을 수 없습니다."
             )
     }
 
     fun readAll(): List<UserRoute> = userRouteRepository.findAll()
 
-    fun delete(user: User) = userRouteRepository.delete(user.id)
+    fun delete(user: User) = userRouteRepository.delete(user.id.value)
 }

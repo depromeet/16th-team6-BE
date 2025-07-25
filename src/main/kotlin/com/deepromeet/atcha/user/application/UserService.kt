@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.user.application
 
+import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
 import org.springframework.stereotype.Service
@@ -8,7 +9,8 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class UserService(
     private val userReader: UserReader,
-    private val userAppender: UserAppender
+    private val userAppender: UserAppender,
+    private val userUpdater: UserUpdater
 ) {
     @Transactional(readOnly = true)
     fun getUser(id: Long): User = userReader.read(id)
@@ -19,7 +21,25 @@ class UserService(
         userUpdateInfo: UserUpdateInfo
     ): User {
         val user = userReader.read(id)
-        return userAppender.update(user, userUpdateInfo)
+        return userUpdater.update(user, userUpdateInfo)
+    }
+
+    @Transactional
+    fun updateAlertFrequency(
+        id: Long,
+        alertFrequency: MutableSet<Int>
+    ): User {
+        val user = userReader.read(id)
+        return userUpdater.updateAlertFrequency(user, alertFrequency)
+    }
+
+    @Transactional
+    fun updateHomeAddress(
+        id: Long,
+        homeAddress: HomeAddress
+    ): User {
+        val user = userReader.read(id)
+        return userUpdater.updateHomeAddress(user, homeAddress)
     }
 
     @Transactional

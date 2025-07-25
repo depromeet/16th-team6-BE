@@ -10,7 +10,6 @@ enum class UserError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    NOTIFICATION_NOT_FOUND(404, "USR_001", "해당 ID의 알림이 없습니다.", LogLevel.WARN),
     USER_NOT_FOUND(404, "USR_002", "해당 유저 정보가 존재하지 않습니다.", LogLevel.WARN)
 }
 

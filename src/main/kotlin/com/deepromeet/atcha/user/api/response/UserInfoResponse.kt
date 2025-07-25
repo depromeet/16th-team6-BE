@@ -9,7 +9,7 @@ data class UserInfoResponse(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: MutableSet<Int>,
+    val alertFrequencies: Set<Int>,
     val appVersion: String
 ) {
     companion object {
@@ -17,11 +17,11 @@ data class UserInfoResponse(
             domain: User,
             appVersion: AppVersion
         ) = UserInfoResponse(
-            domain.id,
+            domain.id.value,
             domain.providerId,
-            domain.address.address,
-            domain.address.lat,
-            domain.address.lon,
+            domain.homeAddress.address,
+            domain.homeAddress.coordinate.lat,
+            domain.homeAddress.coordinate.lon,
             domain.alertFrequencies,
             appVersion = appVersion.version
         )
