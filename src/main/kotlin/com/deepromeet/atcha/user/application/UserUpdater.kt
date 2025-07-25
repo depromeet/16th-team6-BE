@@ -53,15 +53,15 @@ class UserUpdater(
         user: User,
         alertFrequency: MutableSet<Int>
     ): User {
-        user.updateAlertFrequencies(alertFrequency)
-        return userRepository.save(user)
+        val updatedUser = user.updateAlertFrequencies(alertFrequency)
+        return userRepository.save(updatedUser)
     }
 
     fun updateHomeAddress(
         user: User,
         homeAddress: HomeAddress
     ): User {
-        user.updateHomeAddress(homeAddress)
-        return userRepository.save(user)
+        val updatedUser = user.updateHomeAddress(homeAddress)
+        return userRepository.save(updatedUser)
     }
 }

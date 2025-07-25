@@ -3,6 +3,7 @@ package com.deepromeet.atcha.user.api.controller
 import com.deepromeet.atcha.app.application.AppService
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.user.api.request.AlertFrequencyUpdateRequest
 import com.deepromeet.atcha.user.api.request.HomeAddressUpdateRequest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
@@ -45,9 +46,9 @@ class UserController(
     @PatchMapping("/members/me/alert-frequency")
     fun updateAlertFrequency(
         @CurrentUser id: Long,
-        @RequestBody alertFrequencies: MutableSet<Int>
+        @RequestBody request: AlertFrequencyUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
-        val result = userService.updateAlertFrequency(id, alertFrequencies)
+        val result = userService.updateAlertFrequency(id, request.alertFrequencies.toMutableSet())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
