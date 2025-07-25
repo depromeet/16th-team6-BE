@@ -3,7 +3,7 @@ package com.deepromeet.atcha.auth.application
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import com.deepromeet.atcha.auth.domain.SignUpInfo
 import com.deepromeet.atcha.auth.domain.UserAuthInfo
-import com.deepromeet.atcha.auth.domain.UserTokenInfo
+import com.deepromeet.atcha.auth.domain.UserTokens
 import com.deepromeet.atcha.auth.exception.AuthError
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.shared.web.token.JwtTokeParser
@@ -78,7 +78,7 @@ class AuthService(
     }
 
     @Transactional
-    fun reissueToken(refreshToken: String): UserTokenInfo {
+    fun reissueToken(refreshToken: String): UserTokens {
         tokenExpirationManager.validateNotExpired(refreshToken)
         jwtTokeParser.validateToken(refreshToken, TokenType.REFRESH)
         val userId = jwtTokeParser.getUserId(refreshToken, TokenType.REFRESH)
@@ -87,6 +87,6 @@ class AuthService(
 
         val tokenInfo = jwtTokenGenerator.generateTokens(userId)
 
-        return UserTokenInfo(userId, tokenInfo)
+        return UserTokens(userId, tokenInfo)
     }
 }
