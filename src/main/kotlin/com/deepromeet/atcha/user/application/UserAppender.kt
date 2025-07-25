@@ -3,30 +3,36 @@ package com.deepromeet.atcha.user.application
 import com.deepromeet.atcha.auth.application.UserProviderAppender
 import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.SignUpInfo
+import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
+import com.deepromeet.atcha.user.domain.UserId
+import com.deepromeet.atcha.user.domain.UserRepository
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
-import com.deepromeet.atcha.user.infrastructure.repository.UserJpaRepository
 import org.springframework.stereotype.Component
 
 @Component
 class UserAppender(
-    private val userJpaRepository: UserJpaRepository,
+    private val userRepository: UserRepository,
     private val userProviderAppender: UserProviderAppender
 ) {
-    fun append(user: User): User = userJpaRepository.save(user)
+    fun append(user: User): User = userRepository.save(user)
 
     fun append(
         provider: Provider,
         signUpInfo: SignUpInfo
     ): User {
+        val homeAddress = signUpInfo.getAddress()
+
         val user =
-            User(
+            User.create(
+                id = UserId(0L),
                 providerId = provider.providerUserId,
-                address = signUpInfo.getAddress(),
-                alertFrequencies = signUpInfo.alertFrequencies.toMutableSet(),
+                homeAddress = homeAddress,
+                alertFrequencies = signUpInfo.alertFrequencies.toSet(),
                 fcmToken = signUpInfo.fcmToken
             )
-        val saved = userJpaRepository.save(user)
+
+        val saved = userRepository.save(user)
         userProviderAppender.append(saved, provider)
         return saved
     }
@@ -35,25 +41,43 @@ class UserAppender(
         user: User,
         userUpdateInfo: UserUpdateInfo
     ): User {
-        userUpdateInfo.alertFrequencies?.let { user.alertFrequencies = it }
-        userUpdateInfo.address?.let { user.address.address = it }
-        userUpdateInfo.lat?.let { user.address.lat = it }
-        userUpdateInfo.lon?.let { user.address.lon = it }
-        userUpdateInfo.fcmToken?.let { user.fcmToken = it }
-        return user
+        var updatedUser = user
+
+        userUpdateInfo.alertFrequencies?.let {
+            updatedUser = updatedUser.updateAlertFrequencies(it)
+        }
+
+        if (userUpdateInfo.address != null && userUpdateInfo.lat != null && userUpdateInfo.lon != null) {
+            val newAddress =
+                HomeAddress(
+                    address = userUpdateInfo.address,
+                    latitude = userUpdateInfo.lat,
+                    longitude = userUpdateInfo.lon
+                )
+            updatedUser = updatedUser.updateHomeAddress(newAddress)
+        }
+
+        userUpdateInfo.fcmToken?.let {
+            updatedUser = updatedUser.updateFcmToken(it)
+        }
+
+        return userRepository.save(updatedUser)
     }
 
     fun updateFcmToken(
         user: User,
         fcmToken: String
     ): User {
-        if (user.fcmToken != fcmToken) {
-            user.fcmToken = fcmToken
+        return if (user.fcmToken != fcmToken) {
+            val updatedUser = user.updateFcmToken(fcmToken)
+            userRepository.save(updatedUser)
+        } else {
+            user
         }
-        return user
     }
 
     fun delete(user: User) {
-        user.isDeleted = true
+        val deletedUser = user.markAsDeleted()
+        userRepository.save(deletedUser)
     }
 }

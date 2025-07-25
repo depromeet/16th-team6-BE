@@ -71,6 +71,7 @@ class AuthServiceTest {
 
         val existingUser =
             UserFixture.create(
+                id = 0L,
                 providerId = kakaoId.toString()
             )
 
@@ -115,6 +116,7 @@ class AuthServiceTest {
         // 미리 DB에 해당 유저 저장
         val existingUser =
             UserFixture.create(
+                id = 0L,
                 providerId = kakaoId.toString()
             )
         userAppender.append(existingUser)
@@ -140,7 +142,7 @@ class AuthServiceTest {
         `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
 
         // 미리 DB에 로그인할 유저 저장
-        val user = UserFixture.create(providerId = kakaoId.toString())
+        val user = UserFixture.create(id = 0L, providerId = kakaoId.toString())
         val savedUser = userAppender.append(user)
         userProviderAppender.append(savedUser, Provider("0", ProviderType.KAKAO, token))
 
@@ -148,7 +150,7 @@ class AuthServiceTest {
         val result = authService.login(ProviderToken.of(token, ProviderType.KAKAO.ordinal), "TEST_FCM_TOKEN")
 
         // then
-        assertThat(result.userTokenInfo.id).isEqualTo(savedUser.id)
+        assertThat(result.userTokenInfo.id).isEqualTo(savedUser.id.value)
         assertThat(result.userTokenInfo.accessToken).isNotBlank()
         assertThat(result.userTokenInfo.refreshToken).isNotBlank()
         assertThat(result.coordinate.lat).isNotNull()
