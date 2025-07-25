@@ -1,19 +1,17 @@
 package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
-import jakarta.persistence.Column
-import jakarta.persistence.Embeddable
-import jakarta.persistence.EnumType
-import jakarta.persistence.Enumerated
 
-@Embeddable
-class Provider(
+data class Provider(
     val providerUserId: String,
-    @Enumerated(EnumType.STRING)
-    var providerType: ProviderType,
-    @Column(length = 1024)
-    var providerToken: String
+    val providerType: ProviderType,
+    val providerToken: String
 ) {
+    init {
+        require(providerUserId.isNotBlank()) { "Provider user ID cannot be blank" }
+        require(providerToken.isNotBlank()) { "Provider token cannot be blank" }
+    }
+
     companion object {
         fun of(
             providerUserId: String,
@@ -25,5 +23,10 @@ class Provider(
                 providerToken = providerToken.token
             )
         }
+    }
+
+    fun updateToken(newToken: String): Provider {
+        require(newToken.isNotBlank()) { "New token cannot be blank" }
+        return copy(providerToken = newToken)
     }
 }

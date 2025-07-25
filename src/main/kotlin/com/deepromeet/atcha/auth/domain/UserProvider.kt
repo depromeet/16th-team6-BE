@@ -1,28 +1,26 @@
 package com.deepromeet.atcha.auth.domain
 
-import com.deepromeet.atcha.shared.infrastructure.jpa.BaseTimeEntity
-import com.deepromeet.atcha.user.infrastructure.entity.UserEntity
-import jakarta.persistence.Embedded
-import jakarta.persistence.Entity
-import jakarta.persistence.FetchType
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.OneToOne
+import com.deepromeet.atcha.user.domain.UserId
 
-@Entity
-class UserProvider(
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    val id: Long = 0,
-    @OneToOne(fetch = FetchType.EAGER)
-    val user: UserEntity,
-    @Embedded
+data class UserProvider(
+    val id: UserProviderId,
+    val userId: UserId,
     val provider: Provider
-) : BaseTimeEntity() {
-    constructor(user: UserEntity, provider: Provider) : this(id = 0, user = user, provider = provider)
+) {
+    companion object {
+        fun create(
+            userId: UserId,
+            provider: Provider
+        ): UserProvider {
+            return UserProvider(
+                id = UserProviderId(0L),
+                userId = userId,
+                provider = provider
+            )
+        }
+    }
 
-    override fun toString(): String {
-        return "UserProvider(id=$id, user=$user, provider=$provider)"
+    fun updateProviderToken(newToken: String): UserProvider {
+        return copy(provider = provider.updateToken(newToken))
     }
 }
