@@ -98,9 +98,9 @@ class AuthServiceTest {
         val result = authService.signUp(ProviderToken.of(token, signUpRequest.provider), signUpRequest.toSignUpInfo())
 
         // then
-        assertThat(result.userTokenInfo.id).isNotNull()
-        assertThat(result.userTokenInfo.accessToken).isNotBlank()
-        assertThat(result.userTokenInfo.refreshToken).isNotBlank()
+        assertThat(result.userTokens.id).isNotNull()
+        assertThat(result.userTokens.accessToken).isNotBlank()
+        assertThat(result.userTokens.refreshToken).isNotBlank()
         assertThat(result.coordinate.lat).isNotNull()
         assertThat(result.coordinate.lon).isNotNull()
     }
@@ -150,9 +150,9 @@ class AuthServiceTest {
         val result = authService.login(ProviderToken.of(token, ProviderType.KAKAO.ordinal), "TEST_FCM_TOKEN")
 
         // then
-        assertThat(result.userTokenInfo.id.value).isEqualTo(savedUser.id.value)
-        assertThat(result.userTokenInfo.accessToken).isNotBlank()
-        assertThat(result.userTokenInfo.refreshToken).isNotBlank()
+        assertThat(result.userTokens.id.value).isEqualTo(savedUser.id.value)
+        assertThat(result.userTokens.accessToken).isNotBlank()
+        assertThat(result.userTokens.refreshToken).isNotBlank()
         assertThat(result.coordinate.lat).isNotNull()
         assertThat(result.coordinate.lon).isNotNull()
     }
