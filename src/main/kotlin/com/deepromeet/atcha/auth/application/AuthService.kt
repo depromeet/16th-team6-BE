@@ -63,7 +63,7 @@ class AuthService(
         val user = userReader.readByProviderId(userInfo.providerUserId)
         userUpdater.updateFcmToken(user, fcmToken)
 
-        val userProvider = userProviderReader.read(user.id.value)
+        val userProvider = userProviderReader.read(user.id)
         userProviderAppender.updateProviderToken(userProvider, providerToken.token)
         val token = jwtTokenGenerator.generateTokens(user.id)
 
