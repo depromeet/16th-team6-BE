@@ -12,10 +12,6 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.Table
 
-/**
- * User JPA Entity - Infrastructure Layer
- * 데이터베이스 저장을 위한 기술적 구현체
- */
 @Entity
 @Table(name = "users")
 class UserEntity(

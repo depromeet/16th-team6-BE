@@ -3,10 +3,6 @@ package com.deepromeet.atcha.user.infrastructure.entity
 import jakarta.persistence.Column
 import jakarta.persistence.Embeddable
 
-/**
- * Address JPA Embeddable Entity - Infrastructure Layer
- * 데이터베이스 저장을 위한 기술적 구현체
- */
 @Embeddable
 class AddressEntity(
     @Column(name = "address")

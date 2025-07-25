@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.user.infrastructure.mapper
 
+import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserId
@@ -27,58 +28,40 @@ class UserMapper {
         )
     }
 
-    /**
-     * User를 UserEntity로 변환
-     */
     fun toEntity(domain: User): UserEntity {
         return UserEntity(
             id = domain.id.value,
             providerId = domain.providerId,
-            address = domain.homeAddress?.toEntity() ?: AddressEntity(),
+            address = domain.homeAddress.toEntity(),
             alertFrequencies = domain.alertFrequencies.toMutableSet(),
             fcmToken = domain.fcmToken,
             isDeleted = domain.isDeleted
         )
     }
 
-    /**
-     * 기존 Entity에 Domain 데이터 업데이트
-     * JPA 영속성 컨텍스트 관리를 위해 필요
-     */
     fun updateEntity(
         entity: UserEntity,
         domain: User
     ): UserEntity {
-        entity.address = domain.homeAddress?.toEntity() ?: AddressEntity()
+        entity.address = domain.homeAddress.toEntity()
         entity.alertFrequencies = domain.alertFrequencies.toMutableSet()
         entity.fcmToken = domain.fcmToken
         entity.isDeleted = domain.isDeleted
         return entity
     }
 
-    /**
-     * AddressEntity를 HomeAddress로 변환
-     */
-    private fun AddressEntity?.toDomain(): HomeAddress? {
-        return if (this == null || (address.isBlank() && lat == 0.0 && lon == 0.0)) {
-            null
-        } else {
-            HomeAddress(
-                address = address,
-                latitude = lat,
-                longitude = lon
-            )
-        }
+    private fun AddressEntity.toDomain(): HomeAddress {
+        return HomeAddress(
+            address = address,
+            coordinate = Coordinate(lat = lat, lon = lon)
+        )
     }
 
-    /**
-     * HomeAddress를 AddressEntity로 변환
-     */
     private fun HomeAddress.toEntity(): AddressEntity {
         return AddressEntity(
             address = address,
-            lat = latitude,
-            lon = longitude
+            lat = coordinate.lat,
+            lon = coordinate.lon
         )
     }
 }

@@ -3,6 +3,7 @@ package com.deepromeet.atcha.user.api.controller
 import com.deepromeet.atcha.app.application.AppService
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.user.api.request.HomeAddressUpdateRequest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
@@ -10,6 +11,7 @@ import com.deepromeet.atcha.user.application.UserService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -37,6 +39,24 @@ class UserController(
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateUser(id, userInfoUpdateRequest.toUpdateUserInfo())
+        return ApiResponse.success(UserInfoUpdateResponse.from(result))
+    }
+
+    @PatchMapping("/members/me/alert-frequency")
+    fun updateAlertFrequency(
+        @CurrentUser id: Long,
+        @RequestBody alertFrequencies: MutableSet<Int>
+    ): ApiResponse<UserInfoUpdateResponse> {
+        val result = userService.updateAlertFrequency(id, alertFrequencies)
+        return ApiResponse.success(UserInfoUpdateResponse.from(result))
+    }
+
+    @PatchMapping("/members/me/home-address")
+    fun updateAlertFrequency(
+        @CurrentUser id: Long,
+        @RequestBody request: HomeAddressUpdateRequest
+    ): ApiResponse<UserInfoUpdateResponse> {
+        val result = userService.updateHomeAddress(id, request.toHomeAddress())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 

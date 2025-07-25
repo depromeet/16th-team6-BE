@@ -12,6 +12,7 @@ import com.deepromeet.atcha.shared.web.token.TokenExpirationManager
 import com.deepromeet.atcha.shared.web.token.TokenType
 import com.deepromeet.atcha.user.application.UserAppender
 import com.deepromeet.atcha.user.application.UserReader
+import com.deepromeet.atcha.user.application.UserUpdater
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,6 +24,7 @@ class AuthService(
     private val tokenExpirationManager: TokenExpirationManager,
     private val userReader: UserReader,
     private val userAppender: UserAppender,
+    private val userUpdater: UserUpdater,
     private val userProviderAppender: UserProviderAppender,
     private val userProviderReader: UserProviderReader
 ) {
@@ -46,7 +48,7 @@ class AuthService(
         }
 
         val savedUser = userAppender.append(provider, signUpInfo)
-        val token = jwtTokenGenerator.generateTokens(savedUser.id)
+        val token = jwtTokenGenerator.generateTokens(savedUser.id.value)
         return UserAuthInfo(savedUser, token)
     }
 
@@ -59,11 +61,11 @@ class AuthService(
 
         val userInfo = authProvider.getProviderUserId(providerToken)
         val user = userReader.readByProviderId(userInfo.providerUserId)
-        userAppender.updateFcmToken(user, fcmToken)
+        userUpdater.updateFcmToken(user, fcmToken)
 
         val userProvider = userProviderReader.read(user.id.value)
         userProviderAppender.updateProviderToken(userProvider, providerToken.token)
-        val token = jwtTokenGenerator.generateTokens(user.id)
+        val token = jwtTokenGenerator.generateTokens(user.id.value)
 
         return UserAuthInfo(user, token)
     }

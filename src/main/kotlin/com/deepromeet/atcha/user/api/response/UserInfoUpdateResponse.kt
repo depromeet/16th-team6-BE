@@ -16,8 +16,8 @@ data class UserInfoUpdateResponse(
                 domain.id.value,
                 domain.providerId,
                 domain.homeAddress?.address ?: "",
-                domain.homeAddress?.latitude ?: 0.0,
-                domain.homeAddress?.longitude ?: 0.0,
+                domain.homeAddress?.coordinate?.lat ?: 0.0,
+                domain.homeAddress?.coordinate?.lon ?: 0.0,
                 domain.alertFrequencies
             )
     }
