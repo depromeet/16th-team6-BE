@@ -10,8 +10,8 @@ enum class TokenError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    EXPIRED_TOKEN(400, "TOK_001", "만료된 토큰입니다.", LogLevel.WARN),
-    NOT_VALID_TOKEN(400, "TOK_002", "유효하지 않는 토큰입니다.", LogLevel.WARN)
+    EXPIRED_TOKEN(401, "TOK_001", "만료된 토큰입니다.", LogLevel.WARN),
+    NOT_VALID_TOKEN(401, "TOK_002", "유효하지 않는 토큰입니다.", LogLevel.WARN)
 }
 
 class TokenException(
