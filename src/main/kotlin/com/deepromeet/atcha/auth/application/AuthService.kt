@@ -48,7 +48,7 @@ class AuthService(
         }
 
         val savedUser = userAppender.append(provider, signUpInfo)
-        val token = jwtTokenGenerator.generateTokens(savedUser.id.value)
+        val token = jwtTokenGenerator.generateTokens(savedUser.id)
         return UserAuthInfo(savedUser, token)
     }
 
@@ -65,7 +65,7 @@ class AuthService(
 
         val userProvider = userProviderReader.read(user.id.value)
         userProviderAppender.updateProviderToken(userProvider, providerToken.token)
-        val token = jwtTokenGenerator.generateTokens(user.id.value)
+        val token = jwtTokenGenerator.generateTokens(user.id)
 
         return UserAuthInfo(user, token)
     }

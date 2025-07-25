@@ -2,6 +2,7 @@ package com.deepromeet.atcha.shared.web.token
 
 import com.deepromeet.atcha.shared.web.token.exception.TokenError
 import com.deepromeet.atcha.shared.web.token.exception.TokenException
+import com.deepromeet.atcha.user.domain.UserId
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
@@ -38,7 +39,7 @@ class JwtTokeParser(
     fun getUserId(
         token: String,
         tokenType: TokenType
-    ): Long {
+    ): UserId {
         try {
             val body =
                 Jwts.parserBuilder()
@@ -46,7 +47,7 @@ class JwtTokeParser(
                     .build()
                     .parseClaimsJws(token)
                     .body
-            return body.get("sub").toString().toLong()
+            return UserId(body.get("sub").toString().toLong())
         } catch (e: ExpiredJwtException) {
             throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "만료된 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}")
         } catch (e: Exception) {

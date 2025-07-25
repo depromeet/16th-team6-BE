@@ -20,7 +20,7 @@ class UserRouteManager(
                 token = user.fcmToken ?: "",
                 departureTime = route.departureDateTime,
                 routeId = route.id,
-                userId = user.id.value
+                userId = user.id
             )
         userRouteRepository.save(userRoute)
     }
@@ -28,7 +28,7 @@ class UserRouteManager(
     fun update(userRoute: UserRoute) = userRouteRepository.save(userRoute)
 
     fun read(user: User): UserRoute {
-        return userRouteRepository.findById(user.id.value)
+        return userRouteRepository.findById(user.id)
             ?: throw RouteException.of(
                 RouteError.USER_ROUTE_NOT_FOUND,
                 "id(${user.id.value}) 유저가 등록한 경로를 찾을 수 없습니다."
@@ -37,5 +37,5 @@ class UserRouteManager(
 
     fun readAll(): List<UserRoute> = userRouteRepository.findAll()
 
-    fun delete(user: User) = userRouteRepository.delete(user.id.value)
+    fun delete(user: User) = userRouteRepository.delete(user.id)
 }

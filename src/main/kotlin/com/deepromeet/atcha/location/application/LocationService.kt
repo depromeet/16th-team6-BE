@@ -4,6 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.Location
 import com.deepromeet.atcha.location.domain.POI
 import com.deepromeet.atcha.user.application.UserReader
+import com.deepromeet.atcha.user.domain.UserId
 import org.springframework.stereotype.Service
 
 @Service
@@ -24,7 +25,7 @@ class LocationService(
     }
 
     fun addPOIHistory(
-        userId: Long,
+        userId: UserId,
         poi: POI
     ) {
         val user = userReader.read(userId)
@@ -32,7 +33,7 @@ class LocationService(
     }
 
     fun getPOIHistories(
-        userId: Long,
+        userId: UserId,
         currentCoordinate: Coordinate
     ): List<POI> {
         val user = userReader.read(userId)
@@ -41,14 +42,14 @@ class LocationService(
     }
 
     fun removePOIHistory(
-        userId: Long,
+        userId: UserId,
         poi: POI
     ) {
         val user = userReader.read(userId)
         poiHistoryManager.remove(user, poi)
     }
 
-    fun clearPOIHistories(userId: Long) {
+    fun clearPOIHistories(userId: UserId) {
         val user = userReader.read(userId)
         poiHistoryManager.clear(user)
     }

@@ -12,7 +12,7 @@ data class UserAuthInfo(
         user: User,
         token: TokenInfo
     ) : this(
-        userTokenInfo = UserTokenInfo(user.id.value, token),
+        userTokenInfo = UserTokenInfo(user.id, token),
         coordinate = user.homeAddress.coordinate
     )
 }

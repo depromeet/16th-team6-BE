@@ -11,11 +11,11 @@ import org.springframework.stereotype.Component
 class UserReader(
     private val userRepository: UserRepository
 ) {
-    fun read(id: Long): User =
-        userRepository.findById(UserId(id))
+    fun read(id: UserId): User =
+        userRepository.findById(id)
             ?: throw UserException.of(
                 UserError.USER_NOT_FOUND,
-                "ID $id 에 해당하는 사용자를 찾을 수 없습니다"
+                "ID ${id.value} 에 해당하는 사용자를 찾을 수 없습니다"
             )
 
     fun readByProviderId(providerId: String): User =

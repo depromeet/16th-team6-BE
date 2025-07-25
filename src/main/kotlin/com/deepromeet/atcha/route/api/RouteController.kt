@@ -8,6 +8,7 @@ import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.springframework.http.HttpStatus
@@ -29,7 +30,7 @@ class RouteController(
 ) {
     @GetMapping("/last-routes")
     suspend fun getLastRoutes(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
@@ -43,7 +44,7 @@ class RouteController(
 
     @GetMapping("/v2/last-routes")
     suspend fun getLastRoutesV2(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
@@ -60,7 +61,7 @@ class RouteController(
         produces = [MediaType.TEXT_EVENT_STREAM_VALUE]
     )
     fun streamLastRoutesV3(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @ModelAttribute request: LastRoutesRequest
     ): Flow<LastRouteResponse> =
         routeService.getLastRouteStream(
@@ -97,7 +98,7 @@ class RouteController(
     @PostMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun addUserRoute(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @RequestBody request: UserRouteRequest
     ) {
         routeService.addUserRoute(id, request.lastRouteId)
@@ -106,7 +107,7 @@ class RouteController(
     @DeleteMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserRoute(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @ModelAttribute request: UserRouteRequest
     ) {
         routeService.deleteUserRoute(id)
@@ -114,7 +115,7 @@ class RouteController(
 
     @GetMapping("/user-routes/refresh")
     suspend fun refreshUserRoute(
-        @CurrentUser id: Long
+        @CurrentUser id: UserId
     ): ApiResponse<UserRouteResponse> =
         ApiResponse.success(
             UserRouteResponse(

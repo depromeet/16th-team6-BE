@@ -6,6 +6,7 @@ import com.deepromeet.atcha.shared.web.token.TokenBlacklist
 import com.deepromeet.atcha.shared.web.token.TokenExpirationManager
 import com.deepromeet.atcha.shared.web.token.TokenType
 import com.deepromeet.atcha.shared.web.token.exception.TokenException
+import com.deepromeet.atcha.user.domain.UserId
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
@@ -38,7 +39,7 @@ class TokenGeneratorTest(
 
     @Test
     fun `토큰 생성 테스트 - 생성된 토큰의 subject가 userId와 일치해야 한다`() {
-        val userId = 100L
+        val userId = UserId(100L)
         val tokenInfo = jwtTokenGenerator.generateTokens(userId)
 
         // 토큰이 빈 문자열이 아닌지 확인
@@ -53,7 +54,7 @@ class TokenGeneratorTest(
                 .build()
                 .parseClaimsJws(tokenInfo.accessToken)
                 .body
-        assertEquals(userId.toString(), accessClaims.subject, "Access token의 subject는 userId와 일치해야 합니다.")
+        assertEquals(userId.value.toString(), accessClaims.subject, "Access token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
             .isThrownBy { jwtTokeParser.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
 
@@ -65,7 +66,7 @@ class TokenGeneratorTest(
                 .build()
                 .parseClaimsJws(tokenInfo.refreshToken)
                 .body
-        assertEquals(userId.toString(), refreshClaims.subject, "Refresh token의 subject는 userId와 일치해야 합니다.")
+        assertEquals(userId.value.toString(), refreshClaims.subject, "Refresh token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
             .isThrownBy { jwtTokeParser.validateToken(tokenInfo.refreshToken, TokenType.REFRESH) }
     }
@@ -73,7 +74,7 @@ class TokenGeneratorTest(
     @Test
     fun `만료된 토큰 사용지 에러가 발생한다`() {
         // given
-        val userId = 100L
+        val userId = UserId(100L)
         val tokenInfo = jwtTokenGenerator.generateTokens(userId)
 
         // when

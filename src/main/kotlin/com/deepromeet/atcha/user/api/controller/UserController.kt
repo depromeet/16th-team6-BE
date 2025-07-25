@@ -9,6 +9,7 @@ import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
 import com.deepromeet.atcha.user.application.UserService
+import com.deepromeet.atcha.user.domain.UserId
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -27,7 +28,7 @@ class UserController(
 ) {
     @GetMapping("/members/me")
     fun getUserInfo(
-        @CurrentUser id: Long
+        @CurrentUser id: UserId
     ): ApiResponse<UserInfoResponse> {
         val user = userService.getUser(id)
         val appVersion = appService.getAppVersion()
@@ -36,7 +37,7 @@ class UserController(
 
     @PutMapping("/members/me")
     fun updateUserInfo(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateUser(id, userInfoUpdateRequest.toUpdateUserInfo())
@@ -45,7 +46,7 @@ class UserController(
 
     @PatchMapping("/members/me/alert-frequency")
     fun updateAlertFrequency(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @RequestBody request: AlertFrequencyUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateAlertFrequency(id, request.alertFrequencies.toMutableSet())
@@ -54,7 +55,7 @@ class UserController(
 
     @PatchMapping("/members/me/home-address")
     fun updateHomeAddress(
-        @CurrentUser id: Long,
+        @CurrentUser id: UserId,
         @RequestBody request: HomeAddressUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateHomeAddress(id, request.toHomeAddress())
@@ -64,7 +65,7 @@ class UserController(
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUser(
-        @CurrentUser id: Long
+        @CurrentUser id: UserId
     ) {
         userService.deleteUser(id)
     }

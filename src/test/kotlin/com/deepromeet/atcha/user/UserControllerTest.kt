@@ -80,7 +80,7 @@ class UserControllerTest(
             .then().log().all()
             .statusCode(200)
 
-        val findUser = userReader.read(user.id.value)
+        val findUser = userReader.read(user.id)
 
         // then
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
@@ -100,7 +100,7 @@ class UserControllerTest(
             .statusCode(204)
 
         // then
-        assertThatThrownBy { userReader.read(user.id.value) }
+        assertThatThrownBy { userReader.read(user.id) }
             .isInstanceOf(UserException::class.java)
     }
 }

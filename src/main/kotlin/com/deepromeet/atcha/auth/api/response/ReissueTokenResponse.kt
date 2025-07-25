@@ -9,5 +9,5 @@ data class ReissueTokenResponse(
 ) {
     constructor(
         userTokenInfo: UserTokenInfo
-    ) : this(userTokenInfo.id, userTokenInfo.accessToken, userTokenInfo.refreshToken)
+    ) : this(userTokenInfo.id.value, userTokenInfo.accessToken, userTokenInfo.refreshToken)
 }

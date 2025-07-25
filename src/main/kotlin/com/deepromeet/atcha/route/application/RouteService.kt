@@ -14,6 +14,7 @@ import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
 import com.deepromeet.atcha.transit.application.region.ServiceRegionValidator
 import com.deepromeet.atcha.user.application.UserReader
+import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
@@ -33,7 +34,7 @@ class RouteService(
     private val transitRouteClientV2: TransitRouteClientV2
 ) {
     suspend fun getLastRoutes(
-        userId: Long,
+        userId: UserId,
         start: Coordinate,
         end: Coordinate?,
         sortType: LastRouteSortType
@@ -51,7 +52,7 @@ class RouteService(
     }
 
     suspend fun getLastRoutesV2(
-        userId: Long,
+        userId: UserId,
         start: Coordinate,
         end: Coordinate?,
         sortType: LastRouteSortType
@@ -66,7 +67,7 @@ class RouteService(
     }
 
     fun getLastRouteStream(
-        userId: Long,
+        userId: UserId,
         start: Coordinate,
         end: Coordinate?,
         sortType: LastRouteSortType
@@ -100,7 +101,7 @@ class RouteService(
     }
 
     fun addUserRoute(
-        id: Long,
+        id: UserId,
         lastRouteId: String
     ) {
         val user = userReader.read(id)
@@ -108,12 +109,12 @@ class RouteService(
         userRouteManager.update(user, route)
     }
 
-    fun deleteUserRoute(id: Long) {
+    fun deleteUserRoute(id: UserId) {
         val user = userReader.read(id)
         userRouteManager.delete(user)
     }
 
-    suspend fun refreshUserRoute(id: Long): UserRoute {
+    suspend fun refreshUserRoute(id: UserId): UserRoute {
         val user = userReader.read(id)
         val userRoute = userRouteManager.read(user)
         return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)

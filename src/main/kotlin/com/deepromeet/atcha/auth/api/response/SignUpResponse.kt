@@ -12,7 +12,7 @@ data class SignUpResponse(
     constructor(
         userAuthInfo: UserAuthInfo
     ) : this(
-        userAuthInfo.userTokenInfo.id,
+        userAuthInfo.userTokenInfo.id.value,
         userAuthInfo.userTokenInfo.accessToken,
         userAuthInfo.userTokenInfo.refreshToken,
         userAuthInfo.coordinate.lat,

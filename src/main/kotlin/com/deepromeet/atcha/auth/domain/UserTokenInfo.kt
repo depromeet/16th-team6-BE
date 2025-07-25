@@ -1,11 +1,12 @@
 package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.shared.web.token.TokenInfo
+import com.deepromeet.atcha.user.domain.UserId
 
 data class UserTokenInfo(
-    val id: Long,
+    val id: UserId,
     val accessToken: String,
     val refreshToken: String
 ) {
-    constructor(id: Long, tokenInfo: TokenInfo) : this(id, tokenInfo.accessToken, tokenInfo.refreshToken)
+    constructor(id: UserId, tokenInfo: TokenInfo) : this(id, tokenInfo.accessToken, tokenInfo.refreshToken)
 }

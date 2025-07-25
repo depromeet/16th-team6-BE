@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.shared.web.token
 
+import com.deepromeet.atcha.user.domain.UserId
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.io.Decoders
 import io.jsonwebtoken.security.Keys
@@ -25,7 +26,7 @@ class JwtTokenGenerator(
             TokenType.REFRESH to Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
         )
 
-    fun generateTokens(userId: Long): TokenInfo {
+    fun generateTokens(userId: UserId): TokenInfo {
         val now = Date()
         val accessToken = generateAccessToken(userId, now)
         val refreshToken = generateRefreshToken(userId, now, accessToken)
@@ -33,11 +34,11 @@ class JwtTokenGenerator(
     }
 
     private fun generateAccessToken(
-        userId: Long,
+        userId: UserId,
         now: Date
     ): String {
         return Jwts.builder()
-            .setSubject(userId.toString())
+            .setSubject(userId.value.toString())
             .setIssuedAt(now)
             .setId(UUID.randomUUID().toString())
             .setExpiration(Date(now.time + accessExpiration.toLong()))
@@ -46,12 +47,12 @@ class JwtTokenGenerator(
     }
 
     private fun generateRefreshToken(
-        userId: Long,
+        userId: UserId,
         now: Date,
         accessToken: String
     ): String {
         return Jwts.builder()
-            .setSubject(userId.toString())
+            .setSubject(userId.value.toString())
             .setIssuedAt(now)
             .claim(TokenType.ACCESS.name, accessToken)
             .setId(UUID.randomUUID().toString())
