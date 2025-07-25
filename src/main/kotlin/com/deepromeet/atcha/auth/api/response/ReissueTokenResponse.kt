@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.api.response
 
-import com.deepromeet.atcha.auth.domain.UserTokenInfo
+import com.deepromeet.atcha.auth.domain.UserTokens
 
 data class ReissueTokenResponse(
     val id: Long,
@@ -8,6 +8,6 @@ data class ReissueTokenResponse(
     val refreshToken: String
 ) {
     constructor(
-        userTokenInfo: UserTokenInfo
-    ) : this(userTokenInfo.id.value, userTokenInfo.accessToken, userTokenInfo.refreshToken)
+        userTokens: UserTokens
+    ) : this(userTokens.id.value, userTokens.accessToken, userTokens.refreshToken)
 }

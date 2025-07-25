@@ -12,9 +12,9 @@ data class LoginResponse(
     constructor(
         userAuthInfo: UserAuthInfo
     ) : this(
-        userAuthInfo.userTokenInfo.id.value,
-        userAuthInfo.userTokenInfo.accessToken,
-        userAuthInfo.userTokenInfo.refreshToken,
+        userAuthInfo.userTokens.id.value,
+        userAuthInfo.userTokens.accessToken,
+        userAuthInfo.userTokens.refreshToken,
         userAuthInfo.coordinate.lat,
         userAuthInfo.coordinate.lon
     )
