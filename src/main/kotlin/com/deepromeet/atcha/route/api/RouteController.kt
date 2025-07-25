@@ -30,12 +30,12 @@ class RouteController(
 ) {
     @GetMapping("/last-routes")
     suspend fun getLastRoutes(
-        @CurrentUser id: UserId,
+        @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
             routeService.getLastRoutes(
-                id,
+                UserId(id),
                 request.toStart(),
                 request.toEnd(),
                 request.sortType
@@ -44,12 +44,12 @@ class RouteController(
 
     @GetMapping("/v2/last-routes")
     suspend fun getLastRoutesV2(
-        @CurrentUser id: UserId,
+        @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
             routeService.getLastRoutesV2(
-                id,
+                UserId(id),
                 request.toStart(),
                 request.toEnd(),
                 request.sortType
@@ -61,11 +61,11 @@ class RouteController(
         produces = [MediaType.TEXT_EVENT_STREAM_VALUE]
     )
     fun streamLastRoutesV3(
-        @CurrentUser id: UserId,
+        @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): Flow<LastRouteResponse> =
         routeService.getLastRouteStream(
-            id,
+            UserId(id),
             request.toStart(),
             request.toEnd(),
             request.sortType
@@ -98,28 +98,28 @@ class RouteController(
     @PostMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun addUserRoute(
-        @CurrentUser id: UserId,
+        @CurrentUser id: Long,
         @RequestBody request: UserRouteRequest
     ) {
-        routeService.addUserRoute(id, request.lastRouteId)
+        routeService.addUserRoute(UserId(id), request.lastRouteId)
     }
 
     @DeleteMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserRoute(
-        @CurrentUser id: UserId,
+        @CurrentUser id: Long,
         @ModelAttribute request: UserRouteRequest
     ) {
-        routeService.deleteUserRoute(id)
+        routeService.deleteUserRoute(UserId(id))
     }
 
     @GetMapping("/user-routes/refresh")
     suspend fun refreshUserRoute(
-        @CurrentUser id: UserId
+        @CurrentUser id: Long
     ): ApiResponse<UserRouteResponse> =
         ApiResponse.success(
             UserRouteResponse(
-                routeService.refreshUserRoute(id)
+                routeService.refreshUserRoute(UserId(id))
             )
         )
 }

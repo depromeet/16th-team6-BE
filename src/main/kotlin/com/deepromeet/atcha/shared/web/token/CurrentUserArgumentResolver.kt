@@ -2,7 +2,6 @@ package com.deepromeet.atcha.shared.web.token
 
 import com.deepromeet.atcha.shared.web.exception.RequestError
 import com.deepromeet.atcha.shared.web.exception.RequestException
-import com.deepromeet.atcha.user.domain.UserId
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpHeaders
@@ -21,16 +20,17 @@ class CurrentUserArgumentResolver(
         private const val TOKEN_TYPE = "Bearer "
     }
 
-    override fun supportsParameter(parameter: MethodParameter): Boolean =
-        parameter.hasParameterAnnotation(CurrentUser::class.java) &&
-            parameter.parameterType == UserId::class.java
+    override fun supportsParameter(parameter: MethodParameter): Boolean {
+        return parameter.hasParameterAnnotation(CurrentUser::class.java) &&
+            parameter.parameterType == Long::class.javaPrimitiveType
+    }
 
     override fun resolveArgument(
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): UserId {
+    ): Any {
         val request =
             webRequest.getNativeRequest(HttpServletRequest::class.java)
                 ?: throw RequestException.Companion.of(RequestError.NO_REQUEST_INFO, "HTTP 요청 정보를 가져올 수 없습니다")
@@ -44,6 +44,7 @@ class CurrentUserArgumentResolver(
         val token = authorization.substring(TOKEN_TYPE.length)
         tokenExpirationManager.validateNotExpired(token)
         jwtTokeParser.validateToken(token, TokenType.ACCESS)
-        return jwtTokeParser.getUserId(token, TokenType.ACCESS)
+        val userId = jwtTokeParser.getUserId(token, TokenType.ACCESS)
+        return userId.value
     }
 }

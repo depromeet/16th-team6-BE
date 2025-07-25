@@ -44,19 +44,19 @@ class LocationController(
     @PostMapping("/histories")
     @ResponseStatus(HttpStatus.CREATED)
     fun addRecentPOI(
-        @CurrentUser userId: UserId,
+        @CurrentUser userId: Long,
         @RequestBody request: POIHistoryRequest
     ) = locationService.addPOIHistory(
-        userId,
+        UserId(userId),
         request.toPOI()
     )
 
     @GetMapping("/histories")
     fun getRecentPOIs(
-        @CurrentUser userId: UserId,
+        @CurrentUser userId: Long,
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<List<POIResponse>> =
-        locationService.getPOIHistories(userId, coordinate).let {
+        locationService.getPOIHistories(UserId(userId), coordinate).let {
             return ApiResponse.success(
                 it.map { poi -> POIResponse.from(poi) }
             )
@@ -65,13 +65,13 @@ class LocationController(
     @DeleteMapping("/history")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun removeRecentPOI(
-        @CurrentUser userId: UserId,
+        @CurrentUser userId: Long,
         @ModelAttribute request: POIHistoryRequest
-    ) = locationService.removePOIHistory(userId, request.toPOI())
+    ) = locationService.removePOIHistory(UserId(userId), request.toPOI())
 
     @DeleteMapping("/histories")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun clearRecentPOIs(
-        @CurrentUser userId: UserId
-    ) = locationService.clearPOIHistories(userId)
+        @CurrentUser userId: Long
+    ) = locationService.clearPOIHistories(UserId(userId))
 }

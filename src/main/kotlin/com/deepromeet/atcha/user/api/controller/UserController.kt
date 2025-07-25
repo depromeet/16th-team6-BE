@@ -28,45 +28,45 @@ class UserController(
 ) {
     @GetMapping("/members/me")
     fun getUserInfo(
-        @CurrentUser id: UserId
+        @CurrentUser userId: Long
     ): ApiResponse<UserInfoResponse> {
-        val user = userService.getUser(id)
+        val user = userService.getUser(UserId(userId))
         val appVersion = appService.getAppVersion()
         return ApiResponse.success(UserInfoResponse.from(user, appVersion))
     }
 
     @PutMapping("/members/me")
     fun updateUserInfo(
-        @CurrentUser id: UserId,
+        @CurrentUser userId: Long,
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
-        val result = userService.updateUser(id, userInfoUpdateRequest.toUpdateUserInfo())
+        val result = userService.updateUser(UserId(userId), userInfoUpdateRequest.toUpdateUserInfo())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
     @PatchMapping("/members/me/alert-frequency")
     fun updateAlertFrequency(
-        @CurrentUser id: UserId,
+        @CurrentUser userId: Long,
         @RequestBody request: AlertFrequencyUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
-        val result = userService.updateAlertFrequency(id, request.alertFrequencies.toMutableSet())
+        val result = userService.updateAlertFrequency(UserId(userId), request.alertFrequencies.toMutableSet())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
     @PatchMapping("/members/me/home-address")
     fun updateHomeAddress(
-        @CurrentUser id: UserId,
+        @CurrentUser userId: Long,
         @RequestBody request: HomeAddressUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
-        val result = userService.updateHomeAddress(id, request.toHomeAddress())
+        val result = userService.updateHomeAddress(UserId(userId), request.toHomeAddress())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUser(
-        @CurrentUser id: UserId
+        @CurrentUser userId: Long
     ) {
-        userService.deleteUser(id)
+        userService.deleteUser(UserId(userId))
     }
 }

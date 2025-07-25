@@ -39,17 +39,6 @@ class UserMapper {
         )
     }
 
-    fun updateEntity(
-        entity: UserEntity,
-        domain: User
-    ): UserEntity {
-        entity.address = domain.homeAddress.toEntity()
-        entity.alertFrequencies = domain.alertFrequencies.toMutableSet()
-        entity.fcmToken = domain.fcmToken
-        entity.isDeleted = domain.isDeleted
-        return entity
-    }
-
     private fun AddressEntity.toDomain(): HomeAddress {
         return HomeAddress(
             address = address,
