@@ -10,7 +10,7 @@ class TokenConfig(
     private val tokenArgumentResolver: TokenArgumentResolver
 ) : WebMvcConfigurer {
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
-        resolvers.add(currentUserArgumentResolver)
-        resolvers.add(tokenArgumentResolver)
+        resolvers.add(0, currentUserArgumentResolver) // Add at index 0 to prioritize
+        resolvers.add(1, tokenArgumentResolver)
     }
 }
