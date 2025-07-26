@@ -1,4 +1,3 @@
-// route/domain/RouteItineraryValidator.kt
 package com.deepromeet.atcha.route.domain
 
 import io.github.oshai.kotlinlogging.KotlinLogging
