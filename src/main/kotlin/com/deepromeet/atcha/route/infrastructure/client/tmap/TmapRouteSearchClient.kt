@@ -15,6 +15,8 @@ import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger {}
 
+private const val MAX_ROUTE_COUNT = 15
+
 @Component
 class TmapRouteSearchClient(
     private val tMapRouteClient: TMapRouteClient
@@ -35,7 +37,7 @@ class TmapRouteSearchClient(
                         startY = start.lat.toString(),
                         endX = end.lon.toString(),
                         endY = end.lat.toString(),
-                        count = 20,
+                        count = MAX_ROUTE_COUNT,
                         searchDttm = baseDate
                     )
                 )
