@@ -48,7 +48,7 @@ class RouteController(
         @ModelAttribute request: LastRoutesRequest
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
-            routeService.getLastRoutesV2(
+            routeService.getLastRoutesForTest(
                 UserId(id),
                 request.toStart(),
                 request.toEnd(),
