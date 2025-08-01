@@ -53,6 +53,7 @@ class LastRouteCalculator(
             throw RouteException.of(RouteError.LAST_ROUTES_NOT_FOUND)
         }
 
+        metricsRepository.incrSuccess(routes.size.toLong())
         lastRouteAppender.appendRoutes(start, destination, routes)
         log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
         return routes
@@ -83,6 +84,7 @@ class LastRouteCalculator(
             }
         }.onCompletion {
             log.info { "총 ${itineraries.size}개의 여정 중 ${lastRouteBuffer.size}개의 막차 경로를 계산했습니다." }
+            metricsRepository.incrSuccess(lastRouteBuffer.size.toLong())
             lastRouteAppender.appendRoutes(start, destination, lastRouteBuffer)
         }
     }
