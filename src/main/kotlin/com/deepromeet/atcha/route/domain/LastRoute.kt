@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.domain
 
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.UUID
 import kotlin.math.absoluteValue
 
@@ -16,6 +17,10 @@ data class LastRoute(
     val pathType: Int,
     val legs: List<LastRouteLeg>
 ) {
+    fun parseDepartureTime(): LocalDateTime {
+        return LocalDateTime.parse(departureDateTime, DateTimeFormatter.ISO_DATE_TIME)
+    }
+
     fun calculateRemainingTime(): Int {
         return Duration.between(
             LocalDateTime.now(),

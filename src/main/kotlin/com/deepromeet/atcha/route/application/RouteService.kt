@@ -6,8 +6,6 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteSortType
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.route.domain.sort
-import com.deepromeet.atcha.route.exception.RouteError
-import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV2
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
@@ -118,6 +116,6 @@ class RouteService(
         val user = userReader.read(id)
         val userRoute = userRouteManager.read(user)
         return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)
-            ?: throw RouteException.of(RouteError.USER_ROUTE_REFRESH_ERROR)
+            ?: userRoute
     }
 }
