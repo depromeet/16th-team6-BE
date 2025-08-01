@@ -49,7 +49,7 @@ class RouteService(
             .sort(sortType)
     }
 
-    suspend fun getLastRoutesV2(
+    suspend fun getLastRoutesForTest(
         userId: UserId,
         start: Coordinate,
         end: Coordinate?,
