@@ -40,6 +40,8 @@ data class LastRouteLegResponse(
     val service: String? = null,
     val start: RouteLocationResponse,
     val end: RouteLocationResponse,
+    val subwayFinalStation: String? = null,
+    val subwayDirection: String? = null,
     val passStopList: List<RoutePassStopResponse>? = null,
     val step: List<RouteStep>? = null,
     val passShape: String? = null
@@ -54,6 +56,8 @@ data class LastRouteLegResponse(
         service = lastRouteLeg.service,
         start = RouteLocationResponse(lastRouteLeg.start),
         end = RouteLocationResponse(lastRouteLeg.end),
+        subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
+        subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
         step = lastRouteLeg.steps,
         passShape = lastRouteLeg.pathCoordinates
