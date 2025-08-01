@@ -53,6 +53,6 @@ class RedisPOIHistoryQueue(
     }
 
     private fun getKey(user: User): String {
-        return "POI_HISTORY:${user.id}"
+        return "POI_HISTORY:${user.id.value}"
     }
 }
