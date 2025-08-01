@@ -55,11 +55,11 @@ class LastRouteLegCalculator(
                 val endStation = endStationDeferred.await()
 
                 val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
-                val lastDepartureTime = timeTable.getLastTime(endStation, routes, leg.isExpress())
+                val lastSchedule = timeTable.getLastTime(endStation, routes, leg.isExpress())
 
                 leg.toLastTransitLeg(
-                    departureDateTime = lastDepartureTime.departureTime.toString(),
-                    transitInfo = TransitInfo.SubwayInfo(timeTable)
+                    departureDateTime = lastSchedule.departureTime.toString(),
+                    transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, lastSchedule)
                 )
             }
         } catch (e: Exception) {
