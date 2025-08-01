@@ -31,16 +31,6 @@ class UserRouteDepartureTimeRefresher(
 
     suspend fun refreshAll(): List<UserRoute> =
         userRouteManager.readAll().mapNotNull { userRoute ->
-            val oldDeparture = LocalDateTime.parse(userRoute.departureTime, formatter)
-            val route = lastRouteReader.read(userRoute.lastRouteId)
-
-            val firstBusLeg = extractFirstBusTransit(route) ?: return@mapNotNull null
-            val timeTable = firstBusLeg.busInfo?.timeTable ?: return@mapNotNull null
-
-            if (isNotRefreshTarget(oldDeparture, timeTable.term)) {
-                return@mapNotNull null
-            }
-
             refreshDepartureTime(userRoute)
         }
 
@@ -50,6 +40,10 @@ class UserRouteDepartureTimeRefresher(
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
         val timeTable = firstBusLeg.busInfo?.timeTable ?: return null
+
+        if (isNotRefreshTarget(route.parseDepartureTime(), timeTable.term)) {
+            return null
+        }
 
         // 2) 실시간 도착 정보 조회
         val arrivalInfo =
@@ -91,6 +85,7 @@ class UserRouteDepartureTimeRefresher(
     ): OptimalDepartureTime? {
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
+        val oldDepartureTime = route.parseDepartureTime()
 
         return arrivalInfo
             .createArrivalCandidates(timeTable.term)
@@ -102,7 +97,7 @@ class UserRouteDepartureTimeRefresher(
                     .takeIf { it.isAfter(now) }
                     ?.let { OptimalDepartureTime(arrival, it) }
             }
-            .minByOrNull { it.routeDepartureTime }
+            .minByOrNull { Duration.between(oldDepartureTime, it.routeDepartureTime).abs() }
     }
 
     private suspend fun saveUpdatedRoute(
