@@ -8,6 +8,7 @@ import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import org.springframework.http.HttpStatus
@@ -34,7 +35,7 @@ class RouteController(
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
             routeService.getLastRoutes(
-                id,
+                UserId(id),
                 request.toStart(),
                 request.toEnd(),
                 request.sortType
@@ -48,7 +49,7 @@ class RouteController(
     ): ApiResponse<List<LastRouteResponse>> =
         ApiResponse.success(
             routeService.getLastRoutesV2(
-                id,
+                UserId(id),
                 request.toStart(),
                 request.toEnd(),
                 request.sortType
@@ -64,7 +65,7 @@ class RouteController(
         @ModelAttribute request: LastRoutesRequest
     ): Flow<LastRouteResponse> =
         routeService.getLastRouteStream(
-            id,
+            UserId(id),
             request.toStart(),
             request.toEnd(),
             request.sortType
@@ -100,7 +101,7 @@ class RouteController(
         @CurrentUser id: Long,
         @RequestBody request: UserRouteRequest
     ) {
-        routeService.addUserRoute(id, request.lastRouteId)
+        routeService.addUserRoute(UserId(id), request.lastRouteId)
     }
 
     @DeleteMapping("/user-routes")
@@ -109,7 +110,7 @@ class RouteController(
         @CurrentUser id: Long,
         @ModelAttribute request: UserRouteRequest
     ) {
-        routeService.deleteUserRoute(id)
+        routeService.deleteUserRoute(UserId(id))
     }
 
     @GetMapping("/user-routes/refresh")
@@ -118,7 +119,7 @@ class RouteController(
     ): ApiResponse<UserRouteResponse> =
         ApiResponse.success(
             UserRouteResponse(
-                routeService.refreshUserRoute(id)
+                routeService.refreshUserRoute(UserId(id))
             )
         )
 }

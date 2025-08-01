@@ -2,7 +2,7 @@ package com.deepromeet.atcha.user
 
 import com.deepromeet.atcha.app.application.AppVersionAppender
 import com.deepromeet.atcha.shared.web.ApiResponse
-import com.deepromeet.atcha.shared.web.token.TokenGenerator
+import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
@@ -23,7 +23,7 @@ import org.springframework.http.HttpHeaders
 
 class UserControllerTest(
     @Autowired
-    private val tokenGenerator: TokenGenerator,
+    private val jwtTokenGenerator: JwtTokenGenerator,
     @Autowired
     private val userReader: UserReader,
     @Autowired
@@ -32,12 +32,12 @@ class UserControllerTest(
     private val appVersionAppender: AppVersionAppender
 ) : BaseControllerTest() {
     var accessToken: String = ""
-    var user: User = UserFixture.create()
+    var user: User = UserFixture.create(id = 0L)
 
     @BeforeEach
     fun issueToken() {
         user = userAppender.append(user)
-        val generateToken = tokenGenerator.generateTokens(user.id)
+        val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
         appVersionAppender.createAppVersion("test v1.0.0")
     }
@@ -54,7 +54,7 @@ class UserControllerTest(
                 .result
         val objectMapper = jacksonObjectMapper()
         val findUser: UserInfoResponse = objectMapper.convertValue(result, UserInfoResponse::class.java)
-        assertThat(findUser.id).isEqualTo(user.id)
+        assertThat(findUser.id).isEqualTo(user.id.value)
     }
 
     @Test
@@ -84,9 +84,9 @@ class UserControllerTest(
 
         // then
         assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
-        assertThat(findUser.address.address).isEqualTo(userInfoUpdateRequest.address)
-        assertThat(findUser.address.lat).isEqualTo(userInfoUpdateRequest.lat)
-        assertThat(findUser.address.lon).isEqualTo(userInfoUpdateRequest.lon)
+        assertThat(findUser.homeAddress.address).isEqualTo(userInfoUpdateRequest.address)
+        assertThat(findUser.homeAddress.coordinate.lat).isEqualTo(userInfoUpdateRequest.lat)
+        assertThat(findUser.homeAddress.coordinate.lon).isEqualTo(userInfoUpdateRequest.lon)
         assertThat(findUser.fcmToken).isEqualTo(userInfoUpdateRequest.fcmToken)
     }
 

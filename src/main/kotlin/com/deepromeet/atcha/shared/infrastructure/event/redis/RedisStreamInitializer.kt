@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.shared.domain.event.infrastructure
+package com.deepromeet.atcha.shared.infrastructure.event.redis
 
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.lettuce.core.RedisBusyException

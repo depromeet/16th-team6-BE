@@ -97,7 +97,7 @@ class AuthControllerTest : BaseControllerTest() {
             .header(HttpHeaders.AUTHORIZATION, "Bearer ${signUpResponse.accessToken}")
             .`when`().delete("/api/members/me")
             .then().log().all()
-            .statusCode(400)
+            .statusCode(401)
     }
 
     @Test
@@ -140,7 +140,7 @@ class AuthControllerTest : BaseControllerTest() {
             .header("Authorization", "Bearer ${signUpResponse.refreshToken}")
             .`when`().get("/api/auth/reissue")
             .then().log().all()
-            .statusCode(400)
+            .statusCode(401)
     }
 
     @Test

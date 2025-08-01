@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.user.domain.UserId
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -8,7 +9,7 @@ data class UserRoute(
     val updatedAt: String,
     val token: String,
     val lastRouteId: String,
-    val userId: Long
+    val userId: UserId
 ) {
     companion object {
         private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
@@ -18,7 +19,7 @@ data class UserRoute(
         token: String,
         departureTime: String,
         routeId: String,
-        userId: Long
+        userId: UserId
     ) : this(
         token = token,
         updatedAt = LocalDateTime.now().format(dateTimeFormatter),

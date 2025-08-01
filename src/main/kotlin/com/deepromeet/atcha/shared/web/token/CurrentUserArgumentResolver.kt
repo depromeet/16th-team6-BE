@@ -13,22 +13,24 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
 class CurrentUserArgumentResolver(
-    private val tokenGenerator: TokenGenerator
+    private val jwtTokeParser: JwtTokeParser,
+    private val tokenExpirationManager: TokenExpirationManager
 ) : HandlerMethodArgumentResolver {
     companion object {
         private const val TOKEN_TYPE = "Bearer "
     }
 
-    override fun supportsParameter(parameter: MethodParameter): Boolean =
-        parameter.hasParameterAnnotation(CurrentUser::class.java) &&
-            parameter.parameterType == Long::class.java
+    override fun supportsParameter(parameter: MethodParameter): Boolean {
+        return parameter.hasParameterAnnotation(CurrentUser::class.java) &&
+            parameter.parameterType == Long::class.javaPrimitiveType
+    }
 
     override fun resolveArgument(
         parameter: MethodParameter,
         mavContainer: ModelAndViewContainer?,
         webRequest: NativeWebRequest,
         binderFactory: WebDataBinderFactory?
-    ): Long {
+    ): Any {
         val request =
             webRequest.getNativeRequest(HttpServletRequest::class.java)
                 ?: throw RequestException.Companion.of(RequestError.NO_REQUEST_INFO, "HTTP 요청 정보를 가져올 수 없습니다")
@@ -40,7 +42,9 @@ class CurrentUserArgumentResolver(
             )
         }
         val token = authorization.substring(TOKEN_TYPE.length)
-        tokenGenerator.validateToken(token, TokenType.ACCESS)
-        return tokenGenerator.getUserIdByToken(token, TokenType.ACCESS)
+        tokenExpirationManager.validateNotExpired(token)
+        jwtTokeParser.validateToken(token, TokenType.ACCESS)
+        val userId = jwtTokeParser.getUserId(token, TokenType.ACCESS)
+        return userId.value
     }
 }

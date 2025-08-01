@@ -5,14 +5,14 @@ import com.deepromeet.atcha.shared.web.token.TokenInfo
 import com.deepromeet.atcha.user.domain.User
 
 data class UserAuthInfo(
-    val userTokenInfo: UserTokenInfo,
+    val userTokens: UserTokens,
     val coordinate: Coordinate
 ) {
     constructor(
         user: User,
         token: TokenInfo
     ) : this(
-        userTokenInfo = UserTokenInfo(user.id, token),
-        coordinate = Coordinate(user.address.lat, user.address.lon)
+        userTokens = UserTokens(user.id, token),
+        coordinate = user.homeAddress.coordinate
     )
 }

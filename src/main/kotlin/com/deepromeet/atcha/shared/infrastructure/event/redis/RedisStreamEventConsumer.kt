@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.shared.domain.event.infrastructure
+package com.deepromeet.atcha.shared.infrastructure.event.redis
 
 import com.deepromeet.atcha.shared.domain.event.domain.EventHandler
 import com.deepromeet.atcha.shared.domain.event.exception.EventError

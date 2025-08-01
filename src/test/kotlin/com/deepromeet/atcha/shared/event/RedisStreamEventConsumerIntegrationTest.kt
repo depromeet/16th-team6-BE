@@ -4,7 +4,7 @@ package com.deepromeet.atcha.shared.event
 import com.deepromeet.atcha.shared.domain.event.domain.DomainEvent
 import com.deepromeet.atcha.shared.domain.event.domain.EventBus
 import com.deepromeet.atcha.shared.domain.event.domain.EventHandler
-import com.deepromeet.atcha.shared.domain.event.infrastructure.RedisStreamEventConsumer
+import com.deepromeet.atcha.shared.infrastructure.event.redis.RedisStreamEventConsumer
 import com.fasterxml.jackson.databind.ObjectMapper
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

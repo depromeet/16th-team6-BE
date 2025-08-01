@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.infrastructure.cache
 
 import com.deepromeet.atcha.route.application.UserRouteRepository
 import com.deepromeet.atcha.route.domain.UserRoute
+import com.deepromeet.atcha.user.domain.UserId
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.ScanOptions
 import org.springframework.stereotype.Component
@@ -25,7 +26,7 @@ class UserRouteRedisRepository(
         return userRoute
     }
 
-    override fun findById(userId: Long): UserRoute? = valueOps.get(getKey(userId))
+    override fun findById(userId: UserId): UserRoute? = valueOps.get(getKey(userId))
 
     override fun findAll(): List<UserRoute> {
         val result = mutableListOf<UserRoute>()
@@ -45,9 +46,9 @@ class UserRouteRedisRepository(
         save(userRoute)
     }
 
-    override fun delete(userId: Long) {
+    override fun delete(userId: UserId) {
         userRouteRedisTemplate.delete(getKey(userId))
     }
 
-    private fun getKey(userId: Long) = "user-routes:$userId"
+    private fun getKey(userId: UserId) = "user-routes:${userId.value}"
 }

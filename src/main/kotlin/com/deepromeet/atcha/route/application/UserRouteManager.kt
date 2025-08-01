@@ -17,7 +17,7 @@ class UserRouteManager(
     ) {
         val userRoute =
             UserRoute(
-                token = user.fcmToken,
+                token = user.fcmToken ?: "",
                 departureTime = route.departureDateTime,
                 routeId = route.id,
                 userId = user.id
@@ -31,7 +31,7 @@ class UserRouteManager(
         return userRouteRepository.findById(user.id)
             ?: throw RouteException.of(
                 RouteError.USER_ROUTE_NOT_FOUND,
-                "id(${user.id}) 유저가 등록한 경로를 찾을 수 없습니다."
+                "id(${user.id.value}) 유저가 등록한 경로를 찾을 수 없습니다."
             )
     }
 
