@@ -12,7 +12,7 @@ import java.time.Duration
 class UserRouteRedisRepository(
     private val userRouteRedisTemplate: RedisTemplate<String, UserRoute>
 ) : UserRouteRepository {
-    private val duration = Duration.ofHours(2)
+    private val duration = Duration.ofDays(1)
     private val valueOps = userRouteRedisTemplate.opsForValue()
     private val scanOptions =
         ScanOptions
