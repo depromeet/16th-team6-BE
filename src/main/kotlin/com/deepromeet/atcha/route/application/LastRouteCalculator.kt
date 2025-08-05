@@ -3,6 +3,8 @@ package com.deepromeet.atcha.route.application
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.RouteItinerary
+import com.deepromeet.atcha.route.exception.RouteError
+import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.route.infrastructure.cache.LastRouteMetricsRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +49,12 @@ class LastRouteCalculator(
                     .filterNotNull()
             }
 
-        if (routes.isNotEmpty()) lastRouteAppender.appendRoutes(start, destination, routes)
+        if (routes.isEmpty()) {
+            throw RouteException.of(RouteError.LAST_ROUTES_NOT_FOUND)
+        }
+
+        metricsRepository.incrSuccess(routes.size.toLong())
+        lastRouteAppender.appendRoutes(start, destination, routes)
         log.info { "총 ${itineraries.size}개의 여정 중 ${routes.size}개의 막차 경로를 계산했습니다." }
         return routes
     }
@@ -77,6 +84,7 @@ class LastRouteCalculator(
             }
         }.onCompletion {
             log.info { "총 ${itineraries.size}개의 여정 중 ${lastRouteBuffer.size}개의 막차 경로를 계산했습니다." }
+            metricsRepository.incrSuccess(lastRouteBuffer.size.toLong())
             lastRouteAppender.appendRoutes(start, destination, lastRouteBuffer)
         }
     }

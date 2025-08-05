@@ -10,14 +10,14 @@ data class SubwayTimeTable(
     val startStation: SubwayStation,
     val dailyType: DailyType,
     val subwayDirection: SubwayDirection,
-    val schedule: List<SubwayTime>
+    val schedules: List<SubwayTime>
 ) {
     fun getLastTime(
         destinationStation: SubwayStation,
         routes: List<Route>,
         isExpress: Boolean
     ): SubwayTime =
-        schedule
+        schedules
             .filter { it.isExpress == isExpress }
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
             .maxByOrNull { it.departureTime }
@@ -33,13 +33,13 @@ data class SubwayTimeTable(
     ): SubwayTime? =
         when (direction) {
             TimeDirection.AFTER -> {
-                schedule
+                schedules
                     .filter { it.departureTime.isAfter(time) }
                     .minByOrNull { it.departureTime }
             }
 
             TimeDirection.BEFORE -> {
-                schedule
+                schedules
                     .filter { it.departureTime.isBefore(time) }
                     .maxByOrNull { it.departureTime }
             }
