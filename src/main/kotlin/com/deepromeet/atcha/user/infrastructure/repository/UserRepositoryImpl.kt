@@ -1,8 +1,9 @@
 package com.deepromeet.atcha.user.infrastructure.repository
 
+import com.deepromeet.atcha.user.application.UserRepository
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserId
-import com.deepromeet.atcha.user.domain.UserRepository
+import com.deepromeet.atcha.user.domain.UserWithdrawalReason
 import com.deepromeet.atcha.user.infrastructure.mapper.UserMapper
 import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
@@ -11,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional
 @Transactional
 class UserRepositoryImpl(
     private val jpaRepository: UserEntityJpaRepository,
+    private val userWithdrawalReasonJpaRepository: UserWithdrawalReasonJpaRepository,
     private val userMapper: UserMapper
 ) : UserRepository {
     @Transactional(readOnly = true)
@@ -42,5 +44,10 @@ class UserRepositoryImpl(
                 .orElseThrow { IllegalArgumentException("User not found: ${userId.value}") }
         entity.isDeleted = true
         jpaRepository.save(entity)
+    }
+
+    override fun saveWithdrawalReason(reason: UserWithdrawalReason) {
+        val entity = userMapper.toEntity(reason)
+        userWithdrawalReasonJpaRepository.save(entity)
     }
 }

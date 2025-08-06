@@ -6,6 +6,7 @@ import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.user.api.request.AlertFrequencyUpdateRequest
 import com.deepromeet.atcha.user.api.request.HomeAddressUpdateRequest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
+import com.deepromeet.atcha.user.api.request.UserWithdrawalRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
 import com.deepromeet.atcha.user.application.UserService
@@ -65,8 +66,9 @@ class UserController(
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUser(
-        @CurrentUser userId: Long
+        @CurrentUser userId: Long,
+        @RequestBody request: UserWithdrawalRequest
     ) {
-        userService.deleteUser(UserId(userId))
+        userService.deleteUser(request.toDomain(UserId(userId)))
     }
 }

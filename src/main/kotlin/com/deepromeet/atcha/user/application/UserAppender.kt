@@ -4,7 +4,6 @@ import com.deepromeet.atcha.auth.application.UserProviderAppender
 import com.deepromeet.atcha.auth.domain.Provider
 import com.deepromeet.atcha.auth.domain.SignUpInfo
 import com.deepromeet.atcha.user.domain.User
-import com.deepromeet.atcha.user.domain.UserRepository
 import org.springframework.stereotype.Component
 
 @Component
@@ -31,10 +30,5 @@ class UserAppender(
         val saved = userRepository.save(user)
         userProviderAppender.append(saved, provider)
         return saved
-    }
-
-    fun delete(user: User) {
-        val deletedUser = user.markAsDeleted()
-        userRepository.save(deletedUser)
     }
 }

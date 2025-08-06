@@ -4,8 +4,10 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserId
+import com.deepromeet.atcha.user.domain.UserWithdrawalReason
 import com.deepromeet.atcha.user.infrastructure.entity.AddressEntity
 import com.deepromeet.atcha.user.infrastructure.entity.UserEntity
+import com.deepromeet.atcha.user.infrastructure.entity.UserWithdrawalReasonEntity
 import org.springframework.stereotype.Component
 
 /**
@@ -36,6 +38,13 @@ class UserMapper {
             alertFrequencies = domain.alertFrequencies.toMutableSet(),
             fcmToken = domain.fcmToken,
             isDeleted = domain.isDeleted
+        )
+    }
+
+    fun toEntity(domain: UserWithdrawalReason): UserWithdrawalReasonEntity {
+        return UserWithdrawalReasonEntity(
+            userId = domain.userId.value,
+            detailReason = domain.reason
         )
     }
 
