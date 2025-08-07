@@ -34,7 +34,7 @@ data class Route(val list: List<SubwayBranch>) {
     fun isContains(
         startStationName: String,
         nextStationName: String,
-        endStationName: String,
+        endStationName: String
     ): Boolean = startStationName in stationMap && nextStationName in stationMap && endStationName in stationMap
 
     fun getDirection(
