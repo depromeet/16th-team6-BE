@@ -49,12 +49,15 @@ class LastRouteLegCalculator(
                 val routesDeferred = async { subwayManager.getRoutes(subwayLine) }
                 val startStationDeferred = async { subwayManager.getStation(subwayLine, leg.start.name) }
                 val endStationDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
+                val nextStationDeferred =
+                    async { subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName()) }
 
                 val routes = routesDeferred.await()
                 val startStation = startStationDeferred.await()
                 val endStation = endStationDeferred.await()
+                val nextStation = nextStationDeferred.await()
 
-                val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
                 val lastSchedule = timeTable.getLastTime(endStation, routes, leg.isExpress())
 
                 leg.toLastTransitLeg(
