@@ -99,7 +99,8 @@ class LastRouteCalculatorV2(
                             val routes = subwayManager.getRoutes(subwayLine)
                             val startStation = subwayManager.getStation(subwayLine, leg.start.name)
                             val endStation = subwayManager.getStation(subwayLine, leg.end.name)
-                            val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                            val nextStation = subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName())
+                            val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
 
                             leg.toLastTransitLeg(
                                 departureDateTime = cursor.toString(),
