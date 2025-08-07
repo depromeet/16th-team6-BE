@@ -33,15 +33,16 @@ data class Route(val list: List<SubwayBranch>) {
 
     fun isContains(
         startStationName: String,
-        endStationName: String
-    ): Boolean = startStationName in stationMap && endStationName in stationMap
+        nextStationName: String,
+        endStationName: String,
+    ): Boolean = startStationName in stationMap && nextStationName in stationMap && endStationName in stationMap
 
     fun getDirection(
         startStationName: String,
-        endStationName: String
+        nextStation: String
     ): SubwayDirection {
         val start = stationMap[startStationName]!!
-        val end = stationMap[endStationName]!!
+        val end = stationMap[nextStation]!!
 
         val isLine9 = start.routeCode == "9"
         val isDown = if (isLine9) start.ord > end.ord else start.ord < end.ord
