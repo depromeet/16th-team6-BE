@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.transit.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.subway.SubwayStationBatchAppender
 import com.deepromeet.atcha.transit.domain.Fare
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo

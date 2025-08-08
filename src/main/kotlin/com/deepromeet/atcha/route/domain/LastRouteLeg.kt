@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta

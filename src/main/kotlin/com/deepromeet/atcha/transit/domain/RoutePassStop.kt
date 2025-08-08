@@ -1,4 +1,6 @@
-package com.deepromeet.atcha.route.domain
+package com.deepromeet.atcha.transit.domain
+
+import com.deepromeet.atcha.route.domain.RouteLocation
 
 data class RoutePassStop(
     val index: Int,
@@ -14,7 +16,7 @@ data class RoutePassStop(
         ): RoutePassStop {
             return RoutePassStop(
                 index = index,
-                location = RouteLocation.of(stationName, latitude, longitude),
+                location = RouteLocation.Companion.of(stationName, latitude, longitude),
                 stationName = stationName
             )
         }
