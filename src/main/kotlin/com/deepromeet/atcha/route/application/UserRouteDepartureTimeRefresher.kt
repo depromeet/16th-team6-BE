@@ -4,8 +4,8 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
+import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -39,9 +39,9 @@ class UserRouteDepartureTimeRefresher(
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
-        val timeTable = firstBusLeg.busInfo?.timeTable ?: return null
+        val busInfo = firstBusLeg.busInfo ?: return null
 
-        if (isNotRefreshTarget(route.parseDepartureTime(), timeTable.term)) {
+        if (isNotRefreshTarget(route.parseDepartureTime(), busInfo.timeTable.term)) {
             return null
         }
 
@@ -57,7 +57,7 @@ class UserRouteDepartureTimeRefresher(
         val optimalTime =
             calculateOptimalDepartureTime(
                 arrivalInfo,
-                timeTable,
+                busInfo,
                 route
             ) ?: return null
 
@@ -78,18 +78,20 @@ class UserRouteDepartureTimeRefresher(
         return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until (FIXED_REFRESH_MINUTES + busTerm)
     }
 
-    private fun calculateOptimalDepartureTime(
+    private suspend fun calculateOptimalDepartureTime(
         arrivalInfo: BusRealTimeArrival,
-        timeTable: BusTimeTable,
+        busInfo: TransitInfo.BusInfo,
         route: LastRoute
     ): OptimalDepartureTime? {
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
         val oldDepartureTime = route.parseDepartureTime()
 
+        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+        val approachingBuses = busPositions.countApproachingBuses(busInfo.busStation)
+
         return arrivalInfo
-            .createArrivalCandidates(timeTable.term)
-            .filter { it.isBefore(timeTable.lastTime) }
+            .createArrivalCandidates(busInfo.timeTable, approachingBuses)
             .mapNotNull { arrival ->
                 arrival
                     .minusSeconds(walkingTime)
