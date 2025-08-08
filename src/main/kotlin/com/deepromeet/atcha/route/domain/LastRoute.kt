@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.route.exception.RouteError
+import com.deepromeet.atcha.route.exception.RouteException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
@@ -32,8 +34,11 @@ data class LastRoute(
         return legs.first { it.isTransit() }
     }
 
-    fun findFirstBus(): LastRouteLeg? {
-        return legs.firstOrNull { it.isBus() }
+    fun findFirstBus(): LastRouteLeg {
+        return legs.firstOrNull { it.isBus() } ?: throw RouteException.of(
+            RouteError.INVALID_LAST_ROUTE,
+            "$id 경로에서 첫 버스를 찾을 수 없습니다."
+        )
     }
 
     fun calcWalkingTimeToFirstTransit(): Long =

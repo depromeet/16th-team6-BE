@@ -29,10 +29,10 @@ data class LastRouteLeg(
     }
 
     val busInfo: TransitInfo.BusInfo?
-        get() = transitInfo as? TransitInfo.BusInfo
+        get() = transitInfo as? TransitInfo.BusInfo?
 
     val subwayInfo: TransitInfo.SubwayInfo?
-        get() = transitInfo as? TransitInfo.SubwayInfo
+        get() = transitInfo as? TransitInfo.SubwayInfo?
 
     fun isTransit(): Boolean = mode.isTransit()
 
@@ -93,6 +93,10 @@ data class LastRouteLeg(
                 )
             }
         }
+    }
+
+    fun parseDepartureDateTime(): LocalDateTime {
+        return LocalDateTime.parse(departureDateTime!!)
     }
 
     private fun validateRouteMode() {
