@@ -87,7 +87,7 @@ class LastRouteCalculatorV2(
      * ─ departureDateTime 은 현재시각+5분부터 누적, 시간표 기준과 무관.
      */
     private suspend fun buildDemoLegs(legs: List<RouteLeg>): List<LastRouteLeg>? {
-        var cursor = LocalDateTime.now().plusMinutes(5)
+        var cursor = LocalDateTime.now().plusMinutes(10)
         val result = mutableListOf<LastRouteLeg>()
 
         for (leg in legs) {
