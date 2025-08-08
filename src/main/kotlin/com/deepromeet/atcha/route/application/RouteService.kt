@@ -91,7 +91,15 @@ class RouteService(
     suspend fun isBusStarted(lastRouteId: String): Boolean {
         startedBusCache.get(lastRouteId)?.let { return true }
         val lastRoute = lastRouteReader.read(lastRouteId)
-        return busManager.isBusStarted(lastRoute)
+
+        val firstBus = lastRoute.findFirstBus()
+        val busInfo = firstBus?.busInfo ?: return false
+        val departureDateTime = firstBus.departureDateTime ?: return false
+
+        val locatedBus = busManager.locateBus(busInfo, departureDateTime) ?: return false
+
+        startedBusCache.cache(lastRouteId, locatedBus)
+        return true
     }
 
     fun getDepartureRemainingTime(routeId: String): Int {

@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.route.domain
+package com.deepromeet.atcha.transit.domain
 
 data class RoutePassStops(
     val stops: List<RoutePassStop> = emptyList()

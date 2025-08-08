@@ -1,7 +1,8 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.route.domain.LastRoute
-import com.deepromeet.atcha.route.domain.RoutePassStops
+import com.deepromeet.atcha.transit.domain.RoutePassStops
+import com.deepromeet.atcha.transit.domain.TransitInfo
+import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
@@ -67,24 +68,19 @@ class BusManager(
             }
         }
 
-    suspend fun isBusStarted(lastRoute: LastRoute): Boolean {
-        val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus?.busInfo ?: return false
-
+    suspend fun locateBus(
+        busInfo: TransitInfo.BusInfo,
+        departureDateTime: String
+    ): BusPosition? {
         val busPositions =
             runCatching {
                 getBusPositions(busInfo.busRoute)
-            }.getOrElse { return false }
+            }.getOrNull() ?: return null
 
-        busPositions.findTargetBus(
+        return busPositions.findTargetBus(
             busInfo.busStation,
-            firstBus.departureDateTime!!,
+            departureDateTime,
             busInfo.timeTable.term
-        )?.let {
-            startedBusCache.cache(lastRoute.id, it)
-            return true
-        }
-
-        return false
+        )
     }
 }
