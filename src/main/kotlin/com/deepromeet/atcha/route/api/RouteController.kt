@@ -104,6 +104,15 @@ class RouteController(
         routeService.addUserRoute(UserId(id), request.lastRouteId)
     }
 
+    @GetMapping("/user-routes/bus-arrival")
+    suspend fun getBusArrivalInUserRoute(
+        @CurrentUser id: Long
+    ): ApiResponse<Long> {
+        return ApiResponse.success(
+            routeService.getFirstBusArrivalRemainSecond(UserId(id))
+        )
+    }
+
     @DeleteMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserRoute(

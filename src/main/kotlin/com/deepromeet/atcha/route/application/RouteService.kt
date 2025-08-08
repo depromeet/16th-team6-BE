@@ -16,6 +16,9 @@ import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class RouteService(
@@ -29,7 +32,8 @@ class RouteService(
     private val busManager: BusManager,
     private val userRouteDepartureTimeRefresher: UserRouteDepartureTimeRefresher,
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
-    private val transitRouteClientV2: TransitRouteClientV2
+    private val transitRouteClientV2: TransitRouteClientV2,
+    private val lastRouteAppender: LastRouteAppender
 ) {
     suspend fun getLastRoutes(
         userId: UserId,
@@ -93,7 +97,7 @@ class RouteService(
         val lastRoute = lastRouteReader.read(lastRouteId)
 
         val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus?.busInfo ?: return false
+        val busInfo = firstBus.busInfo ?: return false
         val departureDateTime = firstBus.departureDateTime ?: return false
 
         val locatedBus = busManager.locateBus(busInfo, departureDateTime) ?: return false
@@ -125,5 +129,57 @@ class RouteService(
         val userRoute = userRouteManager.read(user)
         return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)
             ?: userRoute
+    }
+
+    suspend fun getFirstBusArrivalRemainSecond(userId: UserId): Long {
+        val user = userReader.read(userId)
+        val userRoute = userRouteManager.read(user)
+        val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
+
+        val firstBus = lastRoute.findFirstBus()
+        val oldBusArrival = firstBus.parseDepartureDateTime()
+
+        val realTimeArrivals =
+            busManager.getRealTimeArrival(
+                firstBus.resolveRouteName(),
+                firstBus.toBusStationMeta(),
+                firstBus.passStops!!
+            )
+
+        val busPositions = busManager.getBusPositions(firstBus.busInfo!!.busRoute)
+
+        val approachingBusCount =
+            busPositions
+                .countApproachingBuses(firstBus.busInfo!!.busStation)
+
+        val closestArrival =
+            realTimeArrivals
+                .getClosestArrival(
+                    firstBus.busInfo!!.timeTable,
+                    oldBusArrival,
+                    approachingBusCount
+                ) ?: oldBusArrival
+
+        val timeDifference = Duration.between(oldBusArrival, closestArrival).toMinutes()
+        val threshold = firstBus.busInfo!!.timeTable.term / 2.0
+
+        // 시간 차이가 배차간격의 절반보다 크면 원래 버스가 이미 지나감
+        val targetArrival =
+            if (timeDifference > threshold) {
+                oldBusArrival
+            } else {
+                val updatedFirstBus =
+                    firstBus.copy(
+                        departureDateTime = closestArrival.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+                    )
+                val updatedLegs =
+                    lastRoute.legs.map {
+                        if (it == firstBus) updatedFirstBus else it
+                    }
+                lastRouteAppender.append(lastRoute.copy(legs = updatedLegs))
+                closestArrival
+            }
+
+        return Duration.between(LocalDateTime.now(), targetArrival).toSeconds()
     }
 }
