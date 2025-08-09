@@ -27,7 +27,7 @@ class UserRouteRefreshedEventHandler(
                 userId = event.userRoute.userId.toString(),
                 token = event.userRoute.token,
                 idempotencyKey = createIdempotencyKey(event.userRoute),
-                departureTime = event.userRoute.departureTime,
+                departureTime = event.userRoute.updatedDepartureTime,
                 updatedAt = event.userRoute.updatedAt
             )
 
