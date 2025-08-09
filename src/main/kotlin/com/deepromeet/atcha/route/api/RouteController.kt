@@ -7,6 +7,7 @@ import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -106,9 +107,9 @@ class RouteController(
     @GetMapping("/user-routes/bus-arrival")
     suspend fun getBusArrivalInUserRoute(
         @CurrentUser id: Long
-    ): ApiResponse<Long> {
+    ): ApiResponse<RealTimeBusArrivalResponse> {
         return ApiResponse.success(
-            routeService.getFirstBusArrivalRemainSecond(UserId(id))
+            RealTimeBusArrivalResponse(routeService.getFirstBusArrival(UserId(id)))
         )
     }
 
