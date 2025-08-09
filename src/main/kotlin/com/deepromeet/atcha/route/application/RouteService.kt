@@ -145,8 +145,8 @@ class RouteService(
         val firstBus = lastRoute.findFirstBus()
         val scheduled = firstBus.parseDepartureDateTime()
 
-        val info = firstBus.busInfo ?: return BusRealTimeInfo.createScheduled(scheduled)
-        val passStops = firstBus.passStops ?: return BusRealTimeInfo.createScheduled(scheduled)
+        val info = firstBus.busInfo!!
+        val passStops = firstBus.passStops!!
 
         val closest =
             arrivalCalculator.closestArrival(
