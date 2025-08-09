@@ -5,7 +5,6 @@ import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
 import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
-import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.user.domain.UserId
@@ -74,9 +73,9 @@ class RouteController(
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String
-    ): ApiResponse<LastRoute> =
+    ): ApiResponse<LastRouteResponse> =
         ApiResponse.success(
-            routeService.getRoute(routeId)
+            LastRouteResponse(routeService.getRoute(routeId))
         )
 
     @GetMapping("/last-routes/{lastRouteId}/bus-started")

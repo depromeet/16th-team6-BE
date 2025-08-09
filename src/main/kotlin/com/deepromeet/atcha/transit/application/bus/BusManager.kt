@@ -24,8 +24,7 @@ class BusManager(
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
-    private val busTimeTableCache: BusTimeTableCache,
-    private val startedBusCache: StartedBusCache
+    private val busTimeTableCache: BusTimeTableCache
 ) {
     suspend fun getSchedule(
         routeName: String,
