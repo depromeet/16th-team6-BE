@@ -51,14 +51,6 @@ data class LastRouteLeg(
         )
     }
 
-    fun withIncreasedWalkTime(nextLeg: LastRouteLeg?): LastRouteLeg {
-        return if (isWalk() && nextLeg?.isTransit() == true) {
-            copy(sectionTime = sectionTime + 120) // 2분 추가
-        } else {
-            this
-        }
-    }
-
     fun calcBoardingTime(
         targetTime: LocalDateTime,
         direction: TimeDirection
