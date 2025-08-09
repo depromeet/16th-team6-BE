@@ -87,7 +87,7 @@ class LastRouteCalculatorV2(
      * ─ departureDateTime 은 현재시각+5분부터 누적, 시간표 기준과 무관.
      */
     private suspend fun buildDemoLegs(legs: List<RouteLeg>): List<LastRouteLeg>? {
-        var cursor = LocalDateTime.now().plusMinutes(5)
+        var cursor = LocalDateTime.now().plusMinutes(10)
         val result = mutableListOf<LastRouteLeg>()
 
         for (leg in legs) {
@@ -99,7 +99,8 @@ class LastRouteCalculatorV2(
                             val routes = subwayManager.getRoutes(subwayLine)
                             val startStation = subwayManager.getStation(subwayLine, leg.start.name)
                             val endStation = subwayManager.getStation(subwayLine, leg.end.name)
-                            val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                            val nextStation = subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName())
+                            val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
 
                             leg.toLastTransitLeg(
                                 departureDateTime = cursor.toString(),

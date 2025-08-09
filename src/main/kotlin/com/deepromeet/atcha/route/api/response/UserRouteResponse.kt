@@ -10,7 +10,7 @@ data class UserRouteResponse(
     constructor(
         userRoute: UserRoute
     ) : this(
-        userRoute.departureTime,
+        userRoute.updatedDepartureTime,
         userRoute.updatedAt,
         userRoute.lastRouteId
     )

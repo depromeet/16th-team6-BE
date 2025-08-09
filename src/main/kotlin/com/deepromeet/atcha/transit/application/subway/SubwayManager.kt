@@ -46,11 +46,12 @@ class SubwayManager(
 
     suspend fun getTimeTable(
         startStation: SubwayStation,
+        nextStation: SubwayStation,
         endStation: SubwayStation,
         routes: List<Route>
     ): SubwayTimeTable {
         val dailyType = dailyTypeResolver.resolve(TransitType.SUBWAY)
-        val direction = SubwayDirection.Companion.resolve(routes, startStation, endStation)
+        val direction = SubwayDirection.resolve(routes, startStation, nextStation, endStation)
 
         subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
             return it

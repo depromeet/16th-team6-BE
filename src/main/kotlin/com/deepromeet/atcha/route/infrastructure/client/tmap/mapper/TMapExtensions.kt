@@ -4,8 +4,6 @@ import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.domain.RouteLeg
 import com.deepromeet.atcha.route.domain.RouteLocation
 import com.deepromeet.atcha.route.domain.RouteMode
-import com.deepromeet.atcha.route.domain.RoutePassStop
-import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.route.domain.RouteStep
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Itinerary
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Leg
@@ -13,6 +11,8 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Location
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.PassStopList
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Station
 import com.deepromeet.atcha.route.infrastructure.client.tmap.response.Step
+import com.deepromeet.atcha.transit.domain.RoutePassStop
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 
 fun Itinerary.toDomain(): RouteItinerary {
     return RouteItinerary(

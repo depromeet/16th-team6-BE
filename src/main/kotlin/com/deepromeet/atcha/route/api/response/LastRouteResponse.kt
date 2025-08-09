@@ -3,8 +3,8 @@ package com.deepromeet.atcha.route.api.response
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.RouteLocation
-import com.deepromeet.atcha.route.domain.RoutePassStop
 import com.deepromeet.atcha.route.domain.RouteStep
+import com.deepromeet.atcha.transit.domain.RoutePassStop
 
 data class LastRouteResponse(
     val routeId: String,

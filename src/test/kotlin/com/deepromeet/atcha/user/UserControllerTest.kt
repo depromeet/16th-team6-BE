@@ -92,14 +92,21 @@ class UserControllerTest(
 
     @Test
     fun `회원 탈퇴`() {
-        // given && when
-        RestAssured.given().log().all()
+        // given
+        val request = mapOf("reason" to "서비스 불만")
+
+        // when
+        RestAssured.given()
+            .log().all()
             .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            .`when`().delete("/api/members/me")
-            .then().log().all()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .`when`()
+            .delete("/api/members/me")
+            .then()
+            .log().all()
             .statusCode(204)
 
-        // then
         assertThatThrownBy { userReader.read(user.id) }
             .isInstanceOf(UserException::class.java)
     }

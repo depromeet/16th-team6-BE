@@ -4,16 +4,15 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
+import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 3
-private const val FIXED_REFRESH_MINUTES = 20
-private const val BUFFER_SEC_SECONDS = 2 * 60L
+private const val MIN_SHIFT_EARLIER_SECONDS = 60L
 
 data class OptimalDepartureTime(
     val busArrivalTime: LocalDateTime,
@@ -27,7 +26,7 @@ class UserRouteDepartureTimeRefresher(
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader
 ) {
-    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
 
     suspend fun refreshAll(): List<UserRoute> =
         userRouteManager.readAll().mapNotNull { userRoute ->
@@ -39,9 +38,10 @@ class UserRouteDepartureTimeRefresher(
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
-        val timeTable = firstBusLeg.busInfo?.timeTable ?: return null
+        val busInfo = firstBusLeg.busInfo ?: return null
 
-        if (isNotRefreshTarget(route.parseDepartureTime(), timeTable.term)) {
+        // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획(updated) 기준)
+        if (isNotRefreshTarget(userRoute.parseUpdatedDepartureTime(), busInfo.timeTable.term)) {
             return null
         }
 
@@ -53,12 +53,13 @@ class UserRouteDepartureTimeRefresher(
                 firstBusLeg.passStops!!
             )
 
-        // 3) 도착 후보 시각 계산 및 최적 출발시간 결정
+        // 3) 도착 후보 시각 계산 및 최적 출발시간 결정 (늦어지는 후보는 배제)
         val optimalTime =
             calculateOptimalDepartureTime(
-                arrivalInfo,
-                timeTable,
-                route
+                arrivalInfo = arrivalInfo,
+                busInfo = busInfo,
+                route = route,
+                userRoute = userRoute
             ) ?: return null
 
         return saveUpdatedRoute(userRoute, route, firstBusLeg, optimalTime)
@@ -69,35 +70,53 @@ class UserRouteDepartureTimeRefresher(
         return if (firstTransit.isBus()) firstTransit else null
     }
 
-    /** "20분 + 배차 간격" 이내가 아니면 갱신 금지 */
+    /** "배차간격 × 3" 이내가 아니면 갱신 금지 */
     private fun isNotRefreshTarget(
-        oldDeparture: LocalDateTime,
+        plannedDeparture: LocalDateTime,
         busTerm: Int
     ): Boolean {
-        val minutesLeft = Duration.between(LocalDateTime.now(), oldDeparture).toMinutes()
-        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until (FIXED_REFRESH_MINUTES + busTerm)
+        val minutesLeft = Duration.between(LocalDateTime.now(), plannedDeparture).toMinutes()
+        val refreshWindow = busTerm * 3
+        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until refreshWindow
     }
 
-    private fun calculateOptimalDepartureTime(
+    private suspend fun calculateOptimalDepartureTime(
         arrivalInfo: BusRealTimeArrival,
-        timeTable: BusTimeTable,
-        route: LastRoute
+        busInfo: TransitInfo.BusInfo,
+        route: LastRoute,
+        userRoute: UserRoute
     ): OptimalDepartureTime? {
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
-        val oldDepartureTime = route.parseDepartureTime()
+        val baseDepartureTime = userRoute.parseBaseDepartureTime()
 
-        return arrivalInfo
-            .createArrivalCandidates(timeTable.term)
-            .filter { it.isBefore(timeTable.lastTime) }
-            .mapNotNull { arrival ->
-                arrival
-                    .minusSeconds(walkingTime)
-                    .minusSeconds(BUFFER_SEC_SECONDS)
-                    .takeIf { it.isAfter(now) }
-                    ?.let { OptimalDepartureTime(arrival, it) }
-            }
-            .minByOrNull { Duration.between(oldDepartureTime, it.routeDepartureTime).abs() }
+        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+
+        val candidates =
+            arrivalInfo
+                .createArrivalCandidatesWithPositions(busInfo.timeTable, busPositions.busPositions)
+                .map { it.expectedArrivalTime!! }
+                .mapNotNull { arrival ->
+                    val newRouteDeparture =
+                        arrival
+                            .minusSeconds(walkingTime)
+
+                    newRouteDeparture
+                        .takeIf { it.isAfter(now) } // 지금 출발해도 도달 가능한가
+                        ?.let { OptimalDepartureTime(arrival, it) }
+                }
+                // 🔒 "늦어지는 갱신"은 배제 + "미세 변동" 무시
+                .filter { opt ->
+                    val improvementSec = Duration.between(opt.routeDepartureTime, baseDepartureTime).seconds
+                    improvementSec >= MIN_SHIFT_EARLIER_SECONDS
+                }
+
+        if (candidates.isEmpty()) return null
+
+        // 기존 계획과의 차이가 가장 작은 개선안을 선택
+        return candidates.minByOrNull {
+            Duration.between(baseDepartureTime, it.routeDepartureTime).abs()
+        }
     }
 
     private suspend fun saveUpdatedRoute(

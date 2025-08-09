@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.route.domain.RoutePassStops
 import com.deepromeet.atcha.transit.application.region.ServiceRegionCandidatePolicy
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.region.ServiceRegion
