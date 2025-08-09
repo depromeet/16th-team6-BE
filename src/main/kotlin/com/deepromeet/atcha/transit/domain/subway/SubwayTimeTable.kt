@@ -19,7 +19,7 @@ data class SubwayTimeTable(
     ): SubwayTime =
         schedules
             .filter { it.isExpress == isExpress }
-            .filter { isReachable(startStation, destinationStation, it.finalStation, routes) }
+            .filter { isReachable(startStation, destinationStation, it.finalStation, routes, subwayDirection) }
             .maxByOrNull { it.departureTime }
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
@@ -49,10 +49,11 @@ data class SubwayTimeTable(
         startStation: SubwayStation,
         endStation: SubwayStation,
         finalStation: SubwayStation,
-        routes: List<Route>
+        routes: List<Route>,
+        direction: SubwayDirection
     ): Boolean {
         return routes.any { route ->
-            route.isReachable(startStation.name, endStation.name, finalStation.name)
+            route.isReachable(startStation.name, endStation.name, finalStation.name, direction)
         }
     }
 }

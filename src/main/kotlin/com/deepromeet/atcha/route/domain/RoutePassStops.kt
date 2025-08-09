@@ -6,4 +6,8 @@ data class RoutePassStops(
     companion object {
         fun of(stops: List<RoutePassStop>): RoutePassStops = RoutePassStops(stops)
     }
+
+    fun getNextStationName(): String {
+        return stops[1].stationName
+    }
 }
