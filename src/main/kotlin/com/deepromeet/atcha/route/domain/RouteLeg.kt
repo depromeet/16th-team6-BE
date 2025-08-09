@@ -34,7 +34,7 @@ data class RouteLeg(
     fun toLastWalkLeg() =
         LastRouteLeg(
             distance = this.distance,
-            sectionTime = this.sectionTime,
+            sectionTime = this.sectionTime + WALK_TIME_BUFFER_SECONDS,
             mode = this.mode,
             departureDateTime = null,
             route = this.route,
@@ -67,5 +67,9 @@ data class RouteLeg(
             pathCoordinates = this.pathCoordinates,
             transitInfo = transitInfo
         )
+    }
+
+    companion object {
+        private const val WALK_TIME_BUFFER_SECONDS = 120
     }
 }

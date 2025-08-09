@@ -6,39 +6,76 @@ import java.time.LocalDateTime
 data class BusRealTimeArrival(
     val realTimeInfoList: List<BusRealTimeInfo>
 ) {
-    /** 실시간 정보 + 배차 기반으로 총 접근 중인 버스 수만큼 후보 시각 생성 */
-    fun createArrivalCandidates(
+    /** BusPosition 정보를 활용한 더 정확한 후보 생성 */
+    fun createArrivalCandidatesWithPositions(
         timeTable: BusTimeTable,
-        approachingBusCount: Int
-    ): List<LocalDateTime> {
-        val baseArrivals =
+        approachingBuses: List<BusPosition>
+    ): List<BusRealTimeInfo> {
+        val realTimeBuses =
             realTimeInfoList
-                .mapNotNull { it.expectedArrivalTime }
-                .sorted()
-                .toMutableList()
+                .filter { it.expectedArrivalTime != null }
+                .sortedBy { it.expectedArrivalTime }
 
-        val base = baseArrivals.lastOrNull() ?: return emptyList()
+        if (realTimeBuses.isEmpty()) return emptyList()
 
+        val matchedBuses = mutableListOf<BusRealTimeInfo>()
+        val usedVehicleIds = mutableSetOf<String>()
+
+        realTimeBuses.forEach { rt ->
+            val pos = approachingBuses.find { it.vehicleId == rt.vehicleId }
+            if (pos != null) {
+                matchedBuses +=
+                    rt.copy(
+                        busCongestion = pos.busCongestion,
+                        remainingSeats = pos.remainSeats
+                    )
+                usedVehicleIds += rt.vehicleId
+            } else {
+                matchedBuses += rt
+            }
+        }
+
+        val remainingPositions =
+            approachingBuses
+                .filter { it.vehicleId !in usedVehicleIds }
+                .sortedByDescending { it.sectionOrder }
+
+        // 마지막 실시간 도착시각 + n*term 로 추정 생성
+        val term = timeTable.term.toLong()
+        val lastRealTime = realTimeBuses.last().expectedArrivalTime!!
         var nextIndex = 1
-        while (baseArrivals.size < approachingBusCount) {
-            val nextArrival = base.plusMinutes(timeTable.term.toLong() * nextIndex)
-            if (nextArrival.isBefore(timeTable.lastTime)) {
-                baseArrivals += nextArrival
+
+        for (pos in remainingPositions) {
+            val nextArrivalTime = lastRealTime.plusMinutes(term * nextIndex)
+
+            if (!nextArrivalTime.isAfter(timeTable.lastTime)) { // <= lastTime 이내만
+                matchedBuses +=
+                    BusRealTimeInfo.createEstimated(
+                        vehicleId = pos.vehicleId,
+                        estimatedArrivalTime = nextArrivalTime,
+                        busCongestion = pos.busCongestion,
+                        remainingSeats = pos.remainSeats
+                    )
                 nextIndex++
             } else {
                 break
             }
         }
 
-        return baseArrivals
+        return matchedBuses.sortedBy { it.expectedArrivalTime }
     }
 
-    fun getClosestArrival(
+    /** BusPosition 정보를 활용한 더 정확한 도착 시간 계산 */
+    fun getClosestArrivalWithPositions(
         timeTable: BusTimeTable,
         targetDepartureTime: LocalDateTime,
-        approachingBusCount: Int
-    ): LocalDateTime? {
-        return createArrivalCandidates(timeTable, approachingBusCount)
-            .minByOrNull { Duration.between(targetDepartureTime, it).abs() }
+        approachingBuses: List<BusPosition>
+    ): BusRealTimeInfo? {
+        return createArrivalCandidatesWithPositions(timeTable, approachingBuses)
+            .minByOrNull {
+                it.expectedArrivalTime!!.let { arrivalTime ->
+                    Duration.between(targetDepartureTime, arrivalTime).abs()
+                }
+            }
     }
 }
