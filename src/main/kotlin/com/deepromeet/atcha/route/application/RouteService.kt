@@ -134,10 +134,6 @@ class RouteService(
             ?: userRoute
     }
 
-    suspend fun getFirstBusArrivalRemainSecond(userId: UserId): Long {
-        return getFirstBusArrival(userId).remainingTime.toLong()
-    }
-
     suspend fun getFirstBusArrival(userId: UserId): BusRealTimeInfo {
         val user = userReader.read(userId)
         val userRoute = userRouteManager.read(user)
