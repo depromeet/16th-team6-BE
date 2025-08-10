@@ -154,13 +154,12 @@ class RouteService(
                 busInfo = info
             )
 
-        // 4. 선택 정책(스케줄 vs 실시간)
-        val selectedBusInfo = selectionPolicy.select(info.timeTable, scheduled, closest)
+        val selected = selectionPolicy.select(info.timeTable, scheduled, closest)
 
-        selectedBusInfo?.expectedArrivalTime?.let { targetTime ->
+        selected?.expectedArrivalTime?.let { targetTime ->
             lastRouteUpdater.updateFirstBusTime(lastRoute, firstBus, targetTime)
         }
 
-        return selectedBusInfo ?: BusRealTimeInfo.createScheduled(scheduled)
+        return selected ?: BusRealTimeInfo.createScheduled(scheduled)
     }
 }
