@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 IS_BLUE=$(docker compose ps | grep atcha-blue)
-MAX_RETRIES=30
+MAX_RETRIES=100
 
 check_service() {
   local RETRIES=0
