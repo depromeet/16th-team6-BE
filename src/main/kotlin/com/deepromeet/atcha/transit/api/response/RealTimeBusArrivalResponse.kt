@@ -5,6 +5,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusInfoType
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.fasterxml.jackson.annotation.JsonInclude
+import java.time.format.DateTimeFormatter
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RealTimeBusArrivalResponse(
@@ -18,6 +19,10 @@ data class RealTimeBusArrivalResponse(
     val vehicleId: String?,
     val infoType: BusInfoType
 ) {
+    companion object {
+        private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     constructor(busRealTimeInfo: BusRealTimeInfo) : this(
         busRealTimeInfo.busStatus,
         busRealTimeInfo.remainingTime,
@@ -25,7 +30,7 @@ data class RealTimeBusArrivalResponse(
         busRealTimeInfo.isLast,
         busRealTimeInfo.busCongestion,
         busRealTimeInfo.remainingSeats,
-        busRealTimeInfo.expectedArrivalTime?.toString(),
+        busRealTimeInfo.expectedArrivalTime?.format(formatter),
         busRealTimeInfo.vehicleId,
         busRealTimeInfo.infoType
     )
