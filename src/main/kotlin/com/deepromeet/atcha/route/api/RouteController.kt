@@ -52,7 +52,8 @@ class RouteController(
                 UserId(id),
                 request.toStart(),
                 request.toEnd(),
-                request.sortType
+                request.sortType,
+                request.time
             ).map { LastRouteResponse(it) }
         )
 

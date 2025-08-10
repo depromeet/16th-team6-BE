@@ -18,6 +18,8 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
@@ -37,13 +39,14 @@ class LastRouteCalculatorV2(
     suspend fun calculateRoutesV2(
         start: Coordinate,
         destination: Coordinate,
-        itineraries: List<RouteItinerary>
+        itineraries: List<RouteItinerary>,
+        time: Int
     ): List<LastRoute> {
         val routes =
             coroutineScope {
                 itineraries.map { itinerary ->
                     async(Dispatchers.Default) {
-                        calculateRouteDemo(itinerary)
+                        calculateRouteDemo(itinerary, time)
                     }
                 }
                     .awaitAll()
@@ -58,16 +61,22 @@ class LastRouteCalculatorV2(
         return routes
     }
 
-    private suspend fun calculateRouteDemo(itinerary: RouteItinerary): LastRoute? {
+    private suspend fun calculateRouteDemo(
+        itinerary: RouteItinerary,
+        time: Int
+    ): LastRoute? {
         try {
-            val legs = buildDemoLegs(itinerary.legs) ?: return null
+            val legs = buildDemoLegs(itinerary.legs, time) ?: return null
             val walkFixed = increaseWalkTime(legs)
             val departAt = calculateDepartureDateTime(walkFixed)
             val totalSec = calculateTotalTime(walkFixed, departAt)
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime = departAt.toString(),
+                departureDateTime =
+                    departAt
+                        .truncatedTo(ChronoUnit.SECONDS)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 transferCount = itinerary.transferCount,
@@ -86,8 +95,11 @@ class LastRouteCalculatorV2(
      * sectionTime 누적 + 각 레그는 **시간표 조회** 하여 TransitInfo 채운다.
      * ─ departureDateTime 은 현재시각+5분부터 누적, 시간표 기준과 무관.
      */
-    private suspend fun buildDemoLegs(legs: List<RouteLeg>): List<LastRouteLeg>? {
-        var cursor = LocalDateTime.now().plusMinutes(10)
+    private suspend fun buildDemoLegs(
+        legs: List<RouteLeg>,
+        time: Int
+    ): List<LastRouteLeg>? {
+        var cursor = LocalDateTime.now().plusMinutes(time.toLong())
         val result = mutableListOf<LastRouteLeg>()
 
         for (leg in legs) {
@@ -103,7 +115,10 @@ class LastRouteCalculatorV2(
                             val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.toString(),
+                                departureDateTime =
+                                    cursor
+                                        .truncatedTo(ChronoUnit.SECONDS)
+                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
                                 transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, timeTable.schedules[0])
                             )
                         } catch (e: Exception) {
@@ -120,7 +135,10 @@ class LastRouteCalculatorV2(
                             val busSchedule = busManager.getSchedule(routeId, stationMeta, leg.passStops!!)
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.toString(),
+                                departureDateTime =
+                                    cursor
+                                        .truncatedTo(ChronoUnit.SECONDS)
+                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
                                 transitInfo = TransitInfo.BusInfo(busSchedule)
                             )
                         } catch (e: Exception) {

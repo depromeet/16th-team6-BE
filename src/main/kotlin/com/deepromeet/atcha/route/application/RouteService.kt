@@ -58,14 +58,15 @@ class RouteService(
         userId: UserId,
         start: Coordinate,
         end: Coordinate?,
-        sortType: LastRouteSortType
+        sortType: LastRouteSortType,
+        time: Int
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteCalculatorV2
-            .calculateRoutesV2(start, destination, validItineraries)
+            .calculateRoutesV2(start, destination, validItineraries, time)
             .sort(sortType)
     }
 

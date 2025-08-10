@@ -5,6 +5,7 @@ import com.deepromeet.atcha.route.exception.RouteException
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.math.absoluteValue
 
@@ -57,7 +58,10 @@ data class LastRoute(
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime = departureDateTime.toString(),
+                departureDateTime =
+                    departureDateTime
+                        .truncatedTo(ChronoUnit.SECONDS)
+                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
                 totalTime = totalTime.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 totalWalkDistance = itinerary.totalWalkDistance,

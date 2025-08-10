@@ -119,8 +119,7 @@ data class SeoulBusArrivalResponse(
 
         val busCongestion =
             when (rerdieDiv) {
-                0 -> BusCongestion.UNKNOWN
-                2 -> BusCongestion.UNKNOWN
+                0, 1, 2 -> BusCongestion.UNKNOWN
                 4 ->
                     when (rerideNum) {
                         0 -> BusCongestion.UNKNOWN
@@ -134,9 +133,8 @@ data class SeoulBusArrivalResponse(
 
         val remainingSeats =
             when (rerdieDiv) {
-                0 -> 0
-                2 -> rerideNum
-                4 -> 0
+                0, 4 -> 0
+                1, 2 -> rerideNum
                 else -> throw IllegalArgumentException("Unknown rerdieDiv: $rerdieDiv")
             }
 

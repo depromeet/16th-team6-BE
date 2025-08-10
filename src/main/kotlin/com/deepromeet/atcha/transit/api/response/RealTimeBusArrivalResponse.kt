@@ -20,7 +20,7 @@ data class RealTimeBusArrivalResponse(
 ) {
     constructor(busRealTimeInfo: BusRealTimeInfo) : this(
         busRealTimeInfo.busStatus,
-        busRealTimeInfo.remainingTimeExtra,
+        busRealTimeInfo.remainingTime,
         busRealTimeInfo.remainingStations,
         busRealTimeInfo.isLast,
         busRealTimeInfo.busCongestion,

@@ -8,7 +8,8 @@ data class LastRoutesRequest(
     val startLon: String,
     val endLat: String?,
     val endLon: String?,
-    val sortType: LastRouteSortType = LastRouteSortType.MINIMUM_TRANSFERS
+    val sortType: LastRouteSortType = LastRouteSortType.MINIMUM_TRANSFERS,
+    val time: Int = 10
 ) {
     fun toStart(): Coordinate = Coordinate(startLat.toDouble(), startLon.toDouble())
 

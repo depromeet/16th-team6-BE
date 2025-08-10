@@ -32,9 +32,6 @@ data class BusRealTimeInfo(
                 else -> null
             }
 
-    val remainingTimeExtra: Int
-        get() = remainingTime - 30
-
     companion object {
         fun createScheduled(scheduledTime: LocalDateTime): BusRealTimeInfo {
             val remainingSeconds =

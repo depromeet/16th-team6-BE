@@ -11,8 +11,9 @@ import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
-private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 3
-private const val MIN_SHIFT_EARLIER_SECONDS = 60L
+private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 1
+private const val MIN_SHIFT_EARLIER_SECONDS = 60L // 기존: 빨라질 때 최소 개선폭
+private const val MAX_SHIFT_LATER_SECONDS = 60L
 
 data class OptimalDepartureTime(
     val busArrivalTime: LocalDateTime,
@@ -40,7 +41,7 @@ class UserRouteDepartureTimeRefresher(
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
         val busInfo = firstBusLeg.busInfo ?: return null
 
-        // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획(updated) 기준)
+        // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획 기준)
         if (isNotRefreshTarget(userRoute.parseUpdatedDepartureTime(), busInfo.timeTable.term)) {
             return null
         }
@@ -105,10 +106,10 @@ class UserRouteDepartureTimeRefresher(
                         .takeIf { it.isAfter(now) } // 지금 출발해도 도달 가능한가
                         ?.let { OptimalDepartureTime(arrival, it) }
                 }
-                // 🔒 "늦어지는 갱신"은 배제 + "미세 변동" 무시
+                // 60초 늦어지는거까지는 허용
                 .filter { opt ->
-                    val improvementSec = Duration.between(opt.routeDepartureTime, baseDepartureTime).seconds
-                    improvementSec >= MIN_SHIFT_EARLIER_SECONDS
+                    val deltaSec = Duration.between(opt.routeDepartureTime, baseDepartureTime).seconds
+                    deltaSec >= -MAX_SHIFT_LATER_SECONDS
                 }
 
         if (candidates.isEmpty()) return null
