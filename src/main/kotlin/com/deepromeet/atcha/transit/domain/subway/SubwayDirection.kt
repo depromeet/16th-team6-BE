@@ -26,15 +26,16 @@ enum class SubwayDirection(
         fun resolve(
             routes: List<Route>,
             startStation: SubwayStation,
+            nextStation: SubwayStation,
             endStation: SubwayStation
         ): SubwayDirection {
-            return routes.firstOrNull { it.isContains(startStation.name, endStation.name) }
-                ?.getDirection(startStation.name, endStation.name)
+            return routes.firstOrNull { it.isContains(startStation.name, nextStation.name, endStation.name) }
+                ?.getDirection(startStation.name, nextStation.name)
                 ?: run {
-                    log.warn { "지하철 방향 추정 실패: 출발역='${startStation.name}', 도착역='${endStation.name}'" }
+                    log.warn { "지하철 방향 추정 실패: 출발역='${startStation.name}', 도착역='${nextStation.name}'" }
                     throw TransitException.of(
                         TransitError.NOT_FOUND_SUBWAY_ROUTE,
-                        "출발역 '${startStation.name}'에서 도착역 '${endStation.name}'으로 가는 지하철 노선을 찾을 수 없습니다."
+                        "출발역 '${startStation.name}'에서 도착역 '${nextStation.name}'으로 가는 지하철 노선을 찾을 수 없습니다."
                     )
                 }
         }
