@@ -3,8 +3,6 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.incheon
 import com.deepromeet.atcha.transit.application.bus.BusPositionFetcher
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
-import com.deepromeet.atcha.transit.exception.TransitError
-import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -36,10 +34,7 @@ class PublicIncheonBusPositionClient(
                 isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
                 processResult = { response ->
                     response.msgBody.itemList?.map { it.toBusPosition() }
-                        ?: throw TransitException.of(
-                            TransitError.NOT_FOUND_BUS_POSITION,
-                            "인천시 버스 노선 ID '${routeId.value}'에 해당하는 버스 위치 정보를 찾을 수 없습니다."
-                        )
+                        ?: emptyList()
                 },
                 errorMessage = "인천시 버스 위치 정보를 가져오는데 실패했습니다."
             )
