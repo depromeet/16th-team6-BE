@@ -13,7 +13,7 @@ data class BusRoutePositions(
         departureDateTime: String,
         term: Int
     ): BusPosition? {
-        val target = routeStations.getTargetStationById(busStation.id) ?: return null
+        val target = routeStations.getTargetStationById(busStation.id)
         val depTime = LocalDateTime.parse(departureDateTime)
 
         return busPositions.firstOrNull { pos -> // 일치하는 첫 버스 반환
@@ -32,6 +32,22 @@ data class BusRoutePositions(
             val diffMin = Duration.between(depTime, arriveAt).toMinutes()
 
             diffMin in 0..term
+        }
+    }
+
+    fun countApproachingBuses(targetStation: BusStation): Int {
+        val targetStation = routeStations.getTargetStationById(targetStation.id)
+        var count = 0
+        busPositions.forEach { pos ->
+            if (pos.sectionOrder < targetStation.order) count++
+        }
+        return count
+    }
+
+    fun getApproachingBuses(targetStation: BusStation): List<BusPosition> {
+        val target = routeStations.getTargetStationById(targetStation.id)
+        return busPositions.filter { pos ->
+            pos.sectionOrder < target.order
         }
     }
 }

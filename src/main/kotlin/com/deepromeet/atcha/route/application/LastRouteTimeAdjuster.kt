@@ -4,6 +4,8 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @Service
 class LastRouteTimeAdjuster {
@@ -89,7 +91,13 @@ class LastRouteTimeAdjuster {
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
             val boardingTime = leg.calcBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
 
-            legs[i] = leg.copy(departureDateTime = boardingTime.toString())
+            legs[i] =
+                leg.copy(
+                    departureDateTime =
+                        boardingTime
+                            .truncatedTo(ChronoUnit.SECONDS)
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                )
             adjustBaseTime = boardingTime
         }
     }
@@ -116,7 +124,13 @@ class LastRouteTimeAdjuster {
             }
 
             val boardingTime = leg.calcBoardingTime(adjustBaseTime, TimeDirection.AFTER)
-            legs[i] = leg.copy(departureDateTime = boardingTime.toString())
+            legs[i] =
+                leg.copy(
+                    departureDateTime =
+                        boardingTime
+                            .truncatedTo(ChronoUnit.SECONDS)
+                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                )
             adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
         }
     }

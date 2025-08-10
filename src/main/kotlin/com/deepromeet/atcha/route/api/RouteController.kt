@@ -5,9 +5,9 @@ import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
 import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
-import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -52,7 +52,8 @@ class RouteController(
                 UserId(id),
                 request.toStart(),
                 request.toEnd(),
-                request.sortType
+                request.sortType,
+                request.time
             ).map { LastRouteResponse(it) }
         )
 
@@ -74,9 +75,9 @@ class RouteController(
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String
-    ): ApiResponse<LastRoute> =
+    ): ApiResponse<LastRouteResponse> =
         ApiResponse.success(
-            routeService.getRoute(routeId)
+            LastRouteResponse(routeService.getRoute(routeId))
         )
 
     @GetMapping("/last-routes/{lastRouteId}/bus-started")
@@ -102,6 +103,15 @@ class RouteController(
         @RequestBody request: UserRouteRequest
     ) {
         routeService.addUserRoute(UserId(id), request.lastRouteId)
+    }
+
+    @GetMapping("/user-routes/bus-arrival")
+    suspend fun getBusArrivalInUserRoute(
+        @CurrentUser id: Long
+    ): ApiResponse<RealTimeBusArrivalResponse> {
+        return ApiResponse.success(
+            RealTimeBusArrivalResponse(routeService.getFirstBusArrival(UserId(id)))
+        )
     }
 
     @DeleteMapping("/user-routes")
