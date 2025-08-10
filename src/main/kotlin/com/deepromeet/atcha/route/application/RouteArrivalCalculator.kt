@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class ArrivalCalculator(
+class RouteArrivalCalculator(
     private val busManager: BusManager
 ) {
     suspend fun closestArrival(

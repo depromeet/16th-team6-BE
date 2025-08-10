@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 
-interface ArrivalSelectionPolicy {
+interface RouteArrivalSelectionPolicy {
     fun select(
         timeTable: BusTimeTable,
         scheduled: LocalDateTime,
@@ -15,7 +15,7 @@ interface ArrivalSelectionPolicy {
 }
 
 @Component
-class HalfHeadwayPolicy : ArrivalSelectionPolicy {
+class HalfHeadwayPolicyRoute : RouteArrivalSelectionPolicy {
     override fun select(
         timeTable: BusTimeTable,
         scheduled: LocalDateTime,

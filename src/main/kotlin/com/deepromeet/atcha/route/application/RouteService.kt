@@ -18,7 +18,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
-import org.springframework.web.servlet.function.RouterFunctions.route
 import java.time.LocalDateTime
 
 @Service
@@ -34,8 +33,8 @@ class RouteService(
     private val userRouteDepartureTimeRefresher: UserRouteDepartureTimeRefresher,
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
     private val transitRouteClientV2: TransitRouteClientV2,
-    private val arrivalCalculator: ArrivalCalculator,
-    private val selectionPolicy: ArrivalSelectionPolicy,
+    private val routeArrivalCalculator: RouteArrivalCalculator,
+    private val selectionPolicy: RouteArrivalSelectionPolicy,
     private val lastRouteUpdater: LastRouteUpdater
 ) {
     suspend fun getLastRoutes(
@@ -145,7 +144,7 @@ class RouteService(
         val passStops = firstBus.passStops!!
 
         val closest =
-            arrivalCalculator.closestArrival(
+            routeArrivalCalculator.closestArrival(
                 timeTable = info.timeTable,
                 scheduled = scheduled,
                 routeName = firstBus.resolveRouteName(),
