@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 @Component
 class MixpanelEventListener(
     @Value("\${mixpanel.token}")
-    val token: String,
+    val token: String
 ) {
     private val delivery: ClientDelivery = ClientDelivery()
 
@@ -22,16 +22,15 @@ class MixpanelEventListener(
     @Async
     @EventListener
     fun eventTrack(mixpanelEvent: MixpanelEvent) {
-
         // 믹스패널 이벤트 메시지 생성
         val messageBuilder = MessageBuilder(token)
 
         // 이벤트 생성
-        val sentEvent: org.json.JSONObject? =
+        val sentEvent: JSONObject? =
             messageBuilder.event(
                 mixpanelEvent.distinctId,
                 mixpanelEvent.mixpanelEventName.value,
-                JSONObject(mixpanelEvent.property),
+                JSONObject(mixpanelEvent.property)
             )
         delivery.addMessage(sentEvent)
 

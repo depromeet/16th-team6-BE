@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
+import com.deepromeet.atcha.miaxpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
 import com.deepromeet.atcha.transit.application.bus.BusScheduleProvider
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
@@ -17,13 +18,20 @@ private val log = KotlinLogging.logger {}
 class RegionBusScheduleProvider(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>
 ) : BusScheduleProvider {
-    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? {
+    override suspend fun getBusSchedule(
+        routeInfo: BusRouteInfo,
+        busApiCallCountPerRequestProperty: BusApiCallCountPerRequestProperty
+    ): BusSchedule? {
         try {
+            busApiCallCountPerRequestProperty.incrementPublicBusCallCount()
+
             return busRouteInfoClientMap[routeInfo.route.serviceRegion]
                 ?.getBusSchedule(routeInfo)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
+            busApiCallCountPerRequestProperty.decrementPublicBusCallCount()
+
             log.debug(e) {
                 "공공데이터에서 ${routeInfo.route.serviceRegion} 막차 정보 조회 실패 - " +
                     "정류장: ${routeInfo.getTargetStation().stationId} 노선: ${routeInfo.route.id}"
