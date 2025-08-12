@@ -4,6 +4,7 @@ import com.deepromeet.atcha.miaxpanel.MixpanelEvent
 import com.mixpanel.mixpanelapi.ClientDelivery
 import com.mixpanel.mixpanelapi.MessageBuilder
 import com.mixpanel.mixpanelapi.MixpanelAPI
+import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
@@ -14,27 +15,26 @@ class MixpanelEventListener(
     @Value("\${mixpanel.token}")
     val token: String,
 ) {
+    private val delivery: ClientDelivery = ClientDelivery()
+
+    private val mixpanelAPI: MixpanelAPI = MixpanelAPI()
+
     @Async
     @EventListener
     fun eventTrack(mixpanelEvent: MixpanelEvent) {
 
         // 믹스패널 이벤트 메시지 생성
-        val messageBuilder: MessageBuilder = MessageBuilder(token)
+        val messageBuilder = MessageBuilder(token)
 
         // 이벤트 생성
         val sentEvent: org.json.JSONObject? =
             messageBuilder.event(
                 mixpanelEvent.distinctId,
                 mixpanelEvent.mixpanelEventName.value,
-                null
+                JSONObject(mixpanelEvent.property),
             )
-
-        // 만든 여러 이벤트를 delivery
-        val delivery: ClientDelivery = ClientDelivery()
         delivery.addMessage(sentEvent)
 
-        // Mixpanel로 데이터 전송
-        val mixpanel: MixpanelAPI = MixpanelAPI()
-        mixpanel.deliver(delivery)
+        mixpanelAPI.deliver(delivery)
     }
 }
