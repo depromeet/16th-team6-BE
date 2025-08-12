@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit
 
 @Service
 class LastRouteTimeAdjuster {
-    fun adjustTransitDepartureTimes(legs: List<LastRouteLeg>): List<LastRouteLeg> {
+    suspend fun adjustTransitDepartureTimes(legs: List<LastRouteLeg>): List<LastRouteLeg> {
         val adjustedLegs = legs.toMutableList()
 
         val transitLegs = adjustedLegs.withIndex().filter { it.value.isTransit() }
@@ -66,7 +66,7 @@ class LastRouteTimeAdjuster {
         return adjustedLegs
     }
 
-    private fun adjustLegsBeforeBase(
+    private suspend fun adjustLegsBeforeBase(
         legs: MutableList<LastRouteLeg>,
         baseIndex: Int
     ) {
@@ -102,7 +102,7 @@ class LastRouteTimeAdjuster {
         }
     }
 
-    private fun adjustLegsAfterBase(
+    private suspend fun adjustLegsAfterBase(
         legs: MutableList<LastRouteLeg>,
         baseIndex: Int
     ) {
