@@ -12,7 +12,6 @@ import java.time.Duration
 class UserRouteRedisRepository(
     private val userRouteRedisTemplate: RedisTemplate<String, UserRoute>
 ) : UserRouteRepository {
-    private val duration = Duration.ofDays(1)
     private val valueOps = userRouteRedisTemplate.opsForValue()
     private val scanOptions =
         ScanOptions
@@ -21,7 +20,10 @@ class UserRouteRedisRepository(
             .count(1000)
             .build()
 
-    override fun save(userRoute: UserRoute): UserRoute {
+    override fun save(
+        userRoute: UserRoute,
+        duration: Duration
+    ): UserRoute {
         valueOps.set(getKey(userRoute.userId), userRoute, duration)
         return userRoute
     }
@@ -40,10 +42,6 @@ class UserRouteRedisRepository(
             }
         }
         return result
-    }
-
-    override fun update(userRoute: UserRoute) {
-        save(userRoute)
     }
 
     override fun delete(userId: UserId) {
