@@ -5,4 +5,3 @@ data class BusSchedule(
     val busStation: BusStation,
     val busTimeTable: BusTimeTable
 )
-
