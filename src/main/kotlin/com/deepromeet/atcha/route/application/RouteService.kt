@@ -11,7 +11,7 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
@@ -132,32 +132,21 @@ class RouteService(
             ?: userRoute
     }
 
-    suspend fun getFirstBusArrival(userId: UserId): BusRealTimeInfo {
+    suspend fun getFirstBusArrival(userId: UserId): BusArrival {
         val user = userReader.read(userId)
         val userRoute = userRouteManager.read(user)
         val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
         val firstBus = lastRoute.findFirstBus()
         val scheduled = firstBus.departureDateTime!!
 
-        val info = firstBus.requireBusInfo()
-        val passStops = firstBus.passStops!!
+        val closest = routeArrivalCalculator.closestArrival(firstBus, scheduled)
 
-        val closest =
-            routeArrivalCalculator.closestArrival(
-                timeTable = info.timeTable,
-                scheduled = scheduled,
-                routeName = firstBus.resolveRouteName(),
-                stationMeta = firstBus.toBusStationMeta(),
-                passStops = passStops,
-                busInfo = info
-            )
-
-        val selected = selectionPolicy.select(info.timeTable, scheduled, closest)
+        val selected = selectionPolicy.select(scheduled, closest, firstBus.requireBusInfo().timeTable)
 
         selected?.expectedArrivalTime?.let { targetTime ->
             lastRouteUpdater.updateFirstBusTime(lastRoute, firstBus, targetTime)
         }
 
-        return selected ?: BusRealTimeInfo.createScheduled(scheduled)
+        return selected ?: BusArrival.createScheduled(scheduled)
     }
 }

@@ -5,7 +5,7 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.domain.TransitInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
@@ -79,7 +79,7 @@ class UserRouteDepartureTimeRefresher(
     }
 
     private suspend fun calculateOptimalDepartureTime(
-        arrivalInfo: BusRealTimeArrival,
+        arrivalInfo: BusRealTimeArrivals,
         busInfo: TransitInfo.BusInfo,
         route: LastRoute,
         userRoute: UserRoute
