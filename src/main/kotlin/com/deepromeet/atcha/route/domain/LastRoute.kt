@@ -26,6 +26,10 @@ data class LastRoute(
         ).toSeconds().toInt().absoluteValue
     }
 
+    fun calculateArrivalTime(): LocalDateTime {
+        return departureDateTime.plusSeconds(totalTime.toLong())
+    }
+
     fun findFirstTransit(): LastRouteLeg {
         return legs.first { it.isTransit() }
     }
