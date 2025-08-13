@@ -5,6 +5,7 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.RouteLocation
 import com.deepromeet.atcha.route.domain.RouteStep
 import com.deepromeet.atcha.transit.domain.RoutePassStop
+import com.deepromeet.atcha.transit.domain.bus.BusStation
 import java.time.format.DateTimeFormatter
 
 data class LastRouteResponse(
@@ -45,6 +46,7 @@ data class LastRouteLegResponse(
     val service: String? = null,
     val start: RouteLocationResponse,
     val end: RouteLocationResponse,
+    val targetBusStation: BusStationResponse? = null,
     val subwayFinalStation: String? = null,
     val subwayDirection: String? = null,
     val passStopList: List<RoutePassStopResponse>? = null,
@@ -65,6 +67,12 @@ data class LastRouteLegResponse(
         service = lastRouteLeg.service,
         start = RouteLocationResponse(lastRouteLeg.start),
         end = RouteLocationResponse(lastRouteLeg.end),
+        targetBusStation =
+            lastRouteLeg.busInfo?.busRouteInfo?.getTargetStation()?.busStation?.let {
+                BusStationResponse(
+                    it
+                )
+            },
         subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
         subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
@@ -100,5 +108,19 @@ data class RoutePassStopResponse(
         routePassStop.stationName,
         routePassStop.location.longitude.toString(),
         routePassStop.location.latitude.toString()
+    )
+}
+
+data class BusStationResponse(
+    val busStationId: String,
+    val busStationNumber: String,
+    val busStationName: String
+) {
+    constructor(
+        busStation: BusStation
+    ) : this(
+        busStation.id.value,
+        busStation.busStationNumber.value,
+        busStation.busStationMeta.name
     )
 }

@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.infrastructure.client.odsay.response
 
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
-import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
@@ -66,7 +66,7 @@ data class ODSayLaneResponse(
     var busInterval: String,
     var busLocalBlID: String
 ) {
-    fun toBusSchedule(station: BusStation): BusSchedule {
+    fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule {
         val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
@@ -74,8 +74,8 @@ data class ODSayLaneResponse(
                 serviceRegion = ServiceRegion.SEOUL
             )
         return BusSchedule(
-            busRoute = busRoute,
-            busStation = station,
+            busRouteInfo = busRouteInfo,
+            busStation = busRouteInfo.getTargetStation().busStation,
             busTimeTable =
                 BusTimeTable(
                     parseTime(busFirstTime, LocalDate.now()),
