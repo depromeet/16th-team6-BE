@@ -35,11 +35,11 @@ data class LastRouteLeg(
         get() = transitInfo as? TransitInfo.SubwayInfo?
 
     fun requireBusInfo(): TransitInfo.BusInfo {
-        return busInfo ?: throw IllegalStateException("버스 경로는 버스 정보가 필수입니다.")
+        return requireNotNull(busInfo) { "버스 경로는 버스 정보(BusInfo)가 필수입니다." }
     }
 
     fun requireSubwayInfo(): TransitInfo.SubwayInfo {
-        return subwayInfo ?: throw IllegalStateException("지하철 경로는 지하철 정보가 필수입니다.")
+        return requireNotNull(subwayInfo) { "지하철 경로는 지하철 정보(SubwayInfo)가 필수입니다." }
     }
 
     fun isTransit(): Boolean = mode.isTransit()
