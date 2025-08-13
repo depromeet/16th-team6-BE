@@ -74,7 +74,7 @@ class BusManager(
     ): BusPosition? {
         val busPositions =
             runCatching {
-                getBusPositions(busInfo.busRoute)
+                getBusPositions(busInfo.busRouteInfo.route)
             }.getOrNull() ?: return null
 
         return busPositions.findTargetBus(
