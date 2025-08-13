@@ -34,6 +34,10 @@ class BusManager(
         busTimeTableCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
 
+        if (routeName == "282") {
+            print("")
+        }
+
         val schedule =
             busScheduleProvider.getBusSchedule(busRouteInfo)
                 ?: throw TransitException.of(

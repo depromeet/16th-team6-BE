@@ -34,6 +34,14 @@ data class LastRouteLeg(
     val subwayInfo: TransitInfo.SubwayInfo?
         get() = transitInfo as? TransitInfo.SubwayInfo?
 
+    fun requireBusInfo(): TransitInfo.BusInfo {
+        return busInfo ?: throw IllegalStateException("버스 경로는 버스 정보가 필수입니다.")
+    }
+
+    fun requireSubwayInfo(): TransitInfo.SubwayInfo {
+        return subwayInfo ?: throw IllegalStateException("지하철 경로는 지하철 정보가 필수입니다.")
+    }
+
     fun isTransit(): Boolean = mode.isTransit()
 
     fun isWalk(): Boolean = mode.isWalk()

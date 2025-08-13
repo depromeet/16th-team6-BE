@@ -52,7 +52,9 @@ data class LastRoute(
             itinerary: RouteItinerary,
             adjustedLegs: List<LastRouteLeg>
         ): LastRoute {
-            val departureDateTime = calculateDepartureTime(adjustedLegs)
+            val departureDateTime =
+                calculateDepartureTime(adjustedLegs)
+                    .validateLastRouteDeparture()
             val arrivalTime = calculateArrivalTime(adjustedLegs)
             val totalTime = Duration.between(departureDateTime, arrivalTime).seconds
 
