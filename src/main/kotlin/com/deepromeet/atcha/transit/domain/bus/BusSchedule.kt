@@ -8,7 +8,7 @@ enum class BusInfoType {
 }
 
 data class BusSchedule(
-    val busRoute: BusRoute,
+    val busRouteInfo: BusRouteInfo,
     val busStation: BusStation,
     val busTimeTable: BusTimeTable
 )
