@@ -10,13 +10,15 @@ data class BusTimeTable(
     val lastTime: LocalDateTime,
     val term: Int
 ) {
+    init {
+        require(firstTime <= lastTime) { "첫차 시각($firstTime)이 막차 시각($lastTime)보다 늦습니다." }
+    }
+
     fun calculateNearestTime(
         time: LocalDateTime,
         timeDirection: TimeDirection
     ): LocalDateTime {
         require(term > 0) { "잘못된 배차 간격(term=$term)입니다. 0보다 커야 합니다." }
-        require(lastTime.isAfter(firstTime)) { "첫차 시각($firstTime)이 막차 시각($lastTime)보다 늦습니다." }
-
         return when (timeDirection) {
             TimeDirection.BEFORE -> {
                 if (time.isBefore(firstTime)) {
