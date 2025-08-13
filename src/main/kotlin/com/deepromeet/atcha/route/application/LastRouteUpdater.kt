@@ -4,7 +4,6 @@ import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 @Component
 class LastRouteUpdater(
@@ -18,12 +17,10 @@ class LastRouteUpdater(
         firstBus: LastRouteLeg,
         newArrivalTime: LocalDateTime
     ) {
-        val formattedTime = newArrivalTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-
         val updatedLegs =
             lastRoute.legs.map { leg ->
                 if (leg == firstBus) {
-                    leg.copy(departureDateTime = formattedTime)
+                    leg.copy(departureDateTime = newArrivalTime)
                 } else {
                     leg
                 }

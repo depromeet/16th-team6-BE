@@ -10,11 +10,11 @@ data class BusRoutePositions(
 ) {
     fun findTargetBus(
         busStation: BusStation,
-        departureDateTime: String,
+        departureDateTime: LocalDateTime,
         term: Int
     ): BusPosition? {
         val target = routeStations.getTargetStationById(busStation.id)
-        val depTime = LocalDateTime.parse(departureDateTime)
+        val depTime = departureDateTime
 
         return busPositions.firstOrNull { pos -> // 일치하는 첫 버스 반환
             val remainStations = target.order - pos.sectionOrder

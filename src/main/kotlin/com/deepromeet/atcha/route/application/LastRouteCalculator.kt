@@ -80,7 +80,7 @@ class LastRouteCalculator(
 
                     if (route != null) {
                         lastRouteBuffer.add(route)
-                        if (route.parseDepartureTime().isAfter(LocalDateTime.now())) {
+                        if (route.departureDateTime.isAfter(LocalDateTime.now())) {
                             send(route)
                         }
                     }

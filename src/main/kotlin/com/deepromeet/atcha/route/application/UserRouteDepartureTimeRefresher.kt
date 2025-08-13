@@ -9,7 +9,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 1
 private const val MIN_SHIFT_EARLIER_SECONDS = 60L // 기존: 빨라질 때 최소 개선폭
@@ -27,8 +26,6 @@ class UserRouteDepartureTimeRefresher(
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader
 ) {
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-
     suspend fun refreshAll(): List<UserRoute> =
         userRouteManager.readAll().mapNotNull { userRoute ->
             refreshDepartureTime(userRoute)
@@ -42,7 +39,7 @@ class UserRouteDepartureTimeRefresher(
         val busInfo = firstBusLeg.requireBusInfo()
 
         // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획 기준)
-        if (isNotRefreshTarget(userRoute.parseUpdatedDepartureTime(), busInfo.timeTable.term)) {
+        if (isNotRefreshTarget(userRoute.updatedDepartureTime, busInfo.timeTable.term)) {
             return null
         }
 
@@ -89,7 +86,7 @@ class UserRouteDepartureTimeRefresher(
     ): OptimalDepartureTime? {
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
-        val baseDepartureTime = userRoute.parseBaseDepartureTime()
+        val baseDepartureTime = userRoute.baseDepartureTime
 
         val busPositions = busManager.getBusPositions(busInfo.busRoute)
 
@@ -146,11 +143,11 @@ class UserRouteDepartureTimeRefresher(
         newBusArrival: LocalDateTime,
         newRouteDeparture: LocalDateTime
     ): LastRoute {
-        val updatedBusLeg = busLeg.copy(departureDateTime = newBusArrival.format(formatter))
+        val updatedBusLeg = busLeg.copy(departureDateTime = newBusArrival)
         val updatedLegs = route.legs.map { if (it == busLeg) updatedBusLeg else it }
 
         return route.copy(
-            departureDateTime = newRouteDeparture.format(formatter),
+            departureDateTime = newRouteDeparture,
             legs = updatedLegs
         )
     }

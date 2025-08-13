@@ -137,7 +137,7 @@ class RouteService(
         val userRoute = userRouteManager.read(user)
         val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
         val firstBus = lastRoute.findFirstBus()
-        val scheduled = firstBus.parseDepartureDateTime()
+        val scheduled = firstBus.departureDateTime!!
 
         val info = firstBus.requireBusInfo()
         val passStops = firstBus.passStops!!

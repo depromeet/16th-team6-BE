@@ -5,6 +5,7 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.RouteLocation
 import com.deepromeet.atcha.route.domain.RouteStep
 import com.deepromeet.atcha.transit.domain.RoutePassStop
+import java.time.format.DateTimeFormatter
 
 data class LastRouteResponse(
     val routeId: String,
@@ -17,9 +18,13 @@ data class LastRouteResponse(
     val pathType: Int,
     val legs: List<LastRouteLegResponse>
 ) {
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     constructor(lastRoute: LastRoute) : this(
         routeId = lastRoute.id,
-        departureDateTime = lastRoute.departureDateTime,
+        departureDateTime = lastRoute.departureDateTime.format(dateTimeFormatter),
         totalTime = lastRoute.totalTime,
         totalWalkTime = lastRoute.totalWalkTime,
         totalWorkDistance = lastRoute.totalWalkDistance,
@@ -46,11 +51,15 @@ data class LastRouteLegResponse(
     val step: List<RouteStep>? = null,
     val passShape: String? = null
 ) {
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     constructor(lastRouteLeg: LastRouteLeg) : this(
         distance = lastRouteLeg.distance,
         sectionTime = lastRouteLeg.sectionTime,
         mode = lastRouteLeg.mode.value,
-        departureDateTime = lastRouteLeg.departureDateTime,
+        departureDateTime = lastRouteLeg.departureDateTime?.format(dateTimeFormatter),
         route = lastRouteLeg.route,
         type = lastRouteLeg.type,
         service = lastRouteLeg.service,
