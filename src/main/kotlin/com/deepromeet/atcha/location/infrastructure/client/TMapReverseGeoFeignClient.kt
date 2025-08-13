@@ -1,7 +1,7 @@
-package com.deepromeet.atcha.transit.infrastructure.client.tmap
+package com.deepromeet.atcha.location.infrastructure.client
 
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.config.TMapFeignConfig
-import com.deepromeet.atcha.transit.infrastructure.client.tmap.response.TMapAddressResponse
+import com.deepromeet.atcha.location.infrastructure.client.config.TMapFeignConfig
+import com.deepromeet.atcha.location.infrastructure.client.response.TMapAddressResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
