@@ -74,7 +74,7 @@ class PublicSeoulBusRouteInfoClient(
             processResult = { response ->
                 response.msgBody.itemList
                     ?.getOrNull(0)
-                    ?.toBusSchedule(routeInfo.getTargetStation().busStation)
+                    ?.toBusSchedule(routeInfo)
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_REAL_TIME,
                         "서울시 버스(${routeInfo.routeId}의" +

@@ -48,6 +48,6 @@ class ODSayBusInfoClient(
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."
             )
 
-        return busStationResponse.toBusSchedule(routeInfo.getTargetStation().busStation)
+        return busStationResponse.toBusSchedule(routeInfo)
     }
 }
