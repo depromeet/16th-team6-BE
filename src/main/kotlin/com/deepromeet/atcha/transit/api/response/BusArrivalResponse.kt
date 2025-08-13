@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.api.response
 
 import com.deepromeet.atcha.location.domain.ServiceRegion
-import com.deepromeet.atcha.transit.domain.bus.BusArrival
+import com.deepromeet.atcha.transit.domain.bus.BusArrivalInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.deepromeet.atcha.transit.domain.bus.BusStationId
 import java.time.LocalDateTime
@@ -17,15 +17,15 @@ data class BusArrivalResponse(
     val realTimeBusArrival: List<RealTimeBusArrivalResponse>
 ) {
     constructor(
-        busArrival: BusArrival
+        busArrivalInfo: BusArrivalInfo
     ) : this(
-        busArrival.schedule.busRouteInfo.route.id,
-        busArrival.schedule.busRouteInfo.route.name,
-        busArrival.schedule.busRouteInfo.route.serviceRegion,
-        busArrival.schedule.busStation.id,
-        busArrival.schedule.busStation.busStationMeta.name,
-        busArrival.schedule.busTimeTable.lastTime,
-        busArrival.schedule.busTimeTable.term,
-        busArrival.realTimeArrival.realTimeInfoList.map { RealTimeBusArrivalResponse(it) }
+        busArrivalInfo.schedule.busRouteInfo.route.id,
+        busArrivalInfo.schedule.busRouteInfo.route.name,
+        busArrivalInfo.schedule.busRouteInfo.route.serviceRegion,
+        busArrivalInfo.schedule.busStation.id,
+        busArrivalInfo.schedule.busStation.busStationMeta.name,
+        busArrivalInfo.schedule.busTimeTable.lastTime,
+        busArrivalInfo.schedule.busTimeTable.term,
+        busArrivalInfo.realTimeArrival.realTimeInfoList.map { RealTimeBusArrivalResponse(it) }
     )
 }
