@@ -3,7 +3,7 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.incheon
 import com.deepromeet.atcha.location.application.CoordinateTransformer
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
@@ -133,7 +133,7 @@ class PublicIncheonRouteInfoClient(
             errorMessage = "인천시 버스 노선 스케줄 정보를 가져오는데 실패했습니다."
         )
 
-    override suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival =
+    override suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrivals =
         ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,
@@ -149,7 +149,7 @@ class PublicIncheonRouteInfoClient(
             processResult = { response ->
                 response.msgBody.itemList?.getOrNull(0)
                     ?.toBusRealTimeArrival()
-                    ?: BusRealTimeArrival(emptyList())
+                    ?: BusRealTimeArrivals(emptyList())
             },
             errorMessage =
                 "인천시 버스(${routeInfo.route.id})의 " +
