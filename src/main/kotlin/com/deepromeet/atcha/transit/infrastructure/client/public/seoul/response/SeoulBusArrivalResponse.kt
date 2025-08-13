@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusCongestion
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
@@ -73,8 +73,8 @@ data class SeoulBusArrivalResponse(
                 )
         )
 
-    fun toBusRealTimeArrival(): BusRealTimeArrival {
-        return BusRealTimeArrival(
+    fun toBusRealTimeArrival(): BusRealTimeArrivals {
+        return BusRealTimeArrivals(
             listOf(
                 createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg1,
@@ -106,7 +106,7 @@ data class SeoulBusArrivalResponse(
         rerdieDiv: Int,
         rerideNum: Int,
         vehId: String
-    ): BusRealTimeInfo {
+    ): BusArrival {
         val busStatus = determineBusStatus(arrivalMessage)
 
         val busCongestion =
@@ -130,7 +130,7 @@ data class SeoulBusArrivalResponse(
                 else -> throw IllegalArgumentException("Unknown rerdieDiv: $rerdieDiv")
             }
 
-        return BusRealTimeInfo(
+        return BusArrival(
             vehicleId = vehId,
             busStatus = busStatus,
             remainingTime = remainingTime.toInt(),

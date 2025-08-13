@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response
 
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusCongestion
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
@@ -47,10 +47,10 @@ data class BusArrivalItem(
     @field:JacksonXmlProperty(localName = "vehId2")
     val vehId2: Int
 ) {
-    fun toRealTimeArrival(): BusRealTimeArrival {
+    fun toRealTimeArrival(): BusRealTimeArrivals {
         val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, vehId1)
         val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, vehId2)
-        return BusRealTimeArrival(
+        return BusRealTimeArrivals(
             listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
         )
     }
@@ -60,7 +60,7 @@ data class BusArrivalItem(
         crowded: Int,
         remainSeatCnt: Int,
         vehId: Int
-    ): BusRealTimeInfo {
+    ): BusArrival {
         val busCongestion =
             when (crowded) {
                 1 -> BusCongestion.LOW
@@ -70,7 +70,7 @@ data class BusArrivalItem(
                 else -> BusCongestion.UNKNOWN
             }
 
-        return BusRealTimeInfo(
+        return BusArrival(
             vehicleId = vehId.toString(),
             busStatus = determineBusStatus(predictTimeSec),
             remainingTime = predictTimeSec ?: 0,

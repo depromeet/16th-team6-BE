@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.incheon.response
 
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusCongestion
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
@@ -34,10 +34,10 @@ data class IncheonBusArrivalResponse(
     @JacksonXmlProperty(localName = "ROUTEID")
     val routeId: String
 ) {
-    fun toBusRealTimeArrival(): BusRealTimeArrival = BusRealTimeArrival(listOf(toBusRealTimeInfo()))
+    fun toBusRealTimeArrival(): BusRealTimeArrivals = BusRealTimeArrivals(listOf(toBusRealTimeInfo()))
 
-    private fun toBusRealTimeInfo(): BusRealTimeInfo {
-        return BusRealTimeInfo(
+    private fun toBusRealTimeInfo(): BusArrival {
+        return BusArrival(
             vehicleId = busId,
             busStatus = determineBusStatus(arrivalEstimateTime.toInt(), restStopCount),
             remainingTime = arrivalEstimateTime.toInt(),
