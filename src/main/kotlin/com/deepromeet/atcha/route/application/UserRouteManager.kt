@@ -6,12 +6,14 @@ import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.user.domain.User
 import org.springframework.stereotype.Component
+import java.time.Duration
+import java.time.LocalDateTime
 
 @Component
 class UserRouteManager(
     private val userRouteRepository: UserRouteRepository
 ) {
-    fun update(
+    fun append(
         user: User,
         route: LastRoute
     ) {
@@ -22,10 +24,20 @@ class UserRouteManager(
                 routeId = route.id,
                 userId = user.id
             )
-        userRouteRepository.save(userRoute)
+
+        val userRouteExpiresAt =
+            route.calculateArrivalTime()
+                .plusHours(1)
+
+        userRouteRepository.save(userRoute, Duration.between(LocalDateTime.now(), userRouteExpiresAt))
     }
 
-    fun update(userRoute: UserRoute) = userRouteRepository.save(userRoute)
+    fun update(
+        userRoute: UserRoute,
+        expiresAt: LocalDateTime
+    ): UserRoute {
+        return userRouteRepository.save(userRoute, Duration.between(LocalDateTime.now(), expiresAt))
+    }
 
     fun read(user: User): UserRoute {
         return userRouteRepository.findById(user.id)
