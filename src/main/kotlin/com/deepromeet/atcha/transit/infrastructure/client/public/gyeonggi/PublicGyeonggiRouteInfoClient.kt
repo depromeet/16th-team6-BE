@@ -65,7 +65,7 @@ class PublicGyeonggiRouteInfoClient(
             apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, routeInfo.routeId) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
-                response.msgBody?.busRouteInfoItem?.toBusSchedule(dailyType, routeInfo.getTargetStation())
+                response.msgBody?.busRouteInfoItem?.toBusSchedule(dailyType, routeInfo)
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_SCHEDULE,
                         "경기도 버스 노선 '${routeInfo.route.name}' 정류소" +

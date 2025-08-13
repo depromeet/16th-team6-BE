@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.domain
 
-import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
@@ -20,14 +20,14 @@ sealed class TransitInfo {
     }
 
     data class BusInfo(
-        val busRoute: BusRoute,
+        val busRouteInfo: BusRouteInfo,
         val busStation: BusStation,
         val timeTable: BusTimeTable
     ) : TransitInfo() {
         constructor(
             busSchedule: BusSchedule
         ) : this(
-            busRoute = busSchedule.busRoute,
+            busRouteInfo = busSchedule.busRouteInfo,
             busStation = busSchedule.busStation,
             timeTable = busSchedule.busTimeTable
         )

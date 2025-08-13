@@ -64,7 +64,7 @@ class PublicIncheonRouteInfoClient(
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
-                response.msgBody.itemList?.get(0)?.toBusSchedule(routeInfo.getTargetStation())
+                response.msgBody.itemList?.get(0)?.toBusSchedule(routeInfo)
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_ROUTE,
                         "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 정보를 찾을 수 없습니다."

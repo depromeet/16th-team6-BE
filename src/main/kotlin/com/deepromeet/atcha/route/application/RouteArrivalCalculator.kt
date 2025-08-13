@@ -22,7 +22,7 @@ class RouteArrivalCalculator(
         busInfo: TransitInfo.BusInfo
     ): BusRealTimeInfo? {
         val arrivals = busManager.getRealTimeArrival(routeName, stationMeta, passStops)
-        val positions = busManager.getBusPositions(busInfo.busRoute)
+        val positions = busManager.getBusPositions(busInfo.busRouteInfo.route)
         val approachingBuses = positions.getApproachingBuses(busInfo.busStation)
 
         return arrivals.getClosestArrivalWithPositions(timeTable, scheduled, approachingBuses)
