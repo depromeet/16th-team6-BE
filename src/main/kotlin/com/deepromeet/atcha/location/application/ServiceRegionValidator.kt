@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.transit.application.region
+package com.deepromeet.atcha.location.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import org.springframework.stereotype.Component

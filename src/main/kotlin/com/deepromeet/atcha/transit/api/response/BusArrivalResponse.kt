@@ -1,9 +1,9 @@
 package com.deepromeet.atcha.transit.api.response
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.deepromeet.atcha.transit.domain.bus.BusStationId
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import java.time.LocalDateTime
 
 data class BusArrivalResponse(

@@ -1,8 +1,8 @@
-package com.deepromeet.atcha.transit.infrastructure.client.tmap
+package com.deepromeet.atcha.location.infrastructure.client
 
+import com.deepromeet.atcha.location.application.RegionIdentifier
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.application.region.RegionIdentifier
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import org.springframework.stereotype.Component
 
 @Component

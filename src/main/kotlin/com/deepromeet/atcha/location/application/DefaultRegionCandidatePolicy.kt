@@ -1,7 +1,7 @@
-package com.deepromeet.atcha.transit.application.region
+package com.deepromeet.atcha.location.application
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import org.springframework.stereotype.Component
 
 @Component

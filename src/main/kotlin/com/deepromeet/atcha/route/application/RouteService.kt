@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.application
 
+import com.deepromeet.atcha.location.application.ServiceRegionValidator
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.ItineraryValidator
 import com.deepromeet.atcha.route.domain.LastRoute
@@ -10,7 +11,6 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
-import com.deepromeet.atcha.transit.application.region.ServiceRegionValidator
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId

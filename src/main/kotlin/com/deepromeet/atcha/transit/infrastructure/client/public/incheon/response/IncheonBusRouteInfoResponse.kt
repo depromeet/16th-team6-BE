@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.incheon.response
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
@@ -10,7 +11,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusServiceHours
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.bus.BusTravelTimeCalculator
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter

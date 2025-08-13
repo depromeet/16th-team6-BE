@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
@@ -8,7 +9,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusStationId
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.bus.BusStationNumber
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
 data class SeoulBusRouteStationResponse(
