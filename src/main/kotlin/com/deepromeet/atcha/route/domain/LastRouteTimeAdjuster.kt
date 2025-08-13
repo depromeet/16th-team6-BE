@@ -74,16 +74,28 @@ class LastRouteTimeAdjuster {
 
         for (i in adjustedLegs.indices) {
             val leg = adjustedLegs[i]
-            if (leg.isBus() && leg.departureDateTime != null) {
+            if (leg.isBus()) {
                 // 첫 번째 대중교통이 버스이고 현재 leg가 그 첫 번째 버스라면 건너뛰기
                 if (isFirstTransitBus && i == firstTransitIndex) continue
 
                 val busInfo = leg.requireBusInfo()
-                val currentTime = LocalDateTime.parse(leg.departureDateTime)
-                val adjustedTime = currentTime.minusMinutes(busInfo.timeTable.term.toLong())
+                val lastBusTime = leg.parseDepartureDateTime()
+                val prevLastBusTime = lastBusTime.minusMinutes(busInfo.timeTable.term.toLong())
+
+                val adjustedBusInfo =
+                    busInfo.copy(
+                        timeTable =
+                            busInfo.timeTable.copy(
+                                lastTime = prevLastBusTime
+                            )
+                    )
+
                 adjustedLegs[i] =
                     leg.copy(
-                        departureDateTime = adjustedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                        departureDateTime =
+                            prevLastBusTime
+                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                        transitInfo = adjustedBusInfo
                     )
             }
         }
