@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.location.api.controller
+package com.deepromeet.atcha.location.api
 
 import com.deepromeet.atcha.location.api.request.POIHistoryRequest
 import com.deepromeet.atcha.location.api.request.POISearchRequest
@@ -28,16 +28,16 @@ class LocationController(
     fun getPOIs(
         @ModelAttribute request: POISearchRequest
     ): ApiResponse<List<POIResponse>> =
-        ApiResponse.success(
+        ApiResponse.Companion.success(
             locationService.getPOIs(request.keyword, request.toCoordinate())
-                .map(POIResponse::from)
+                .map(POIResponse.Companion::from)
         )
 
     @GetMapping("/rgeo")
     fun getReverseGeoLabel(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<LocationResponse> =
-        ApiResponse.success(
+        ApiResponse.Companion.success(
             LocationResponse(locationService.getLocation(coordinate))
         )
 
@@ -57,8 +57,8 @@ class LocationController(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<List<POIResponse>> =
         locationService.getPOIHistories(UserId(userId), coordinate).let {
-            return ApiResponse.success(
-                it.map { poi -> POIResponse.from(poi) }
+            return ApiResponse.Companion.success(
+                it.map { poi -> POIResponse.Companion.from(poi) }
             )
         }
 
@@ -74,4 +74,13 @@ class LocationController(
     fun clearRecentPOIs(
         @CurrentUser userId: Long
     ) = locationService.clearPOIHistories(UserId(userId))
+
+    @GetMapping("/is-service-region")
+    fun isServiceRegion(
+        @ModelAttribute coordinate: Coordinate
+    ): ApiResponse<Boolean> {
+        return ApiResponse.Companion.success(
+            locationService.isServiceRegion(coordinate)
+        )
+    }
 }
