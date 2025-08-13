@@ -102,7 +102,12 @@ data class LastRouteLeg(
     }
 
     private fun validateDepartureDateTime() {
-        require(!isValidRange(parseDepartureDateTime()))
+        if (isTransit()) {
+            val departureDateTime = parseDepartureDateTime()
+            require(isValidRange(departureDateTime)) {
+                "유효하지않은 막차 시간 범위입니다. 입력값: $departureDateTime, 노선: $route"
+            }
+        }
     }
 
     private fun validateRouteMode() {

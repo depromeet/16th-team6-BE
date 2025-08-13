@@ -15,7 +15,8 @@ enum class RouteError(
     INVALID_LAST_ROUTE(500, "LRT_001", "유효하지 않은 막차 경로입니다.", LogLevel.ERROR),
     INVALID_ROUTE_MODE(500, "LRT_002", "지원하지 않는 모드입니다.", LogLevel.ERROR),
     LAST_ROUTES_NOT_FOUND(404, "LRT_003", "유효한 막차 경로를 찾을 수 없습니다.", LogLevel.WARN),
-    NO_AVAILABLE_LAST_ROUTES(404, "LRT_004", "시간이 늦어서 탑승 가능한 막차 경로가 없습니다.", LogLevel.WARN)
+    NO_AVAILABLE_LAST_ROUTES(404, "LRT_004", "시간이 늦어서 탑승 가능한 막차 경로가 없습니다.", LogLevel.WARN),
+    INVALID_LAST_TIME(500, "LRT_005", "04:00 ~ 20:00 사이의 시간은 유효하지 않습니다.", LogLevel.WARN)
 }
 
 class RouteException(
