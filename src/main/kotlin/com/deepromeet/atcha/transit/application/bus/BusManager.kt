@@ -4,7 +4,7 @@ import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRoutePositions
@@ -50,7 +50,7 @@ class BusManager(
         routeName: String,
         meta: BusStationMeta,
         passStopList: RoutePassStops
-    ): BusRealTimeArrival {
+    ): BusRealTimeArrivals {
         val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }

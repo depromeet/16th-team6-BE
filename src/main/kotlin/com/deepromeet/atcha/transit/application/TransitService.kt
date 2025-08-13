@@ -5,7 +5,7 @@ import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.subway.SubwayStationBatchAppender
 import com.deepromeet.atcha.transit.domain.Fare
 import com.deepromeet.atcha.transit.domain.RoutePassStops
-import com.deepromeet.atcha.transit.domain.bus.BusArrival
+import com.deepromeet.atcha.transit.domain.bus.BusArrivalInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
@@ -28,10 +28,10 @@ class TransitService(
         routeName: String,
         busStationMeta: BusStationMeta,
         passStopList: RoutePassStops
-    ): BusArrival {
+    ): BusArrivalInfo {
         val schedule = busManager.getSchedule(routeName, busStationMeta, passStopList)
         val realTimeArrival = busManager.getRealTimeArrival(routeName, busStationMeta, passStopList)
-        return BusArrival(schedule, realTimeArrival)
+        return BusArrivalInfo(schedule, realTimeArrival)
     }
 
     suspend fun getBusPositions(busRoute: BusRoute) = busManager.getBusPositions(busRoute)
