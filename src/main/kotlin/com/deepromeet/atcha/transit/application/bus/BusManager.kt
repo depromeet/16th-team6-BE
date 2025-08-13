@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.application.bus
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
@@ -9,7 +10,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRoutePositions
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import kotlinx.coroutines.Dispatchers
