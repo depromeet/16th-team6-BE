@@ -117,7 +117,7 @@ class RouteService(
     ) {
         val user = userReader.read(id)
         val route = lastRouteReader.read(lastRouteId)
-        userRouteManager.update(user, route)
+        userRouteManager.append(user, route)
     }
 
     fun deleteUserRoute(id: UserId) {

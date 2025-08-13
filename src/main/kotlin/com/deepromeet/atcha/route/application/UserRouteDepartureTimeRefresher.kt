@@ -132,8 +132,14 @@ class UserRouteDepartureTimeRefresher(
             )
         lastRouteAppender.append(updatedRoute)
 
+        val userRouteExpiresAt =
+            updatedRoute
+                .calculateArrivalTime()
+                .plusHours(1)
+
         return userRouteManager.update(
-            userRoute.updateDepartureTime(optimalTime.routeDepartureTime)
+            userRoute.updateDepartureTime(optimalTime.routeDepartureTime),
+            userRouteExpiresAt
         )
     }
 
