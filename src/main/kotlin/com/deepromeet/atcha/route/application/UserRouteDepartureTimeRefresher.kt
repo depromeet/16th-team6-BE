@@ -88,7 +88,7 @@ class UserRouteDepartureTimeRefresher(
         val walkingTime = route.calcWalkingTimeToFirstTransit()
         val baseDepartureTime = userRoute.baseDepartureTime
 
-        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+        val busPositions = busManager.getBusPositions(busInfo.busRouteInfo.route)
 
         val candidates =
             arrivalInfo
