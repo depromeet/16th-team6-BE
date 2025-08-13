@@ -39,7 +39,7 @@ class UserRouteDepartureTimeRefresher(
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
-        val busInfo = firstBusLeg.busInfo ?: return null
+        val busInfo = firstBusLeg.requireBusInfo()
 
         // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획 기준)
         if (isNotRefreshTarget(userRoute.parseUpdatedDepartureTime(), busInfo.timeTable.term)) {

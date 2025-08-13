@@ -15,10 +15,8 @@ import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class RouteService(
@@ -52,6 +50,7 @@ class RouteService(
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteCalculator
             .calcLastRoutes(start, destination, validItineraries)
+            .sort(sortType)
     }
 
     suspend fun getLastRoutesForTest(
@@ -87,7 +86,6 @@ class RouteService(
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
             lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
-                .filter { route -> route.parseDepartureTime().isAfter(LocalDateTime.now()) }
                 .collect { route -> emit(route) }
         }
 
@@ -100,7 +98,7 @@ class RouteService(
         val lastRoute = lastRouteReader.read(lastRouteId)
 
         val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus.busInfo ?: return false
+        val busInfo = firstBus.requireBusInfo()
         val departureDateTime = firstBus.departureDateTime ?: return false
 
         val locatedBus = busManager.locateBus(busInfo, departureDateTime) ?: return false
@@ -141,7 +139,7 @@ class RouteService(
         val firstBus = lastRoute.findFirstBus()
         val scheduled = firstBus.parseDepartureDateTime()
 
-        val info = firstBus.busInfo!!
+        val info = firstBus.requireBusInfo()
         val passStops = firstBus.passStops!!
 
         val closest =
