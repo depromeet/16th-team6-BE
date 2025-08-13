@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.route.domain.LastRouteTimeAdjuster
 import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
@@ -17,6 +18,7 @@ import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 import java.util.Collections
 
 private val log = KotlinLogging.logger {}
@@ -78,7 +80,9 @@ class LastRouteCalculator(
 
                     if (route != null) {
                         lastRouteBuffer.add(route)
-                        send(route)
+                        if (route.parseDepartureTime().isAfter(LocalDateTime.now())) {
+                            send(route)
+                        }
                     }
                 }
             }

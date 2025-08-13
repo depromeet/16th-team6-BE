@@ -1,6 +1,5 @@
-package com.deepromeet.atcha.route.application
+package com.deepromeet.atcha.route.domain
 
-import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import org.springframework.stereotype.Service
 import java.time.LocalDateTime
@@ -11,6 +10,9 @@ import java.time.temporal.ChronoUnit
 class LastRouteTimeAdjuster {
     suspend fun adjustTransitDepartureTimes(legs: List<LastRouteLeg>): List<LastRouteLeg> {
         val adjustedLegs = legs.toMutableList()
+
+        // 첫 번째 대중교통이 버스인 경우를 제외하고 모든 버스의 출발시간을 배차간격만큼 빼기
+        adjustBusDepartureTimes(adjustedLegs)
 
         val transitLegs = adjustedLegs.withIndex().filter { it.value.isTransit() }
         if (transitLegs.isEmpty()) return adjustedLegs
@@ -64,6 +66,27 @@ class LastRouteTimeAdjuster {
         adjustLegsAfterBase(adjustedLegs, adjustBaseIndex)
 
         return adjustedLegs
+    }
+
+    private fun adjustBusDepartureTimes(adjustedLegs: MutableList<LastRouteLeg>) {
+        val firstTransitIndex = adjustedLegs.indexOfFirst { it.isTransit() }
+        val isFirstTransitBus = firstTransitIndex != -1 && adjustedLegs[firstTransitIndex].isBus()
+
+        for (i in adjustedLegs.indices) {
+            val leg = adjustedLegs[i]
+            if (leg.isBus() && leg.departureDateTime != null) {
+                // 첫 번째 대중교통이 버스이고 현재 leg가 그 첫 번째 버스라면 건너뛰기
+                if (isFirstTransitBus && i == firstTransitIndex) continue
+
+                val busInfo = leg.requireBusInfo()
+                val currentTime = LocalDateTime.parse(leg.departureDateTime)
+                val adjustedTime = currentTime.minusMinutes(busInfo.timeTable.term.toLong())
+                adjustedLegs[i] =
+                    leg.copy(
+                        departureDateTime = adjustedTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                    )
+            }
+        }
     }
 
     private suspend fun adjustLegsBeforeBase(
