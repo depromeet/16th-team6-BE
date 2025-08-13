@@ -1,10 +1,10 @@
 package com.deepromeet.atcha.route.infrastructure.client.tmap
 
+import com.deepromeet.atcha.location.application.RegionIdentifier
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.infrastructure.client.tmap.mapper.toDomain
 import com.deepromeet.atcha.route.infrastructure.client.tmap.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.application.region.RegionIdentifier
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import feign.RetryableException
