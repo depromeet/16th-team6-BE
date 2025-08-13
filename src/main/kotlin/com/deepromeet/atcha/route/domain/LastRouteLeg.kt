@@ -7,7 +7,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.time.LocalDateTime
-import java.time.LocalTime
 
 data class LastRouteLeg(
     val distance: Int,
@@ -25,7 +24,6 @@ data class LastRouteLeg(
     val transitInfo: TransitInfo
 ) {
     init {
-        validateDepartureDateTime()
         validateRouteMode()
         validateTransitDepartureTime()
     }
@@ -101,15 +99,6 @@ data class LastRouteLeg(
         return LocalDateTime.parse(departureDateTime!!)
     }
 
-    private fun validateDepartureDateTime() {
-        if (isTransit()) {
-            val departureDateTime = parseDepartureDateTime()
-            require(isValidRange(departureDateTime)) {
-                "유효하지않은 막차 시간 범위입니다. 입력값: $departureDateTime, 노선: $route"
-            }
-        }
-    }
-
     private fun validateRouteMode() {
         require(mode.isSupported) {
             "지원하지 않는 교통수단입니다: $mode"
@@ -122,13 +111,5 @@ data class LastRouteLeg(
                 "대중교통($mode)의 출발시간은 필수입니다"
             }
         }
-    }
-
-    private fun isValidRange(lastTime: LocalDateTime): Boolean {
-        val time = lastTime.toLocalTime()
-        val start = LocalTime.of(20, 0)
-        val end = LocalTime.of(3, 0)
-
-        return time.isAfter(start) || time.isBefore(end)
     }
 }
