@@ -15,7 +15,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 private val log = KotlinLogging.logger {}
@@ -63,10 +62,7 @@ class LastRouteLegCalculator(
                 val lastSchedule = timeTable.getLastTime(endStation, routes, leg.isExpress())
 
                 leg.toLastTransitLeg(
-                    departureDateTime =
-                        lastSchedule.departureTime
-                            .truncatedTo(ChronoUnit.SECONDS)
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                    departureDateTime = lastSchedule.departureTime.truncatedTo(ChronoUnit.SECONDS),
                     transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, lastSchedule)
                 )
             }
@@ -84,10 +80,7 @@ class LastRouteLegCalculator(
         val lastDepartureTime = busSchedule.busTimeTable.lastTime
 
         return leg.toLastTransitLeg(
-            departureDateTime =
-                lastDepartureTime
-                    .truncatedTo(ChronoUnit.SECONDS)
-                    .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+            departureDateTime = lastDepartureTime.truncatedTo(ChronoUnit.SECONDS),
             transitInfo = TransitInfo.BusInfo(busSchedule)
         )
     }

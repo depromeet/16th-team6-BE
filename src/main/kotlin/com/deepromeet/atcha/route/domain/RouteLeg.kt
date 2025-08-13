@@ -3,6 +3,7 @@ package com.deepromeet.atcha.route.domain
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
+import java.time.LocalDateTime
 
 data class RouteLeg(
     val distance: Int,
@@ -49,7 +50,7 @@ data class RouteLeg(
         )
 
     fun toLastTransitLeg(
-        departureDateTime: String,
+        departureDateTime: LocalDateTime,
         transitInfo: TransitInfo
     ): LastRouteLeg {
         return LastRouteLeg(

@@ -17,6 +17,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class BusManager(
@@ -33,10 +34,6 @@ class BusManager(
     ): BusSchedule {
         busTimeTableCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
-
-        if (routeName == "282") {
-            print("")
-        }
 
         val schedule =
             busScheduleProvider.getBusSchedule(busRouteInfo)
@@ -73,7 +70,7 @@ class BusManager(
 
     suspend fun locateBus(
         busInfo: TransitInfo.BusInfo,
-        departureDateTime: String
+        departureDateTime: LocalDateTime
     ): BusPosition? {
         val busPositions =
             runCatching {

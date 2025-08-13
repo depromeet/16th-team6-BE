@@ -2,8 +2,6 @@ package com.deepromeet.atcha.route.domain
 
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -20,7 +18,7 @@ class LastRouteTimeAdjuster {
         // 1. 대중교통 기준 가장 빠른 막차 시간 찾기
         val earliestTransitLeg =
             transitLegs.minBy {
-                LocalDateTime.parse(it.value.departureDateTime!!)
+                it.value.departureDateTime!!
             }
 
         var isAllRideable = true
@@ -33,7 +31,7 @@ class LastRouteTimeAdjuster {
 
             // 2-1. 출발 시간 + 소요 시간
             var currentLegAvailableTime =
-                LocalDateTime.parse(currentLeg.departureDateTime!!)
+                currentLeg.departureDateTime!!
                     .plusSeconds(currentLeg.sectionTime.toLong())
 
             // 2-2. 2-1 결과 시간과 다음 대중교통 출발 시간 비교 -> 탑승 가능 여부 확인
@@ -48,7 +46,7 @@ class LastRouteTimeAdjuster {
             if (nextIndex > adjustedLegs.lastIndex) break
 
             val nextLeg = adjustedLegs[nextIndex]
-            val nextLegDepartureTime = LocalDateTime.parse(nextLeg.departureDateTime!!)
+            val nextLegDepartureTime = nextLeg.departureDateTime!!
 
             if (currentLegAvailableTime.isAfter(nextLegDepartureTime)) {
                 isAllRideable = false
@@ -79,7 +77,7 @@ class LastRouteTimeAdjuster {
                 if (isFirstTransitBus && i == firstTransitIndex) continue
 
                 val busInfo = leg.requireBusInfo()
-                val lastBusTime = leg.parseDepartureDateTime()
+                val lastBusTime = leg.departureDateTime!!
                 val prevLastBusTime = lastBusTime.minusMinutes(busInfo.timeTable.term.toLong())
 
                 val adjustedBusInfo =
@@ -92,9 +90,7 @@ class LastRouteTimeAdjuster {
 
                 adjustedLegs[i] =
                     leg.copy(
-                        departureDateTime =
-                            prevLastBusTime
-                                .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                        departureDateTime = prevLastBusTime,
                         transitInfo = adjustedBusInfo
                     )
             }
@@ -105,10 +101,7 @@ class LastRouteTimeAdjuster {
         legs: MutableList<LastRouteLeg>,
         baseIndex: Int
     ) {
-        var adjustBaseTime =
-            legs[baseIndex].departureDateTime?.let {
-                LocalDateTime.parse(it)
-            }
+        var adjustBaseTime = legs[baseIndex].departureDateTime
 
         for (i in baseIndex - 1 downTo 0) {
             val leg = legs[i]
@@ -128,10 +121,7 @@ class LastRouteTimeAdjuster {
 
             legs[i] =
                 leg.copy(
-                    departureDateTime =
-                        boardingTime
-                            .truncatedTo(ChronoUnit.SECONDS)
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                    departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
                 )
             adjustBaseTime = boardingTime
         }
@@ -142,7 +132,7 @@ class LastRouteTimeAdjuster {
         baseIndex: Int
     ) {
         var adjustBaseTime =
-            LocalDateTime.parse(legs[baseIndex].departureDateTime!!)
+            legs[baseIndex].departureDateTime!!
                 .plusSeconds(legs[baseIndex].sectionTime.toLong())
 
         for (i in baseIndex + 1 until legs.size) {
@@ -161,10 +151,7 @@ class LastRouteTimeAdjuster {
             val boardingTime = leg.calcBoardingTime(adjustBaseTime, TimeDirection.AFTER)
             legs[i] =
                 leg.copy(
-                    departureDateTime =
-                        boardingTime
-                            .truncatedTo(ChronoUnit.SECONDS)
-                            .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
+                    departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
                 )
             adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
         }

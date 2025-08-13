@@ -18,7 +18,6 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 
@@ -73,10 +72,7 @@ class LastRouteCalculatorV2(
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime =
-                    departAt
-                        .truncatedTo(ChronoUnit.SECONDS)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                departureDateTime = departAt.truncatedTo(ChronoUnit.SECONDS),
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 transferCount = itinerary.transferCount,
@@ -115,10 +111,7 @@ class LastRouteCalculatorV2(
                             val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
 
                             leg.toLastTransitLeg(
-                                departureDateTime =
-                                    cursor
-                                        .truncatedTo(ChronoUnit.SECONDS)
-                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                                departureDateTime = cursor.truncatedTo(ChronoUnit.SECONDS),
                                 transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, timeTable.schedules[0])
                             )
                         } catch (e: Exception) {
@@ -135,10 +128,7 @@ class LastRouteCalculatorV2(
                             val busSchedule = busManager.getSchedule(routeId, stationMeta, leg.passStops!!)
 
                             leg.toLastTransitLeg(
-                                departureDateTime =
-                                    cursor
-                                        .truncatedTo(ChronoUnit.SECONDS)
-                                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                                departureDateTime = cursor.truncatedTo(ChronoUnit.SECONDS),
                                 transitInfo = TransitInfo.BusInfo(busSchedule)
                             )
                         } catch (e: Exception) {
@@ -182,7 +172,7 @@ class LastRouteCalculatorV2(
         }
 
         val firstTransit = legs[firstTransitIndex]
-        val departureDateTime = LocalDateTime.parse(firstTransit.departureDateTime!!)
+        val departureDateTime = firstTransit.departureDateTime!!
         val totalWalkTime =
             if (firstTransitIndex > 0) {
                 legs.subList(0, firstTransitIndex)
@@ -209,7 +199,7 @@ class LastRouteCalculatorV2(
         }
 
         val lastTransit = legs[lastTransitIndex]
-        val lastTransitDepartureTime = LocalDateTime.parse(lastTransit.departureDateTime!!)
+        val lastTransitDepartureTime = lastTransit.departureDateTime!!
         var arrivalTime = lastTransitDepartureTime.plusSeconds(lastTransit.sectionTime.toLong())
 
         val totalWalkTime =
