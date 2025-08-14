@@ -91,6 +91,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-slf4j")
     testImplementation("org.mockito.kotlin:mockito-kotlin:4.1.0")
+
+    // Mixpanel Java SDK
+    implementation("com.mixpanel:mixpanel-java:1.5.0")
 }
 
 dependencyManagement {
