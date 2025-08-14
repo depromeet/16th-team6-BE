@@ -96,10 +96,10 @@ class LastRouteCalculatorV2(
         time: Int
     ): List<LastRouteLeg>? {
         var cursor = LocalDateTime.now().plusMinutes(time.toLong())
-        val result = mutableListOf<LastRouteLeg>()
+        val result = mutableListOf<LastRouteLeg?>()
 
         for (leg in legs) {
-            val lastRouteLeg: LastRouteLeg =
+            val lastRouteLeg: LastRouteLeg? =
                 when (leg.mode) {
                     RouteMode.SUBWAY -> {
                         try {
@@ -144,7 +144,7 @@ class LastRouteCalculatorV2(
             cursor = cursor.plusSeconds(leg.sectionTime.toLong())
         }
 
-        return result
+        return result.filterNotNull()
     }
 
     /**
