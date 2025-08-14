@@ -38,7 +38,7 @@ class LastRouteLegCalculator(
                         )
                     }
                 }
-            }.awaitAll()
+            }.awaitAll().filterNotNull()
         }
     }
 
