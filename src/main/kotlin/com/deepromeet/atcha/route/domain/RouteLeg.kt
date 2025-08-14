@@ -32,8 +32,9 @@ data class RouteLeg(
         )
     }
 
-    fun toLastWalkLeg() =
-        LastRouteLeg(
+    fun toLastWalkLeg(): LastRouteLeg? {
+        if (sectionTime == 0) return null
+        return LastRouteLeg(
             distance = this.distance,
             sectionTime = this.sectionTime + WALK_TIME_BUFFER_SECONDS,
             mode = this.mode,
@@ -48,6 +49,7 @@ data class RouteLeg(
             pathCoordinates = this.pathCoordinates,
             transitInfo = TransitInfo.NoInfoTable
         )
+    }
 
     fun toLastTransitLeg(
         departureDateTime: LocalDateTime,
