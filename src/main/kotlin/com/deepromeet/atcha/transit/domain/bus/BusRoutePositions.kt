@@ -35,15 +35,6 @@ data class BusRoutePositions(
         }
     }
 
-    fun countApproachingBuses(targetStation: BusStation): Int {
-        val targetStation = routeStations.getTargetStationById(targetStation.id)
-        var count = 0
-        busPositions.forEach { pos ->
-            if (pos.sectionOrder < targetStation.order) count++
-        }
-        return count
-    }
-
     fun getApproachingBuses(targetStation: BusStation): List<BusPosition> {
         val target = routeStations.getTargetStationById(targetStation.id)
         return busPositions.filter { pos ->
