@@ -57,7 +57,7 @@ open-api:
   limits:
     default: 100
     per-api:
-      subway-schedule: 30
+      subway-schedule: 10
       gyeonggi-route: 30
       incheon-route: 3
       incheon-arrival: 10

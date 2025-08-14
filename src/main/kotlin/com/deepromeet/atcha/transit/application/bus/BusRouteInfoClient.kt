@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
@@ -27,5 +27,5 @@ interface BusRouteInfoClient {
 
     suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule
 
-    suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrival
+    suspend fun getBusRealTimeInfo(routeInfo: BusRouteInfo): BusRealTimeArrivals
 }

@@ -1,7 +1,7 @@
-package com.deepromeet.atcha.transit.application.region
+package com.deepromeet.atcha.location.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.location.domain.ServiceRegion
 
 interface RegionIdentifier {
     fun identify(coordinate: Coordinate): ServiceRegion

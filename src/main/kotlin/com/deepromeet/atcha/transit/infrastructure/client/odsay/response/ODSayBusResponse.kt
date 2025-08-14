@@ -1,14 +1,15 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay.response
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
-import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.lang.Exception
+import java.time.Duration
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -65,7 +66,7 @@ data class ODSayLaneResponse(
     var busInterval: String,
     var busLocalBlID: String
 ) {
-    fun toBusSchedule(station: BusStation): BusSchedule {
+    fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule {
         val busRoute =
             BusRoute(
                 id = BusRouteId(this.busLocalBlID),
@@ -73,15 +74,45 @@ data class ODSayLaneResponse(
                 serviceRegion = ServiceRegion.SEOUL
             )
         return BusSchedule(
-            busRoute = busRoute,
-            busStation = station,
+            busRouteInfo = busRouteInfo,
+            busStation = busRouteInfo.getTargetStation().busStation,
             busTimeTable =
                 BusTimeTable(
                     parseTime(busFirstTime, LocalDate.now()),
                     parseTime(busLastTime, LocalDate.now()),
-                    busInterval.toInt()
+                    parseIntervalFromString(busInterval)
                 )
         )
+    }
+
+    private fun parseIntervalFromString(intervalStr: String): Int {
+        return try {
+            when {
+                intervalStr.endsWith("회") -> {
+                    // 운행횟수로 온 경우 배차간격으로 변환
+                    val operationCount = intervalStr.removeSuffix("회").toInt()
+                    calculateIntervalFromOperationCount(operationCount)
+                }
+                else -> {
+                    intervalStr.toInt()
+                }
+            }
+        } catch (e: NumberFormatException) {
+            throw TransitException.of(TransitError.INVALID_TIME_FORMAT)
+        }
+    }
+
+    private fun calculateIntervalFromOperationCount(operationCount: Int): Int {
+        if (operationCount <= 1) return 0
+
+        val referenceDate = LocalDate.now()
+        val firstDateTime = parseTime(busFirstTime, referenceDate)
+        val lastDateTime = parseTime(busLastTime, referenceDate)
+
+        val totalMinutes = Duration.between(firstDateTime, lastDateTime).toMinutes()
+
+        // 운행횟수 - 1로 나누는 이유: 첫차와 막차 사이의 간격 개수
+        return (totalMinutes / (operationCount - 1)).toInt()
     }
 
     fun parseTime(

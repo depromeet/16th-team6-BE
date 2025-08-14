@@ -3,14 +3,14 @@ package com.deepromeet.atcha.transit.domain.bus
 import java.time.Duration
 import java.time.LocalDateTime
 
-data class BusRealTimeArrival(
-    val realTimeInfoList: List<BusRealTimeInfo>
+data class BusRealTimeArrivals(
+    val realTimeInfoList: List<BusArrival>
 ) {
     /** BusPosition 정보를 활용한 더 정확한 후보 생성 */
     fun createArrivalCandidatesWithPositions(
         timeTable: BusTimeTable,
         approachingBuses: List<BusPosition>
-    ): List<BusRealTimeInfo> {
+    ): List<BusArrival> {
         val realTimeBuses =
             realTimeInfoList
                 .filter { it.expectedArrivalTime != null }
@@ -18,7 +18,7 @@ data class BusRealTimeArrival(
 
         if (realTimeBuses.isEmpty()) return emptyList()
 
-        val matchedBuses = mutableListOf<BusRealTimeInfo>()
+        val matchedBuses = mutableListOf<BusArrival>()
         val usedVehicleIds = mutableSetOf<String>()
 
         realTimeBuses.forEach { rt ->
@@ -50,7 +50,7 @@ data class BusRealTimeArrival(
 
             if (!nextArrivalTime.isAfter(timeTable.lastTime)) { // <= lastTime 이내만
                 matchedBuses +=
-                    BusRealTimeInfo.createEstimated(
+                    BusArrival.createEstimated(
                         vehicleId = pos.vehicleId,
                         estimatedArrivalTime = nextArrivalTime,
                         busCongestion = pos.busCongestion,
@@ -70,7 +70,7 @@ data class BusRealTimeArrival(
         timeTable: BusTimeTable,
         targetDepartureTime: LocalDateTime,
         approachingBuses: List<BusPosition>
-    ): BusRealTimeInfo? {
+    ): BusArrival? {
         return createArrivalCandidatesWithPositions(timeTable, approachingBuses)
             .minByOrNull {
                 it.expectedArrivalTime!!.let { arrivalTime ->

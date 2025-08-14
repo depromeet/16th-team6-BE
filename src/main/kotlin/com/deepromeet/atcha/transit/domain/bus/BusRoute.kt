@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.domain.bus
 
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.location.domain.ServiceRegion
 
 data class BusRoute(
     val id: BusRouteId,

@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.application.bus.config
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.application.bus.BusPositionFetcher
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.PublicGyeonggiBusPositionClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.PublicGyeonggiRouteInfoClient
 import com.deepromeet.atcha.transit.infrastructure.client.public.incheon.PublicIncheonBusPositionClient

@@ -1,17 +1,17 @@
 package com.deepromeet.atcha.transit.application.bus
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.miaxpanel.MixpanelEventPublisher
 import com.deepromeet.atcha.miaxpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRoutePositions
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import kotlinx.coroutines.Dispatchers
@@ -19,6 +19,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class BusManager(
@@ -56,7 +57,7 @@ class BusManager(
         routeName: String,
         meta: BusStationMeta,
         passStopList: RoutePassStops
-    ): BusRealTimeArrival {
+    ): BusRealTimeArrivals {
         val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }
@@ -76,11 +77,11 @@ class BusManager(
 
     suspend fun locateBus(
         busInfo: TransitInfo.BusInfo,
-        departureDateTime: String
+        departureDateTime: LocalDateTime
     ): BusPosition? {
         val busPositions =
             runCatching {
-                getBusPositions(busInfo.busRoute)
+                getBusPositions(busInfo.busRouteInfo.route)
             }.getOrNull() ?: return null
 
         return busPositions.findTargetBus(

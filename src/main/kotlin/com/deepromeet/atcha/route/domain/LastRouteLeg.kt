@@ -12,7 +12,7 @@ data class LastRouteLeg(
     val distance: Int,
     val sectionTime: Int,
     val mode: RouteMode,
-    val departureDateTime: String? = null,
+    val departureDateTime: LocalDateTime? = null,
     val route: String? = null,
     val type: String? = null,
     val service: String? = null,
@@ -33,6 +33,14 @@ data class LastRouteLeg(
 
     val subwayInfo: TransitInfo.SubwayInfo?
         get() = transitInfo as? TransitInfo.SubwayInfo?
+
+    fun requireBusInfo(): TransitInfo.BusInfo {
+        return requireNotNull(busInfo) { "버스 경로는 버스 정보(BusInfo)가 필수입니다." }
+    }
+
+    fun requireSubwayInfo(): TransitInfo.SubwayInfo {
+        return requireNotNull(subwayInfo) { "지하철 경로는 지하철 정보(SubwayInfo)가 필수입니다." }
+    }
 
     fun isTransit(): Boolean = mode.isTransit()
 
@@ -87,10 +95,6 @@ data class LastRouteLeg(
         }
     }
 
-    fun parseDepartureDateTime(): LocalDateTime {
-        return LocalDateTime.parse(departureDateTime!!)
-    }
-
     private fun validateRouteMode() {
         require(mode.isSupported) {
             "지원하지 않는 교통수단입니다: $mode"
@@ -99,7 +103,7 @@ data class LastRouteLeg(
 
     private fun validateTransitDepartureTime() {
         if (mode.requiresDepartureTime) {
-            require(!departureDateTime.isNullOrBlank()) {
+            require(departureDateTime != null) {
                 "대중교통($mode)의 출발시간은 필수입니다"
             }
         }

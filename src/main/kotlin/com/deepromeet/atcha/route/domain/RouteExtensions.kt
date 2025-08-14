@@ -8,7 +8,7 @@ fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
     val now = LocalDateTime.now()
     val upcomingRoutes =
         this.filter {
-            LocalDateTime.parse(it.departureDateTime).isAfter(now)
+            it.departureDateTime.isAfter(now)
         }
 
     if (upcomingRoutes.isEmpty()) {

@@ -5,11 +5,10 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.domain.TransitInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 1
 private const val MIN_SHIFT_EARLIER_SECONDS = 60L // 기존: 빨라질 때 최소 개선폭
@@ -27,8 +26,6 @@ class UserRouteDepartureTimeRefresher(
     private val busManager: BusManager,
     private val lastRouteReader: LastRouteReader
 ) {
-    private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
-
     suspend fun refreshAll(): List<UserRoute> =
         userRouteManager.readAll().mapNotNull { userRoute ->
             refreshDepartureTime(userRoute)
@@ -39,10 +36,10 @@ class UserRouteDepartureTimeRefresher(
 
         // 1) 버스 구간 및 시간표 추출
         val firstBusLeg = extractFirstBusTransit(route) ?: return null
-        val busInfo = firstBusLeg.busInfo ?: return null
+        val busInfo = firstBusLeg.requireBusInfo()
 
         // "20분 + 배차 간격" 윈도우 내에서만 갱신 시도 (현재 계획 기준)
-        if (isNotRefreshTarget(userRoute.parseUpdatedDepartureTime(), busInfo.timeTable.term)) {
+        if (isNotRefreshTarget(userRoute.updatedDepartureTime, busInfo.timeTable.term)) {
             return null
         }
 
@@ -82,16 +79,16 @@ class UserRouteDepartureTimeRefresher(
     }
 
     private suspend fun calculateOptimalDepartureTime(
-        arrivalInfo: BusRealTimeArrival,
+        arrivalInfo: BusRealTimeArrivals,
         busInfo: TransitInfo.BusInfo,
         route: LastRoute,
         userRoute: UserRoute
     ): OptimalDepartureTime? {
         val now = LocalDateTime.now()
         val walkingTime = route.calcWalkingTimeToFirstTransit()
-        val baseDepartureTime = userRoute.parseBaseDepartureTime()
+        val baseDepartureTime = userRoute.baseDepartureTime
 
-        val busPositions = busManager.getBusPositions(busInfo.busRoute)
+        val busPositions = busManager.getBusPositions(busInfo.busRouteInfo.route)
 
         val candidates =
             arrivalInfo
@@ -135,8 +132,14 @@ class UserRouteDepartureTimeRefresher(
             )
         lastRouteAppender.append(updatedRoute)
 
+        val userRouteExpiresAt =
+            updatedRoute
+                .calculateArrivalTime()
+                .plusHours(1)
+
         return userRouteManager.update(
-            userRoute.updateDepartureTime(optimalTime.routeDepartureTime)
+            userRoute.updateDepartureTime(optimalTime.routeDepartureTime),
+            userRouteExpiresAt
         )
     }
 
@@ -146,11 +149,11 @@ class UserRouteDepartureTimeRefresher(
         newBusArrival: LocalDateTime,
         newRouteDeparture: LocalDateTime
     ): LastRoute {
-        val updatedBusLeg = busLeg.copy(departureDateTime = newBusArrival.format(formatter))
+        val updatedBusLeg = busLeg.copy(departureDateTime = newBusArrival)
         val updatedLegs = route.legs.map { if (it == busLeg) updatedBusLeg else it }
 
         return route.copy(
-            departureDateTime = newRouteDeparture.format(formatter),
+            departureDateTime = newRouteDeparture,
             legs = updatedLegs
         )
     }

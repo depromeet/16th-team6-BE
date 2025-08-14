@@ -1,16 +1,16 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.incheon.response
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusServiceHours
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.bus.BusTravelTimeCalculator
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -55,11 +55,12 @@ data class IncheonBusRouteInfoResponse(
         )
     }
 
-    fun toBusSchedule(busRouteStation: BusRouteStation): BusSchedule {
+    fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule {
+        val busRouteStation = busRouteInfo.getTargetStation()
         val travelTime = BusTravelTimeCalculator.calculate(busRouteStation, false)
 
         return BusSchedule(
-            busRoute = busRouteStation.busRoute,
+            busRouteInfo = busRouteInfo,
             busStation = busRouteStation.busStation,
             busTimeTable =
                 BusTimeTable(

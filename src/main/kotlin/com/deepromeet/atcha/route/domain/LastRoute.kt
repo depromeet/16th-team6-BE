@@ -4,14 +4,13 @@ import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.UUID
 import kotlin.math.absoluteValue
 
 data class LastRoute(
     val id: String,
-    val departureDateTime: String,
+    val departureDateTime: LocalDateTime,
     val totalTime: Int,
     val totalWalkTime: Int,
     val totalWalkDistance: Int,
@@ -20,15 +19,15 @@ data class LastRoute(
     val pathType: Int,
     val legs: List<LastRouteLeg>
 ) {
-    fun parseDepartureTime(): LocalDateTime {
-        return LocalDateTime.parse(departureDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))
-    }
-
     fun calculateRemainingTime(): Int {
         return Duration.between(
             LocalDateTime.now(),
-            LocalDateTime.parse(departureDateTime)
+            departureDateTime
         ).toSeconds().toInt().absoluteValue
+    }
+
+    fun calculateArrivalTime(): LocalDateTime {
+        return departureDateTime.plusSeconds(totalTime.toLong())
     }
 
     fun findFirstTransit(): LastRouteLeg {
@@ -52,16 +51,15 @@ data class LastRoute(
             itinerary: RouteItinerary,
             adjustedLegs: List<LastRouteLeg>
         ): LastRoute {
-            val departureDateTime = calculateDepartureTime(adjustedLegs)
+            val departureDateTime =
+                calculateDepartureTime(adjustedLegs)
+                    .validateLastRouteDeparture()
             val arrivalTime = calculateArrivalTime(adjustedLegs)
             val totalTime = Duration.between(departureDateTime, arrivalTime).seconds
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime =
-                    departureDateTime
-                        .truncatedTo(ChronoUnit.SECONDS)
-                        .format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")),
+                departureDateTime = departureDateTime.truncatedTo(ChronoUnit.SECONDS),
                 totalTime = totalTime.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 totalWalkDistance = itinerary.totalWalkDistance,
@@ -80,7 +78,7 @@ data class LastRoute(
                     .sumOf { it.sectionTime }
                     .toLong()
 
-            return LocalDateTime.parse(firstTransitLeg.departureDateTime!!)
+            return firstTransitLeg.departureDateTime!!
                 .minusSeconds(initialWalkTime)
         }
 
@@ -88,7 +86,7 @@ data class LastRoute(
             val lastTransitIndex = legs.indexOfLast { it.isTransit() }
             val lastTransitLeg = legs[lastTransitIndex]
             val lastTransitArrivalTime =
-                LocalDateTime.parse(lastTransitLeg.departureDateTime!!)
+                lastTransitLeg.departureDateTime!!
                     .plusSeconds(lastTransitLeg.sectionTime.toLong())
 
             val finalWalkTime =

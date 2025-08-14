@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.application
 
+import com.deepromeet.atcha.location.application.ServiceRegionValidator
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.ItineraryValidator
 import com.deepromeet.atcha.route.domain.LastRoute
@@ -10,15 +11,12 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
-import com.deepromeet.atcha.transit.application.region.ServiceRegionValidator
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class RouteService(
@@ -52,6 +50,7 @@ class RouteService(
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteCalculator
             .calcLastRoutes(start, destination, validItineraries)
+            .sort(sortType)
     }
 
     suspend fun getLastRoutesForTest(
@@ -87,7 +86,6 @@ class RouteService(
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
             lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
-                .filter { route -> route.parseDepartureTime().isAfter(LocalDateTime.now()) }
                 .collect { route -> emit(route) }
         }
 
@@ -100,7 +98,7 @@ class RouteService(
         val lastRoute = lastRouteReader.read(lastRouteId)
 
         val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus.busInfo ?: return false
+        val busInfo = firstBus.requireBusInfo()
         val departureDateTime = firstBus.departureDateTime ?: return false
 
         val locatedBus = busManager.locateBus(busInfo, departureDateTime) ?: return false
@@ -119,7 +117,7 @@ class RouteService(
     ) {
         val user = userReader.read(id)
         val route = lastRouteReader.read(lastRouteId)
-        userRouteManager.update(user, route)
+        userRouteManager.append(user, route)
     }
 
     fun deleteUserRoute(id: UserId) {
@@ -134,32 +132,21 @@ class RouteService(
             ?: userRoute
     }
 
-    suspend fun getFirstBusArrival(userId: UserId): BusRealTimeInfo {
+    suspend fun getFirstBusArrival(userId: UserId): BusArrival {
         val user = userReader.read(userId)
         val userRoute = userRouteManager.read(user)
         val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
         val firstBus = lastRoute.findFirstBus()
-        val scheduled = firstBus.parseDepartureDateTime()
+        val scheduled = firstBus.departureDateTime!!
 
-        val info = firstBus.busInfo!!
-        val passStops = firstBus.passStops!!
+        val closest = routeArrivalCalculator.closestArrival(firstBus, scheduled)
 
-        val closest =
-            routeArrivalCalculator.closestArrival(
-                timeTable = info.timeTable,
-                scheduled = scheduled,
-                routeName = firstBus.resolveRouteName(),
-                stationMeta = firstBus.toBusStationMeta(),
-                passStops = passStops,
-                busInfo = info
-            )
-
-        val selected = selectionPolicy.select(info.timeTable, scheduled, closest)
+        val selected = selectionPolicy.select(scheduled, closest, firstBus.requireBusInfo().timeTable)
 
         selected?.expectedArrivalTime?.let { targetTime ->
             lastRouteUpdater.updateFirstBusTime(lastRoute, firstBus, targetTime)
         }
 
-        return selected ?: BusRealTimeInfo.createScheduled(scheduled)
+        return selected ?: BusArrival.createScheduled(scheduled)
     }
 }
