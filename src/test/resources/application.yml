@@ -110,3 +110,6 @@ jwt:
   refresh:
     secret: ${secret.dev.JWT_REFRESH_SECRET}
     expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
+
+mixpanel:
+  token: ${secret.prod.MIXPANEL_TOKEN}

@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.application.bus
 
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import kotlinx.coroutines.flow.asFlow
@@ -13,9 +14,12 @@ import org.springframework.stereotype.Component
 class CompositeBusScheduleProvider(
     private val providers: List<BusScheduleProvider>
 ) : BusScheduleProvider {
-    override suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule? =
+    override suspend fun getBusSchedule(
+        routeInfo: BusRouteInfo,
+        busApiCallCountPerRequestProperty: BusApiCallCountPerRequestProperty
+    ): BusSchedule? =
         providers
             .asFlow()
-            .mapNotNull { it.getBusSchedule(routeInfo) }
+            .mapNotNull { it.getBusSchedule(routeInfo, busApiCallCountPerRequestProperty) }
             .firstOrNull()
 }

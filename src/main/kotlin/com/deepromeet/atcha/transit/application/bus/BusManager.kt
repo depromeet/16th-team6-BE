@@ -1,6 +1,8 @@
 package com.deepromeet.atcha.transit.application.bus
 
 import com.deepromeet.atcha.location.domain.ServiceRegion
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.MixpanelEventPublisher
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
@@ -25,7 +27,8 @@ class BusManager(
     private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
-    private val busTimeTableCache: BusTimeTableCache
+    private val busTimeTableCache: BusTimeTableCache,
+    private val mixpanelEventPublisher: MixpanelEventPublisher
 ) {
     suspend fun getSchedule(
         routeName: String,
@@ -35,12 +38,16 @@ class BusManager(
         busTimeTableCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
 
+        val busApiCallCountPerRequestProperty = BusApiCallCountPerRequestProperty(routeName = routeName)
+
         val schedule =
-            busScheduleProvider.getBusSchedule(busRouteInfo)
+            busScheduleProvider.getBusSchedule(busRouteInfo, busApiCallCountPerRequestProperty)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_BUS_SCHEDULE,
                     "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 시간표 정보를 찾을 수 없습니다."
                 )
+
+        mixpanelEventPublisher.publishBusRouteApiCallCountEvent(busApiCallCountPerRequestProperty)
 
         busTimeTableCache.cache(routeName, stationMeta, schedule)
         return schedule

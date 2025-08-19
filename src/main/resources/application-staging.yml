@@ -46,3 +46,6 @@ jwt:
   refresh:
     secret: ${secret.staging.JWT_REFRESH_SECRET}
     expiration: ${secret.staging.JWT_REFRESH_EXPIRATION_MS}
+
+mixpanel:
+  token: ${secret.prod.MIXPANEL_TOKEN}

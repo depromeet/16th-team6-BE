@@ -65,3 +65,6 @@ management:
     health:
       enabled: true
       show-components: never
+
+mixpanel:
+  token: ${secret.prod.MIXPANEL_TOKEN}
