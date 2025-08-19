@@ -8,12 +8,14 @@ import com.mixpanel.mixpanelapi.MessageBuilder
 import com.mixpanel.mixpanelapi.MixpanelAPI
 import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Profile
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
 import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
 
 @Component
+@Profile("prod")
 @EnableAsync
 class MixpanelEventListener(
     @Value("\${mixpanel.token}")
