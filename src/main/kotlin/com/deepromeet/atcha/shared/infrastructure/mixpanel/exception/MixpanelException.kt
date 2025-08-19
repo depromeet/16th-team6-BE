@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.mixpanel.exception
+package com.deepromeet.atcha.shared.infrastructure.mixpanel.exception
 
 import com.deepromeet.atcha.shared.exception.BaseErrorType
 import com.deepromeet.atcha.shared.exception.CustomException

@@ -1,8 +1,8 @@
-package com.deepromeet.atcha.mixpanel.application
+package com.deepromeet.atcha.shared.infrastructure.mixpanel.application
 
-import com.deepromeet.atcha.mixpanel.MixpanelEvent
-import com.deepromeet.atcha.mixpanel.exception.MixpanelError
-import com.deepromeet.atcha.mixpanel.exception.MixpanelException
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.MixpanelEvent
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.exception.MixpanelError
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.exception.MixpanelException
 import com.mixpanel.mixpanelapi.ClientDelivery
 import com.mixpanel.mixpanelapi.MessageBuilder
 import com.mixpanel.mixpanelapi.MixpanelAPI

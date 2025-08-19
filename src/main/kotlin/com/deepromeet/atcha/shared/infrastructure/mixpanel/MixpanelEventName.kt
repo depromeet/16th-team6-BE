@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.mixpanel
+package com.deepromeet.atcha.shared.infrastructure.mixpanel
 
 enum class MixpanelEventName(val value: String) {
     ODSAY_CALL_COUNT("odsay_call_count"),

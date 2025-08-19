@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.odsay
 
-import com.deepromeet.atcha.mixpanel.MixpanelEventPublisher
-import com.deepromeet.atcha.mixpanel.event.BusApiCallCountPerRequestProperty
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.MixpanelEventPublisher
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.application.bus.BusScheduleProvider
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule

@@ -1,7 +1,7 @@
-package com.deepromeet.atcha.mixpanel
+package com.deepromeet.atcha.shared.infrastructure.mixpanel
 
-import com.deepromeet.atcha.mixpanel.event.BusApiCallCountPerRequestProperty
-import com.deepromeet.atcha.mixpanel.event.ODsayCallRouteProperty
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.ODsayCallRouteProperty
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import org.springframework.context.ApplicationEventPublisher
 import org.springframework.stereotype.Component

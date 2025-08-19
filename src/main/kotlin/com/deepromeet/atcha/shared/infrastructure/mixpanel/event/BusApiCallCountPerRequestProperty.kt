@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.mixpanel.event
+package com.deepromeet.atcha.shared.infrastructure.mixpanel.event
 
 class BusApiCallCountPerRequestProperty(
     var oDsayCallCount: Int = 0,

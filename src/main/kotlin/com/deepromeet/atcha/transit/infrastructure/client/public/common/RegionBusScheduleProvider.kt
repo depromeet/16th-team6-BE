@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
 import com.deepromeet.atcha.location.domain.ServiceRegion
-import com.deepromeet.atcha.mixpanel.event.BusApiCallCountPerRequestProperty
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
 import com.deepromeet.atcha.transit.application.bus.BusScheduleProvider
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
