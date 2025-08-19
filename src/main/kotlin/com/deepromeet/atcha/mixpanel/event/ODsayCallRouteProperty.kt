@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.miaxpanel.event
+package com.deepromeet.atcha.mixpanel.event
 
 class ODsayCallRouteProperty(
     val serviceRegion: String,

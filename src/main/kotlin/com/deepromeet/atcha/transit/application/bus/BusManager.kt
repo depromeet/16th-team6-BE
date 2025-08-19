@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.application.bus
 
 import com.deepromeet.atcha.location.domain.ServiceRegion
-import com.deepromeet.atcha.miaxpanel.MixpanelEventPublisher
-import com.deepromeet.atcha.miaxpanel.event.BusApiCallCountPerRequestProperty
+import com.deepromeet.atcha.mixpanel.MixpanelEventPublisher
+import com.deepromeet.atcha.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusPosition

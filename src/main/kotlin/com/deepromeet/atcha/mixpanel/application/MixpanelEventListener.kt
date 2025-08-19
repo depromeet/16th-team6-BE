@@ -1,6 +1,6 @@
-package com.deepromeet.atcha.miaxpanel.application
+package com.deepromeet.atcha.mixpanel.application
 
-import com.deepromeet.atcha.miaxpanel.MixpanelEvent
+import com.deepromeet.atcha.mixpanel.MixpanelEvent
 import com.mixpanel.mixpanelapi.ClientDelivery
 import com.mixpanel.mixpanelapi.MessageBuilder
 import com.mixpanel.mixpanelapi.MixpanelAPI

@@ -1,6 +1,6 @@
-package com.deepromeet.atcha.miaxpanel
+package com.deepromeet.atcha.mixpanel
 
-import com.deepromeet.atcha.miaxpanel.event.MixpanelEventProperty
+import com.deepromeet.atcha.mixpanel.event.MixpanelEventProperty
 
 class MixpanelEvent(
     val mixpanelEventName: MixpanelEventName,
