@@ -1,6 +1,8 @@
 package com.deepromeet.atcha.mixpanel.application
 
 import com.deepromeet.atcha.mixpanel.MixpanelEvent
+import com.deepromeet.atcha.mixpanel.exception.MixpanelError
+import com.deepromeet.atcha.mixpanel.exception.MixpanelException
 import com.mixpanel.mixpanelapi.ClientDelivery
 import com.mixpanel.mixpanelapi.MessageBuilder
 import com.mixpanel.mixpanelapi.MixpanelAPI
@@ -8,15 +10,15 @@ import org.json.JSONObject
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.event.EventListener
 import org.springframework.scheduling.annotation.Async
+import org.springframework.scheduling.annotation.EnableAsync
 import org.springframework.stereotype.Component
 
 @Component
+@EnableAsync
 class MixpanelEventListener(
     @Value("\${mixpanel.token}")
     val token: String
 ) {
-    private val delivery: ClientDelivery = ClientDelivery()
-
     private val mixpanelAPI: MixpanelAPI = MixpanelAPI()
 
     @Async
@@ -32,8 +34,12 @@ class MixpanelEventListener(
                 mixpanelEvent.mixpanelEventName.value,
                 JSONObject(mixpanelEvent.property)
             )
-        delivery.addMessage(sentEvent)
+        val delivery = ClientDelivery().apply { addMessage(sentEvent) }
 
-        mixpanelAPI.deliver(delivery)
+        try {
+            mixpanelAPI.deliver(delivery)
+        } catch (e: Exception) {
+            throw MixpanelException.of(MixpanelError.MIXPANEL_EVENT_DELIVERY_FAILURE)
+        }
     }
 }
