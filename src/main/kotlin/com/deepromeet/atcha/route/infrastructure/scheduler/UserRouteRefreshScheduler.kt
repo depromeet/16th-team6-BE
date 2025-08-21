@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 class UserRouteRefreshScheduler(
     private val userRouteRefreshService: UserRouteRefreshService
 ) {
-    @Scheduled(cron = "0 0/3 * * * ?")
+    @Scheduled(cron = "0 0/1 * * * ?")
     @SchedulerLock(name = "refresh_departure_time", lockAtMostFor = "PT2S", lockAtLeastFor = "PT2S")
     fun processRefresh() =
         runBlocking {
