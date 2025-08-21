@@ -13,7 +13,7 @@ class DailyTypeResolver(
 ) {
     suspend fun resolve(
         transitType: TransitType,
-        date: LocalDate = LocalDate.now()
+        date: LocalDate = LocalDate.of(2025, 8, 15)
     ): DailyType {
         return when (transitType) {
             TransitType.SUBWAY, TransitType.BUS -> resolveDailyType(date)
@@ -21,8 +21,9 @@ class DailyTypeResolver(
     }
 
     private suspend fun resolveDailyType(date: LocalDate): DailyType {
+        val isHoliday = isHoliday(date)
         return when {
-            isHoliday(date) -> DailyType.HOLIDAY
+            isHoliday -> DailyType.HOLIDAY
             date.dayOfWeek == DayOfWeek.SATURDAY -> DailyType.SATURDAY
             date.dayOfWeek == DayOfWeek.SUNDAY -> DailyType.SUNDAY
             else -> DailyType.WEEKDAY
