@@ -10,8 +10,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 
-private const val BUS_ARRIVAL_THRESHOLD_MINUTES = 1
-private const val MIN_SHIFT_EARLIER_SECONDS = 60L // 기존: 빨라질 때 최소 개선폭
+private const val DEPARTURE_THRESHOLD = 2
 private const val MAX_SHIFT_LATER_SECONDS = 60L
 
 data class OptimalDepartureTime(
@@ -74,8 +73,8 @@ class UserRouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         val minutesLeft = Duration.between(LocalDateTime.now(), plannedDeparture).toMinutes()
-        val refreshWindow = busTerm * 3
-        return minutesLeft !in BUS_ARRIVAL_THRESHOLD_MINUTES until refreshWindow
+        val refreshWindow = busTerm * 2
+        return minutesLeft !in DEPARTURE_THRESHOLD until refreshWindow
     }
 
     private suspend fun calculateOptimalDepartureTime(
@@ -90,9 +89,11 @@ class UserRouteDepartureTimeRefresher(
 
         val busPositions = busManager.getBusPositions(busInfo.busRouteInfo.route)
 
+        val approachingBuses = busPositions.getApproachingBuses(busInfo.busStation)
+
         val candidates =
             arrivalInfo
-                .createArrivalCandidatesWithPositions(busInfo.timeTable, busPositions.busPositions)
+                .createArrivalCandidatesWithPositions(busInfo.timeTable, approachingBuses)
                 .map { it.expectedArrivalTime!! }
                 .mapNotNull { arrival ->
                     val newRouteDeparture =

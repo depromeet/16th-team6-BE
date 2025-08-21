@@ -17,6 +17,8 @@ import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
 
 @Service
 class RouteService(
@@ -132,21 +134,28 @@ class RouteService(
             ?: userRoute
     }
 
-    suspend fun getFirstBusArrival(userId: UserId): BusArrival {
+    suspend fun getTargetBusArrivals(
+        userId: UserId,
+        routeName: String
+    ): List<BusArrival> {
         val user = userReader.read(userId)
         val userRoute = userRouteManager.read(user)
         val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
-        val firstBus = lastRoute.findFirstBus()
-        val scheduled = firstBus.departureDateTime!!
+        val targetBus = lastRoute.findBus(routeName)
+        val scheduled = targetBus.departureDateTime!!
 
-        val closest = routeArrivalCalculator.closestArrival(firstBus, scheduled)
+        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduled).toMinutes()
 
-        val selected = selectionPolicy.select(scheduled, closest, firstBus.requireBusInfo().timeTable)
-
-        selected?.expectedArrivalTime?.let { targetTime ->
-            lastRouteUpdater.updateFirstBusTime(lastRoute, firstBus, targetTime)
+        if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
+            return listOf(BusArrival.createScheduled(scheduled))
         }
 
-        return selected ?: BusArrival.createScheduled(scheduled)
+        val closest = routeArrivalCalculator.closestArrival(targetBus, scheduled)
+
+        closest?.first()?.expectedArrivalTime?.let { newArrival ->
+            lastRouteUpdater.updateDepartureTime(lastRoute, targetBus, newArrival)
+        }
+
+        return closest ?: listOf(BusArrival.createScheduled(scheduled))
     }
 }
