@@ -1,7 +1,11 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.route.exception.RouteError
+import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 
 @Service
@@ -119,6 +123,10 @@ class LastRouteTimeAdjuster {
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
             val boardingTime = leg.calcBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
 
+            if (leg.isSubway()) {
+                validateWaitingTime(leg, adjustedDepartureTime, boardingTime)
+            }
+
             legs[i] =
                 leg.copy(
                     departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
@@ -149,11 +157,39 @@ class LastRouteTimeAdjuster {
             }
 
             val boardingTime = leg.calcBoardingTime(adjustBaseTime, TimeDirection.AFTER)
+
+            if (leg.isSubway()) {
+                validateWaitingTime(leg, adjustBaseTime, boardingTime)
+            }
+
             legs[i] =
                 leg.copy(
                     departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
                 )
             adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
+        }
+    }
+
+    private fun validateWaitingTime(
+        leg: LastRouteLeg,
+        calculatedTime: LocalDateTime,
+        boardingTime: LocalDateTime
+    ) {
+        val waitingDuration = Duration.between(calculatedTime, boardingTime)
+        val waitingMinutes = waitingDuration.abs().toMinutes()
+
+        if (waitingMinutes > 20) {
+            throw RouteException.of(
+                RouteError.INVALID_LAST_ROUTE,
+                """
+                |지하철 경로 대기시간 초과
+                |구간: ${leg.start.name} -> ${leg.end.name}
+                |교통수단: ${leg.mode}
+                |계산된 시간: $calculatedTime
+                |탑승 가능: $boardingTime
+                |대기시간: ${waitingMinutes}분
+                """.trimMargin()
+            )
         }
     }
 }

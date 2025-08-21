@@ -25,6 +25,10 @@ data class UserRoute(
         userId = userId
     )
 
+    fun isUpdated(): Boolean {
+        return baseDepartureTime != updatedDepartureTime
+    }
+
     fun updateDepartureTime(newDepartureTime: LocalDateTime) =
         this.copy(
             updatedDepartureTime = newDepartureTime,

@@ -48,6 +48,8 @@ data class LastRouteLeg(
 
     fun isBus(): Boolean = mode == RouteMode.BUS
 
+    fun isSubway(): Boolean = mode == RouteMode.SUBWAY
+
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
     }

@@ -14,33 +14,31 @@ object ItineraryValidator {
     private fun isValidItinerary(itinerary: RouteItinerary): Boolean {
         if (itinerary.transferCount > 4) return false
 
-        var busCount = 0
-        var isFirstTransit = true
-        var hasInvalidMode = false
+        val transitModes = extractTransitModes(itinerary.legs)
 
-        for (leg in itinerary.legs) {
-            when (leg.mode) {
-                RouteMode.WALK -> {
-                    // 도보는 항상 유효
-                }
-                RouteMode.SUBWAY -> {
-                    // 지하철은 항상 유효
-                }
-                RouteMode.BUS -> {
-                    // 첫 번째 대중교통이 아닌 버스만 카운트
-                    if (!isFirstTransit) {
-                        busCount++
-                    }
-                    isFirstTransit = false
-                }
-                else -> {
-                    hasInvalidMode = true
-                    break
-                }
-            }
+        return hasOnlyValidModes(transitModes) &&
+            hasNoBusInMiddle(transitModes) &&
+            hasValidBusCount(transitModes)
+    }
+
+    private fun extractTransitModes(legs: List<RouteLeg>): List<RouteMode> {
+        return legs.filter { it.mode != RouteMode.WALK }.map { it.mode }
+    }
+
+    private fun hasOnlyValidModes(transitModes: List<RouteMode>): Boolean {
+        return transitModes.all { it in setOf(RouteMode.SUBWAY, RouteMode.BUS) }
+    }
+
+    private fun hasNoBusInMiddle(transitModes: List<RouteMode>): Boolean {
+        return transitModes.withIndex().none { (index, mode) ->
+            mode == RouteMode.BUS &&
+                index > 0 &&
+                index < transitModes.size - 1
         }
+    }
 
-        // 3. 최종 검증: 유효하지 않은 교통수단이 없고, 첫 버스 제외 버스가 1개 이하(총 2개)
-        return !hasInvalidMode && busCount <= 1
+    private fun hasValidBusCount(transitModes: List<RouteMode>): Boolean {
+        val busCount = transitModes.count { it == RouteMode.BUS }
+        return busCount <= 2
     }
 }
