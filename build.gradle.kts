@@ -52,6 +52,14 @@ dependencies {
     // Rate Limiting
     implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
 
+    // Circuit Breaker
+    implementation("io.github.resilience4j:resilience4j-spring-boot3:2.3.0")
+    implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
+    implementation("io.github.resilience4j:resilience4j-feign:2.3.0")
+    implementation("org.springframework.boot:spring-boot-starter-aop")
+    implementation("io.github.resilience4j:resilience4j-spring6:2.3.0")
+    implementation("io.github.resilience4j:resilience4j-rxjava3:2.3.0")
+
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
 
