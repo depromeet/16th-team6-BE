@@ -2,9 +2,11 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.common.utils
 
 import com.deepromeet.atcha.shared.exception.ExternalApiError
 import com.deepromeet.atcha.shared.exception.ExternalApiException
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.fallback.CircuitBreakerOpenException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.ServiceResult
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.PublicGyeonggiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
@@ -27,6 +29,12 @@ object ApiClientUtils {
                 interruptible { apiCall(apiKey) }
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: CircuitBreakerOpenException) {
+                log.warn { "서킷 브레이커 열림 - $errorMessage" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+            } catch (e: CallNotPermittedException) {
+                log.warn { "서킷 브레이커 호출 차단 - $errorMessage" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: Exception) {
                 log.warn(e) { "API 호출 중 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
@@ -67,6 +75,12 @@ object ApiClientUtils {
                 interruptible { apiCall(currentKey) }
             } catch (e: CancellationException) {
                 throw e
+            } catch (e: CircuitBreakerOpenException) {
+                log.warn { "서킷 브레이커 열림 - $errorMessage" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+            } catch (e: CallNotPermittedException) {
+                log.warn { "서킷 브레이커 호출 차단 - $errorMessage" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: Exception) {
                 log.warn(e) { "예상치 못한 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
