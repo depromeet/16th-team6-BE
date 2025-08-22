@@ -11,7 +11,7 @@ class UserRouteRefreshScheduler(
     private val userRouteRefreshService: UserRouteRefreshService
 ) {
     @Scheduled(cron = "0 0/3 * * * ?")
-    @SchedulerLock(name = "refresh_departure_time", lockAtMostFor = "PT2S", lockAtLeastFor = "PT2S")
+    @SchedulerLock(name = "refresh_departure_time", lockAtMostFor = "PT5S", lockAtLeastFor = "PT3S")
     fun processRefresh() =
         runBlocking {
             userRouteRefreshService.refreshAllAndPublishEvents()

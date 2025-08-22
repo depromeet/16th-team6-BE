@@ -16,7 +16,8 @@ class HolidayRedisCache(
 
     override fun getHolidays(year: Int): List<LocalDate>? {
         val key = getKey(year)
-        return holidayRedisTemplate.opsForValue().get(key)
+        val get = holidayRedisTemplate.opsForValue().get(key)
+        return get
     }
 
     private fun getKey(year: Int): String {

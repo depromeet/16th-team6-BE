@@ -35,7 +35,7 @@ data class BusArrival(
 
             return BusArrival(
                 vehicleId = "scheduled",
-                busStatus = BusStatus.OPERATING,
+                busStatus = BusStatus.WAITING,
                 remainingTime = remainingSeconds,
                 remainingStations = null,
                 isLast = false,

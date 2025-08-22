@@ -10,7 +10,6 @@ import com.deepromeet.atcha.transit.application.subway.SubwayManager
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -27,7 +26,7 @@ class LastRouteLegCalculator(
     suspend fun calcWithLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
         return coroutineScope {
             legs.map { leg ->
-                async(Dispatchers.Default) {
+                async {
                     when (leg.mode) {
                         RouteMode.SUBWAY -> calculateSubwayLeg(leg)
                         RouteMode.BUS -> calculateBusLeg(leg)

@@ -11,19 +11,19 @@ class RouteArrivalCalculator(
     private val busManager: BusManager
 ) {
     suspend fun closestArrival(
-        busLeg: LastRouteLeg,
+        targetBus: LastRouteLeg,
         scheduled: LocalDateTime
-    ): BusArrival? {
-        val busInfo = busLeg.requireBusInfo()
+    ): List<BusArrival>? {
+        val busInfo = targetBus.requireBusInfo()
         val arrivals =
             busManager.getRealTimeArrival(
-                busLeg.resolveRouteName(),
-                busLeg.toBusStationMeta(),
-                busLeg.passStops!!
+                targetBus.resolveRouteName(),
+                targetBus.toBusStationMeta(),
+                targetBus.passStops!!
             )
         val positions = busManager.getBusPositions(busInfo.busRouteInfo.route)
         val approachingBuses = positions.getApproachingBuses(busInfo.busStation)
 
-        return arrivals.getClosestArrivalWithPositions(busInfo.timeTable, scheduled, approachingBuses)
+        return arrivals.getClosestArrivalsWithPositions(busInfo.timeTable, scheduled, approachingBuses)
     }
 }
