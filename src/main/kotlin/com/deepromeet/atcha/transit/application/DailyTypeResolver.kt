@@ -13,7 +13,7 @@ class DailyTypeResolver(
 ) {
     suspend fun resolve(
         transitType: TransitType,
-        date: LocalDate = LocalDate.of(2025, 8, 15)
+        date: LocalDate = LocalDate.now()
     ): DailyType {
         return when (transitType) {
             TransitType.SUBWAY, TransitType.BUS -> resolveDailyType(date)
