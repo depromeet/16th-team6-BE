@@ -9,10 +9,7 @@ spring:
        show-sql: true
        format_sql: true
        default_batch_fetch_size: 100
-  cloud:
-    openfeign:
-      circuitbreaker:
-        enabled: true
+
 logging:
   level:
     com.deepromeet.atcha: INFO
@@ -85,9 +82,9 @@ resilience4j:
       public-api:
         failure-rate-threshold: 60.0
         minimum-number-of-calls: 100
-        sliding-window-size: 20
+        sliding-window-size: 100
         wait-duration-in-open-state: PT30S
-        permitted-number-of-calls-in-half-open-state: 3
+        permitted-number-of-calls-in-half-open-state: 10
         slow-call-rate-threshold: 70.0
         slow-call-duration-threshold: PT4S
         automatic-transition-from-open-to-half-open-enabled: true
@@ -96,9 +93,9 @@ resilience4j:
       commercial-api:
         failure-rate-threshold: 50.0
         minimum-number-of-calls: 50
-        sliding-window-size: 10
+        sliding-window-size: 50
         wait-duration-in-open-state: PT30S
-        permitted-number-of-calls-in-half-open-state: 2
+        permitted-number-of-calls-in-half-open-state: 5
         slow-call-rate-threshold: 60.0
         slow-call-duration-threshold: PT4S
         automatic-transition-from-open-to-half-open-enabled: true
@@ -107,9 +104,9 @@ resilience4j:
       auth-api:
         failure-rate-threshold: 50.0
         minimum-number-of-calls: 50
-        sliding-window-size: 8
+        sliding-window-size: 50
         wait-duration-in-open-state: PT30S
-        permitted-number-of-calls-in-half-open-state: 1
+        permitted-number-of-calls-in-half-open-state: 5
         slow-call-rate-threshold: 50.0
         slow-call-duration-threshold: PT4S
         automatic-transition-from-open-to-half-open-enabled: true
