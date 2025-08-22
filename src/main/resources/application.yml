@@ -9,10 +9,13 @@ spring:
        show-sql: true
        format_sql: true
        default_batch_fetch_size: 100
-
+  cloud:
+    openfeign:
+      circuitbreaker:
+        enabled: true
 logging:
   level:
-    com.deepromeet.atcha: DEBUG
+    com.deepromeet.atcha: INFO
     org.springframework.cloud.openfeign: INFO
     feign: INFO
     tracer: trace
@@ -75,3 +78,64 @@ redis:
       group: "event-processor"
       dead-letter:
         key: "atcha:events:dead-letter"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      public-api:
+        failure-rate-threshold: 60.0
+        minimum-number-of-calls: 100
+        sliding-window-size: 20
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-rate-threshold: 70.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      commercial-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 50
+        sliding-window-size: 10
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 2
+        slow-call-rate-threshold: 60.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      auth-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 50
+        sliding-window-size: 8
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 1
+        slow-call-rate-threshold: 50.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+  # 타임아웃 설정 (Feign 타임아웃과 동기화: connect 2s + read 3.5s = 총 5.5s)
+  timelimiter:
+    instances:
+      public-api:
+        timeout-duration: 6s
+        cancel-running-future: true
+      commercial-api:
+        timeout-duration: 6s
+        cancel-running-future: true
+      auth-api:
+        timeout-duration: 6s
+        cancel-running-future: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
