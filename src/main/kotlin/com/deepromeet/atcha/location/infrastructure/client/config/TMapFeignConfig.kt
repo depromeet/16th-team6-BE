@@ -29,7 +29,8 @@ class TMapFeignConfig(
     @Scope(SCOPE_PROTOTYPE)
     fun circuitBreakerDecorator(): Feign.Builder {
         val decorator = circuitBreakerDecorators[CircuitBreakerType.COMMERCIAL_API]!!
-        return Resilience4jFeign.builder(decorator)
+        return Feign.builder()
+            .addCapability(Resilience4jFeign.capability(decorator))
     }
 
     @Bean
