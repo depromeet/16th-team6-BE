@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.apple
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
-import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.fallback.CircuitBreakerFallbackFactory
 import feign.Feign
 import io.github.resilience4j.feign.FeignDecorators
 import io.github.resilience4j.feign.Resilience4jFeign
@@ -19,7 +18,4 @@ class AppleFeignConfig(
         return Feign.builder()
             .addCapability(Resilience4jFeign.capability(decorator))
     }
-
-    @Bean
-    fun fallbackFactory(): CircuitBreakerFallbackFactory<Any> = CircuitBreakerFallbackFactory()
 }

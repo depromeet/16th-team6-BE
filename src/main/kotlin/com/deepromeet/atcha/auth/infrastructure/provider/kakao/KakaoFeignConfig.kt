@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
-import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.fallback.CircuitBreakerFallbackFactory
 import feign.Feign
 import feign.RequestInterceptor
 import io.github.resilience4j.feign.FeignDecorators
@@ -27,7 +26,4 @@ class KakaoFeignConfig(
         return Feign.builder()
             .addCapability(Resilience4jFeign.capability(decorator))
     }
-
-    @Bean
-    fun fallbackFactory(): CircuitBreakerFallbackFactory<Any> = CircuitBreakerFallbackFactory()
 }

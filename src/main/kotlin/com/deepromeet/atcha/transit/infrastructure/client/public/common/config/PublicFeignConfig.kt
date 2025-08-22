@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
-import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.fallback.CircuitBreakerFallbackFactory
 import feign.Feign
 import feign.RequestInterceptor
 import io.github.resilience4j.feign.FeignDecorators
@@ -32,7 +31,4 @@ class PublicFeignConfig(
         return Feign.builder()
             .addCapability(Resilience4jFeign.capability(decorator))
     }
-
-    @Bean
-    fun fallbackFactory(): CircuitBreakerFallbackFactory<Any> = CircuitBreakerFallbackFactory()
 }
