@@ -112,19 +112,6 @@ resilience4j:
         automatic-transition-from-open-to-half-open-enabled: true
         sliding-window-type: count-based
 
-  # 타임아웃 설정 (Feign 타임아웃과 동기화: connect 2s + read 3.5s = 총 5.5s)
-  timelimiter:
-    instances:
-      public-api:
-        timeout-duration: 6s
-        cancel-running-future: true
-      commercial-api:
-        timeout-duration: 6s
-        cancel-running-future: true
-      auth-api:
-        timeout-duration: 6s
-        cancel-running-future: true
-
 management:
   endpoints:
     web:
