@@ -1,19 +1,19 @@
 package com.deepromeet.atcha.location.infrastructure.client.config
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.FeignDecoratorsFactory
 import feign.Feign
 import feign.RequestInterceptor
-import io.github.resilience4j.feign.FeignDecorators
-import io.github.resilience4j.feign.Resilience4jFeign
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Scope
 
 class TMapFeignConfig(
     @Value("\${tmap.api.app-key}")
     private val appKey: String,
-    private val circuitBreakerDecorators: Map<CircuitBreakerType, FeignDecorators>
+    private val decoratorsFactory: FeignDecoratorsFactory
 ) {
     @Bean
     fun requestInterceptor(): RequestInterceptor {
@@ -26,9 +26,7 @@ class TMapFeignConfig(
 
     @Bean
     @Scope(SCOPE_PROTOTYPE)
-    fun circuitBreakerDecorator(): Feign.Builder {
-        val decorator = circuitBreakerDecorators[CircuitBreakerType.COMMERCIAL_API]!!
-        return Feign.builder()
-            .addCapability(Resilience4jFeign.capability(decorator))
+    fun tmapFeignBuilder(context: ApplicationContext): Feign.Builder {
+        return decoratorsFactory.builder(CircuitBreakerType.AUTH_API, context.displayName)
     }
 }

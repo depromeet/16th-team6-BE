@@ -82,7 +82,7 @@ resilience4j:
       public-api:
         failure-rate-threshold: 60.0
         minimum-number-of-calls: 100
-        sliding-window-size: 100
+        sliding-window-size: 500
         wait-duration-in-open-state: PT30S
         permitted-number-of-calls-in-half-open-state: 10
         slow-call-rate-threshold: 70.0
@@ -93,7 +93,7 @@ resilience4j:
       commercial-api:
         failure-rate-threshold: 50.0
         minimum-number-of-calls: 50
-        sliding-window-size: 50
+        sliding-window-size: 200
         wait-duration-in-open-state: PT30S
         permitted-number-of-calls-in-half-open-state: 5
         slow-call-rate-threshold: 60.0
@@ -103,8 +103,8 @@ resilience4j:
 
       auth-api:
         failure-rate-threshold: 50.0
-        minimum-number-of-calls: 50
-        sliding-window-size: 50
+        minimum-number-of-calls: 20
+        sliding-window-size: 100
         wait-duration-in-open-state: PT30S
         permitted-number-of-calls-in-half-open-state: 5
         slow-call-rate-threshold: 50.0

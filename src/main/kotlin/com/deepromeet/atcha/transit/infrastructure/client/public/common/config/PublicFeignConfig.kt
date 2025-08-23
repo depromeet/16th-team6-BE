@@ -1,18 +1,18 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.FeignDecoratorsFactory
 import feign.Feign
 import feign.RequestInterceptor
-import io.github.resilience4j.feign.FeignDecorators
-import io.github.resilience4j.feign.Resilience4jFeign
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Scope
 
 class PublicFeignConfig(
     props: OpenApiProps,
     private val registry: PublicRateLimiterRegistry,
-    private val circuitBreakerDecorators: Map<CircuitBreakerType, FeignDecorators>
+    private val decoratorsFactory: FeignDecoratorsFactory
 ) {
     private val urlKeyMap: Map<String, String> =
         props.api.url.entries.associate { (k, v) -> v to k }
@@ -26,9 +26,7 @@ class PublicFeignConfig(
 
     @Bean
     @Scope(SCOPE_PROTOTYPE)
-    fun circuitBreakerDecorator(): Feign.Builder {
-        val decorator = circuitBreakerDecorators[CircuitBreakerType.PUBLIC_API]!!
-        return Feign.builder()
-            .addCapability(Resilience4jFeign.capability(decorator))
+    fun publicFeignBuilder(context: ApplicationContext): Feign.Builder {
+        return decoratorsFactory.builder(CircuitBreakerType.PUBLIC_API, context.displayName)
     }
 }

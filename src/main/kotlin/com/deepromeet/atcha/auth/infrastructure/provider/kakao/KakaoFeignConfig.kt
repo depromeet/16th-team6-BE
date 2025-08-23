@@ -1,16 +1,16 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.FeignDecoratorsFactory
 import feign.Feign
 import feign.RequestInterceptor
-import io.github.resilience4j.feign.FeignDecorators
-import io.github.resilience4j.feign.Resilience4jFeign
 import org.springframework.beans.factory.config.BeanDefinition.SCOPE_PROTOTYPE
+import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Scope
 
 class KakaoFeignConfig(
-    private val circuitBreakerDecorators: Map<CircuitBreakerType, FeignDecorators>
+    private val decoratorsFactory: FeignDecoratorsFactory
 ) {
     @Bean
     fun requestInterceptor(): RequestInterceptor {
@@ -21,9 +21,7 @@ class KakaoFeignConfig(
 
     @Bean
     @Scope(SCOPE_PROTOTYPE)
-    fun circuitBreakerDecorator(): Feign.Builder {
-        val decorator = circuitBreakerDecorators[CircuitBreakerType.AUTH_API]!!
-        return Feign.builder()
-            .addCapability(Resilience4jFeign.capability(decorator))
+    fun kakaoFeignBuilder(context: ApplicationContext): Feign.Builder {
+        return decoratorsFactory.builder(CircuitBreakerType.AUTH_API, context.displayName)
     }
 }
