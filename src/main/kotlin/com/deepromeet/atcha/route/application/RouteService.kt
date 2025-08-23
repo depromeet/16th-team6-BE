@@ -34,7 +34,6 @@ class RouteService(
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
     private val transitRouteClientV2: TransitRouteClientV2,
     private val routeArrivalCalculator: RouteArrivalCalculator,
-    private val selectionPolicy: RouteArrivalSelectionPolicy,
     private val lastRouteUpdater: LastRouteUpdater
 ) {
     suspend fun getLastRoutes(
@@ -150,7 +149,7 @@ class RouteService(
             return listOf(BusArrival.createScheduled(scheduled))
         }
 
-        val closest = routeArrivalCalculator.closestArrival(targetBus, scheduled)
+        val closest = routeArrivalCalculator.closestArrivals(targetBus, scheduled)
 
         closest?.first()?.expectedArrivalTime?.let { newArrival ->
             lastRouteUpdater.updateDepartureTime(lastRoute, targetBus, newArrival)

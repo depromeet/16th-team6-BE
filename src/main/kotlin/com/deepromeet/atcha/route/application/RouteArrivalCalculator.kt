@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 class RouteArrivalCalculator(
     private val busManager: BusManager
 ) {
-    suspend fun closestArrival(
+    suspend fun closestArrivals(
         targetBus: LastRouteLeg,
         scheduled: LocalDateTime
     ): List<BusArrival>? {
