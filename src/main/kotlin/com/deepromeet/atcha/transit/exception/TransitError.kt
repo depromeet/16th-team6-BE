@@ -30,8 +30,7 @@ enum class TransitError(
     INVALID_DIRECTION_NAME(400, "TRS_021", "유효하지 않은 지하철 방향 이름입니다.", LogLevel.ERROR),
     NOT_FOUND_SPECIFIED_TIME(404, "TRS_023", "특정 시간에 해당하는 대중교통을 찾을 수 없습니다.", LogLevel.ERROR),
     INVALID_TIME_FORMAT(400, "TRS_024", "유효하지 않은 시간 형식입니다.", LogLevel.ERROR),
-    BUS_TERM_REQUIRED(404, "TRS_026", "버스 배차간격은 필수 값입니다.", LogLevel.ERROR),
-    API_TIME_OUT(500, "TRS_025", "TMap이 응답하지 않습니다.", LogLevel.ERROR)
+    BUS_TERM_REQUIRED(404, "TRS_026", "버스 배차간격은 필수 값입니다.", LogLevel.ERROR)
 }
 
 class TransitException(

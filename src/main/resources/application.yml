@@ -12,7 +12,7 @@ spring:
 
 logging:
   level:
-    com.deepromeet.atcha: DEBUG
+    com.deepromeet.atcha: INFO
     org.springframework.cloud.openfeign: INFO
     feign: INFO
     tracer: trace
@@ -75,3 +75,51 @@ redis:
       group: "event-processor"
       dead-letter:
         key: "atcha:events:dead-letter"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      public-api:
+        failure-rate-threshold: 60.0
+        minimum-number-of-calls: 100
+        sliding-window-size: 100
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 10
+        slow-call-rate-threshold: 70.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      commercial-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 50
+        sliding-window-size: 50
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 5
+        slow-call-rate-threshold: 60.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      auth-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 50
+        sliding-window-size: 50
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 5
+        slow-call-rate-threshold: 50.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true

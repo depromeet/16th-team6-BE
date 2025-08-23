@@ -1,0 +1,57 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        show-sql: false
+        format_sql: false
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      public-api:
+        failure-rate-threshold: 60.0
+        minimum-number-of-calls: 10
+        sliding-window-size: 20
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 3
+        slow-call-rate-threshold: 70.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+        
+      commercial-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 5
+        sliding-window-size: 10
+        wait-duration-in-open-state: PT20S
+        permitted-number-of-calls-in-half-open-state: 2
+        slow-call-rate-threshold: 60.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+        
+      auth-api:
+        failure-rate-threshold: 40.0
+        minimum-number-of-calls: 3
+        sliding-window-size: 8
+        wait-duration-in-open-state: PT60S
+        permitted-number-of-calls-in-half-open-state: 1
+        slow-call-rate-threshold: 50.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+logging:
+  level:
+    com.deepromeet.atcha: DEBUG
+    org.springframework.cloud.openfeign: INFO
+    feign: INFO
+    root: INFO

@@ -13,7 +13,9 @@ enum class ExternalApiError(
     EXTERNAL_API_NOT_FOUND_ERROR(404, "EXT_001", "외부 API에서 데이터를 찾을 수 없습니다", LogLevel.WARN),
     EXTERNAL_API_INTERNAL_SERVER_ERROR(500, "EXT_003", "외부 API 서버에서 오류가 발생했습니다", LogLevel.ERROR),
     EXTERNAL_API_UNKNOWN_ERROR(500, "EXT_005", "외부 API 호출 중 알 수 없는 오류가 발생했습니다", LogLevel.ERROR),
-    EXTERNAL_API_CALL_LIMIT_EXCEEDED(429, "EXT_006", "외부 API 호출 제한을 초과했습니다.", LogLevel.ERROR)
+    EXTERNAL_API_CALL_LIMIT_EXCEEDED(429, "EXT_006", "외부 API 호출 제한을 초과했습니다.", LogLevel.ERROR),
+    EXTERNAL_API_CIRCUIT_BREAKER_OPEN(503, "EXT_007", "외부 서비스가 일시적으로 이용 불가능합니다.", LogLevel.WARN),
+    EXTERNAL_API_TIME_OUT(500, "EXT_008", "외부 서버가 응답하지 않습니다.", LogLevel.ERROR)
 }
 
 class ExternalApiException(

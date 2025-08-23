@@ -8,7 +8,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.coroutines.cancellation.CancellationException
 
 @Component
-class RateLimiterRegistry(props: OpenApiProps) {
+class PublicRateLimiterRegistry(props: OpenApiProps) {
     private val bucketMap = ConcurrentHashMap<String, Bucket>()
     private val limitMap = props.limits.perApi
     private val defaultLimit = props.limits.default
