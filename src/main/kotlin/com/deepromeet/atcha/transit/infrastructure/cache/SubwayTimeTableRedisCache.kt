@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.shared.infrastructure.cache.RedisCacheHitRecorder
 import com.deepromeet.atcha.transit.application.subway.SubwayTimeTableCache
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
@@ -13,7 +14,8 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class SubwayTimeTableRedisCache(
-    private val subwayTimeTableRedisTemplate: RedisTemplate<String, SubwayTimeTable>
+    private val subwayTimeTableRedisTemplate: RedisTemplate<String, SubwayTimeTable>,
+    private val cacheHitRecorder: RedisCacheHitRecorder
 ) : SubwayTimeTableCache {
     override fun get(
         startStation: SubwayStation,
@@ -21,7 +23,9 @@ class SubwayTimeTableRedisCache(
         direction: SubwayDirection
     ): SubwayTimeTable? {
         val key = getKey(startStation, dailyType, direction)
-        return subwayTimeTableRedisTemplate.opsForValue().get(key)
+        val timeTable = subwayTimeTableRedisTemplate.opsForValue().get(key)
+        cacheHitRecorder.record("timetable:subway", timeTable != null)
+        return timeTable
     }
 
     override fun cache(

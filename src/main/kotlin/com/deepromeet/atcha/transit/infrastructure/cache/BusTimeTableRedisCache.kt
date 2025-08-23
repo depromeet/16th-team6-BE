@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
+import com.deepromeet.atcha.shared.infrastructure.cache.RedisCacheHitRecorder
 import com.deepromeet.atcha.transit.application.bus.BusTimeTableCache
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
@@ -11,14 +12,17 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class BusTimeTableRedisCache(
-    private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>
+    private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>,
+    private val cacheHitRecorder: RedisCacheHitRecorder
 ) : BusTimeTableCache {
     override fun get(
         routeName: String,
         busStation: BusStationMeta
     ): BusSchedule? {
         val key = getKey(routeName, busStation)
-        return busTimeTableRedisTemplate.opsForValue().get(key)
+        val schedule = busTimeTableRedisTemplate.opsForValue().get(key)
+        cacheHitRecorder.record("timetable:bus", schedule != null)
+        return schedule
     }
 
     override fun cache(
