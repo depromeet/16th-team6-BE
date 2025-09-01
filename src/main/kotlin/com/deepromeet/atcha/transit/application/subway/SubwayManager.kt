@@ -60,8 +60,4 @@ class SubwayManager(
                 subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
             }
     }
-
-    fun initSubwayCache() {
-        // TODO: Implement subway cache initialization
-    }
 }
