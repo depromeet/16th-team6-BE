@@ -52,7 +52,7 @@ class FeignDecoratorsFactory(
                 }
                 .onError { ev ->
                     val m = cb.metrics
-                    log.warn {
+                    log.debug {
                         "❌ $label 호출 실패 " +
                             "(에러: ${ev.throwable.javaClass.simpleName}, " +
                             "실패: ${m.numberOfFailedCalls}, " +
@@ -62,7 +62,7 @@ class FeignDecoratorsFactory(
                 }
                 .onCallNotPermitted {
                     val m = cb.metrics
-                    log.warn {
+                    log.error {
                         "🚫 $label 호출 차단됨 " +
                             "(상태: ${cb.state}, " +
                             "차단: ${m.numberOfNotPermittedCalls}, " +
