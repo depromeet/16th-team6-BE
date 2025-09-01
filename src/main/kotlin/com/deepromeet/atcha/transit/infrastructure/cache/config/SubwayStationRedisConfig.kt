@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
-import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
+import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.databind.SerializationFeature
@@ -14,11 +14,11 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-class SubwayTimeTableRedisConfig {
+class SubwayStationRedisConfig {
     @Bean
-    fun subwayTimeTableRedisTemplate(
+    fun subwayStationRedisTemplate(
         redisConnectionFactory: RedisConnectionFactory
-    ): RedisTemplate<String, SubwayTimeTable> {
+    ): RedisTemplate<String, SubwayStation> {
         val kotlinModule = KotlinModule.Builder().build()
         val objectMapper =
             ObjectMapper()
@@ -27,9 +27,9 @@ class SubwayTimeTableRedisConfig {
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-        val jsonSerializer = Jackson2JsonRedisSerializer(objectMapper, SubwayTimeTable::class.java)
+        val jsonSerializer = Jackson2JsonRedisSerializer(objectMapper, SubwayStation::class.java)
 
-        val redisTemplate = RedisTemplate<String, SubwayTimeTable>()
+        val redisTemplate = RedisTemplate<String, SubwayStation>()
         redisTemplate.connectionFactory = redisConnectionFactory
         redisTemplate.keySerializer = StringRedisSerializer()
         redisTemplate.valueSerializer = jsonSerializer

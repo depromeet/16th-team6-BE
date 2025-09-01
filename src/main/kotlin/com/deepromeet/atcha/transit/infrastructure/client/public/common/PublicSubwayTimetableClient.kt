@@ -5,8 +5,8 @@ import com.deepromeet.atcha.transit.application.subway.SubwayTimetableClient
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
+import com.deepromeet.atcha.transit.domain.subway.SubwaySchedule
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
-import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
@@ -131,7 +131,7 @@ class PublicSubwayTimetableClient(
     private suspend fun mapToSchedule(
         scheduleItems: List<TrainScheduleResponse>,
         subwayStations: List<SubwayStation>
-    ): List<SubwayTime> =
+    ): List<SubwaySchedule> =
         coroutineScope {
             scheduleItems.map { item ->
                 async(Dispatchers.Default) {

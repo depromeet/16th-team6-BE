@@ -3,6 +3,7 @@ package com.deepromeet.atcha.route.domain
 import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.transit.domain.TimeDirection
+import com.deepromeet.atcha.transit.domain.TransitInfo
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -81,6 +82,10 @@ class LastRouteTimeAdjuster {
                 if (isFirstTransitBus && i == firstTransitIndex) continue
 
                 val busInfo = leg.requireBusInfo()
+
+                // 배차간격이 긴 버스(30분 이상)는 건너뛰기
+                if (isLongTermBus(busInfo)) continue
+
                 val lastBusTime = leg.departureDateTime!!
                 val prevLastBusTime = lastBusTime.minusMinutes(busInfo.timeTable.term.toLong())
 
@@ -192,4 +197,6 @@ class LastRouteTimeAdjuster {
             )
         }
     }
+
+    private fun isLongTermBus(busInfo: TransitInfo.BusInfo): Boolean = busInfo.timeTable.term >= 30
 }

@@ -68,7 +68,7 @@ data class LastRouteLeg(
         return when (transitInfo) {
             is TransitInfo.SubwayInfo -> {
                 transitInfo.timeTable.findNearestTime(targetTime, direction)
-                    ?.departureTime
+                    ?.departureTime?.toLocalDateTime()
                     ?: throw TransitException.Companion.of(
                         TransitError.NOT_FOUND_SPECIFIED_TIME,
                         "지하철 '$route'의 ${start.name}역에서 " +
