@@ -11,13 +11,13 @@ import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
-private val logger = KotlinLogging.logger {}
-
 @Component
 class BusTimeTableRedisCache(
     private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>,
     private val cacheHitRecorder: RedisCacheHitRecorder
 ) : BusTimeTableCache {
+    private val log = KotlinLogging.logger {}
+
     override fun get(
         routeName: String,
         busStation: BusStationMeta
@@ -28,7 +28,7 @@ class BusTimeTableRedisCache(
             cacheHitRecorder.record("timetable:bus", schedule != null)
             schedule
         } catch (e: Exception) {
-            logger.warn { "버스 시간표 캐시 조회 중 오류 발생: ${e.message}" }
+            log.warn { "버스 시간표 캐시 조회 중 오류 발생: ${e.message}" }
             cacheHitRecorder.record("timetable:bus", false)
             null
         }
@@ -44,7 +44,7 @@ class BusTimeTableRedisCache(
         try {
             busTimeTableRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
         } catch (e: Exception) {
-            logger.warn { "버스 시간표 캐시 저장 중 오류 발생: ${e.message}" }
+            log.warn { "버스 시간표 캐시 저장 중 오류 발생: ${e.message}" }
         }
     }
 
