@@ -10,17 +10,17 @@ data class SubwayTimeTable(
     val startStation: SubwayStation,
     val dailyType: DailyType,
     val subwayDirection: SubwayDirection,
-    val schedules: List<SubwayTime>
+    val schedules: List<SubwaySchedule>
 ) {
     fun getLastTime(
         destinationStation: SubwayStation,
         routes: List<Route>,
         isExpress: Boolean
-    ): SubwayTime =
+    ): SubwaySchedule =
         schedules
             .filter { it.isExpress == isExpress }
             .filter { isReachable(startStation, destinationStation, it.finalStation, routes, subwayDirection) }
-            .maxByOrNull { it.departureTime }
+            .maxByOrNull { it.departureTime.toLocalDateTime() }
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
                 "${startStation.routeName} 지하철 '${startStation.name}'역에서" +
@@ -30,18 +30,18 @@ data class SubwayTimeTable(
     fun findNearestTime(
         time: LocalDateTime,
         direction: TimeDirection
-    ): SubwayTime? =
+    ): SubwaySchedule? =
         when (direction) {
             TimeDirection.AFTER -> {
                 schedules
-                    .filter { it.departureTime.isAfter(time) }
-                    .minByOrNull { it.departureTime }
+                    .filter { it.departureTime.toLocalDateTime().isAfter(time) }
+                    .minByOrNull { it.departureTime.toLocalDateTime() }
             }
 
             TimeDirection.BEFORE -> {
                 schedules
-                    .filter { it.departureTime.isBefore(time) }
-                    .maxByOrNull { it.departureTime }
+                    .filter { it.departureTime.toLocalDateTime().isBefore(time) }
+                    .maxByOrNull { it.departureTime.toLocalDateTime() }
             }
         }
 
