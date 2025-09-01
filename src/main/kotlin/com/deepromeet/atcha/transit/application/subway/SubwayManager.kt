@@ -22,7 +22,7 @@ class SubwayManager(
     private val dailyTypeResolver: DailyTypeResolver,
     private val subwayBranchRepository: SubwayBranchRepository,
     private val subwayTimeTableCache: SubwayTimeTableCache,
-    private val subwayStationCache: SubwayStationCache,
+    private val subwayStationCache: SubwayStationCache
 ) {
     suspend fun getRoutes(subwayLine: SubwayLine): List<Route> =
         withContext(Dispatchers.IO) {

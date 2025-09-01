@@ -80,7 +80,7 @@ class RouteService(
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
 
             lastRouteReader.read(start, destination)?.let { cached ->
-                cached.sort(sortType).forEach { emit(it) }
+                cached.forEach { emit(it) }
                 return@flow
             }
 

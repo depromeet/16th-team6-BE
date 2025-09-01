@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.transit.domain
 
+import com.deepromeet.atcha.transit.domain.subway.DayScope
+import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import java.lang.Exception
@@ -42,10 +44,7 @@ object TransitTimeParser {
         }
     }
 
-    fun parseTime(
-        timeStr: String?,
-        referenceDate: LocalDate
-    ): LocalDateTime? {
+    fun parseTime(timeStr: String?): SubwayTime? {
         return try {
             if (timeStr.isNullOrBlank()) {
                 return null
@@ -56,15 +55,16 @@ object TransitTimeParser {
             val minute = parts[1].toInt()
             val second = parts[2].toInt()
 
-            var date = referenceDate
-
-            if (hour >= 24) {
-                hour -= 24
-                date = referenceDate.plusDays(1)
-            }
+            val dayScope =
+                if (hour >= 24) {
+                    hour -= 24
+                    DayScope.TOMORROW
+                } else {
+                    DayScope.TODAY
+                }
 
             val localTime = LocalTime.of(hour, minute, second)
-            LocalDateTime.of(date, localTime)
+            SubwayTime(localTime, dayScope)
         } catch (e: Exception) {
             return null
         }

@@ -9,6 +9,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import kotlinx.coroutines.async
+import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 
@@ -37,10 +38,9 @@ class BusRouteMatcher(
 
             routeMatching.forEach { job ->
                 val result = job.await()
-                if (result != null) {
-                    if (result.similarity >= SIM_THRESHOLD) {
-                        return@coroutineScope result.busRouteInfo
-                    }
+                if (result != null && result.similarity >= SIM_THRESHOLD) {
+                    coroutineContext.cancelChildren()
+                    return@coroutineScope result.busRouteInfo
                 }
             }
 
