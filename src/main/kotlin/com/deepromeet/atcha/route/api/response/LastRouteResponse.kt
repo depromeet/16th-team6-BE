@@ -47,6 +47,7 @@ data class LastRouteLegResponse(
     val start: RouteLocationResponse,
     val end: RouteLocationResponse,
     val targetBusStation: BusStationResponse? = null,
+    val targetBusTerm: Int? = null,
     val subwayFinalStation: String? = null,
     val subwayDirection: String? = null,
     val passStopList: List<RoutePassStopResponse>? = null,
@@ -73,6 +74,7 @@ data class LastRouteLegResponse(
                     it
                 )
             },
+        targetBusTerm = lastRouteLeg.busInfo?.timeTable?.term,
         subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
         subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
