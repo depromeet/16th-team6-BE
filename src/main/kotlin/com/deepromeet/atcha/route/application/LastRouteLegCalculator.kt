@@ -61,7 +61,7 @@ class LastRouteLegCalculator(
                 val lastSchedule = timeTable.getLastTime(endStation, routes, leg.isExpress())
 
                 leg.toLastTransitLeg(
-                    departureDateTime = lastSchedule.departureTime.truncatedTo(ChronoUnit.SECONDS),
+                    departureDateTime = lastSchedule.departureTime.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS),
                     transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, lastSchedule)
                 )
             }
