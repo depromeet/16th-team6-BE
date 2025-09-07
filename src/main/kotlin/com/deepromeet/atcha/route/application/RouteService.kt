@@ -73,14 +73,12 @@ class RouteService(
     fun getLastRouteStream(
         userId: UserId,
         start: Coordinate,
-        end: Coordinate?,
-        sortType: LastRouteSortType
+        end: Coordinate?
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
-
             lastRouteReader.read(start, destination)?.let { cached ->
-                cached.sort(sortType).forEach { emit(it) }
+                cached.forEach { emit(it) }
                 return@flow
             }
 
@@ -151,7 +149,7 @@ class RouteService(
 
         val closest = routeArrivalCalculator.closestArrivals(targetBus, scheduled)
 
-        closest?.first()?.expectedArrivalTime?.let { newArrival ->
+        closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
             lastRouteUpdater.updateDepartureTime(lastRoute, targetBus, newArrival)
         }
 

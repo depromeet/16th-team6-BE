@@ -69,8 +69,7 @@ class RouteController(
         routeService.getLastRouteStream(
             UserId(id),
             request.toStart(),
-            request.toEnd(),
-            request.sortType
+            request.toEnd()
         ).map { LastRouteResponse(it) }
 
     @GetMapping("/last-routes/{routeId}")

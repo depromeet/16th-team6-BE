@@ -32,7 +32,6 @@ object ApiClientUtils {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: Exception) {
-                log.warn(e) { "API 호출 중 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
         return processResult(response)
@@ -75,7 +74,6 @@ object ApiClientUtils {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: Exception) {
-                log.warn(e) { "예상치 못한 오류: ${e.message} - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
 

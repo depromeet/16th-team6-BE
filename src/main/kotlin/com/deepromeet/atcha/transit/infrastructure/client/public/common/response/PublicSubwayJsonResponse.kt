@@ -2,7 +2,9 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.common.respons
 
 import com.deepromeet.atcha.transit.application.subway.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
+import com.deepromeet.atcha.transit.domain.subway.DayScope
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
+import com.deepromeet.atcha.transit.domain.subway.SubwaySchedule
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationId
@@ -10,8 +12,6 @@ import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.ItemDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import io.github.oshai.kotlinlogging.KotlinLogging
-import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
@@ -84,8 +84,8 @@ data class SubwayTimeResponse(
     val subwayStationNm: String,
     val upDownTypeCode: String
 ) {
-    fun toDomain(endStation: SubwayStation): SubwayTime? {
-        return SubwayTime(
+    fun toDomain(endStation: SubwayStation): SubwaySchedule? {
+        return SubwaySchedule(
             isExpress = false,
             finalStation = endStation,
             departureTime = parseTime(depTime) ?: return null,
@@ -93,19 +93,21 @@ data class SubwayTimeResponse(
         )
     }
 
-    private fun parseTime(time: String): LocalDateTime? {
+    private fun parseTime(time: String): SubwayTime? {
         if (time == "0") {
             return null
         }
 
-        val formatter = DateTimeFormatter.ofPattern("HHmmss")
-        val localTime = LocalTime.parse(time, formatter)
-        val now = LocalDate.now()
+        return try {
+            val formatter = DateTimeFormatter.ofPattern("HHmmss")
+            val localTime = LocalTime.parse(time, formatter)
 
-        // 자정 이후 새벽 시간대 (00:00:00 ~ 03:59:59)는 "다음 날"로 설정
-        val date = if (localTime.hour < 4) now.plusDays(1) else now
+            val dayScope = if (localTime.hour < 4) DayScope.TOMORROW else DayScope.TODAY
 
-        return LocalDateTime.of(date, localTime)
+            SubwayTime(localTime, dayScope)
+        } catch (e: Exception) {
+            null
+        }
     }
 }
 
@@ -136,12 +138,12 @@ data class TrainScheduleResponse(
     val vldEndDt: String?,
     val crtrYmd: String?
 ) {
-    fun toDomain(finalStation: SubwayStation): SubwayTime? {
-        return SubwayTime(
+    fun toDomain(finalStation: SubwayStation): SubwaySchedule? {
+        return SubwaySchedule(
             isExpress = etrnYn == "Y",
             finalStation = finalStation,
             departureTime =
-                TransitTimeParser.parseTime(trainDptreTm, LocalDate.now())
+                TransitTimeParser.parseTime(trainDptreTm)
                     ?: return null,
             subwayDirection = SubwayDirection.fromName(upbdnbSe)
         )
