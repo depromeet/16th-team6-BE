@@ -113,3 +113,9 @@ jwt:
 
 mixpanel:
   token: ${secret.prod.MIXPANEL_TOKEN}
+
+discord:
+  webhook:
+    url:
+      local: ${secret.dev.DISCORD_WEBHOOK_URL}
+
