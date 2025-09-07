@@ -49,3 +49,8 @@ jwt:
 
 mixpanel:
   token: ${secret.prod.MIXPANEL_TOKEN}
+
+discord:
+  webhook:
+    url:
+      staging: ${secret.staging.DISCORD_WEBHOOK_URL}
