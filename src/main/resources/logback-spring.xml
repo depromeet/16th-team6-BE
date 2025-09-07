@@ -25,7 +25,7 @@
         <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
-                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <pattern>profile=local,host=${HOSTNAME},level=%level</pattern>
                 <readMarkers>true</readMarkers>
             </label>
             <message>
@@ -67,7 +67,7 @@
         <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
-                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <pattern>profile=prod,host=${HOSTNAME},level=%level</pattern>
                 <readMarkers>true</readMarkers>
             </label>
             <message>
@@ -88,7 +88,7 @@
         <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
-                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <pattern>profile=staging,host=${HOSTNAME},level=%level</pattern>
                 <readMarkers>true</readMarkers>
             </label>
             <message>
