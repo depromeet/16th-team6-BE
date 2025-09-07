@@ -74,6 +74,8 @@ class DiscordAppender(
 
             var causedBy = stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
                 .toString()
+            if(causedBy == null) return "로그 정보(causedBy)가 소실되었습니다."
+
             val causedByIndex = causedBy.indexOf(CAUSED_BY)
 
             causedBy = causedBy.substring(causedByIndex + 10)
