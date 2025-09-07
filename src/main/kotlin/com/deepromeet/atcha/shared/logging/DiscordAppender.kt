@@ -33,9 +33,6 @@ class DiscordAppender(
                 setRequestProperty(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                 doOutput = true
             }
-//            connection.addRequestProperty("User-Agent", "Java-DiscordWebhook-BY-Gelox_")
-            val content = "[${event?.level}] ${event?.loggerName} - ${event?.formattedMessage}"
-                .take(1900)
 
             connection.getOutputStream().use { stream ->
                 stream.write(createMessage(event))
@@ -45,7 +42,6 @@ class DiscordAppender(
                 connection.disconnect()
             }
         } catch (e: Exception) {
-            e.printStackTrace()
             throw DiscordException.of(DiscordError.DISCORD_LOG_DELIVERY_FAILURE, e)
         }
     }
@@ -74,19 +70,13 @@ class DiscordAppender(
         val throwableProxy = event.throwableProxy
 
         if (throwableProxy != null) {
-            // 예외 정보를 문자열로 변환 (전체 스택 트레이스)
             val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
-            println("-------")
 
             var causedBy = stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
                 .toString()
             val causedByIndex = causedBy.indexOf(CAUSED_BY)
 
             causedBy = causedBy.substring(causedByIndex + 10)
-
-            println("causedBy: $causedBy")
-            println("-------")
-            // 기존 메시지와 스택 트레이스를 합쳐서 반환
             return causedBy.take(1900)
         }
 
