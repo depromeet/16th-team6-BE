@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+    <property resource="application-local.yml"/>
+    <property resource="application-dev.yml"/>
+    <property resource="application-prod.yml"/>
+    <property resource="application-staging.yml"/>
+    <springProperty name="DISCORD_WEBHOOK_URL_LOCAL" source="discord.webhook.url.local"/>
+    <springProperty name="DISCORD_WEBHOOK_URL_DEV" source="discord.webhook.url.dev"/>
+    <springProperty name="DISCORD_WEBHOOK_URL_PROD" source="discord.webhook.url.prod"/>
+    <springProperty name="DISCORD_WEBHOOK_URL_STAGING" source="discord.webhook.url.staging"/>
+    <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %cyan([%logger{0}:%line])-%message%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="WEBHOOK_APPENDER_LOCAL" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUrl>${DISCORD_WEBHOOK_URL_LOCAL}</webhookUrl>
+        <username>Atcha Bot</username>
+        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
+        <format>
+            <label>
+                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
+                </pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <appender name="WEBHOOK_APPENDER_DEV" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUrl>${DISCORD_WEBHOOK_URL_DEV}</webhookUrl>
+        <username>Atcha Bot</username>
+        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
+        <format>
+            <label>
+                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
+                </pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <appender name="WEBHOOK_APPENDER_PROD" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUrl>${DISCORD_WEBHOOK_URL_PROD}</webhookUrl>
+        <username>Atcha Bot</username>
+        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
+        <format>
+            <label>
+                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
+                </pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <appender name="WEBHOOK_APPENDER_STAGING" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUrl>${DISCORD_WEBHOOK_URL_STAGING}</webhookUrl>
+        <username>Atcha Bot</username>
+        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
+        <format>
+            <label>
+                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
+                </pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <springProfile name="local">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER_LOCAL"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER_DEV"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER_PROD"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="staging">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER_STAGING"/>
+        </root>
+    </springProfile>
+</configuration>
