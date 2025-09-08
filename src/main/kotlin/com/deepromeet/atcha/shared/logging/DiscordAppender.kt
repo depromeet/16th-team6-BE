@@ -77,26 +77,29 @@ class DiscordAppender(
     }
 
     private fun getStackTrace(event: ILoggingEvent?): String {
-        if (event == null) return "로그 정보가 소실되었습니다."
-        val message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(LOG_MAX_LEN)
+        var message: String?
 
-        val throwableProxy = event.throwableProxy
+        if (event == null) message = "로그 정보가 소실되었습니다."
+        else {
+            message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(LOG_MAX_LEN)
 
-        if (throwableProxy != null) {
-            val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
-            println("stackTrace = $stackTrace")
-            var causedBy =
-                stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
-                    .toString()
-            if (causedBy == null) return "로그 정보(causedBy)가 소실되었습니다."
+            val throwableProxy = event.throwableProxy
 
-            val causedByIndex = causedBy.indexOf(CAUSED_BY)
+            if (throwableProxy != null) {
+                val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
+                println("stackTrace = $stackTrace")
+                val causedBy =
+                    stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
+                        .toString()
+                if (causedBy == null) message = stackTrace.toString().take(LOG_MAX_LEN)
 
-            causedBy = causedBy.substring(causedByIndex + 10)
-            return causedBy.take(LOG_MAX_LEN)
+                val causedByIndex = causedBy.indexOf(CAUSED_BY)
+
+                message = causedBy.substring(causedByIndex + 10)
+            }
         }
 
         // 예외 정보가 없으면 기존 메시지만 반환
-        return message
+        return message.take(LOG_MAX_LEN)
     }
 }
