@@ -20,9 +20,11 @@ class DiscordAppender(
     var webhookUrl: String = "",
     var username: String = ""
 ) : UnsynchronizedAppenderBase<ILoggingEvent>() {
-    private val CAUSED_BY = "Caused by:"
-    private val CONTENT_TYPE = "Content-Type"
-
+    companion object {
+        private const val CAUSED_BY = "Caused by:"
+        private const val CONTENT_TYPE = "Content-Type"
+        private const val LOG_MAX_LEN = 1900
+    }
     private val objectMapper = ObjectMapper()
 
     override fun append(event: ILoggingEvent?) {
@@ -68,7 +70,7 @@ class DiscordAppender(
 
     private fun getStackTrace(event: ILoggingEvent?): String {
         if (event == null) return "로그 정보가 소실되었습니다."
-        val message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(1900)
+        val message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(LOG_MAX_LEN)
 
         val throwableProxy = event.throwableProxy
 
@@ -83,7 +85,7 @@ class DiscordAppender(
             val causedByIndex = causedBy.indexOf(CAUSED_BY)
 
             causedBy = causedBy.substring(causedByIndex + 10)
-            return causedBy.take(1900)
+            return causedBy.take(LOG_MAX_LEN)
         }
 
         // 예외 정보가 없으면 기존 메시지만 반환
