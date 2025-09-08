@@ -22,7 +22,6 @@
         </filter>
         <webhookUrl>${DISCORD_WEBHOOK_URL_LOCAL}</webhookUrl>
         <username>Atcha Bot</username>
-        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
                 <pattern>profile=local,host=${HOSTNAME},level=%level</pattern>
@@ -43,7 +42,6 @@
         </filter>
         <webhookUrl>${DISCORD_WEBHOOK_URL_DEV}</webhookUrl>
         <username>Atcha Bot</username>
-        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
                 <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
@@ -64,7 +62,6 @@
         </filter>
         <webhookUrl>${DISCORD_WEBHOOK_URL_PROD}</webhookUrl>
         <username>Atcha Bot</username>
-        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
                 <pattern>profile=prod,host=${HOSTNAME},level=%level</pattern>
@@ -85,7 +82,6 @@
         </filter>
         <webhookUrl>${DISCORD_WEBHOOK_URL_STAGING}</webhookUrl>
         <username>Atcha Bot</username>
-        <avatarUrl>https://avatars.githubusercontent.com/u/112798598</avatarUrl>
         <format>
             <label>
                 <pattern>profile=staging,host=${HOSTNAME},level=%level</pattern>
