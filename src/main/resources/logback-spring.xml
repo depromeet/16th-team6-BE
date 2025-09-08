@@ -127,4 +127,10 @@
             <appender-ref ref="WEBHOOK_APPENDER_STAGING"/>
         </root>
     </springProfile>
+
+    <springProfile name="test">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+        </root>
+    </springProfile>
 </configuration>

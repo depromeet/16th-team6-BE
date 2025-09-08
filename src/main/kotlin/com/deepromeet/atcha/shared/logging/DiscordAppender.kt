@@ -8,12 +8,14 @@ import com.deepromeet.atcha.shared.infrastructure.discord.DiscordMessage.Embed
 import com.deepromeet.atcha.shared.logging.exception.DiscordError
 import com.deepromeet.atcha.shared.logging.exception.DiscordException
 import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.context.annotation.Profile
 import org.springframework.http.HttpMethod
 import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
 import java.net.URL
 import java.time.LocalDateTime
 import javax.net.ssl.HttpsURLConnection
 
+@Profile("dev", "prod")
 class DiscordAppender(
     var webhookUrl: String = "",
     var username: String = "",
@@ -71,7 +73,7 @@ class DiscordAppender(
 
         if (throwableProxy != null) {
             val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
-
+            println("stackTrace = $stackTrace")
             var causedBy = stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
                 .toString()
             if(causedBy == null) return "로그 정보(causedBy)가 소실되었습니다."
