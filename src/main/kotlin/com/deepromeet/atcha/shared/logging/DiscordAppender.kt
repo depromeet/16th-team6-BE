@@ -23,11 +23,17 @@ class DiscordAppender(
     companion object {
         private const val CAUSED_BY = "Caused by:"
         private const val CONTENT_TYPE = "Content-Type"
+
+        private const val CONNECT_TIMEOUT_MS = 2000
+        private const val READ_TIMEOUT_MS = 2000
+
         private const val LOG_MAX_LEN = 1900
     }
     private val objectMapper = ObjectMapper()
 
     override fun append(event: ILoggingEvent?) {
+        if (event == null || webhookUrl.isBlank()) return
+
         try {
             val url: URL = URL(webhookUrl)
             val connection =
@@ -35,6 +41,8 @@ class DiscordAppender(
                     requestMethod = HttpMethod.POST.name()
                     setRequestProperty(CONTENT_TYPE, APPLICATION_JSON_VALUE)
                     doOutput = true
+                    connectTimeout = CONNECT_TIMEOUT_MS
+                    readTimeout = READ_TIMEOUT_MS
                 }
 
             connection.getOutputStream().use { stream ->
@@ -52,7 +60,7 @@ class DiscordAppender(
     private fun createMessage(event: ILoggingEvent?): ByteArray {
         return objectMapper.writeValueAsBytes(
             DiscordMessage().apply {
-                content = "# 🚨 에러 발생 비이이이이사아아아앙"
+                content = "🚨 에러 발생 비이이이이사아아아앙"
                 embeds =
                     listOf(
                         Embed().apply {
