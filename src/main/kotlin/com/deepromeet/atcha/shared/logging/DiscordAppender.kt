@@ -18,23 +18,22 @@ import javax.net.ssl.HttpsURLConnection
 @Profile("dev", "prod")
 class DiscordAppender(
     var webhookUrl: String = "",
-    var username: String = "",
+    var username: String = ""
 ) : UnsynchronizedAppenderBase<ILoggingEvent>() {
-
     private val CAUSED_BY = "Caused by:"
     private val CONTENT_TYPE = "Content-Type"
 
     private val objectMapper = ObjectMapper()
 
     override fun append(event: ILoggingEvent?) {
-
         try {
             val url: URL = URL(webhookUrl)
-            val connection = (url.openConnection() as HttpsURLConnection).apply {
-                requestMethod = HttpMethod.POST.name()
-                setRequestProperty(CONTENT_TYPE, APPLICATION_JSON_VALUE)
-                doOutput = true
-            }
+            val connection =
+                (url.openConnection() as HttpsURLConnection).apply {
+                    requestMethod = HttpMethod.POST.name()
+                    setRequestProperty(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    doOutput = true
+                }
 
             connection.getOutputStream().use { stream ->
                 stream.write(createMessage(event))
@@ -50,23 +49,25 @@ class DiscordAppender(
 
     private fun createMessage(event: ILoggingEvent?): ByteArray {
         return objectMapper.writeValueAsBytes(
-            DiscordMessage().apply{
+            DiscordMessage().apply {
                 content = "# 🚨 에러 발생 비이이이이사아아아앙"
-                embeds = listOf(
-                    Embed().apply {
-                        title = "ℹ️ 에러 정보"
-                        description = """
-                            🕖 발생 시간 : ${LocalDateTime.now()}
-                            📄 예외 : ${getStackTrace(event)}
-                        """.trimIndent()
-                    }
-                )
+                embeds =
+                    listOf(
+                        Embed().apply {
+                            title = "ℹ️ 에러 정보"
+                            description =
+                                """
+                                🕖 발생 시간 : ${LocalDateTime.now()}
+                                📄 예외 : ${getStackTrace(event)}
+                                """.trimIndent()
+                        }
+                    )
             }
         )
     }
 
     private fun getStackTrace(event: ILoggingEvent?): String {
-        if(event == null) return "로그 정보가 소실되었습니다."
+        if (event == null) return "로그 정보가 소실되었습니다."
         val message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(1900)
 
         val throwableProxy = event.throwableProxy
@@ -74,9 +75,10 @@ class DiscordAppender(
         if (throwableProxy != null) {
             val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
             println("stackTrace = $stackTrace")
-            var causedBy = stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
-                .toString()
-            if(causedBy == null) return "로그 정보(causedBy)가 소실되었습니다."
+            var causedBy =
+                stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
+                    .toString()
+            if (causedBy == null) return "로그 정보(causedBy)가 소실되었습니다."
 
             val causedByIndex = causedBy.indexOf(CAUSED_BY)
 
