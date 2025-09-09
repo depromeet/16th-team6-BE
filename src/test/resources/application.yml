@@ -117,5 +117,5 @@ mixpanel:
 discord:
   webhook:
     url:
-      local: ${secret.dev.DISCORD_WEBHOOK_URL}
+      local: ${secret.local.DISCORD_WEBHOOK_URL}
 

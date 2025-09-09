@@ -99,7 +99,7 @@
     <springProfile name="local">
         <root level="ERROR">
             <appender-ref ref="CONSOLE_APPENDER"/>
-            <appender-ref ref="WEBHOOK_APPENDER_LOCAL"/>
+<!--            <appender-ref ref="WEBHOOK_APPENDER_LOCAL"/>-->
         </root>
     </springProfile>
 
