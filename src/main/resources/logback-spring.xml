@@ -120,7 +120,7 @@
     <springProfile name="staging">
         <root level="ERROR">
             <appender-ref ref="CONSOLE_APPENDER"/>
-            <appender-ref ref="WEBHOOK_APPENDER_STAGING"/>
+<!--            <appender-ref ref="WEBHOOK_APPENDER_STAGING"/>-->
         </root>
     </springProfile>
 
