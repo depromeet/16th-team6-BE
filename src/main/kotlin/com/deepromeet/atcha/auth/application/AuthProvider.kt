@@ -4,9 +4,9 @@ import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.ProviderToken
 
 interface AuthProvider {
-    fun getProviderContext(providerToken: ProviderToken): ProviderContext
+    suspend fun getProviderContext(providerToken: ProviderToken): ProviderContext
 
-    fun logout(providerToken: String)
+    suspend fun logout(providerToken: String)
 
-    fun logout(providerContext: ProviderContext)
+    suspend fun logout(providerContext: ProviderContext)
 }
