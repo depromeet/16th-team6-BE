@@ -66,6 +66,9 @@ dependencies {
     // openFeign
     implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
+    // Spring WebFlux for HTTP Interface
+    implementation("org.springframework.boot:spring-boot-starter-webflux")
+
     // rest assured
     testImplementation("io.rest-assured:rest-assured:5.5.0")
 
