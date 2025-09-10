@@ -7,12 +7,12 @@ import org.springframework.stereotype.Component
 
 @Component
 class AppleProvider(
-    private val appleFeignClient: AppleFeignClient,
+    private val appleHttpClient: AppleHttpClient,
     private val appleTokenParser: AppleTokenParser
 ) : AuthProvider {
-    override fun getProviderContext(providerToken: ProviderToken): ProviderContext {
+    override suspend fun getProviderContext(providerToken: ProviderToken): ProviderContext {
         val header = appleTokenParser.parseHeader(providerToken.token)
-        val publicKeys = appleFeignClient.getPublicKeys()
+        val publicKeys = appleHttpClient.getPublicKeys()
         val publicKey = PublicKeyGenerator.generate(header, publicKeys)
         val claims = appleTokenParser.extractClaims(providerToken.token, publicKey)
 
@@ -23,11 +23,11 @@ class AppleProvider(
         )
     }
 
-    override fun logout(providerToken: String) {
+    override suspend fun logout(providerToken: String) {
         TODO("Not yet implemented")
     }
 
-    override fun logout(providerContext: ProviderContext) {
+    override suspend fun logout(providerContext: ProviderContext) {
         TODO("Not yet implemented")
     }
 }

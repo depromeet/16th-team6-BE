@@ -19,9 +19,9 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class TransitRouteClientV2(
-    private val tmapRouteSearchClient: TMapRouteClient
+    private val tmapRouteHttpClient: TMapRouteHttpClient
 ) {
-    fun fetchItinerariesV2(
+    suspend fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
     ): List<RouteItinerary> {
@@ -31,7 +31,7 @@ class TransitRouteClientV2(
 
         val response =
             try {
-                tmapRouteSearchClient.getRoutes(
+                tmapRouteHttpClient.getRoutes(
                     TMapRouteRequest(
                         startX = start.lon.toString(),
                         startY = start.lat.toString(),
