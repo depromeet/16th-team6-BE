@@ -31,8 +31,8 @@ class AuthService(
     @Transactional(readOnly = true)
     fun checkUserExists(providerToken: ProviderToken): Boolean {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
-        val provider = authProvider.getProviderUserId(providerToken)
-        return userReader.checkExists(provider.providerUserId)
+        val providerContext = authProvider.getProviderContext(providerToken)
+        return userReader.checkExists(providerContext.providerUserId)
     }
 
     @Transactional
@@ -41,7 +41,7 @@ class AuthService(
         signUpInfo: SignUpInfo
     ): UserAuthInfo {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
-        val provider = authProvider.getProviderUserId(providerToken)
+        val provider = authProvider.getProviderContext(providerToken)
 
         if (userReader.checkExists(provider.providerUserId)) { // todo uk로 예외 처리
             throw AuthException.of(AuthError.ALREADY_EXISTS_USER)
@@ -59,7 +59,7 @@ class AuthService(
     ): UserAuthInfo {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
 
-        val userInfo = authProvider.getProviderUserId(providerToken)
+        val userInfo = authProvider.getProviderContext(providerToken)
         val user = userReader.readByProviderId(userInfo.providerUserId)
         userUpdater.updateFcmToken(user, fcmToken)
 

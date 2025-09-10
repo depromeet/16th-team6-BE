@@ -1,12 +1,12 @@
 package com.deepromeet.atcha.auth.application
 
-import com.deepromeet.atcha.auth.domain.Provider
+import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.ProviderToken
 
 interface AuthProvider {
-    fun getProviderUserId(providerToken: ProviderToken): Provider
+    fun getProviderContext(providerToken: ProviderToken): ProviderContext
 
     fun logout(providerToken: String)
 
-    fun logout(provider: Provider)
+    fun logout(providerContext: ProviderContext)
 }
