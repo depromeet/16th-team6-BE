@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 @Component
 class TokenExpirationManager(
     private val blacklist: TokenBlacklist,
-    private val jwtTokeParser: JwtTokeParser
+    private val jwtTokenParser: JwtTokenParser
 ) {
     fun expireTokensWithRefreshToken(refreshToken: String) {
-        val accessToken = jwtTokeParser.getAccessToken(refreshToken)
+        val accessToken = jwtTokenParser.getAccessToken(refreshToken)
         expireToken(accessToken)
         expireToken(refreshToken)
     }

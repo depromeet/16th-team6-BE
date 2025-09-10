@@ -13,7 +13,7 @@ import org.springframework.web.method.support.ModelAndViewContainer
 
 @Component
 class CurrentUserArgumentResolver(
-    private val jwtTokeParser: JwtTokeParser,
+    private val jwtTokenParser: JwtTokenParser,
     private val tokenExpirationManager: TokenExpirationManager
 ) : HandlerMethodArgumentResolver {
     companion object {
@@ -43,8 +43,8 @@ class CurrentUserArgumentResolver(
         }
         val token = authorization.substring(TOKEN_TYPE.length)
         tokenExpirationManager.validateNotExpired(token)
-        jwtTokeParser.validateToken(token, TokenType.ACCESS)
-        val userId = jwtTokeParser.getUserId(token, TokenType.ACCESS)
+        jwtTokenParser.validateToken(token, TokenType.ACCESS)
+        val userId = jwtTokenParser.getUserId(token, TokenType.ACCESS)
         return userId.value
     }
 }
