@@ -16,7 +16,7 @@ class LocationReader(
     private val poiFinder: POIFinder,
     private val reverseGeocoder: ReverseGeocoder
 ) {
-    fun readPOIs(
+    suspend fun readPOIs(
         keyword: String,
         currentCoordinate: Coordinate
     ): List<POI> {
@@ -26,7 +26,7 @@ class LocationReader(
         return poiFinder.find(keyword, currentCoordinate)
     }
 
-    fun read(coordinate: Coordinate): Location {
+    suspend fun read(coordinate: Coordinate): Location {
         try {
             return reverseGeocoder.geocode(coordinate)
         } catch (e: ExternalApiException) {

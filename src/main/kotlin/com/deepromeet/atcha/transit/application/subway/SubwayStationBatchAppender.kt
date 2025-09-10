@@ -11,7 +11,7 @@ class SubwayStationBatchAppender(
     private val subwayStationFetcher: SubwayStationFetcher
 ) {
     @Transactional
-    fun appendAll() {
+    suspend fun appendAll() {
         val stationListsByLine =
             SubwayLine.entries.associateWith { line -> subwayStationFetcher.fetch(line.lnCd) }
 
