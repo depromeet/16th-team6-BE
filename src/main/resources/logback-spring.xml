@@ -1,10 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration scan="true" scanPeriod="5 seconds">
-    <property resource="application-local.yml"/>
     <property resource="application-dev.yml"/>
     <property resource="application-prod.yml"/>
     <property resource="application-staging.yml"/>
-    <springProperty name="DISCORD_WEBHOOK_URL_LOCAL" source="discord.webhook.url.local"/>
     <springProperty name="DISCORD_WEBHOOK_URL_DEV" source="discord.webhook.url.dev"/>
     <springProperty name="DISCORD_WEBHOOK_URL_PROD" source="discord.webhook.url.prod"/>
     <springProperty name="DISCORD_WEBHOOK_URL_STAGING" source="discord.webhook.url.staging"/>
@@ -14,26 +12,6 @@
                 %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %cyan([%logger{0}:%line])-%message%n
             </pattern>
         </encoder>
-    </appender>
-
-    <appender name="WEBHOOK_APPENDER_LOCAL" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>ERROR</level>
-        </filter>
-        <webhookUrl>${DISCORD_WEBHOOK_URL_LOCAL}</webhookUrl>
-        <username>Atcha Bot</username>
-        <format>
-            <label>
-                <pattern>profile=local,host=${HOSTNAME},level=%level</pattern>
-                <readMarkers>true</readMarkers>
-            </label>
-            <message>
-                <pattern>
-                    %highlight([%-5level]) %d{yy-MM-dd HH:mm:ss.SSS} %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
-                </pattern>
-            </message>
-            <sortByTime>true</sortByTime>
-        </format>
     </appender>
 
     <appender name="WEBHOOK_APPENDER_DEV" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
