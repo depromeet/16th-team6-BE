@@ -25,7 +25,7 @@ class LocationController(
     private val locationService: LocationService
 ) {
     @GetMapping
-    fun getPOIs(
+    suspend fun getPOIs(
         @ModelAttribute request: POISearchRequest
     ): ApiResponse<List<POIResponse>> =
         ApiResponse.success(
@@ -34,7 +34,7 @@ class LocationController(
         )
 
     @GetMapping("/rgeo")
-    fun getReverseGeoLabel(
+    suspend fun getReverseGeoLabel(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<LocationResponse> =
         ApiResponse.success(
