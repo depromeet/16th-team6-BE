@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.kakao
 
 import com.deepromeet.atcha.auth.application.AuthProvider
-import com.deepromeet.atcha.auth.domain.Provider
+import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import org.springframework.stereotype.Component
 
@@ -13,9 +13,9 @@ class KakaoProvider(
         private const val TOKEN_TYPE = "Bearer "
     }
 
-    override fun getProviderUserId(providerToken: ProviderToken): Provider {
+    override fun getProviderContext(providerToken: ProviderToken): ProviderContext {
         val kakaoUserInfoResponse = kakaoFeignClient.getUserInfo(TOKEN_TYPE + providerToken.token)
-        return Provider(
+        return ProviderContext(
             providerUserId = kakaoUserInfoResponse.kakaoId.toString(),
             providerToken = providerToken.token,
             providerType = providerToken.providerType
@@ -26,7 +26,7 @@ class KakaoProvider(
         kakaoFeignClient.logout(TOKEN_TYPE + providerToken)
     }
 
-    override fun logout(provider: Provider) {
-        kakaoFeignClient.logout(TOKEN_TYPE + provider.providerToken)
+    override fun logout(providerContext: ProviderContext) {
+        kakaoFeignClient.logout(TOKEN_TYPE + providerContext.providerToken)
     }
 }

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.infrastructure.mapper
 
-import com.deepromeet.atcha.auth.domain.Provider
+import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.UserProvider
 import com.deepromeet.atcha.auth.domain.UserProviderId
 import com.deepromeet.atcha.auth.infrastructure.entity.ProviderEntity
@@ -15,15 +15,15 @@ import org.springframework.stereotype.Component
  */
 @Component
 class AuthMapper {
-    fun toDomain(entity: ProviderEntity): Provider {
-        return Provider(
+    fun toDomain(entity: ProviderEntity): ProviderContext {
+        return ProviderContext(
             providerUserId = entity.providerUserId,
             providerType = entity.providerType,
             providerToken = entity.providerToken
         )
     }
 
-    fun toEntity(domain: Provider): ProviderEntity {
+    fun toEntity(domain: ProviderContext): ProviderEntity {
         return ProviderEntity(
             providerUserId = domain.providerUserId,
             providerType = domain.providerType,
@@ -35,7 +35,7 @@ class AuthMapper {
         return UserProvider(
             id = UserProviderId(entity.id),
             userId = UserId(entity.user.id),
-            provider = toDomain(entity.provider)
+            providerContext = toDomain(entity.provider)
         )
     }
 
@@ -46,7 +46,7 @@ class AuthMapper {
         return UserProviderEntity(
             id = domain.id.value,
             user = userEntity,
-            provider = toEntity(domain.provider)
+            provider = toEntity(domain.providerContext)
         )
     }
 }
