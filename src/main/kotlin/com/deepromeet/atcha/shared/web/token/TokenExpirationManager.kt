@@ -21,7 +21,7 @@ class TokenExpirationManager(
 
     fun validateNotExpired(token: String) {
         if (blacklist.contains(token)) {
-            throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
         }
     }
 }

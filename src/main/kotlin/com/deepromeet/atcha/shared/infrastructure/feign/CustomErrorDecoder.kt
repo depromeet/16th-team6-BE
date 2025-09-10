@@ -41,7 +41,7 @@ class CustomErrorDecoder : ErrorDecoder {
                 )
             else -> {
                 log.warn { "정의되지 않은 외부 API 오류 발생. $detailedMessage" }
-                ExternalApiException.Companion.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, detailedMessage)
+                ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, detailedMessage)
             }
         }
     }
