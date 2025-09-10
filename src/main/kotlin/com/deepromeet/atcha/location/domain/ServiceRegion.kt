@@ -13,7 +13,7 @@ enum class ServiceRegion(
     companion object {
         fun from(regionName: String): ServiceRegion {
             return entries.firstOrNull { it.regionName == regionName }
-                ?: throw TransitException.Companion.of(
+                ?: throw TransitException.of(
                     TransitError.SERVICE_AREA_NOT_SUPPORTED,
                     "지역 '$regionName'은 현재 서비스를 지원하지 않습니다."
                 )
