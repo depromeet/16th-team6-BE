@@ -2,6 +2,8 @@ package com.deepromeet.atcha.location.infrastructure.client.config
 
 import com.deepromeet.atcha.location.infrastructure.client.TMapLocationHttpClient
 import com.deepromeet.atcha.route.infrastructure.client.tmap.TMapRouteHttpClient
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.WebClientCircuitBreakerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -12,15 +14,17 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 @Configuration
 class TMapHttpClientConfig(
     @Value("\${tmap.api.url}") private val tmapApiUrl: String,
-    @Value("\${tmap.api.app-key}") private val appKey: String
+    @Value("\${tmap.api.app-key}") private val appKey: String,
+    private val circuitBreakerFactory: WebClientCircuitBreakerFactory
 ) {
     @Bean
-    fun tmapWebClient(webClientBuilder: WebClient.Builder): WebClient {
-        return webClientBuilder
+    fun tmapWebClient(commonWebClient: WebClient): WebClient {
+        return commonWebClient.mutate()
             .baseUrl(tmapApiUrl)
             .defaultHeader("appKey", appKey)
             .defaultHeader("accept", "application/json")
             .defaultHeader("content-type", "application/json")
+            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.COMMERCIAL_API, "T-MAP"))
             .build()
     }
 
