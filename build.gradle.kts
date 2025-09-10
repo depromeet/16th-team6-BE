@@ -59,6 +59,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("io.github.resilience4j:resilience4j-spring6:2.3.0")
     implementation("io.github.resilience4j:resilience4j-rxjava3:2.3.0")
+    implementation("io.github.resilience4j:resilience4j-reactor:2.3.0")
 
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
