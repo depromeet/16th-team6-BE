@@ -4,7 +4,7 @@ import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import java.time.LocalDateTime
 
-fun List<LastRoute>.sort(sortType: LastRouteSortType): List<LastRoute> {
+fun List<LastRoute>.sort(sortType: LastRouteSortType = LastRouteSortType.DEPARTURE_TIME_DESC): List<LastRoute> {
     val now = LocalDateTime.now()
     val upcomingRoutes =
         this.filter {

@@ -30,7 +30,7 @@ class LocationController(
     ): ApiResponse<List<POIResponse>> =
         ApiResponse.Companion.success(
             locationService.getPOIs(request.keyword, request.toCoordinate())
-                .map(POIResponse.Companion::from)
+                .map(POIResponse::from)
         )
 
     @GetMapping("/rgeo")
