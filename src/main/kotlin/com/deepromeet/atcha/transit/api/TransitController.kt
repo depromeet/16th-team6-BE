@@ -66,7 +66,7 @@ class TransitController(
     }
 
     @GetMapping("/batch")
-    fun batch(): ApiResponse<Unit> {
+    suspend fun batch(): ApiResponse<Unit> {
         transitService.init()
         return ApiResponse.success(Unit)
     }

@@ -40,7 +40,7 @@ class TransitService(
         return busManager.getBusRouteOperationInfo(busRoute)
     }
 
-    fun init() {
+    suspend fun init() {
         subwayStationBatchAppender.appendAll()
     }
 }
