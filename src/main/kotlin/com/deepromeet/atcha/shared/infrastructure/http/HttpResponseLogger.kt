@@ -17,10 +17,11 @@ class HttpResponseLogger {
                         .defaultIfEmpty("")
                         .doOnNext { body ->
                             try {
-                                val prettyBody = PrettyBodyFormatter.format(
-                                    body.toByteArray(StandardCharsets.UTF_8),
-                                    response.headers().asHttpHeaders()
-                                )
+                                val prettyBody =
+                                    PrettyBodyFormatter.format(
+                                        body.toByteArray(StandardCharsets.UTF_8),
+                                        response.headers().asHttpHeaders()
+                                    )
                                 log.debug {
                                     """
                                     |=== HTTP Response ===

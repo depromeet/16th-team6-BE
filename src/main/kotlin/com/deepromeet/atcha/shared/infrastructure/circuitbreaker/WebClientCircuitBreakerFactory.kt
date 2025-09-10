@@ -21,9 +21,10 @@ class WebClientCircuitBreakerFactory(
         clientName: String
     ): ExchangeFilterFunction {
         // 1) 타입별 기본 설정 복제
-        val baseCfg = cbRegistry
-            .circuitBreaker(type.instanceName)
-            .circuitBreakerConfig
+        val baseCfg =
+            cbRegistry
+                .circuitBreaker(type.instanceName)
+                .circuitBreakerConfig
 
         val cbName = "${type.instanceName}:$clientName"
         val cb: CircuitBreaker = cbRegistry.circuitBreaker(cbName, baseCfg)
@@ -42,9 +43,10 @@ class WebClientCircuitBreakerFactory(
         type: CircuitBreakerType,
         clientName: String
     ): CircuitBreaker {
-        val baseCfg = cbRegistry
-            .circuitBreaker(type.instanceName)
-            .circuitBreakerConfig
+        val baseCfg =
+            cbRegistry
+                .circuitBreaker(type.instanceName)
+                .circuitBreakerConfig
 
         val cbName = "${type.instanceName}:$clientName"
         val cb: CircuitBreaker = cbRegistry.circuitBreaker(cbName, baseCfg)

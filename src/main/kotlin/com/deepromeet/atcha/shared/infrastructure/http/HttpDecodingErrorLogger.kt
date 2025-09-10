@@ -31,12 +31,13 @@ class HttpDecodingErrorLogger {
                             response.bodyToMono(String::class.java)
                                 .defaultIfEmpty("")
                                 .doOnNext { bodyContent ->
-                                    val prettyBody = PrettyBodyFormatter.format(
-                                        bodyContent.toByteArray(StandardCharsets.UTF_8),
-                                        response.headers().asHttpHeaders()
-                                    )
-                                    log.warn(error) { 
-                                        "응답 디코딩 실패\n=== Response Body ===\n$prettyBody\n====================" 
+                                    val prettyBody =
+                                        PrettyBodyFormatter.format(
+                                            bodyContent.toByteArray(StandardCharsets.UTF_8),
+                                            response.headers().asHttpHeaders()
+                                        )
+                                    log.warn(error) {
+                                        "응답 디코딩 실패\n=== Response Body ===\n$prettyBody\n===================="
                                     }
                                 }
                                 .then(Mono.error<ClientResponse>(error))
