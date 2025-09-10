@@ -1,5 +1,7 @@
 package com.deepromeet.atcha.auth.infrastructure.provider.apple
 
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.WebClientCircuitBreakerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -9,12 +11,14 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 
 @Configuration
 class AppleHttpClientConfig(
-    @Value("\${apple.api.url}") private val appleApiUrl: String
+    @Value("\${apple.api.url}") private val appleApiUrl: String,
+    private val circuitBreakerFactory: WebClientCircuitBreakerFactory
 ) {
     @Bean
-    fun appleWebClient(webClientBuilder: WebClient.Builder): WebClient {
-        return webClientBuilder
+    fun appleWebClient(commonWebClient: WebClient): WebClient {
+        return commonWebClient.mutate()
             .baseUrl(appleApiUrl)
+            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.AUTH_API, "Apple"))
             .build()
     }
 
