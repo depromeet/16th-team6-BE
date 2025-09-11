@@ -12,7 +12,7 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class PublicHolidayClient(
-    private val publicHolidayFeignClient: PublicHolidayFeignClient,
+    private val publicHolidayHttpClient: PublicHolidayHttpClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -25,7 +25,7 @@ class PublicHolidayClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicHolidayFeignClient.getPublicHoliday(key, year) },
+            apiCall = { key -> publicHolidayHttpClient.getPublicHoliday(key, year) },
             isLimitExceeded = { response -> isHolidayApiLimitExceeded(response) },
             processResult = { response ->
                 response.body.items.item.map { it.toLocalDate() }

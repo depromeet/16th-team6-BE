@@ -1,17 +1,14 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayStationResponse
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
 
-@FeignClient(
-    name = "kric-subway-route-station",
-    url = "\${kric.api.url.subway}"
-)
-interface KRICSubwayStationFeignClient {
-    @GetMapping("/subwayRouteInfo")
-    fun getSubwayRouteInfo(
+@HttpExchange
+interface KRICSubwayStationHttpClient {
+    @GetExchange("/subwayRouteInfo")
+    suspend fun getSubwayRouteInfo(
         @RequestParam serviceKey: String,
         @RequestParam lnCd: String,
         @RequestParam format: String = "json",

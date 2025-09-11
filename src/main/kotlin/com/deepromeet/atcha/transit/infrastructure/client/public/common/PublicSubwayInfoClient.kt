@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicSubwayInfoClient(
-    private val subwayInfoFeignClient: PublicSubwayInfoFeignClient,
+    private val subwayInfoHttpClient: PublicSubwayInfoHttpClient,
     private val subwayStationRepository: SubwayStationRepository,
     private val transitNameComparer: TransitNameComparer,
     @Value("\${open-api.api.service-key}")
@@ -41,7 +41,7 @@ class PublicSubwayInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> subwayInfoFeignClient.getStationByName(key, stationName) },
+            apiCall = { key -> subwayInfoHttpClient.getStationByName(key, stationName) },
             isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
             processResult = { response ->
                 response.response.body.items?.item
@@ -82,7 +82,7 @@ class PublicSubwayInfoClient(
                         spareKey = spareKey,
                         realLastKey = realLastKey,
                         apiCall = { key ->
-                            subwayInfoFeignClient.getStationSchedule(
+                            subwayInfoHttpClient.getStationSchedule(
                                 key,
                                 startStation.id!!.value,
                                 dailyType.code,

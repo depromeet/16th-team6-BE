@@ -18,14 +18,14 @@ private val log = KotlinLogging.logger {}
 object ApiClientUtils {
     suspend fun <T, R> callApiByKeyProvider(
         keyProvider: () -> String,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         processResult: (T) -> R,
         errorMessage: String
     ): R {
         val response: T =
             try {
                 val apiKey = keyProvider()
-                interruptible { apiCall(apiKey) }
+                apiCall(apiKey)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: CallNotPermittedException) {
@@ -41,7 +41,7 @@ object ApiClientUtils {
         primaryKey: String,
         spareKey: String,
         realLastKey: String,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         isLimitExceeded: (T) -> Boolean,
         processResult: (T) -> R,
         errorMessage: String
@@ -53,7 +53,7 @@ object ApiClientUtils {
 
     private suspend fun <T> callApiWithRetryInternal(
         keys: List<String>,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         isLimitExceeded: (T) -> Boolean,
         errorMessage: String,
         index: Int
@@ -67,7 +67,7 @@ object ApiClientUtils {
 
         val response =
             try {
-                interruptible { apiCall(currentKey) }
+                apiCall(currentKey)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: CallNotPermittedException) {
