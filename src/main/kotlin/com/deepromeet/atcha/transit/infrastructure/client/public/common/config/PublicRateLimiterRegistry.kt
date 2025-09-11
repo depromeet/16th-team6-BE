@@ -38,6 +38,19 @@ class PublicRateLimiterRegistry(props: OpenApiProps) {
         }
     }
 
+    fun awaitForTMap() {
+        val bucket = bucketMap.computeIfAbsent("tmap") { newBucket(10) }
+
+        while (!bucket.tryConsume(1)) {
+            try {
+                Thread.sleep(100)
+            } catch (e: InterruptedException) {
+                Thread.currentThread().interrupt()
+                throw CancellationException()
+            }
+        }
+    }
+
     private fun newBucket(permits: Int): Bucket =
         Bucket.builder()
             .addLimit(
