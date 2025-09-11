@@ -20,19 +20,21 @@ class WebClientCircuitBreakerFactory(
         type: CircuitBreakerType,
         clientName: String
     ): ExchangeFilterFunction {
-        // 1) 타입별 기본 설정 복제
-        val baseCfg =
-            cbRegistry
-                .circuitBreaker(type.instanceName)
-                .circuitBreakerConfig
-
+        val baseCfg = cbRegistry.circuitBreaker(type.instanceName).circuitBreakerConfig
         val cbName = "${type.instanceName}:$clientName"
         val cb: CircuitBreaker = cbRegistry.circuitBreaker(cbName, baseCfg)
 
         registerEventListeners(cb, type, cbName)
 
-        return ExchangeFilterFunction.ofResponseProcessor { response ->
-            Mono.just(response)
+        return ExchangeFilterFunction { request, next ->
+            next.exchange(request)
+                .flatMap { response ->
+                    if (response.statusCode().isError) {
+                        response.createException().flatMap { Mono.error(it) }
+                    } else {
+                        Mono.just(response)
+                    }
+                }
                 .transformDeferred(CircuitBreakerOperator.of(cb))
         }
     }
