@@ -1,17 +1,14 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul
 
 import com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response.SeoulBusOperationResponse
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
 
-@FeignClient(
-    name = "public-seoul-bus-operation",
-    url = "\${open-api.api.url.bus-operation}"
-)
-interface SeoulBusOperationFeignClient {
-    @GetMapping
-    fun getBusOperationInfo(
+@HttpExchange
+interface SeoulBusOperationHttpClient {
+    @GetExchange
+    suspend fun getBusOperationInfo(
         @RequestParam routId: String
     ): SeoulBusOperationResponse
 }
