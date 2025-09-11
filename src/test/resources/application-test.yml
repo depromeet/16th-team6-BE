@@ -26,7 +26,7 @@ resilience4j:
         slow-call-duration-threshold: PT4S
         automatic-transition-from-open-to-half-open-enabled: true
         sliding-window-type: count-based
-        
+
       commercial-api:
         failure-rate-threshold: 50.0
         minimum-number-of-calls: 5
@@ -37,7 +37,7 @@ resilience4j:
         slow-call-duration-threshold: PT4S
         automatic-transition-from-open-to-half-open-enabled: true
         sliding-window-type: count-based
-        
+
       auth-api:
         failure-rate-threshold: 40.0
         minimum-number-of-calls: 3
@@ -52,6 +52,4 @@ resilience4j:
 logging:
   level:
     com.deepromeet.atcha: DEBUG
-    org.springframework.cloud.openfeign: INFO
-    feign: INFO
     root: INFO
