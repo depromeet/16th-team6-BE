@@ -9,7 +9,6 @@ import com.deepromeet.atcha.shared.exception.ExternalApiException
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import feign.RetryableException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
@@ -22,7 +21,7 @@ private const val MAX_ROUTE_COUNT = 20
 
 @Component
 class TmapRouteSearchClient(
-    private val tMapRouteClient: TMapRouteClient
+    private val tMapRouteHttpClient: TMapRouteHttpClient
 ) : TransitRouteSearchClient {
     override fun searchRoutes(
         start: Coordinate,
@@ -34,7 +33,7 @@ class TmapRouteSearchClient(
 
         val response =
             try {
-                tMapRouteClient.getRoutes(
+                tMapRouteHttpClient.getRoutes(
                     TMapRouteRequest(
                         startX = start.lon.toString(),
                         startY = start.lat.toString(),
@@ -44,7 +43,7 @@ class TmapRouteSearchClient(
                         searchDttm = baseDate
                     )
                 )
-            } catch (e: RetryableException) {
+            } catch (e: Exception) {
                 log.error(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_TIME_OUT, e)
             } catch (e: CallNotPermittedException) {
