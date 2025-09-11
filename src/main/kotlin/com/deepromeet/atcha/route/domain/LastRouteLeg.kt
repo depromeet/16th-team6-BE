@@ -69,7 +69,7 @@ data class LastRouteLeg(
             is TransitInfo.SubwayInfo -> {
                 transitInfo.timeTable.findNearestTime(targetTime, direction)
                     ?.departureTime?.toLocalDateTime()
-                    ?: throw TransitException.Companion.of(
+                    ?: throw TransitException.of(
                         TransitError.NOT_FOUND_SPECIFIED_TIME,
                         "지하철 '$route'의 ${start.name}역에서 " +
                             "$targetTime ${direction}의 시간표를 찾을 수 없습니다."
@@ -79,7 +79,7 @@ data class LastRouteLeg(
                 try {
                     transitInfo.timeTable.calculateNearestTime(targetTime, direction)
                 } catch (e: TransitException) {
-                    throw TransitException.Companion.of(
+                    throw TransitException.of(
                         TransitError.NOT_FOUND_SPECIFIED_TIME,
                         "버스 '$route'의 ${start.name}정류장에서 " +
                             "$targetTime ${direction}의 시간표를 찾을 수 없습니다.",
@@ -88,7 +88,7 @@ data class LastRouteLeg(
                 }
             }
             TransitInfo.NoInfoTable -> {
-                throw TransitException.Companion.of(
+                throw TransitException.of(
                     TransitError.NOT_FOUND_SPECIFIED_TIME,
                     "해당 교통수단의 막차 시간 정보가 없습니다. " +
                         "$mode - ${start.name} -> ${end.name}"

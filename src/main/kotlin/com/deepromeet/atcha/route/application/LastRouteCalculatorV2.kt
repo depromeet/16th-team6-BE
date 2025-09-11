@@ -103,7 +103,7 @@ class LastRouteCalculatorV2(
                 when (leg.mode) {
                     RouteMode.SUBWAY -> {
                         try {
-                            val subwayLine = SubwayLine.Companion.fromRouteName(leg.route!!)
+                            val subwayLine = SubwayLine.fromRouteName(leg.route!!)
                             val routes = subwayManager.getRoutes(subwayLine)
                             val startStation = subwayManager.getStation(subwayLine, leg.start.name)
                             val endStation = subwayManager.getStation(subwayLine, leg.end.name)

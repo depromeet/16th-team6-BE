@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth
 
 import com.deepromeet.atcha.auth.application.AuthService
 import com.deepromeet.atcha.auth.application.UserProviderAppender
-import com.deepromeet.atcha.auth.domain.Provider
+import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
@@ -144,7 +144,7 @@ class AuthServiceTest {
         // 미리 DB에 로그인할 유저 저장
         val user = UserFixture.create(id = 0L, providerId = kakaoId.toString())
         val savedUser = userAppender.append(user)
-        userProviderAppender.append(savedUser, Provider(kakaoId.toString(), ProviderType.KAKAO, token))
+        userProviderAppender.append(savedUser, ProviderContext(kakaoId.toString(), ProviderType.KAKAO, token))
 
         // when
         val result = authService.login(ProviderToken.of(token, ProviderType.KAKAO.ordinal), "TEST_FCM_TOKEN")

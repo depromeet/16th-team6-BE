@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
-class JwtTokeParser(
+class JwtTokenParser(
     @Value("\${jwt.access.secret}")
     private val accessSecret: String,
     @Value("\${jwt.refresh.secret}")
@@ -30,9 +30,9 @@ class JwtTokeParser(
         try {
             validateJwtFormat(tokenType, token)
         } catch (e: ExpiredJwtException) {
-            throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "만료된 토큰입니다: ${e.message}")
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "만료된 토큰입니다: ${e.message}")
         } catch (e: Exception) {
-            throw TokenException.Companion.of(TokenError.NOT_VALID_TOKEN, "유효하지 않은 토큰 형식입니다: ${e.message}")
+            throw TokenException.of(TokenError.NOT_VALID_TOKEN, "유효하지 않은 토큰 형식입니다: ${e.message}")
         }
     }
 
@@ -49,9 +49,9 @@ class JwtTokeParser(
                     .body
             return UserId(body.get("sub").toString().toLong())
         } catch (e: ExpiredJwtException) {
-            throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "만료된 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}")
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "만료된 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}")
         } catch (e: Exception) {
-            throw TokenException.Companion.of(
+            throw TokenException.of(
                 TokenError.NOT_VALID_TOKEN,
                 "유효하지 않은 토큰으로 사용자 ID를 가져올 수 없습니다: ${e.message}"
             )
@@ -68,12 +68,12 @@ class JwtTokeParser(
                     .body
             return body.get(TokenType.ACCESS.name).toString()
         } catch (e: ExpiredJwtException) {
-            throw TokenException.Companion.of(
+            throw TokenException.of(
                 TokenError.EXPIRED_TOKEN,
                 "만료된 리프레시 토큰으로 액세스 토큰을 가져올 수 없습니다: ${e.message}"
             )
         } catch (e: Exception) {
-            throw TokenException.Companion.of(
+            throw TokenException.of(
                 TokenError.NOT_VALID_TOKEN,
                 "유효하지 않은 리프레시 토큰으로 액세스 토큰을 가져올 수 없습니다: ${e.message}"
             )
@@ -89,6 +89,6 @@ class JwtTokeParser(
             .build()
             .parseClaimsJws(token)
             .body.get("sub")
-            ?: throw TokenException.Companion.of(TokenError.NOT_VALID_TOKEN, "토큰에 사용자 정보가 포함되어 있지 않습니다")
+            ?: throw TokenException.of(TokenError.NOT_VALID_TOKEN, "토큰에 사용자 정보가 포함되어 있지 않습니다")
     }
 }

@@ -16,7 +16,7 @@ data class RoutePassStop(
         ): RoutePassStop {
             return RoutePassStop(
                 index = index,
-                location = RouteLocation.Companion.of(stationName, latitude, longitude),
+                location = RouteLocation.of(stationName, latitude, longitude),
                 stationName = stationName
             )
         }

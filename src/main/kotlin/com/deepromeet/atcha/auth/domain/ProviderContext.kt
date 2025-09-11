@@ -2,7 +2,7 @@ package com.deepromeet.atcha.auth.domain
 
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
 
-data class Provider(
+data class ProviderContext(
     val providerUserId: String,
     val providerType: ProviderType,
     val providerToken: String
@@ -16,8 +16,8 @@ data class Provider(
         fun of(
             providerUserId: String,
             providerToken: ProviderToken
-        ): Provider {
-            return Provider(
+        ): ProviderContext {
+            return ProviderContext(
                 providerUserId = providerUserId,
                 providerType = providerToken.providerType,
                 providerToken = providerToken.token
@@ -25,7 +25,7 @@ data class Provider(
         }
     }
 
-    fun updateToken(newToken: String): Provider {
+    fun updateToken(newToken: String): ProviderContext {
         require(newToken.isNotBlank()) { "New token cannot be blank" }
         return copy(providerToken = newToken)
     }

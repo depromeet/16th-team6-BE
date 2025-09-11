@@ -6,8 +6,8 @@ import com.deepromeet.atcha.auth.domain.UserAuthInfo
 import com.deepromeet.atcha.auth.domain.UserTokens
 import com.deepromeet.atcha.auth.exception.AuthError
 import com.deepromeet.atcha.auth.exception.AuthException
-import com.deepromeet.atcha.shared.web.token.JwtTokeParser
 import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
+import com.deepromeet.atcha.shared.web.token.JwtTokenParser
 import com.deepromeet.atcha.shared.web.token.TokenExpirationManager
 import com.deepromeet.atcha.shared.web.token.TokenType
 import com.deepromeet.atcha.user.application.UserAppender
@@ -20,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional
 class AuthService(
     private val authProviders: AuthProviders,
     private val jwtTokenGenerator: JwtTokenGenerator,
-    private val jwtTokeParser: JwtTokeParser,
+    private val jwtTokenParser: JwtTokenParser,
     private val tokenExpirationManager: TokenExpirationManager,
     private val userReader: UserReader,
     private val userAppender: UserAppender,
@@ -31,8 +31,8 @@ class AuthService(
     @Transactional(readOnly = true)
     fun checkUserExists(providerToken: ProviderToken): Boolean {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
-        val provider = authProvider.getProviderUserId(providerToken)
-        return userReader.checkExists(provider.providerUserId)
+        val providerContext = authProvider.getProviderContext(providerToken)
+        return userReader.checkExists(providerContext.providerUserId)
     }
 
     @Transactional
@@ -41,7 +41,7 @@ class AuthService(
         signUpInfo: SignUpInfo
     ): UserAuthInfo {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
-        val provider = authProvider.getProviderUserId(providerToken)
+        val provider = authProvider.getProviderContext(providerToken)
 
         if (userReader.checkExists(provider.providerUserId)) { // todo uk로 예외 처리
             throw AuthException.of(AuthError.ALREADY_EXISTS_USER)
@@ -59,7 +59,7 @@ class AuthService(
     ): UserAuthInfo {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
 
-        val userInfo = authProvider.getProviderUserId(providerToken)
+        val userInfo = authProvider.getProviderContext(providerToken)
         val user = userReader.readByProviderId(userInfo.providerUserId)
         userUpdater.updateFcmToken(user, fcmToken)
 
@@ -73,15 +73,15 @@ class AuthService(
     @Transactional
     fun logout(refreshToken: String) {
         tokenExpirationManager.validateNotExpired(refreshToken)
-        jwtTokeParser.validateToken(refreshToken, TokenType.REFRESH)
+        jwtTokenParser.validateToken(refreshToken, TokenType.REFRESH)
         tokenExpirationManager.expireTokensWithRefreshToken(refreshToken)
     }
 
     @Transactional
     fun reissueToken(refreshToken: String): UserTokens {
         tokenExpirationManager.validateNotExpired(refreshToken)
-        jwtTokeParser.validateToken(refreshToken, TokenType.REFRESH)
-        val userId = jwtTokeParser.getUserId(refreshToken, TokenType.REFRESH)
+        jwtTokenParser.validateToken(refreshToken, TokenType.REFRESH)
+        val userId = jwtTokenParser.getUserId(refreshToken, TokenType.REFRESH)
 
         tokenExpirationManager.expireTokensWithRefreshToken(refreshToken)
 
