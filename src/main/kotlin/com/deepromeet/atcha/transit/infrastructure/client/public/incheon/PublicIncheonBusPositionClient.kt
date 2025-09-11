@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicIncheonBusPositionClient(
-    private val publicIncheonBusPositionFeignClient: PublicIncheonBusPositionFeignClient,
+    private val publicIncheonBusPositionHttpClient: PublicIncheonBusPositionHttpClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -23,7 +23,7 @@ class PublicIncheonBusPositionClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicIncheonBusPositionFeignClient.getBusRouteLocation(
+                publicIncheonBusPositionHttpClient.getBusRouteLocation(
                     serviceKey = key,
                     routeId = routeId.value
                 )
