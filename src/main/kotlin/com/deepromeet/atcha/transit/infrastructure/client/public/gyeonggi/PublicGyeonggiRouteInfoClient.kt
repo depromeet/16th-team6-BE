@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicGyeonggiRouteInfoClient(
-    private val publicGyeonggiRouteInfoFeignClient: PublicGyeonggiRouteInfoFeignClient,
-    private val publicGyeonggiBusRealTimeInfoFeignClient: PublicGyeonggiBusRealTimeInfoFeignClient,
+    private val publicGyeonggiRouteInfoHttpClient: PublicGyeonggiRouteInfoHttpClient,
+    private val publicGyeonggiBusRealTimeInfoHttpClient: PublicGyeonggiBusRealTimeInfoHttpClient,
     private val dailyTypeResolver: DailyTypeResolver,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
@@ -40,7 +40,7 @@ class PublicGyeonggiRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicGyeonggiRouteInfoFeignClient.getRouteList(key, routeName)
+                publicGyeonggiRouteInfoHttpClient.getRouteList(key, routeName)
             },
             isLimitExceeded = ApiClientUtils::isGyeonggiApiLimitExceeded,
             processResult = { resp ->
@@ -62,7 +62,7 @@ class PublicGyeonggiRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, routeInfo.routeId) },
+            apiCall = { key -> publicGyeonggiRouteInfoHttpClient.getRouteInfo(key, routeInfo.routeId) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody?.busRouteInfoItem?.toBusSchedule(dailyType, routeInfo)
@@ -81,7 +81,7 @@ class PublicGyeonggiRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteInfo(key, route.id.value) },
+            apiCall = { key -> publicGyeonggiRouteInfoHttpClient.getRouteInfo(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody?.busRouteInfoItem?.toBusRouteOperationInfo()
@@ -104,7 +104,7 @@ class PublicGyeonggiRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicGyeonggiRouteInfoFeignClient.getRouteStationList(key, route.id.value) },
+            apiCall = { key -> publicGyeonggiRouteInfoHttpClient.getRouteStationList(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
             processResult = { resp ->
                 resp.msgBody?.busRouteStationList
@@ -132,7 +132,7 @@ class PublicGyeonggiRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicGyeonggiBusRealTimeInfoFeignClient.getRealTimeInfo(
+                publicGyeonggiBusRealTimeInfoHttpClient.getRealTimeInfo(
                     key,
                     routeInfo.getTargetStation().stationId,
                     routeInfo.routeId,
