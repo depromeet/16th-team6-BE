@@ -10,11 +10,8 @@ import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
 import io.micrometer.core.instrument.MeterRegistry
-import io.micrometer.core.instrument.Timer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onCompletion
-import kotlinx.coroutines.flow.onStart
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
@@ -78,28 +75,11 @@ class RouteController(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
     ): Flow<LastRouteResponse> {
-        val timer = Timer.start(meterRegistry)
-        meterRegistry.counter(STREAM_COUNTER_NAME).increment()
-
         return routeService.getLastRouteStream(
             UserId(id),
             request.toStart(),
             request.toEnd()
-        )
-            .onStart {
-                logger.info("[PERFORMANCE] Stream started for userId=$id")
-            }
-            .map { route ->
-                LastRouteResponse(route)
-            }
-            .onCompletion { cause ->
-                timer.stop(Timer.builder(STREAM_TIMER_NAME).register(meterRegistry))
-                if (cause == null) {
-                    logger.info("[PERFORMANCE] Stream completed successfully for userId=$id")
-                } else {
-                    logger.warn("[PERFORMANCE] Stream completed with error for userId=$id", cause)
-                }
-            }
+        ).map { route -> LastRouteResponse(route) }
     }
 
     @GetMapping("/last-routes/{routeId}")
