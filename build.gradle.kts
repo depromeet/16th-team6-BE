@@ -2,11 +2,11 @@ plugins {
     id("org.springframework.boot") version "3.4.2"
     id("io.spring.dependency-management") version "1.1.7"
 
-    kotlin("jvm") version "2.0.10"
-    kotlin("plugin.spring") version "2.0.10"
-    kotlin("plugin.jpa") version "2.0.10"
+    kotlin("jvm") version "2.0.21"
+    kotlin("plugin.spring") version "2.0.21"
+    kotlin("plugin.jpa") version "2.0.21"
 
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
     id("org.jlleitschuh.gradle.ktlint") version "12.1.2"
 }
 
@@ -27,6 +27,8 @@ repositories {
 
 noArg {
     annotation("com.deepromeet.atcha.shared.annotation.NoArg")
+    annotation("jakarta.xml.bind.annotation.XmlRootElement")
+    annotation("jakarta.xml.bind.annotation.XmlAccessorType")
 }
 
 extra["springCloudVersion"] = "2024.0.0"
@@ -38,6 +40,9 @@ dependencies {
     implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
+    // Mac OS netty error
+    runtimeOnly("io.netty:netty-resolver-dns-native-macos:4.1.100.Final:osx-aarch_64")
+
     // Spring Actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
@@ -45,17 +50,12 @@ dependencies {
     // xml parsing
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-xml")
 
-    // OKHttp
-    implementation("io.github.openfeign:feign-okhttp")
-    implementation("com.squareup.okhttp3:okhttp")
-
     // Rate Limiting
     implementation("com.bucket4j:bucket4j_jdk17-core:8.14.0")
 
     // Circuit Breaker
     implementation("io.github.resilience4j:resilience4j-spring-boot3:2.3.0")
     implementation("org.springframework.cloud:spring-cloud-starter-circuitbreaker-resilience4j")
-    implementation("io.github.resilience4j:resilience4j-feign:2.3.0")
     implementation("org.springframework.boot:spring-boot-starter-aop")
     implementation("io.github.resilience4j:resilience4j-spring6:2.3.0")
     implementation("io.github.resilience4j:resilience4j-rxjava3:2.3.0")
@@ -63,9 +63,6 @@ dependencies {
 
     // Logging
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.4")
-
-    // openFeign
-    implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
     // Spring WebFlux for HTTP Interface
     implementation("org.springframework.boot:spring-boot-starter-webflux")
