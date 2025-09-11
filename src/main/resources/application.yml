@@ -13,8 +13,6 @@ spring:
 logging:
   level:
     com.deepromeet.atcha: INFO
-    org.springframework.cloud.openfeign: INFO
-    feign: INFO
     tracer: trace
     org:
       hibernate:
