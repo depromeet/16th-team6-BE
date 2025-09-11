@@ -4,5 +4,5 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.ServiceRegion
 
 interface RegionIdentifier {
-    fun identify(coordinate: Coordinate): ServiceRegion
+    suspend fun identify(coordinate: Coordinate): ServiceRegion
 }

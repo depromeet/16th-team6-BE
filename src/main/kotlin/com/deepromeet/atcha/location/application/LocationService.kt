@@ -56,7 +56,7 @@ class LocationService(
         poiHistoryManager.clear(user)
     }
 
-    fun isServiceRegion(coordinate: Coordinate): Boolean {
+    suspend fun isServiceRegion(coordinate: Coordinate): Boolean {
         try {
             serviceRegionValidator.validate(coordinate)
         } catch (e: TransitException) {

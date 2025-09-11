@@ -8,7 +8,7 @@ import org.springframework.web.service.annotation.HttpExchange
 @HttpExchange
 interface TMapReverseGeoHttpClient {
     @GetExchange("/tmap/geo/reversegeocoding")
-    fun getReverseGeo(
+    suspend fun getReverseGeo(
         @RequestParam lat: String,
         @RequestParam lon: String
     ): TMapAddressResponse

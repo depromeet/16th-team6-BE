@@ -9,8 +9,13 @@ import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.Timer
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onCompletion
+import kotlinx.coroutines.flow.onStart
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -27,8 +32,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/routes")
 class RouteController(
-    private val routeService: RouteService
+    private val routeService: RouteService,
+    private val meterRegistry: MeterRegistry
 ) {
+    companion object {
+        private val logger = LoggerFactory.getLogger(RouteController::class.java)
+        private const val STREAM_TIMER_NAME = "route.stream.duration"
+        private const val STREAM_COUNTER_NAME = "route.stream.requests"
+    }
+
     @GetMapping("/last-routes")
     suspend fun getLastRoutes(
         @CurrentUser id: Long,
@@ -65,12 +77,30 @@ class RouteController(
     fun streamLastRoutesV3(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
-    ): Flow<LastRouteResponse> =
-        routeService.getLastRouteStream(
+    ): Flow<LastRouteResponse> {
+        val timer = Timer.start(meterRegistry)
+        meterRegistry.counter(STREAM_COUNTER_NAME).increment()
+
+        return routeService.getLastRouteStream(
             UserId(id),
             request.toStart(),
             request.toEnd()
-        ).map { LastRouteResponse(it) }
+        )
+            .onStart {
+                logger.info("[PERFORMANCE] Stream started for userId=$id")
+            }
+            .map { route ->
+                LastRouteResponse(route)
+            }
+            .onCompletion { cause ->
+                timer.stop(Timer.builder(STREAM_TIMER_NAME).register(meterRegistry))
+                if (cause == null) {
+                    logger.info("[PERFORMANCE] Stream completed successfully for userId=$id")
+                } else {
+                    logger.warn("[PERFORMANCE] Stream completed with error for userId=$id", cause)
+                }
+            }
+    }
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(

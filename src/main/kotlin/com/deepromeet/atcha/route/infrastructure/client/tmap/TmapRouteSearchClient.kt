@@ -23,7 +23,7 @@ private const val MAX_ROUTE_COUNT = 20
 class TmapRouteSearchClient(
     private val tMapRouteHttpClient: TMapRouteHttpClient
 ) : TransitRouteSearchClient {
-    override fun searchRoutes(
+    override suspend fun searchRoutes(
         start: Coordinate,
         end: Coordinate
     ): List<RouteItinerary> {

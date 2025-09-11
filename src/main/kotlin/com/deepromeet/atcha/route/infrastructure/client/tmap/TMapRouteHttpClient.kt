@@ -9,7 +9,7 @@ import org.springframework.web.service.annotation.PostExchange
 @HttpExchange
 interface TMapRouteHttpClient {
     @PostExchange("/transit/routes")
-    fun getRoutes(
+    suspend fun getRoutes(
         @RequestBody request: TMapRouteRequest
     ): TMapRouteResponse
 }

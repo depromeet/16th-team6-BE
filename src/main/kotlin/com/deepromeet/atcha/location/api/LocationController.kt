@@ -76,7 +76,7 @@ class LocationController(
     ) = locationService.clearPOIHistories(UserId(userId))
 
     @GetMapping("/is-service-region")
-    fun isServiceRegion(
+    suspend fun isServiceRegion(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<Boolean> {
         return ApiResponse.success(

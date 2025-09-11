@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 class KakaoTaxiFareClient(
     private val kakaoRouteHttpClient: KakaoRouteHttpClient
 ) : TaxiFareFetcher {
-    override fun fetch(
+    override suspend fun fetch(
         start: Coordinate,
         end: Coordinate
     ): Fare {

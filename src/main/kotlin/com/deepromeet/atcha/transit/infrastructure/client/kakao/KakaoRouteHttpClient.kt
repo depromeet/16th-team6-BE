@@ -8,7 +8,7 @@ import org.springframework.web.service.annotation.HttpExchange
 @HttpExchange
 interface KakaoRouteHttpClient {
     @GetExchange("/route/carset/mobility.json")
-    fun getRoute(
+    suspend fun getRoute(
         @RequestParam origin: String,
         @RequestParam destination: String
     ): KakaoRouteResponse

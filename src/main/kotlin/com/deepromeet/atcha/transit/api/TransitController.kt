@@ -22,7 +22,7 @@ class TransitController(
     private val transitService: TransitService
 ) {
     @GetMapping("/taxi-fare")
-    fun getTaxiFare(
+    suspend fun getTaxiFare(
         @ModelAttribute request: TaxiFareRequest
     ): ApiResponse<Fare> =
         ApiResponse.success(

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class DefaultRegionCandidatePolicy(
     private val regionIdentifier: RegionIdentifier
 ) : ServiceRegionCandidatePolicy {
-    override fun candidates(station: BusStationMeta): List<ServiceRegion> {
+    override suspend fun candidates(station: BusStationMeta): List<ServiceRegion> {
         val primary = regionIdentifier.identify(station.coordinate)
 
         val fallback =

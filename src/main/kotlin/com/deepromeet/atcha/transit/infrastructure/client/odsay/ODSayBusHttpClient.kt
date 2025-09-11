@@ -9,14 +9,14 @@ import org.springframework.web.service.annotation.HttpExchange
 @HttpExchange
 interface ODSayBusHttpClient {
     @GetExchange("/v1/api/searchStation")
-    fun getStationByStationName(
+    suspend fun getStationByStationName(
         @RequestParam apiKey: String,
         @RequestParam stationName: String,
         @RequestParam lang: String = "0"
     ): ODSayBusArrivalResponse
 
     @GetExchange("/v1/api/busStationInfo")
-    fun getStationInfoByStationID(
+    suspend fun getStationInfoByStationID(
         @RequestParam apiKey: String,
         @RequestParam stationID: String,
         @RequestParam lang: String = "0"

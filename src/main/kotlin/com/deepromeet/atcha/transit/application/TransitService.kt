@@ -17,7 +17,7 @@ class TransitService(
     private val busManager: BusManager,
     private val subwayStationBatchAppender: SubwayStationBatchAppender
 ) {
-    fun getTaxiFare(
+    suspend fun getTaxiFare(
         start: Coordinate,
         end: Coordinate
     ): Fare {
