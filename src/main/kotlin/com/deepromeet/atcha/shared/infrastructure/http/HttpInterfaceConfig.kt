@@ -13,7 +13,7 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
-import org.springframework.web.reactive.function.client.WebClientResponseException
+import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
 import java.time.Duration
 import java.util.concurrent.TimeUnit
@@ -31,7 +31,6 @@ class HttpInterfaceConfig {
                         .addHandlerLast(WriteTimeoutHandler(2_000, TimeUnit.MILLISECONDS))
                 }
 
-        // XML 매퍼 설정
         val xmlMapper =
             XmlMapper().apply {
                 findAndRegisterModules()
@@ -41,7 +40,6 @@ class HttpInterfaceConfig {
         val strategies =
             ExchangeStrategies.builder().codecs { cfg ->
                 cfg.defaultCodecs().maxInMemorySize(1 * 1_024 * 1_024)
-
                 cfg.customCodecs().register(
                     Jackson2JsonDecoder(xmlMapper, MediaType.APPLICATION_XML, MediaType.TEXT_XML)
                 )
@@ -54,12 +52,14 @@ class HttpInterfaceConfig {
             .clientConnector(ReactorClientHttpConnector(httpClient))
             .exchangeStrategies(strategies)
             .filter(DecodingErrorLogger.logOnDecodingError())
-            .filter { request, next ->
-                next.exchange(request)
-                    .onErrorMap(WebClientResponseException::class.java) { ex ->
-                        HttpErrorHandler.handleException(ex)
+            .defaultStatusHandler(
+                { status -> status.isError },
+                { response ->
+                    response.createException().flatMap { ex ->
+                        Mono.error(HttpErrorHandler.handleException(ex))
                     }
-            }
+                }
+            )
     }
 
     @Bean

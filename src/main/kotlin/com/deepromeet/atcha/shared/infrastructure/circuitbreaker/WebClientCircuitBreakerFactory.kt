@@ -29,30 +29,12 @@ class WebClientCircuitBreakerFactory(
         val cbName = "${type.instanceName}:$clientName"
         val cb: CircuitBreaker = cbRegistry.circuitBreaker(cbName, baseCfg)
 
-        // 2) 이벤트 리스너 등록 (한 번만)
         registerEventListeners(cb, type, cbName)
 
-        // 3) WebClient ExchangeFilterFunction 반환
         return ExchangeFilterFunction.ofResponseProcessor { response ->
             Mono.just(response)
                 .transformDeferred(CircuitBreakerOperator.of(cb))
         }
-    }
-
-    fun getCircuitBreaker(
-        type: CircuitBreakerType,
-        clientName: String
-    ): CircuitBreaker {
-        val baseCfg =
-            cbRegistry
-                .circuitBreaker(type.instanceName)
-                .circuitBreakerConfig
-
-        val cbName = "${type.instanceName}:$clientName"
-        val cb: CircuitBreaker = cbRegistry.circuitBreaker(cbName, baseCfg)
-
-        registerEventListeners(cb, type, cbName)
-        return cb
     }
 
     private fun registerEventListeners(

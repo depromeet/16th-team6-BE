@@ -12,12 +12,12 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 class TMapReverseGeoHttpClientConfig {
     @Bean
     fun tMapReverseGeoHttpClient(
-        webClientBuilder: WebClient.Builder,
+        commonWebClient: WebClient,
         @Value("\${tmap.api.url}") baseUrl: String,
         @Value("\${tmap.api.app-key}") apiKey: String
     ): TMapReverseGeoHttpClient {
         val webClient =
-            webClientBuilder
+            commonWebClient.mutate()
                 .baseUrl(baseUrl)
                 .defaultHeader("appKey", apiKey)
                 .build()
