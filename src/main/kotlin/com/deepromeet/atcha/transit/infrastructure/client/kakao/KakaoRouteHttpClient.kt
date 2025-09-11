@@ -1,13 +1,13 @@
 package com.deepromeet.atcha.transit.infrastructure.client.kakao
 
 import com.deepromeet.atcha.transit.infrastructure.client.kakao.response.KakaoRouteResponse
-import org.springframework.cloud.openfeign.FeignClient
-import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.service.annotation.GetExchange
+import org.springframework.web.service.annotation.HttpExchange
 
-@FeignClient(name = "kakao-taxi-fare", url = "https://app.map.kakao.com")
-interface KakaoRouteFeignClient {
-    @GetMapping("/route/carset/mobility.json")
+@HttpExchange
+interface KakaoRouteHttpClient {
+    @GetExchange("/route/carset/mobility.json")
     fun getRoute(
         @RequestParam origin: String,
         @RequestParam destination: String

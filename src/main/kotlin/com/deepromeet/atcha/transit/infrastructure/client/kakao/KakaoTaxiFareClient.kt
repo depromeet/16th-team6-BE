@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component
 
 @Component
 class KakaoTaxiFareClient(
-    private val kakaoRouteFeignClient: KakaoRouteFeignClient
+    private val kakaoRouteHttpClient: KakaoRouteHttpClient
 ) : TaxiFareFetcher {
     override fun fetch(
         start: Coordinate,
         end: Coordinate
     ): Fare {
         val response =
-            kakaoRouteFeignClient.getRoute(
+            kakaoRouteHttpClient.getRoute(
                 "${start.lon},${start.lat}",
                 "${end.lon},${end.lat}"
             )
