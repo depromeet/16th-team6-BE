@@ -43,12 +43,12 @@ class TmapRouteSearchClient(
                         searchDttm = baseDate
                     )
                 )
-            } catch (e: Exception) {
-                log.error(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_TIME_OUT, e)
             } catch (e: CallNotPermittedException) {
                 log.warn(e) { "외부 서비스 일시적 장애 발생" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN)
+            } catch (e: Exception) {
+                log.error(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_TIME_OUT, e)
             }
 
         response.result?.let { result ->
