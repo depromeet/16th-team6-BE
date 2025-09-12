@@ -2,6 +2,7 @@ package com.deepromeet.atcha.transit.application.bus
 
 import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.application.TransitNameComparer
+import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.isValidStation
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
@@ -56,7 +57,11 @@ class BusRouteMatcher(
         plannedStops: List<String>
     ): RouteProcessResult? {
         val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
-        val routeStops = stationList.busRouteStations.map { it.stationName }
+
+        val routeStops =
+            stationList.busRouteStations
+                .filter(::isValidStation)
+                .map { it.stationName }
 
         val startIdxs =
             routeStops
