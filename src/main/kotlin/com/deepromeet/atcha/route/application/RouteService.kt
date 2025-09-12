@@ -78,7 +78,7 @@ class RouteService(
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
             lastRouteReader.read(start, destination)?.let { cached ->
-                cached.forEach { emit(it) }
+                cached.sort().forEach { emit(it) }
                 return@flow
             }
 
