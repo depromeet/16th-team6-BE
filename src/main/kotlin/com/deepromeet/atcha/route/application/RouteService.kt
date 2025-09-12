@@ -77,10 +77,10 @@ class RouteService(
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
-//            lastRouteReader.read(start, destination)?.let { cached ->
-//                cached.forEach { emit(it) }
-//                return@flow
-//            }
+            lastRouteReader.read(start, destination)?.let { cached ->
+                cached.forEach { emit(it) }
+                return@flow
+            }
 
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
