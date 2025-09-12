@@ -28,16 +28,22 @@ class PublicRateLimiterRegistry(props: OpenApiProps) {
                 newBucket(limitMap[key] ?: defaultLimit)
             }
 
-        while (!bucket.tryConsume(1)) {
-            delay(100)
+        while (true) {
+            val probe = bucket.tryConsumeAndReturnRemaining(1)
+            if (probe.isConsumed) break
+            val waitMillis = (probe.nanosToWaitForRefill / 1_000_000).coerceAtLeast(1)
+            delay(waitMillis)
         }
     }
 
     suspend fun awaitForTMap() {
         val bucket = bucketMap.computeIfAbsent("tmap") { newBucket(10) }
 
-        while (!bucket.tryConsume(1)) {
-            delay(100)
+        while (true) {
+            val probe = bucket.tryConsumeAndReturnRemaining(1)
+            if (probe.isConsumed) break
+            val waitMillis = (probe.nanosToWaitForRefill / 1_000_000).coerceAtLeast(1)
+            delay(waitMillis)
         }
     }
 
