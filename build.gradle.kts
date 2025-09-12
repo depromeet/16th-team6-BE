@@ -84,6 +84,8 @@ dependencies {
     // geometry
     implementation("org.locationtech.proj4j:proj4j:1.3.0")
     implementation("org.locationtech.proj4j:proj4j-epsg:1.3.0")
+    implementation("org.locationtech.jts:jts-core:1.20.0")
+    implementation("org.locationtech.jts.io:jts-io-common:1.20.0")
 
     // similarity
     implementation("org.apache.commons:commons-text:1.10.0")
