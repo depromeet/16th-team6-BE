@@ -20,7 +20,7 @@ data class GyeonggiBusRoute(
     @field:JacksonXmlProperty(localName = "endStationId")
     val endStationId: String?,
     @field:JacksonXmlProperty(localName = "endStationName")
-    val endStationName: String,
+    val endStationName: String?,
     @field:JacksonXmlProperty(localName = "regionName")
     val regionName: String?,
     @field:JacksonXmlProperty(localName = "routeId")
