@@ -38,7 +38,7 @@ data class BusArrival(
                 busStatus = BusStatus.WAITING,
                 remainingTime = remainingSeconds,
                 remainingStations = null,
-                isLast = false,
+                isLast = null,
                 busCongestion = null,
                 remainingSeats = null,
                 infoType = ArrivalInfoType.ESTIMATED
@@ -49,6 +49,7 @@ data class BusArrival(
             vehicleId: String,
             estimatedArrivalTime: LocalDateTime,
             busCongestion: BusCongestion?,
+            remainStations: Int?,
             remainingSeats: Int?
         ): BusArrival {
             val remainingSeconds =
@@ -59,8 +60,8 @@ data class BusArrival(
                 vehicleId = vehicleId,
                 busStatus = BusStatus.OPERATING,
                 remainingTime = remainingSeconds,
-                remainingStations = null,
-                isLast = false,
+                remainingStations = remainStations,
+                isLast = null,
                 busCongestion = busCongestion,
                 remainingSeats = remainingSeats,
                 infoType = ArrivalInfoType.ESTIMATED
