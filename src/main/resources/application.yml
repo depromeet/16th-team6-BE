@@ -121,3 +121,9 @@ management:
   health:
     circuitbreakers:
       enabled: true
+
+discord:
+  webhook:
+    url:
+      local: ${secret.local.DISCORD_WEBHOOK_URL}
+      prod: ${secret.prod.DISCORD_WEBHOOK_URL}

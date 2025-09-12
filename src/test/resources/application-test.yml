@@ -53,3 +53,9 @@ logging:
   level:
     com.deepromeet.atcha: DEBUG
     root: INFO
+
+discord:
+  webhook:
+    url:
+      local: ${secret.local.DISCORD_WEBHOOK_URL}
+      prod: ${secret.prod.DISCORD_WEBHOOK_URL}

@@ -68,3 +68,8 @@ management:
 
 mixpanel:
   token: ${secret.prod.MIXPANEL_TOKEN}
+
+discord:
+  webhook:
+    url:
+      dev: ${secret.dev.DISCORD_WEBHOOK_URL}
