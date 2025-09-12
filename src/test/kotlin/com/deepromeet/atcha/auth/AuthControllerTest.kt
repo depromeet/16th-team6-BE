@@ -8,6 +8,7 @@ import com.deepromeet.atcha.support.BaseControllerTest
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import io.restassured.RestAssured
+import kotlinx.coroutines.runBlocking
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.ArgumentMatchers.anyString
@@ -21,7 +22,9 @@ class AuthControllerTest : BaseControllerTest() {
 
     @BeforeEach
     fun setMockKakaoApiClient() {
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
     }
 
     @Test

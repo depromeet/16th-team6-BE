@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 class ServiceRegionValidator(
     private val regionIdentifier: RegionIdentifier
 ) {
-    fun validate(vararg coordinates: Coordinate) {
+    suspend fun validate(vararg coordinates: Coordinate) {
         coordinates.forEach { coordinate ->
             regionIdentifier.identify(coordinate)
         }

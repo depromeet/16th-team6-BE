@@ -6,10 +6,11 @@ import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.ProviderToken
 import com.deepromeet.atcha.auth.exception.AuthException
 import com.deepromeet.atcha.auth.infrastructure.provider.ProviderType
-import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoFeignClient
+import com.deepromeet.atcha.auth.infrastructure.provider.kakao.KakaoHttpClient
 import com.deepromeet.atcha.auth.infrastructure.response.KakaoUserInfoResponse
 import com.deepromeet.atcha.support.fixture.UserFixture
 import com.deepromeet.atcha.user.application.UserAppender
+import kotlinx.coroutines.runBlocking
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -38,7 +39,7 @@ class AuthServiceTest {
     lateinit var userAppender: UserAppender
 
     @MockitoBean
-    lateinit var kakaoFeignClient: KakaoFeignClient
+    lateinit var kakaoHttpClient: KakaoHttpClient
 
     @Test
     fun `존재하지 않은 유저를 확인한다`() {
@@ -46,16 +47,20 @@ class AuthServiceTest {
         val token = "token"
         val kakaoId = 12345L
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
 
         // when
         val result: Boolean =
-            authService.checkUserExists(
-                ProviderToken.of(
-                    token = token,
-                    providerOrdinal = ProviderType.KAKAO.ordinal
+            runBlocking {
+                authService.checkUserExists(
+                    ProviderToken.of(
+                        token = token,
+                        providerOrdinal = ProviderType.KAKAO.ordinal
+                    )
                 )
-            )
+            }
 
         // then
         assertThat(result).isFalse()
@@ -67,7 +72,9 @@ class AuthServiceTest {
         val token = "token"
         val kakaoId = 12345L
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
 
         val existingUser =
             UserFixture.create(
@@ -78,7 +85,10 @@ class AuthServiceTest {
         userAppender.append(existingUser)
 
         // when
-        val result: Boolean = authService.checkUserExists(ProviderToken.of(token, ProviderType.KAKAO.ordinal))
+        val result: Boolean =
+            runBlocking {
+                authService.checkUserExists(ProviderToken.of(token, ProviderType.KAKAO.ordinal))
+            }
 
         // then
         assertThat(result).isTrue()
@@ -90,12 +100,17 @@ class AuthServiceTest {
         val token = "token"
         val kakaoId = 67890L
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
         val user = UserFixture.create()
         val signUpRequest = UserFixture.userToSignUpRequest(user, ProviderType.KAKAO.ordinal)
 
         // when
-        val result = authService.signUp(ProviderToken.of(token, signUpRequest.provider), signUpRequest.toSignUpInfo())
+        val result =
+            runBlocking {
+                authService.signUp(ProviderToken.of(token, signUpRequest.provider), signUpRequest.toSignUpInfo())
+            }
 
         // then
         assertThat(result.userTokens.id).isNotNull()
@@ -111,7 +126,9 @@ class AuthServiceTest {
         val token = "token"
         val kakaoId = 11111L
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
 
         // 미리 DB에 해당 유저 저장
         val existingUser =
@@ -124,10 +141,12 @@ class AuthServiceTest {
 
         // when & then
         assertThatThrownBy {
-            authService.signUp(
-                ProviderToken.of(token, signUpRequest.provider),
-                signUpRequest.toSignUpInfo()
-            )
+            runBlocking {
+                authService.signUp(
+                    ProviderToken.of(token, signUpRequest.provider),
+                    signUpRequest.toSignUpInfo()
+                )
+            }
         }
             .isInstanceOf(AuthException::class.java)
     }
@@ -139,7 +158,9 @@ class AuthServiceTest {
         val kakaoId = 22222L
         val kakaoUserInfo = KakaoUserInfoResponse(kakaoId)
 
-        `when`(kakaoFeignClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        runBlocking {
+            `when`(kakaoHttpClient.getUserInfo(anyString())).thenReturn(kakaoUserInfo)
+        }
 
         // 미리 DB에 로그인할 유저 저장
         val user = UserFixture.create(id = 0L, providerId = kakaoId.toString())
@@ -147,7 +168,10 @@ class AuthServiceTest {
         userProviderAppender.append(savedUser, ProviderContext(kakaoId.toString(), ProviderType.KAKAO, token))
 
         // when
-        val result = authService.login(ProviderToken.of(token, ProviderType.KAKAO.ordinal), "TEST_FCM_TOKEN")
+        val result =
+            runBlocking {
+                authService.login(ProviderToken.of(token, ProviderType.KAKAO.ordinal), "TEST_FCM_TOKEN")
+            }
 
         // then
         assertThat(result.userTokens.id.value).isEqualTo(savedUser.id.value)

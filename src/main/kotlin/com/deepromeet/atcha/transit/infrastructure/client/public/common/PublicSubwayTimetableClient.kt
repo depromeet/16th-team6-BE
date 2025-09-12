@@ -26,7 +26,7 @@ private const val PAGE_SIZE = 300
 
 @Component
 class PublicSubwayTimetableClient(
-    private val subwayScheduleFeignClient: PublicSubwayScheduleFeignClient,
+    private val subwayScheduleHttpClient: PublicSubwayScheduleHttpClient,
     private val subwayStationRepository: SubwayStationRepository,
     private val transitNameComparer: TransitNameComparer,
     @Value("\${open-api.api.service-key}") private val serviceKey: String,
@@ -75,7 +75,7 @@ class PublicSubwayTimetableClient(
                 spareKey = spareKey,
                 realLastKey = realLastKey,
                 apiCall = { key ->
-                    subwayScheduleFeignClient.getTrainSchedule(
+                    subwayScheduleHttpClient.getTrainSchedule(
                         key,
                         line.mainName(),
                         startStation.normalizeName(),
@@ -105,7 +105,7 @@ class PublicSubwayTimetableClient(
                             spareKey = spareKey,
                             realLastKey = realLastKey,
                             apiCall = { key ->
-                                subwayScheduleFeignClient.getTrainSchedule(
+                                subwayScheduleHttpClient.getTrainSchedule(
                                     key,
                                     line.mainName(),
                                     startStation.normalizeName(),

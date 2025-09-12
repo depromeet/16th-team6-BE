@@ -4,7 +4,6 @@ import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
-import java.time.format.DateTimeFormatter
 
 data class SeoulBusRouteInfoResponse(
     @JacksonXmlProperty(localName = "busRouteAbrv")
@@ -42,9 +41,5 @@ data class SeoulBusRouteInfoResponse(
             name = busRouteName,
             serviceRegion = ServiceRegion.SEOUL
         )
-    }
-
-    companion object {
-        private val TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
     }
 }

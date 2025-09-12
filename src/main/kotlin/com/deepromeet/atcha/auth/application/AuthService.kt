@@ -29,14 +29,14 @@ class AuthService(
     private val userProviderReader: UserProviderReader
 ) {
     @Transactional(readOnly = true)
-    fun checkUserExists(providerToken: ProviderToken): Boolean {
+    suspend fun checkUserExists(providerToken: ProviderToken): Boolean {
         val authProvider = authProviders.getAuthProvider(providerToken.providerType)
         val providerContext = authProvider.getProviderContext(providerToken)
         return userReader.checkExists(providerContext.providerUserId)
     }
 
     @Transactional
-    fun signUp(
+    suspend fun signUp(
         providerToken: ProviderToken,
         signUpInfo: SignUpInfo
     ): UserAuthInfo {
@@ -53,7 +53,7 @@ class AuthService(
     }
 
     @Transactional
-    fun login(
+    suspend fun login(
         providerToken: ProviderToken,
         fcmToken: String
     ): UserAuthInfo {

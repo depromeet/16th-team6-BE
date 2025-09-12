@@ -15,14 +15,14 @@ class LocationService(
     private val poiHistoryManager: POIHistoryManager,
     private val serviceRegionValidator: ServiceRegionValidator
 ) {
-    fun getPOIs(
+    suspend fun getPOIs(
         keyword: String,
         currentCoordinate: Coordinate
     ): List<POI> {
         return locationReader.readPOIs(keyword, currentCoordinate)
     }
 
-    fun getLocation(coordinate: Coordinate): Location {
+    suspend fun getLocation(coordinate: Coordinate): Location {
         return locationReader.read(coordinate)
     }
 
@@ -56,7 +56,7 @@ class LocationService(
         poiHistoryManager.clear(user)
     }
 
-    fun isServiceRegion(coordinate: Coordinate): Boolean {
+    suspend fun isServiceRegion(coordinate: Coordinate): Boolean {
         try {
             serviceRegionValidator.validate(coordinate)
         } catch (e: TransitException) {

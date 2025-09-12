@@ -20,9 +20,9 @@ import kotlin.collections.first
 
 @Component
 class PublicSeoulBusRouteInfoClient(
-    private val publicSeoulBusArrivalInfoFeignClient: PublicSeoulBusArrivalInfoFeignClient,
-    private val publicBusRouteClient: PublicSeoulBusRouteInfoFeignClient,
-    private val seoulBusOperationFeignClient: SeoulBusOperationFeignClient,
+    private val publicSeoulBusArrivalInfoHttpClient: PublicSeoulBusArrivalInfoHttpClient,
+    private val publicBusRouteHttpClient: PublicSeoulBusRouteInfoHttpClient,
+    private val seoulBusOperationHttpClient: SeoulBusOperationHttpClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -41,7 +41,7 @@ class PublicSeoulBusRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicSeoulBusArrivalInfoFeignClient.getBusRouteList(key, routeName) },
+            apiCall = { key -> publicSeoulBusArrivalInfoHttpClient.getBusRouteList(key, routeName) },
             isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody.itemList
@@ -62,7 +62,7 @@ class PublicSeoulBusRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicSeoulBusArrivalInfoFeignClient
+                publicSeoulBusArrivalInfoHttpClient
                     .getArrivalInfoByRoute(
                         key,
                         routeInfo.route.id.value,
@@ -86,7 +86,7 @@ class PublicSeoulBusRouteInfoClient(
         )
 
     override suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo =
-        seoulBusOperationFeignClient.getBusOperationInfo(route.id.value).toBusRouteOperationInfo()
+        seoulBusOperationHttpClient.getBusOperationInfo(route.id.value).toBusRouteOperationInfo()
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_BUS_OPERATION_INFO,
                 "서울시 버스 노선 '${route.id.value}'의 운영 정보를 찾을 수 없습니다."
@@ -103,7 +103,7 @@ class PublicSeoulBusRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicBusRouteClient.getStationsByRoute(route.id.value, key) },
+            apiCall = { key -> publicBusRouteHttpClient.getStationsByRoute(route.id.value, key) },
             isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 val responses = response.msgBody.itemList
@@ -133,7 +133,7 @@ class PublicSeoulBusRouteInfoClient(
             realLastKey = realLastKey,
             apiCall = {
                     key ->
-                publicSeoulBusArrivalInfoFeignClient
+                publicSeoulBusArrivalInfoHttpClient
                     .getArrivalInfoByRoute(
                         key,
                         routeInfo.route.id.value,
