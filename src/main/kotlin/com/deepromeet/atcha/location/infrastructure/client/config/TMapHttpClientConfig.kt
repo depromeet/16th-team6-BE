@@ -4,7 +4,6 @@ import com.deepromeet.atcha.location.infrastructure.client.TMapLocationHttpClien
 import com.deepromeet.atcha.route.infrastructure.client.tmap.TMapRouteHttpClient
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
 import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.WebClientCircuitBreakerFactory
-import com.deepromeet.atcha.transit.infrastructure.client.public.common.config.TMapRateLimitFilter
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -16,8 +15,7 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 class TMapHttpClientConfig(
     @Value("\${tmap.api.url}") private val tmapApiUrl: String,
     @Value("\${tmap.api.app-key}") private val appKey: String,
-    private val circuitBreakerFactory: WebClientCircuitBreakerFactory,
-    private val rateLimitFilter: TMapRateLimitFilter
+    private val circuitBreakerFactory: WebClientCircuitBreakerFactory
 ) {
     @Bean
     fun tmapWebClient(commonWebClient: WebClient): WebClient {
@@ -32,11 +30,7 @@ class TMapHttpClientConfig(
 
     @Bean
     fun tmapLocationHttpClient(tmapWebClient: WebClient): TMapLocationHttpClient {
-        val locationClient =
-            tmapWebClient.mutate()
-                .filter(rateLimitFilter.rateLimitFilter())
-                .build()
-        val adapter = WebClientAdapter.create(locationClient)
+        val adapter = WebClientAdapter.create(tmapWebClient)
         val factory = HttpServiceProxyFactory.builderFor(adapter).build()
         return factory.createClient(TMapLocationHttpClient::class.java)
     }

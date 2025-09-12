@@ -3,6 +3,7 @@ package com.deepromeet.atcha.location.infrastructure
 import com.deepromeet.atcha.location.application.RegionIdentifier
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.ServiceRegion
+import com.deepromeet.atcha.location.infrastructure.repository.RegionBoundaryRepository
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import org.springframework.stereotype.Component

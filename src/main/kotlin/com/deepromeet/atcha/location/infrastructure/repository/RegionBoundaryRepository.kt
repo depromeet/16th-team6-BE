@@ -1,4 +1,4 @@
-package com.deepromeet.atcha.location.infrastructure
+package com.deepromeet.atcha.location.infrastructure.repository
 
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.locationtech.jts.geom.Geometry
