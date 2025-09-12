@@ -56,7 +56,7 @@ data class IncheonBusRouteInfoResponse(
     }
 
     fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule {
-        val busRouteStation = busRouteInfo.getTargetStation()
+        val busRouteStation = busRouteInfo.targetStation
         val travelTime = BusTravelTimeCalculator.calculate(busRouteStation, false)
 
         return BusSchedule(

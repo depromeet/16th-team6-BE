@@ -54,7 +54,7 @@ data class BusRealTimeArrivals(
                 BusArrival.createEstimated(
                     vehicleId = pos.vehicleId,
                     estimatedArrivalTime = nextArrivalTime,
-                    remainStations = busInfo.busRouteInfo.getTargetStation().order - pos.sectionOrder,
+                    remainStations = busInfo.busRouteInfo.targetStation.order - pos.sectionOrder,
                     busCongestion = pos.busCongestion,
                     remainingSeats = pos.remainSeats
                 )

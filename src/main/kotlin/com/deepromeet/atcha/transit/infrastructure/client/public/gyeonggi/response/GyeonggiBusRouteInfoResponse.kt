@@ -102,7 +102,7 @@ data class BusRouteInfoItem(
         dailyType: DailyType,
         busRouteInfo: BusRouteInfo
     ): BusSchedule {
-        val routeStation = busRouteInfo.getTargetStation()
+        val routeStation = busRouteInfo.targetStation
         val travelTimeFromStart =
             BusTravelTimeCalculator.calculate(
                 routeStation,

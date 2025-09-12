@@ -65,8 +65,8 @@ class PublicSeoulBusRouteInfoClient(
                     .getArrivalInfoByRoute(
                         key,
                         routeInfo.route.id.value,
-                        routeInfo.getTargetStation().stationId,
-                        routeInfo.getTargetStation().order
+                        routeInfo.targetStation.stationId,
+                        routeInfo.targetStation.order
                     )
             },
             isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
@@ -77,8 +77,8 @@ class PublicSeoulBusRouteInfoClient(
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_REAL_TIME,
                         "서울시 버스(${routeInfo.routeId}의" +
-                            " 정류소(${routeInfo.getTargetStation().stationId}" +
-                            "-${routeInfo.getTargetStation().order})의 실시간 도착 정보를 찾을 수 없습니다."
+                            " 정류소(${routeInfo.targetStation.stationId}" +
+                            "-${routeInfo.targetStation.order})의 실시간 도착 정보를 찾을 수 없습니다."
                     )
             },
             errorMessage = "서울시 버스 도착 정보를 가져오는데 실패했습니다."
@@ -133,8 +133,8 @@ class PublicSeoulBusRouteInfoClient(
                     .getArrivalInfoByRoute(
                         key,
                         routeInfo.route.id.value,
-                        routeInfo.getTargetStation().stationId,
-                        routeInfo.getTargetStation().order
+                        routeInfo.targetStation.stationId,
+                        routeInfo.targetStation.order
                     )
             },
             isLimitExceeded = { response -> isServiceResultApiLimitExceeded(response) },
@@ -145,8 +145,8 @@ class PublicSeoulBusRouteInfoClient(
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_REAL_TIME,
                         "서울시 버스(${routeInfo.routeId}의" +
-                            " 정류소(${routeInfo.getTargetStation().stationId}" +
-                            "-${routeInfo.getTargetStation().order})의 실시간 도착 정보를 찾을 수 없습니다."
+                            " 정류소(${routeInfo.targetStation.stationId}" +
+                            "-${routeInfo.targetStation.order})의 실시간 도착 정보를 찾을 수 없습니다."
                     )
             },
             errorMessage = "서울시 버스 실시간 정보를 가져오는데 실패했습니다."

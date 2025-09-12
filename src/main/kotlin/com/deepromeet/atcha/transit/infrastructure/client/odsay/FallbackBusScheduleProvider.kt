@@ -21,7 +21,7 @@ class FallbackBusScheduleProvider(
         routeInfo: BusRouteInfo,
         busApiCallCountPerRequestProperty: BusApiCallCountPerRequestProperty
     ): BusSchedule? {
-        log.debug { "ODSay를 통한 버스 도착 정보 조회 시도: ${routeInfo.getTargetStation().busStation}, 노선: ${routeInfo.route}" }
+        log.debug { "ODSay를 통한 버스 도착 정보 조회 시도: ${routeInfo.targetStation.busStation}, 노선: ${routeInfo.route}" }
         try {
             busApiCallCountPerRequestProperty.incrementODsayCallCount()
             mixpanelEventPublisher.publishODsayCallRouteEvent(routeInfo)

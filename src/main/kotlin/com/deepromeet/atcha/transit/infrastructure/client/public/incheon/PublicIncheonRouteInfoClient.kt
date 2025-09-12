@@ -69,7 +69,7 @@ class PublicIncheonRouteInfoClient(
                         "인천시 버스 노선-${routeInfo.route.name}-${routeInfo.route.id.value}의 정보를 찾을 수 없습니다."
                     )
             },
-            errorMessage = "인천시 버스 정류소-${routeInfo.getTargetStation().stationId} 정보를 가져오는데 실패했습니다."
+            errorMessage = "인천시 버스 정류소-${routeInfo.targetStation.stationId} 정보를 가져오는데 실패했습니다."
         )
 
     override suspend fun getBusRouteInfo(route: BusRoute): BusRouteOperationInfo =
@@ -138,7 +138,7 @@ class PublicIncheonRouteInfoClient(
                 publicIncheonBusArrivalHttpClient.getBusArrivalList(
                     key,
                     routeInfo.routeId,
-                    routeInfo.getTargetStation().stationId
+                    routeInfo.targetStation.stationId
                 )
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
@@ -149,6 +149,6 @@ class PublicIncheonRouteInfoClient(
             },
             errorMessage =
                 "인천시 버스(${routeInfo.route.id})의 " +
-                    "정류장(${routeInfo.getTargetStation().stationId}) 도착 정보를 가져오는데 실패했습니다."
+                    "정류장(${routeInfo.targetStation.stationId}) 도착 정보를 가져오는데 실패했습니다."
         )
 }

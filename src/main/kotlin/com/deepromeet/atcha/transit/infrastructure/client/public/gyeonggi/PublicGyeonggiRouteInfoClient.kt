@@ -69,7 +69,7 @@ class PublicGyeonggiRouteInfoClient(
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_BUS_SCHEDULE,
                         "경기도 버스 노선 '${routeInfo.route.name}' 정류소" +
-                            " '${routeInfo.getTargetStation().stationName}'의 시간표 정보를 찾을 수 없습니다."
+                            " '${routeInfo.targetStation.stationName}'의 시간표 정보를 찾을 수 없습니다."
                     )
             },
             errorMessage = "경기도 버스 노선 도착 정보를 가져오는데 실패했습니다."
@@ -133,9 +133,9 @@ class PublicGyeonggiRouteInfoClient(
             apiCall = { key ->
                 publicGyeonggiBusRealTimeInfoHttpClient.getRealTimeInfo(
                     key,
-                    routeInfo.getTargetStation().stationId,
+                    routeInfo.targetStation.stationId,
                     routeInfo.routeId,
-                    routeInfo.getTargetStation().order.toString()
+                    routeInfo.targetStation.order.toString()
                 )
             },
             isLimitExceeded = { response -> ApiClientUtils.isGyeonggiApiLimitExceeded(response) },
@@ -148,6 +148,6 @@ class PublicGyeonggiRouteInfoClient(
             },
             errorMessage =
                 "경기도 버스(${routeInfo.route.id})의 " +
-                    "정류장(${routeInfo.getTargetStation().stationId}) 도착 정보를 가져오는데 실패했습니다."
+                    "정류장(${routeInfo.targetStation.stationId}) 도착 정보를 가져오는데 실패했습니다."
         )
 }

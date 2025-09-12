@@ -34,7 +34,7 @@ class RegionBusScheduleProvider(
 
             log.debug(e) {
                 "공공데이터에서 ${routeInfo.route.serviceRegion} 막차 정보 조회 실패 - " +
-                    "정류장: ${routeInfo.getTargetStation().stationId} 노선: ${routeInfo.route.id}"
+                    "정류장: ${routeInfo.targetStation.stationId} 노선: ${routeInfo.route.id}"
             }
             return null
         }

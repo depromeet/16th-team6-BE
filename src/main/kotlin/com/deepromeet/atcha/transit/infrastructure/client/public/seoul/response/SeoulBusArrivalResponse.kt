@@ -64,7 +64,7 @@ data class SeoulBusArrivalResponse(
     fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule =
         BusSchedule(
             busRouteInfo = busRouteInfo,
-            busStation = busRouteInfo.getTargetStation().busStation,
+            busStation = busRouteInfo.targetStation.busStation,
             busTimeTable =
                 BusTimeTable(
                     firstTime = parseDateTime(firstTm),

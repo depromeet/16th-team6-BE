@@ -20,15 +20,15 @@ class ODSayBusInfoClient(
                         key ->
                     oDSayBusHttpClient.getStationByStationName(
                         key,
-                        routeInfo.getTargetStation().stationName
+                        routeInfo.targetStation.stationName
                     )
                 },
                 processResult = { response ->
                     response.result.station
-                        .find { it.arsID.trim() == routeInfo.getTargetStation().stationNumber.trim() }
+                        .find { it.arsID.trim() == routeInfo.targetStation.stationNumber.trim() }
                         ?: throw TransitException.of(
                             TransitError.NOT_FOUND_BUS_STATION,
-                            "ODSay에서 정류장 '${routeInfo.getTargetStation().stationName}'을 찾을 수 없습니다."
+                            "ODSay에서 정류장 '${routeInfo.targetStation.stationName}'을 찾을 수 없습니다."
                         )
                 },
                 errorMessage = "ODSay에서 정류장 정보를 가져오는데 실패했습니다."

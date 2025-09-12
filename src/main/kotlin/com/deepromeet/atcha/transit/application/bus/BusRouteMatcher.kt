@@ -57,11 +57,9 @@ class BusRouteMatcher(
         plannedStops: List<String>
     ): RouteProcessResult? {
         val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
+        val routeStations = stationList.busRouteStations.filter(::isValidStation)
 
-        val routeStops =
-            stationList.busRouteStations
-                .filter(::isValidStation)
-                .map { it.stationName }
+        val routeStops = routeStations.map { it.stationName }
 
         val startIdxs =
             routeStops
@@ -83,7 +81,7 @@ class BusRouteMatcher(
 
             if (similarity > bestSimilarity) {
                 bestSimilarity = similarity
-                bestResult = BusRouteInfo(route, curIdx, stationList)
+                bestResult = BusRouteInfo(route, routeStations[curIdx], stationList)
             }
         }
 

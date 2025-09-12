@@ -69,7 +69,7 @@ data class LastRouteLegResponse(
         start = RouteLocationResponse(lastRouteLeg.start),
         end = RouteLocationResponse(lastRouteLeg.end),
         targetBusStation =
-            lastRouteLeg.busInfo?.busRouteInfo?.getTargetStation()?.busStation?.let {
+            lastRouteLeg.busInfo?.busRouteInfo?.targetStation?.busStation?.let {
                 BusStationResponse(
                     it
                 )
