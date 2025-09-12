@@ -67,17 +67,19 @@ data class BusRealTimeArrivals(
     private fun getClosestArrivalIndex(
         arrivals: List<BusArrival>,
         targetDepartureTime: LocalDateTime
-    ): Int? = arrivals.withIndex().minByOrNull { (_, arrival) ->
-        Duration.between(targetDepartureTime, arrival.expectedArrivalTime!!).abs()
-    }?.index
+    ): Int? =
+        arrivals.withIndex().minByOrNull { (_, arrival) ->
+            Duration.between(targetDepartureTime, arrival.expectedArrivalTime!!).abs()
+        }?.index
 
     private fun createClosestTwoArrival(
         targetIndex: Int,
-        arrivals: List<BusArrival>,
-    ): List<BusArrival> = buildList {
-        add(arrivals[targetIndex])
-        if (targetIndex + 1 < arrivals.size) {
-            add(arrivals[targetIndex + 1])
+        arrivals: List<BusArrival>
+    ): List<BusArrival> =
+        buildList {
+            add(arrivals[targetIndex])
+            if (targetIndex + 1 < arrivals.size) {
+                add(arrivals[targetIndex + 1])
+            }
         }
-    }
 }
