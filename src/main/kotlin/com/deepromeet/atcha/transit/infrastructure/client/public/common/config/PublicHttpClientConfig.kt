@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
+import com.deepromeet.atcha.shared.infrastructure.http.HttpResponseLogger
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -14,7 +15,7 @@ class PublicHttpClientConfig(
     fun publicApiWebClient(webClientBuilder: WebClient.Builder): WebClient {
         return webClientBuilder
             .filter(rateLimitFilter.rateLimitFilter())
-//            .filter(HttpResponseLogger.logRequest())
+            .filter(HttpResponseLogger.logRequest())
 //            .filter(HttpResponseLogger.logResponse())
             .build()
     }
