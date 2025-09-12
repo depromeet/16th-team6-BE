@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.auth
 
-import com.deepromeet.atcha.shared.web.token.JwtTokeParser
 import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
+import com.deepromeet.atcha.shared.web.token.JwtTokenParser
 import com.deepromeet.atcha.shared.web.token.TokenBlacklist
 import com.deepromeet.atcha.shared.web.token.TokenExpirationManager
 import com.deepromeet.atcha.shared.web.token.TokenType
@@ -27,14 +27,14 @@ class TokenGeneratorTest(
     private val accessExpiration = "1800000"
     private val refreshExpiration = "1800000"
     private lateinit var jwtTokenGenerator: JwtTokenGenerator
-    private lateinit var jwtTokeParser: JwtTokeParser
+    private lateinit var jwtTokenParser: JwtTokenParser
     private lateinit var tokenExpirationManager: TokenExpirationManager
 
     @BeforeEach
     fun setUpTokenGenerator() {
         jwtTokenGenerator = JwtTokenGenerator(accessSecret, refreshSecret, accessExpiration, refreshExpiration)
-        jwtTokeParser = JwtTokeParser(accessSecret, refreshSecret)
-        tokenExpirationManager = TokenExpirationManager(tokenBlacklist, jwtTokeParser)
+        jwtTokenParser = JwtTokenParser(accessSecret, refreshSecret)
+        tokenExpirationManager = TokenExpirationManager(tokenBlacklist, jwtTokenParser)
     }
 
     @Test
@@ -56,7 +56,7 @@ class TokenGeneratorTest(
                 .body
         assertEquals(userId.value.toString(), accessClaims.subject, "Access token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
-            .isThrownBy { jwtTokeParser.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
+            .isThrownBy { jwtTokenParser.validateToken(tokenInfo.accessToken, TokenType.ACCESS) }
 
         // refreshToken 확인
         val refreshKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(refreshSecret))
@@ -68,7 +68,7 @@ class TokenGeneratorTest(
                 .body
         assertEquals(userId.value.toString(), refreshClaims.subject, "Refresh token의 subject는 userId와 일치해야 합니다.")
         Assertions.assertThatNoException()
-            .isThrownBy { jwtTokeParser.validateToken(tokenInfo.refreshToken, TokenType.REFRESH) }
+            .isThrownBy { jwtTokenParser.validateToken(tokenInfo.refreshToken, TokenType.REFRESH) }
     }
 
     @Test

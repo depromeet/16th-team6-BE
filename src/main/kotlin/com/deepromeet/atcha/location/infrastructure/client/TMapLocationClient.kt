@@ -9,28 +9,28 @@ import org.springframework.stereotype.Component
 
 @Component
 class TMapLocationClient(
-    private val tMapLocationFeignClient: TMapLocationFeignClient
+    private val tmapLocationHttpClient: TMapLocationHttpClient
 ) : POIFinder, ReverseGeocoder {
-    override fun find(
+    override suspend fun find(
         keyword: String,
         currentCoordinate: Coordinate
     ): List<POI> {
-        return tMapLocationFeignClient.getPOIs(
+        return tmapLocationHttpClient.getPOIs(
             keyword,
             currentCoordinate.lat,
             currentCoordinate.lon
         )?.toPOIs() ?: emptyList()
     }
 
-    override fun geocode(coordinate: Coordinate): Location {
+    override suspend fun geocode(coordinate: Coordinate): Location {
         val poiInfo =
-            tMapLocationFeignClient.getReverseLabel(
+            tmapLocationHttpClient.getReverseLabel(
                 coordinate.lat,
                 coordinate.lon
             )
 
         val address =
-            tMapLocationFeignClient.getReverseGeocoding(
+            tmapLocationHttpClient.getReverseGeocoding(
                 coordinate.lat,
                 coordinate.lon
             )

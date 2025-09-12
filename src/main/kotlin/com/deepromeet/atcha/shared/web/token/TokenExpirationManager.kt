@@ -7,10 +7,10 @@ import org.springframework.stereotype.Component
 @Component
 class TokenExpirationManager(
     private val blacklist: TokenBlacklist,
-    private val jwtTokeParser: JwtTokeParser
+    private val jwtTokenParser: JwtTokenParser
 ) {
     fun expireTokensWithRefreshToken(refreshToken: String) {
-        val accessToken = jwtTokeParser.getAccessToken(refreshToken)
+        val accessToken = jwtTokenParser.getAccessToken(refreshToken)
         expireToken(accessToken)
         expireToken(refreshToken)
     }
@@ -21,7 +21,7 @@ class TokenExpirationManager(
 
     fun validateNotExpired(token: String) {
         if (blacklist.contains(token)) {
-            throw TokenException.Companion.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
+            throw TokenException.of(TokenError.EXPIRED_TOKEN, "이미 만료되거나 로그아웃된 토큰입니다")
         }
     }
 }

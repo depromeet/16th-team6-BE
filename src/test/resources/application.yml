@@ -21,8 +21,6 @@ spring:
 logging:
   level:
     com.deepromeet.seulseul: DEBUG
-    org.springframework.cloud.openfeign: DEBUG
-    feign: DEBUG
     tracer: trace
     org:
       hibernate:
@@ -30,12 +28,6 @@ logging:
           jdbc:
             bind: trace
         SQL: trace
-
-feign:
-  client:
-    config:
-      default:
-        loggerLevel: FULL
 
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}

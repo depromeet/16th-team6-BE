@@ -9,8 +9,10 @@ import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
+import io.micrometer.core.instrument.MeterRegistry
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -27,8 +29,15 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 @RequestMapping("/api/routes")
 class RouteController(
-    private val routeService: RouteService
+    private val routeService: RouteService,
+    private val meterRegistry: MeterRegistry
 ) {
+    companion object {
+        private val logger = LoggerFactory.getLogger(RouteController::class.java)
+        private const val STREAM_TIMER_NAME = "route.stream.duration"
+        private const val STREAM_COUNTER_NAME = "route.stream.requests"
+    }
+
     @GetMapping("/last-routes")
     suspend fun getLastRoutes(
         @CurrentUser id: Long,
@@ -65,12 +74,13 @@ class RouteController(
     fun streamLastRoutesV3(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
-    ): Flow<LastRouteResponse> =
-        routeService.getLastRouteStream(
+    ): Flow<LastRouteResponse> {
+        return routeService.getLastRouteStream(
             UserId(id),
             request.toStart(),
             request.toEnd()
-        ).map { LastRouteResponse(it) }
+        ).map { route -> LastRouteResponse(route) }
+    }
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(

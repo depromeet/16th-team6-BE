@@ -14,17 +14,17 @@ import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.CompositeBusPositionFetcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
 class BusManager(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
-    private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
+    private val busPositionFetcher: CompositeBusPositionFetcher,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
     private val busTimeTableCache: BusTimeTableCache,
@@ -67,12 +67,10 @@ class BusManager(
     }
 
     suspend fun getBusPositions(route: BusRoute): BusRoutePositions =
-        withContext(Dispatchers.IO) {
-            coroutineScope {
-                val stations = async { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
-                val positions = async { busPositionFetcherMap[route.serviceRegion]!!.fetch(route.id) }
-                BusRoutePositions(stations.await(), positions.await())
-            }
+        coroutineScope {
+            val stations = async(Dispatchers.IO) { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
+            val positions = async(Dispatchers.IO) { busPositionFetcher.fetch(route) }
+            BusRoutePositions(stations.await(), positions.await())
         }
 
     suspend fun locateBus(

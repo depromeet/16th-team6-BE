@@ -5,22 +5,22 @@ import com.deepromeet.atcha.user.domain.UserId
 data class UserProvider(
     val id: UserProviderId,
     val userId: UserId,
-    val provider: Provider
+    val providerContext: ProviderContext
 ) {
     companion object {
         fun create(
             userId: UserId,
-            provider: Provider
+            providerContext: ProviderContext
         ): UserProvider {
             return UserProvider(
                 id = UserProviderId(0L),
                 userId = userId,
-                provider = provider
+                providerContext = providerContext
             )
         }
     }
 
     fun updateProviderToken(newToken: String): UserProvider {
-        return copy(provider = provider.updateToken(newToken))
+        return copy(providerContext = providerContext.updateToken(newToken))
     }
 }

@@ -25,19 +25,19 @@ class LocationController(
     private val locationService: LocationService
 ) {
     @GetMapping
-    fun getPOIs(
+    suspend fun getPOIs(
         @ModelAttribute request: POISearchRequest
     ): ApiResponse<List<POIResponse>> =
-        ApiResponse.Companion.success(
+        ApiResponse.success(
             locationService.getPOIs(request.keyword, request.toCoordinate())
-                .map(POIResponse.Companion::from)
+                .map(POIResponse::from)
         )
 
     @GetMapping("/rgeo")
-    fun getReverseGeoLabel(
+    suspend fun getReverseGeoLabel(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<LocationResponse> =
-        ApiResponse.Companion.success(
+        ApiResponse.success(
             LocationResponse(locationService.getLocation(coordinate))
         )
 
@@ -57,8 +57,8 @@ class LocationController(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<List<POIResponse>> =
         locationService.getPOIHistories(UserId(userId), coordinate).let {
-            return ApiResponse.Companion.success(
-                it.map { poi -> POIResponse.Companion.from(poi) }
+            return ApiResponse.success(
+                it.map { poi -> POIResponse.from(poi) }
             )
         }
 
@@ -76,10 +76,10 @@ class LocationController(
     ) = locationService.clearPOIHistories(UserId(userId))
 
     @GetMapping("/is-service-region")
-    fun isServiceRegion(
+    suspend fun isServiceRegion(
         @ModelAttribute coordinate: Coordinate
     ): ApiResponse<Boolean> {
-        return ApiResponse.Companion.success(
+        return ApiResponse.success(
             locationService.isServiceRegion(coordinate)
         )
     }

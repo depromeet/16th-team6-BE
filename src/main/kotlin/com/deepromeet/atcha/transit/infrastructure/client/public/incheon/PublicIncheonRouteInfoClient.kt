@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicIncheonRouteInfoClient(
-    private val publicIncheonBusArrivalFeignClient: PublicIncheonBusArrivalFeignClient,
-    private val incheonBusRouteInfoFeignClient: PublicIncheonBusRouteInfoFeignClient,
+    private val publicIncheonBusArrivalHttpClient: PublicIncheonBusArrivalHttpClient,
+    private val incheonBusRouteInfoHttpClient: PublicIncheonBusRouteInfoHttpClient,
     private val coordinateTransformer: CoordinateTransformer,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
@@ -39,7 +39,7 @@ class PublicIncheonRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> incheonBusRouteInfoFeignClient.getBusRouteByName(key, routeName) },
+            apiCall = { key -> incheonBusRouteInfoHttpClient.getBusRouteByName(key, routeName) },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody.itemList
@@ -60,7 +60,7 @@ class PublicIncheonRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                incheonBusRouteInfoFeignClient.getBusRouteInfoById(key, routeInfo.routeId)
+                incheonBusRouteInfoHttpClient.getBusRouteInfoById(key, routeInfo.routeId)
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
@@ -78,7 +78,7 @@ class PublicIncheonRouteInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> incheonBusRouteInfoFeignClient.getBusRouteInfoById(key, route.id.value) },
+            apiCall = { key -> incheonBusRouteInfoHttpClient.getBusRouteInfoById(key, route.id.value) },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody.itemList?.get(0)?.toBusRouteOperationInfo()
@@ -102,7 +102,7 @@ class PublicIncheonRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                incheonBusRouteInfoFeignClient.getBusRouteSectionList(key, route.id.value)
+                incheonBusRouteInfoHttpClient.getBusRouteSectionList(key, route.id.value)
             },
             isLimitExceeded = { response -> ApiClientUtils.isServiceResultApiLimitExceeded(response) },
             processResult = { response ->
@@ -139,7 +139,7 @@ class PublicIncheonRouteInfoClient(
             spareKey = spareKey,
             realLastKey = realLastKey,
             apiCall = { key ->
-                publicIncheonBusArrivalFeignClient.getBusArrivalList(
+                publicIncheonBusArrivalHttpClient.getBusArrivalList(
                     key,
                     routeInfo.routeId,
                     routeInfo.getTargetStation().stationId

@@ -44,7 +44,7 @@ class GlobalControllerAdvice {
         request: HttpServletRequest
     ): ResponseEntity<ApiResponse<Unit>> {
         val exception =
-            RequestException.Companion.of(
+            RequestException.of(
                 RequestError.NO_MATCHED_RESOURCE,
                 "요청하신 리소스를 찾을 수 없습니다: ${noResourceException.resourcePath}"
             )

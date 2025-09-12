@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicGyeonggiBusPositionClient(
-    private val publicGyeonggiBusPositionClient: PublicGyeonggiBusPositionFeignClient,
+    private val publicGyeonggiBusPositionHttpClient: PublicGyeonggiBusPositionHttpClient,
     @Value("\${open-api.api.service-key}")
     private val serviceKey: String,
     @Value("\${open-api.api.spare-key}")
@@ -23,7 +23,7 @@ class PublicGyeonggiBusPositionClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> publicGyeonggiBusPositionClient.getBusLocationList(key, routeId.value) },
+            apiCall = { key -> publicGyeonggiBusPositionHttpClient.getBusLocationList(key, routeId.value) },
             isLimitExceeded = { response -> isGyeonggiApiLimitExceeded(response) },
             processResult = { response ->
                 response.msgBody?.busLocationList

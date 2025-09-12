@@ -2,10 +2,10 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
 import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
+import kotlinx.coroutines.delay
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.coroutines.cancellation.CancellationException
 
 @Component
 class PublicRateLimiterRegistry(props: OpenApiProps) {
@@ -13,7 +13,7 @@ class PublicRateLimiterRegistry(props: OpenApiProps) {
     private val limitMap = props.limits.perApi
     private val defaultLimit = props.limits.default
 
-    fun awaitByUrl(
+    suspend fun awaitByUrl(
         requestUrl: String,
         urlKeyMap: Map<String, String>
     ) {
@@ -28,13 +28,11 @@ class PublicRateLimiterRegistry(props: OpenApiProps) {
                 newBucket(limitMap[key] ?: defaultLimit)
             }
 
-        while (!bucket.tryConsume(1)) {
-            try {
-                Thread.sleep(100)
-            } catch (e: InterruptedException) {
-                Thread.currentThread().interrupt()
-                throw CancellationException()
-            }
+        while (true) {
+            val probe = bucket.tryConsumeAndReturnRemaining(1)
+            if (probe.isConsumed) break
+            val waitMillis = (probe.nanosToWaitForRefill / 1_000_000).coerceAtLeast(1)
+            delay(waitMillis)
         }
     }
 

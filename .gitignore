@@ -52,3 +52,5 @@ src/main/resources/firebase-service-account.json
 
 CLAUDE.md
 GEMINI.md
+
+src/test/kotlin/com/deepromeet/atcha/auth/DevTokenGeneratorTest.kt

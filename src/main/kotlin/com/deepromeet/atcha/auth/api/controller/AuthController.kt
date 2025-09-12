@@ -24,7 +24,7 @@ class AuthController(
     private val authService: AuthService
 ) {
     @GetMapping("/auth/check")
-    fun checkUserExists(
+    suspend fun checkUserExists(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int
     ): ApiResponse<ExistsUserResponse> {
@@ -35,7 +35,7 @@ class AuthController(
 
     @PostMapping("/auth/sign-up")
     @ResponseStatus(HttpStatus.CREATED)
-    fun signUp(
+    suspend fun signUp(
         @Token providerToken: String,
         @RequestBody signUpRequest: SignUpRequest
     ): ApiResponse<SignUpResponse> {
@@ -46,7 +46,7 @@ class AuthController(
     }
 
     @GetMapping("/auth/login")
-    fun login(
+    suspend fun login(
         @Token providerToken: String,
         @RequestParam("provider") provider: Int,
         @RequestParam("fcmToken") fcmToken: String

@@ -1,14 +1,29 @@
 package com.deepromeet.atcha.transit.domain.bus
 
+import com.deepromeet.atcha.transit.domain.TransitInfo
 import java.time.Duration
 import java.time.LocalDateTime
 
 data class BusRealTimeArrivals(
     val realTimeInfoList: List<BusArrival>
 ) {
-    /** BusPosition 정보를 활용한 더 정확한 후보 생성 */
+    /** BusPosition 정보를 활용한 더 정확한 도착 시간 계산 */
+    fun getClosestArrivalsWithPositions(
+        busInfo: TransitInfo.BusInfo,
+        targetDepartureTime: LocalDateTime,
+        approachingBuses: List<BusPosition>
+    ): List<BusArrival>? {
+        val arrivals = createArrivalCandidatesWithPositions(busInfo, approachingBuses)
+
+        if (arrivals.isEmpty()) return null
+
+        val targetIndex = getClosestArrivalIndex(arrivals, targetDepartureTime) ?: return null
+
+        return createClosestTwoArrival(targetIndex, arrivals)
+    }
+
     fun createArrivalCandidatesWithPositions(
-        timeTable: BusTimeTable,
+        busInfo: TransitInfo.BusInfo,
         approachingBuses: List<BusPosition>
     ): List<BusArrival> {
         val realTimeBuses =
@@ -19,72 +34,52 @@ data class BusRealTimeArrivals(
         if (realTimeBuses.isEmpty()) return emptyList()
 
         val matchedBuses = mutableListOf<BusArrival>()
-        val usedVehicleIds = mutableSetOf<String>()
+        val arrivingVehicleIds = realTimeBuses.map { it.vehicleId }
 
-        realTimeBuses.forEach { rt ->
-            val pos = approachingBuses.find { it.vehicleId == rt.vehicleId }
-            if (pos != null) {
-                matchedBuses +=
-                    rt.copy(
-                        busCongestion = pos.busCongestion,
-                        remainingSeats = pos.remainSeats
-                    )
-                usedVehicleIds += rt.vehicleId
-            } else {
-                matchedBuses += rt
-            }
-        }
+        realTimeBuses.forEach { realTimeBus -> matchedBuses += realTimeBus }
 
         val remainingPositions =
             approachingBuses
-                .filter { it.vehicleId !in usedVehicleIds }
+                .filter { it.vehicleId !in arrivingVehicleIds }
                 .sortedByDescending { it.sectionOrder }
 
         // 마지막 실시간 도착시각 + n*term 로 추정 생성
-        val term = timeTable.term.toLong()
+        val term = busInfo.timeTable.term.toLong()
         val lastRealTime = realTimeBuses.last().expectedArrivalTime!!
         var nextIndex = 1
 
         for (pos in remainingPositions) {
             val nextArrivalTime = lastRealTime.plusMinutes(term * nextIndex)
-
-            if (nextArrivalTime.isBefore(timeTable.lastTime)) {
-                matchedBuses +=
-                    BusArrival.createEstimated(
-                        vehicleId = pos.vehicleId,
-                        estimatedArrivalTime = nextArrivalTime,
-                        busCongestion = pos.busCongestion,
-                        remainingSeats = pos.remainSeats
-                    )
-                nextIndex++
-            } else {
-                break
-            }
+            matchedBuses +=
+                BusArrival.createEstimated(
+                    vehicleId = pos.vehicleId,
+                    estimatedArrivalTime = nextArrivalTime,
+                    remainStations = busInfo.busRouteInfo.getTargetStation().order - pos.sectionOrder,
+                    busCongestion = pos.busCongestion,
+                    remainingSeats = pos.remainSeats
+                )
+            nextIndex++
         }
 
         return matchedBuses.sortedBy { it.expectedArrivalTime }
     }
 
-    /** BusPosition 정보를 활용한 더 정확한 도착 시간 계산 */
-    fun getClosestArrivalsWithPositions(
-        timeTable: BusTimeTable,
-        targetDepartureTime: LocalDateTime,
-        approachingBuses: List<BusPosition>
-    ): List<BusArrival>? {
-        val arrivals = createArrivalCandidatesWithPositions(timeTable, approachingBuses)
+    private fun getClosestArrivalIndex(
+        arrivals: List<BusArrival>,
+        targetDepartureTime: LocalDateTime
+    ): Int? =
+        arrivals.withIndex().minByOrNull { (_, arrival) ->
+            Duration.between(targetDepartureTime, arrival.expectedArrivalTime!!).abs()
+        }?.index
 
-        if (arrivals.isEmpty()) return null
-
-        val targetIndex =
-            arrivals.withIndex().minByOrNull { (_, arrival) ->
-                Duration.between(targetDepartureTime, arrival.expectedArrivalTime!!).abs()
-            }?.index ?: return null
-
-        return buildList {
+    private fun createClosestTwoArrival(
+        targetIndex: Int,
+        arrivals: List<BusArrival>
+    ): List<BusArrival> =
+        buildList {
             add(arrivals[targetIndex])
             if (targetIndex + 1 < arrivals.size) {
                 add(arrivals[targetIndex + 1])
             }
         }
-    }
 }

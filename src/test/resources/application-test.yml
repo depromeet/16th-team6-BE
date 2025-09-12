@@ -52,8 +52,6 @@ resilience4j:
 logging:
   level:
     com.deepromeet.atcha: DEBUG
-    org.springframework.cloud.openfeign: INFO
-    feign: INFO
     root: INFO
 
 discord:

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class ODSayBusInfoClient(
-    private val oDSayBusFeignClient: ODSayBusFeignClient,
+    private val oDSayBusHttpClient: ODSayBusHttpClient,
     private val oDSayCallCounter: ODSayCallCounter
 ) {
     suspend fun getBusSchedule(routeInfo: BusRouteInfo): BusSchedule {
@@ -18,7 +18,7 @@ class ODSayBusInfoClient(
                 keyProvider = oDSayCallCounter::getApiKeyBasedOnUsage,
                 apiCall = {
                         key ->
-                    oDSayBusFeignClient.getStationByStationName(
+                    oDSayBusHttpClient.getStationByStationName(
                         key,
                         routeInfo.getTargetStation().stationName
                     )
@@ -37,7 +37,7 @@ class ODSayBusInfoClient(
         val busStationResponse =
             ApiClientUtils.callApiByKeyProvider(
                 keyProvider = oDSayCallCounter::getApiKeyBasedOnUsage,
-                apiCall = { key -> oDSayBusFeignClient.getStationInfoByStationID(key, busStation.stationID) },
+                apiCall = { key -> oDSayBusHttpClient.getStationInfoByStationID(key, busStation.stationID) },
                 processResult = { response ->
                     response.result.lane.find { it.busLocalBlID == routeInfo.routeId }
                         ?: throw TransitException.of(

@@ -139,20 +139,20 @@ class RouteService(
         val userRoute = userRouteManager.read(user)
         val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
         val targetBus = lastRoute.findBus(routeName)
-        val scheduled = targetBus.departureDateTime!!
+        val scheduledTime = targetBus.departureDateTime!!
 
-        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduled).toMinutes()
+        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
 
         if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
-            return listOf(BusArrival.createScheduled(scheduled))
+            return listOf(BusArrival.createScheduled(scheduledTime))
         }
 
-        val closest = routeArrivalCalculator.closestArrivals(targetBus, scheduled)
+        val closest = routeArrivalCalculator.closestArrivals(targetBus, scheduledTime)
 
         closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
             lastRouteUpdater.updateDepartureTime(lastRoute, targetBus, newArrival)
         }
 
-        return closest ?: listOf(BusArrival.createScheduled(scheduled))
+        return closest ?: listOf(BusArrival.createScheduled(scheduledTime))
     }
 }

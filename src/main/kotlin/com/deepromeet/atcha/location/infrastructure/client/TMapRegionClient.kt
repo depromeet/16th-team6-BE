@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component
 
 @Component
 class TMapRegionClient(
-    private val tMapReverseGeoFeignClient: TMapReverseGeoFeignClient
+    private val tMapLocationHttpClient: TMapLocationHttpClient
 ) : RegionIdentifier {
-    override fun identify(coordinate: Coordinate): ServiceRegion =
-        tMapReverseGeoFeignClient.getReverseGeo(
-            coordinate.lat.toString(),
-            coordinate.lon.toString()
+    override suspend fun identify(coordinate: Coordinate): ServiceRegion =
+        tMapLocationHttpClient.getReverseGeocoding(
+            coordinate.lat,
+            coordinate.lon
         ).addressInfo.toServiceRegion()
 }

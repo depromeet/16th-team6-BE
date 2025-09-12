@@ -8,7 +8,6 @@ import com.deepromeet.atcha.shared.exception.ExternalApiError
 import com.deepromeet.atcha.shared.exception.ExternalApiException
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import feign.RetryableException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
@@ -19,9 +18,9 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class TransitRouteClientV2(
-    private val tmapRouteSearchClient: TMapRouteClient
+    private val tmapRouteHttpClient: TMapRouteHttpClient
 ) {
-    fun fetchItinerariesV2(
+    suspend fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
     ): List<RouteItinerary> {
@@ -31,7 +30,7 @@ class TransitRouteClientV2(
 
         val response =
             try {
-                tmapRouteSearchClient.getRoutes(
+                tmapRouteHttpClient.getRoutes(
                     TMapRouteRequest(
                         startX = start.lon.toString(),
                         startY = start.lat.toString(),
@@ -41,7 +40,7 @@ class TransitRouteClientV2(
                         searchDttm = baseDate
                     )
                 )
-            } catch (e: RetryableException) {
+            } catch (e: Exception) {
                 log.error(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_TIME_OUT, e)
             } catch (e: CallNotPermittedException) {
