@@ -112,7 +112,6 @@ class PublicGyeonggiRouteInfoClient(
                     ?.let { routeStations ->
                         val busRouteStations =
                             routeStations.map { it.toBusRouteStation(route) }
-                                .filter(::isValidStation)
                         BusRouteStationList(
                             busRouteStations,
                             routeStations.first().turnSeq

@@ -1,7 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul
 
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
-import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
@@ -116,9 +115,6 @@ class PublicSeoulBusRouteInfoClient(
                     val turnPoint = responses.first { it.transYn == "Y" }.seq.toInt()
                     val busRouteStations =
                         responses
-                            .filter { station ->
-                                NON_STOP_STATION_NAME.none { keyword -> station.stationNm.contains(keyword) }
-                            }
                             .map { it.toBusRouteStation(turnPoint) }
                     BusRouteStationList(busRouteStations, turnPoint)
                 }
