@@ -1,11 +1,10 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
 
+import kotlinx.coroutines.reactor.mono
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import org.springframework.web.reactive.function.client.ExchangeFunction
-import reactor.core.publisher.Mono
-import reactor.core.scheduler.Schedulers
 
 @Component
 class HttpRateLimitFilter(
@@ -17,11 +16,10 @@ class HttpRateLimitFilter(
 
     fun rateLimitFilter(): ExchangeFilterFunction {
         return ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
-            Mono.fromCallable {
+            mono {
                 val baseUrl = request.url().toString()
                 registry.awaitByUrl(baseUrl, urlKeyMap)
-            }.subscribeOn(Schedulers.boundedElastic())
-                .then(next.exchange(request))
+            }.then(next.exchange(request))
         }
     }
 }

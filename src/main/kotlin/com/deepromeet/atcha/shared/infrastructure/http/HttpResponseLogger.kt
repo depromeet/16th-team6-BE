@@ -9,7 +9,6 @@ import org.springframework.web.reactive.function.client.ClientResponse
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
-import kotlin.jvm.java
 
 private val log = KotlinLogging.logger {}
 
