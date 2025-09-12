@@ -73,7 +73,12 @@ class UserRouteDepartureTimeRefresher(
         busTerm: Int
     ): Boolean {
         val minutesLeft = Duration.between(LocalDateTime.now(), plannedDeparture).toMinutes()
-        val refreshWindow = busTerm * 2
+        val refreshWindow =
+            if (busTerm < 30) {
+                busTerm * 2
+            } else {
+                busTerm
+            }
         return minutesLeft !in DEPARTURE_THRESHOLD until refreshWindow
     }
 
