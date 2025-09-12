@@ -93,7 +93,7 @@ class UserRouteDepartureTimeRefresher(
 
         val candidates =
             arrivalInfo
-                .createArrivalCandidatesWithPositions(busInfo.timeTable, approachingBuses)
+                .createArrivalCandidatesWithPositions(busInfo, approachingBuses)
                 .map { it.expectedArrivalTime!! }
                 .mapNotNull { arrival ->
                     val newRouteDeparture =

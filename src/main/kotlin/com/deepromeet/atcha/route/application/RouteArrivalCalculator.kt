@@ -24,6 +24,6 @@ class RouteArrivalCalculator(
         val positions = busManager.getBusPositions(busInfo.busRouteInfo.route)
         val approachingBuses = positions.getApproachingBuses(busInfo.busStation)
 
-        return arrivals.getClosestArrivalsWithPositions(busInfo.timeTable, scheduled, approachingBuses)
+        return arrivals.getClosestArrivalsWithPositions(busInfo, scheduled, approachingBuses)
     }
 }
