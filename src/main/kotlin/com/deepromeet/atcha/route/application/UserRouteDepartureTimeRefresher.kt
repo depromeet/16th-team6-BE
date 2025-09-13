@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
 
-private const val DEPARTURE_THRESHOLD = 2
+private const val DEPARTURE_THRESHOLD = 1
 private const val MAX_SHIFT_LATER_SECONDS = 60L
 
 data class OptimalDepartureTime(
