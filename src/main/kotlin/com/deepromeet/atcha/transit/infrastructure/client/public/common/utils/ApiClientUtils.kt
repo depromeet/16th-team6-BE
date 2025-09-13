@@ -10,6 +10,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+import org.springframework.web.reactive.function.client.WebClientRequestException
+import sun.jvm.hotspot.HelloWorld.e
 import kotlin.coroutines.cancellation.CancellationException
 
 private val log = KotlinLogging.logger {}
@@ -31,6 +33,8 @@ object ApiClientUtils {
             } catch (e: CallNotPermittedException) {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+            } catch (e: WebClientRequestException) {
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
             } catch (e: Exception) {
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }

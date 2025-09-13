@@ -82,7 +82,7 @@ class LastRouteCalculatorV2(
                 legs = walkFixed
             )
         } catch (e: Exception) {
-            log.error(e) { "[V2‑DEMO] 경로 계산 중 오류 발생" }
+            log.warn(e) { "[V2‑DEMO] 경로 계산 중 오류 발생" }
             return null
         }
     }

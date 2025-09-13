@@ -19,7 +19,7 @@ enum class TransitError(
     SERVICE_AREA_NOT_SUPPORTED(400, "TRS_012", "서비스 지역이 아닙니다.", LogLevel.WARN),
     NOT_FOUND_ROUTE(404, "TRS_013", "경로를 찾을 수 없습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_POSITION(404, "TRS_014", "버스 위치를 찾을 수 없습니다.", LogLevel.WARN),
-    BUS_ROUTE_STATION_LIST_FETCH_FAILED(500, "TRS_015", "버스 노선 경유 정류소를 가져오는데 실패했습니다.", LogLevel.ERROR),
+    BUS_ROUTE_STATION_LIST_FETCH_FAILED(404, "TRS_015", "버스 노선 경유 정류소를 가져오는데 실패했습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_SCHEDULE(404, "TRS_016", "버스 시간표를 찾을 수 없습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_REAL_TIME(404, "TRS_017", "버스 실시간 정보를 찾을 수 없습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_OPERATION_INFO(404, "TRS_017", "버스 운행 정보를 찾을 수 없습니다.", LogLevel.WARN),

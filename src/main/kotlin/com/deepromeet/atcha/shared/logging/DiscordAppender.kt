@@ -76,30 +76,33 @@ class DiscordAppender(
     }
 
     private fun getStackTrace(event: ILoggingEvent?): String {
-        var message: String?
-
         if (event == null) {
-            message = "로그 정보가 소실되었습니다."
-        } else {
-            message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}".take(LOG_MAX_LEN)
+            return "로그 정보가 소실되었습니다."
+        }
 
-            val throwableProxy = event.throwableProxy
+        var message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}"
 
-            if (throwableProxy != null) {
-                val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
-                println("stackTrace = $stackTrace")
-                val causedBy =
-                    stackTrace.lines().firstOrNull { it.contains(CAUSED_BY) }
-                        .toString()
-                if (causedBy == null) message = stackTrace.toString().take(LOG_MAX_LEN)
+        val throwableProxy = event.throwableProxy
+        if (throwableProxy != null) {
+            val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
 
-                val causedByIndex = causedBy.indexOf(CAUSED_BY)
+            // Root Cause를 찾기 위해 "Caused by:" 라인들을 모두 찾아서 가장 마지막 것을 사용
+            val causedByLines = stackTrace.lines().filter { it.trim().startsWith(CAUSED_BY) }
 
-                message = causedBy.substring(causedByIndex + 10)
+            if (causedByLines.isNotEmpty()) {
+                // 가장 마지막 "Caused by:"가 실제 root cause
+                val rootCause = causedByLines.last().trim()
+                val rootCauseException = rootCause.substring(CAUSED_BY.length).trim()
+                message += "\n🔍 Root Cause: $rootCauseException"
+            } else {
+                // "Caused by:"가 없으면 첫 번째 예외가 root cause
+                val firstLine = stackTrace.lines().firstOrNull { it.trim().isNotEmpty() }
+                if (firstLine != null) {
+                    message += "\n🔍 Exception: ${firstLine.trim()}"
+                }
             }
         }
 
-        // 예외 정보가 없으면 기존 메시지만 반환
         return message.take(LOG_MAX_LEN)
     }
 }
