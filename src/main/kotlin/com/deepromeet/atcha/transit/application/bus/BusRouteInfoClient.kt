@@ -19,7 +19,7 @@ interface BusRouteInfoClient {
             }
     }
 
-    suspend fun getBusRoute(routeName: String): List<BusRoute>
+    suspend fun getBusRoutes(routeName: String): List<BusRoute>
 
     suspend fun getStationList(route: BusRoute): BusRouteStationList
 

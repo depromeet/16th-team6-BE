@@ -35,7 +35,7 @@ class PublicSeoulBusRouteInfoClient(
         sync = true,
         cacheManager = "apiCacheManager"
     )
-    override suspend fun getBusRoute(routeName: String): List<BusRoute> =
+    override suspend fun getBusRoutes(routeName: String): List<BusRoute> =
         ApiClientUtils.callApiWithRetry(
             primaryKey = serviceKey,
             spareKey = spareKey,

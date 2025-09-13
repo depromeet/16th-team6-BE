@@ -118,7 +118,6 @@ data class BusRouteInfoItem(
 
         return BusSchedule(
             busRouteInfo = busRouteInfo,
-            busStation = routeStation.busStation,
             busTimeTable = busTimeTable
         )
     }

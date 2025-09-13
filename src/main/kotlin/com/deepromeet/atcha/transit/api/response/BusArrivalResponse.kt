@@ -22,8 +22,8 @@ data class BusArrivalResponse(
         busArrivalInfo.schedule.busRouteInfo.route.id,
         busArrivalInfo.schedule.busRouteInfo.route.name,
         busArrivalInfo.schedule.busRouteInfo.route.serviceRegion,
-        busArrivalInfo.schedule.busStation.id,
-        busArrivalInfo.schedule.busStation.busStationMeta.name,
+        busArrivalInfo.schedule.busRouteInfo.targetStation.busStation.id,
+        busArrivalInfo.schedule.busRouteInfo.targetStation.busStation.busStationMeta.name,
         busArrivalInfo.schedule.busTimeTable.lastTime,
         busArrivalInfo.schedule.busTimeTable.term,
         busArrivalInfo.realTimeArrivals.realTimeInfoList.map { RealTimeBusArrivalResponse(it) }

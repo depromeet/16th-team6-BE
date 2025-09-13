@@ -28,7 +28,7 @@ sealed class TransitInfo {
             busSchedule: BusSchedule
         ) : this(
             busRouteInfo = busSchedule.busRouteInfo,
-            busStation = busSchedule.busStation,
+            busStation = busSchedule.busRouteInfo.targetStation.busStation,
             timeTable = busSchedule.busTimeTable
         )
     }

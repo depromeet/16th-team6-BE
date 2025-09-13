@@ -13,6 +13,16 @@ data class BusArrivalRequest(
     val lat: Double,
     val lon: Double
 ) {
+    init {
+        require(routeName.contains(":")) {
+            "유효하지 않은 정류장 이름입니다. : $routeName"
+        }
+
+        require(stationName.isNotBlank()) {
+            "정류장 이름은 비어있을 수 없습니다."
+        }
+    }
+
     fun toBusStationMeta() =
         BusStationMeta(
             stationName,

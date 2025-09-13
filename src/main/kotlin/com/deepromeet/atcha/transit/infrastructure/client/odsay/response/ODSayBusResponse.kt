@@ -75,7 +75,6 @@ data class ODSayLaneResponse(
             )
         return BusSchedule(
             busRouteInfo = busRouteInfo,
-            busStation = busRouteInfo.targetStation.busStation,
             busTimeTable =
                 BusTimeTable(
                     parseTime(busFirstTime, LocalDate.now()),

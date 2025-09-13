@@ -61,7 +61,6 @@ data class IncheonBusRouteInfoResponse(
 
         return BusSchedule(
             busRouteInfo = busRouteInfo,
-            busStation = busRouteStation.busStation,
             busTimeTable =
                 BusTimeTable(
                     firstTime =

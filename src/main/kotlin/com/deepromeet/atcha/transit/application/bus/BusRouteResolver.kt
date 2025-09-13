@@ -45,7 +45,7 @@ class BusRouteResolver(
         passStopList: RoutePassStops
     ): BusRouteInfo? =
         runCatching {
-            val routes = clientMap[region]!!.getBusRoute(routeName)
+            val routes = clientMap[region]!!.getBusRoutes(routeName)
             busRouteMatcher.getMatchedRoute(routes, station, passStopList)
         }.getOrNull()
 }
