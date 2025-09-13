@@ -10,7 +10,7 @@ enum class DiscordError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    DISCORD_LOG_DELIVERY_FAILURE(500, "DIS_001", "Discord Log 전송에 실패했습니다.", LogLevel.ERROR)
+    DISCORD_LOG_DELIVERY_FAILURE(500, "DIS_001", "Discord Log 전송에 실패했습니다.", LogLevel.WARN)
 }
 
 class DiscordException(

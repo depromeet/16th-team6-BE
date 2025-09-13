@@ -10,7 +10,7 @@ enum class MixpanelError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    MIXPANEL_EVENT_DELIVERY_FAILURE(500, "MIX_001", "Mixpanel 이벤트 전송에 실패했습니다.", LogLevel.ERROR)
+    MIXPANEL_EVENT_DELIVERY_FAILURE(500, "MIX_001", "Mixpanel 이벤트 전송에 실패했습니다.", LogLevel.WARN)
 }
 
 class MixpanelException(
