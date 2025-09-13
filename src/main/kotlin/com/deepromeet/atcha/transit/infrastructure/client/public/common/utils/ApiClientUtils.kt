@@ -11,7 +11,6 @@ import kotlinx.coroutines.runInterruptible
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientRequestException
-import sun.jvm.hotspot.HelloWorld.e
 import kotlin.coroutines.cancellation.CancellationException
 
 private val log = KotlinLogging.logger {}
