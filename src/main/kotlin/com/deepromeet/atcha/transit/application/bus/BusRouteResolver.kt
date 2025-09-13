@@ -7,6 +7,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.google.firebase.database.utilities.Utilities.getOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -47,5 +48,5 @@ class BusRouteResolver(
         runCatching {
             val routes = clientMap[region]!!.getBusRoutes(routeName)
             busRouteMatcher.getMatchedRoute(routes, station, passStopList)
-        }.getOrNull()
+        }.onFailure { log.warn(it) { } }.getOrNull()
 }

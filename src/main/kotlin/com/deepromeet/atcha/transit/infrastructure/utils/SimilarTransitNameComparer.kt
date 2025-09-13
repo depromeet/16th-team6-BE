@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component
 @Component
 class SimilarTransitNameComparer() : TransitNameComparer {
     companion object {
-        private const val SIMILARITY_THRESHOLD = 0.85
+        private const val SIMILARITY_THRESHOLD = 0.9
     }
 
     private val similarity = JaroWinklerSimilarity()
