@@ -39,7 +39,7 @@ class HttpInterfaceConfig {
 
         val strategies =
             ExchangeStrategies.builder().codecs { cfg ->
-                cfg.defaultCodecs().maxInMemorySize(1 * 1_024 * 1_024)
+                cfg.defaultCodecs().maxInMemorySize(2 * 1_024 * 1_024)
                 cfg.customCodecs().register(
                     Jackson2JsonDecoder(xmlMapper, MediaType.APPLICATION_XML, MediaType.TEXT_XML)
                 )

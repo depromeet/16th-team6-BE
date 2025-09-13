@@ -14,7 +14,7 @@ enum class RequestError(
     NOT_VALID_HEADER(400, "REQ_002", "잘못된 헤더 형식입니다.", LogLevel.WARN),
     NO_MATCHED_METHOD(400, "REQ_003", "잘못된 API 요청입니다.", LogLevel.WARN),
     NO_MATCHED_RESOURCE(400, "REQ_004", "잘못된 API 요청입니다.", LogLevel.WARN),
-    INVALID_REQUEST(400, "REQ_004", "잘못된 API 요청입니다.", LogLevel.WARN)
+    INVALID_REQUEST(400, "REQ_005", "잘못된 API 요청입니다.", LogLevel.WARN)
 }
 
 class RequestException(
