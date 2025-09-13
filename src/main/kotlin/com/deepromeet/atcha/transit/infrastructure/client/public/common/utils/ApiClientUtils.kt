@@ -6,9 +6,6 @@ import com.deepromeet.atcha.transit.infrastructure.client.public.common.response
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.PublicGyeonggiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientRequestException
 import kotlin.coroutines.cancellation.CancellationException
@@ -76,6 +73,8 @@ object ApiClientUtils {
             } catch (e: CallNotPermittedException) {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+            } catch (e: WebClientRequestException) {
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
             } catch (e: Exception) {
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
@@ -87,9 +86,6 @@ object ApiClientUtils {
             response
         }
     }
-
-    private suspend fun <T> interruptible(block: () -> T): T =
-        withContext(Dispatchers.IO) { runInterruptible { block() } }
 
     fun <T> isServiceResultApiLimitExceeded(response: ServiceResult<T>): Boolean {
         val limitMessages =
