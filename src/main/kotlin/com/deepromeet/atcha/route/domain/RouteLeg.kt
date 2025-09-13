@@ -55,21 +55,53 @@ data class RouteLeg(
         departureDateTime: LocalDateTime,
         transitInfo: TransitInfo
     ): LastRouteLeg {
+        val (patchedStart, patchedPassStops) = patchStartForBus(transitInfo)
+
         return LastRouteLeg(
-            distance = this.distance,
-            sectionTime = this.sectionTime,
-            mode = this.mode,
+            distance = distance,
+            sectionTime = sectionTime,
+            mode = mode,
             departureDateTime = departureDateTime,
-            route = this.route,
-            type = this.type,
-            service = this.service,
-            start = this.start,
-            end = this.end,
-            steps = this.steps,
-            passStops = this.passStops,
-            pathCoordinates = this.pathCoordinates,
+            route = route,
+            type = type,
+            service = service,
+            start = patchedStart,
+            end = end,
+            steps = steps,
+            passStops = patchedPassStops,
+            pathCoordinates = pathCoordinates,
             transitInfo = transitInfo
         )
+    }
+
+    private fun patchStartForBus(transitInfo: TransitInfo): Pair<RouteLocation, RoutePassStops?> {
+        if (mode != RouteMode.BUS || transitInfo !is TransitInfo.BusInfo) {
+            return start to passStops
+        }
+
+        val realStationName = transitInfo.busStation.busStationMeta.name
+
+        val newStart =
+            if (start.name != realStationName) {
+                start.copy(name = realStationName)
+            } else {
+                start
+            }
+
+        val newPassStops =
+            passStops?.let { ps ->
+                if (ps.stops.isNotEmpty() && ps.stops.first().stationName != realStationName) {
+                    val fixedFirst =
+                        ps.stops.first().copy(
+                            stationName = realStationName
+                        )
+                    RoutePassStops(listOf(fixedFirst) + ps.stops.drop(1))
+                } else {
+                    ps
+                }
+            }
+
+        return newStart to newPassStops
     }
 
     companion object {

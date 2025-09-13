@@ -20,7 +20,6 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 import java.util.Collections
 
 private val log = KotlinLogging.logger {}
@@ -91,7 +90,7 @@ class LastRouteCalculator(
             calculationTasks.forEach { job ->
                 launch {
                     val route = job.await()
-                    if (route != null && route.departureDateTime.isAfter(LocalDateTime.now())) {
+                    if (route != null) {
                         send(route)
                     }
                 }
