@@ -52,16 +52,42 @@ class GlobalControllerAdvice {
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(exception: Exception): ResponseEntity<ApiResponse<Unit>> {
-        log.error(exception) { "알 수 없는 서버 에러입니다" }
-        return ResponseEntity.internalServerError()
-            .body(
-                ApiResponse.error(
-                    "INTERNAL_SERVER_ERROR",
-                    exception.cause?.message
-                        ?: "알 수 없는 서버 에러입니다"
-                )
-            )
+    fun handleException(
+        exception: Exception,
+        request: HttpServletRequest
+    ): ResponseEntity<ApiResponse<Unit>> {
+        val rootCause = findRootCause(exception)
+
+        return when (rootCause) {
+            is IllegalArgumentException -> {
+                val customException =
+                    RequestException.of(
+                        RequestError.INVALID_REQUEST,
+                        rootCause.message ?: "잘못된 요청 파라미터입니다",
+                        rootCause
+                    )
+                handle(customException, request)
+            }
+            is IllegalStateException -> {
+                val customException =
+                    RequestException.of(
+                        RequestError.INVALID_REQUEST,
+                        rootCause.message ?: "현재 상태에서 처리할 수 없는 요청입니다",
+                        rootCause
+                    )
+                handle(customException, request)
+            }
+            else -> {
+                log.error(exception) { "알 수 없는 서버 에러입니다" }
+                ResponseEntity.internalServerError()
+                    .body(
+                        ApiResponse.error(
+                            "INTERNAL_SERVER_ERROR",
+                            exception.cause?.message ?: "알 수 없는 서버 에러입니다"
+                        )
+                    )
+            }
+        }
     }
 
     private fun handle(
@@ -81,5 +107,13 @@ class GlobalControllerAdvice {
                     exception.message ?: exception.errorType.message
                 )
             )
+    }
+
+    private fun findRootCause(throwable: Throwable): Throwable {
+        var cause = throwable
+        while (cause.cause != null && cause.cause != cause) {
+            cause = cause.cause!!
+        }
+        return cause
     }
 }
