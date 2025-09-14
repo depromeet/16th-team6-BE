@@ -3,6 +3,7 @@ package com.deepromeet.atcha.shared.web
 import com.deepromeet.atcha.shared.exception.CustomException
 import com.deepromeet.atcha.shared.web.exception.RequestError
 import com.deepromeet.atcha.shared.web.exception.RequestException
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.logging.LogLevel
@@ -17,18 +18,20 @@ import org.springframework.web.servlet.resource.NoResourceFoundException
 private val log = KotlinLogging.logger {}
 
 @RestControllerAdvice
-class GlobalControllerAdvice {
+class GlobalControllerAdvice(
+    private val objectMapper: ObjectMapper
+) {
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(
         exception: CustomException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> = handle(exception, request)
+    ): ResponseEntity<*> = handle(exception, request)
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun handleHttpRequestMethodNotSupportedException(
         httpException: HttpRequestMethodNotSupportedException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         val exception =
             RequestException.of(
                 RequestError.NO_MATCHED_METHOD,
@@ -44,7 +47,7 @@ class GlobalControllerAdvice {
     fun handleNoResourceFoundException(
         noResourceException: NoResourceFoundException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         val exception =
             RequestException.of(
                 RequestError.NO_MATCHED_RESOURCE,
@@ -57,10 +60,8 @@ class GlobalControllerAdvice {
     fun handleException(
         exception: Exception,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
-        val rootCause = findRootCause(exception)
-
-        return when (rootCause) {
+    ): ResponseEntity<*> {
+        return when (val rootCause = findRootCause(exception)) {
             is IllegalArgumentException -> {
                 val customException =
                     RequestException.of(
@@ -81,13 +82,20 @@ class GlobalControllerAdvice {
             }
             else -> {
                 log.error(exception) { "알 수 없는 서버 에러입니다" }
-                ResponseEntity.internalServerError()
-                    .body(
-                        ApiResponse.error(
-                            "INTERNAL_SERVER_ERROR",
-                            exception.cause?.message ?: "알 수 없는 서버 에러입니다"
-                        )
+                val apiResponse =
+                    ApiResponse.error(
+                        "INTERNAL_SERVER_ERROR",
+                        exception.cause?.message ?: "알 수 없는 서버 에러입니다"
                     )
+
+                if (isServerSentEventRequest(request)) {
+                    val sseData = "data: ${objectMapper.writeValueAsString(apiResponse)}\n\n"
+                    ResponseEntity.internalServerError()
+                        .contentType(MediaType.TEXT_EVENT_STREAM)
+                        .body(sseData)
+                } else {
+                    ResponseEntity.internalServerError().body(apiResponse)
+                }
             }
         }
     }
@@ -95,7 +103,7 @@ class GlobalControllerAdvice {
     private fun handle(
         exception: CustomException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         when (exception.errorType.logLevel) {
             LogLevel.ERROR -> log.error(exception) { exception.message }
             LogLevel.WARN -> log.warn(exception) { exception.message }
@@ -110,9 +118,11 @@ class GlobalControllerAdvice {
             )
 
         return if (isServerSentEventRequest(request)) {
+            // SSE 포맷으로 변환
+            val sseData = "data: ${objectMapper.writeValueAsString(apiResponse)}\n\n"
             ResponseEntity.status(exception.status)
                 .contentType(MediaType.TEXT_EVENT_STREAM)
-                .body(apiResponse)
+                .body(sseData)
         } else {
             ResponseEntity.status(exception.status)
                 .body(apiResponse)
