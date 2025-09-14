@@ -25,7 +25,7 @@ enum class TransitError(
     NOT_FOUND_BUS_OPERATION_INFO(404, "TRS_017", "버스 운행 정보를 찾을 수 없습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_STATION(404, "TRS_018", "버스 정류소를 찾을 수 없습니다.", LogLevel.WARN),
     NOT_FOUND_BUS_ROUTE(404, "TRS_019", "버스 노선을 찾을 수 없습니다.", LogLevel.WARN),
-    NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.WARN),
+    NOT_FOUND_SUBWAY_LAST_TIME(404, "TRS_020", "지하철 막차 시간을 찾을 수 없습니다.", LogLevel.ERROR),
     NOT_FOUND_SUBWAY_SCHEDULE(404, "TRS_022", "지하철 시간표를 찾을 수 없습니다.", LogLevel.WARN),
     INVALID_DIRECTION_NAME(400, "TRS_021", "유효하지 않은 지하철 방향 이름입니다.", LogLevel.WARN),
     NOT_FOUND_SPECIFIED_TIME(404, "TRS_023", "특정 시간에 해당하는 대중교통을 찾을 수 없습니다.", LogLevel.WARN),

@@ -24,7 +24,9 @@ data class SubwayTimeTable(
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
                 "${startStation.routeName} 지하철 '${startStation.name}'역에서" +
-                    " '${destinationStation.name}'역으로 가는 막차 시간을 찾을 수 없습니다."
+                    " '${destinationStation.name}'역으로 가는 " +
+                    "'${subwayDirection.getName(SubwayLine.fromRouteName(startStation.routeName).isCircular)}' " +
+                    "방향 막차 시간을 찾을 수 없습니다."
             )
 
     fun findNearestTime(
