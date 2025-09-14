@@ -4,6 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteTimeAdjuster
 import com.deepromeet.atcha.route.domain.RouteItinerary
+import com.deepromeet.atcha.route.domain.isValidDepartureTime
 import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.route.infrastructure.cache.LastRouteMetricsRepository
@@ -33,6 +34,7 @@ class LastRouteCalculator(
     private val lastRouteAppender: LastRouteAppender,
     private val metricsRepository: LastRouteMetricsRepository
 ) {
+    @Deprecated("streamLastRoutes로 업그레이드")
     suspend fun calcLastRoutes(
         start: Coordinate,
         destination: Coordinate,
@@ -46,6 +48,7 @@ class LastRouteCalculator(
                         async(Dispatchers.Default) {
                             withTimeoutOrNull(MAX_CALCULATION_TIME) {
                                 calculateRoute(itinerary)
+                                    ?.takeIf { it.isValidDepartureTime() }
                             }
                         }
                     }
@@ -77,6 +80,7 @@ class LastRouteCalculator(
                     val route =
                         withTimeoutOrNull(MAX_CALCULATION_TIME) {
                             calculateRoute(itinerary)
+                                ?.takeIf { it.isValidDepartureTime() }
                         }
                     if (route != null) {
                         lastRouteBuffer.add(route)
