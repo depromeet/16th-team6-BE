@@ -48,5 +48,5 @@ class BusRouteResolver(
         runCatching {
             val routes = clientMap[region]!!.getBusRoutes(routeName)
             busRouteMatcher.getMatchedRoute(routes, station, passStopList)
-        }.onFailure { log.warn(it) { } }.getOrNull()
+        }.onFailure { log.debug { it.message } }.getOrNull()
 }
