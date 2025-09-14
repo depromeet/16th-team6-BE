@@ -10,7 +10,7 @@
     <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>
-                %highlight([%-5level]) [%d{yy-MM-dd HH:mm:ss.SSS}] %green([%thread]) %cyan([%logger{0}:%line])-%message%n
+                %highlight([%level]) [%d{yy-MM-dd HH:mm:ss.SSS}] %green([%thread]) %cyan([%logger{0}:%line])-%message%n
             </pattern>
         </encoder>
     </appender>

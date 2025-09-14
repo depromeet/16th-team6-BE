@@ -7,8 +7,6 @@ import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.respon
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
-import org.springframework.web.reactive.function.client.WebClientRequestException
-import org.springframework.web.reactive.function.client.WebClientResponseException
 import kotlin.coroutines.cancellation.CancellationException
 
 private val log = KotlinLogging.logger {}
@@ -22,21 +20,9 @@ object ApiClientUtils {
         errorMessage: String
     ): R {
         val response: T =
-            try {
+            executeWithExceptionHandling(errorMessage) {
                 val apiKey = keyProvider()
                 apiCall(apiKey)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: CallNotPermittedException) {
-                log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
-            } catch (e: WebClientRequestException) {
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
-            } catch (e: WebClientResponseException) {
-                log.warn { "API 응답 에러 - $errorMessage: ${e.statusCode} ${e.responseBodyAsString}" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
-            } catch (e: Exception) {
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
         return processResult(response)
     }
@@ -68,22 +54,9 @@ object ApiClientUtils {
         }
 
         val currentKey = keys[index]
-
         val response =
-            try {
+            executeWithExceptionHandling(errorMessage) {
                 apiCall(currentKey)
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: CallNotPermittedException) {
-                log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
-            } catch (e: WebClientRequestException) {
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
-            } catch (e: WebClientResponseException) {
-                log.warn { "API 응답 에러 - $errorMessage: ${e.statusCode} ${e.responseBodyAsString}" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
-            } catch (e: Exception) {
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
             }
 
         return if (isLimitExceeded(response)) {
@@ -91,6 +64,22 @@ object ApiClientUtils {
             callApiWithRetryInternal(keys, apiCall, isLimitExceeded, errorMessage, index + 1)
         } else {
             response
+        }
+    }
+
+    private suspend fun <T> executeWithExceptionHandling(
+        errorMessage: String,
+        apiCall: suspend () -> T
+    ): T {
+        return try {
+            apiCall()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: CallNotPermittedException) {
+            log.error { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
+            throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+        } catch (e: Exception) {
+            throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
         }
     }
 
