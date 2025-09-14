@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component
 class RedisCacheHitRecorder(
     private val stringRedisTemplate: StringRedisTemplate
 ) {
-    private val namespace = "cache:metrics"
+    private val namespace = "metrics:cache"
 
     private fun metricsKey(key: String): String {
         return "$namespace:$key"
