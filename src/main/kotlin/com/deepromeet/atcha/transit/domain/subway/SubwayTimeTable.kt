@@ -14,12 +14,10 @@ data class SubwayTimeTable(
 ) {
     fun getLastTime(
         destinationStation: SubwayStation,
-        routes: List<Route>,
         isExpress: Boolean
     ): SubwaySchedule =
         schedules
             .filter { it.isExpress == isExpress }
-            .filter { isReachable(startStation, destinationStation, it.finalStation, routes, subwayDirection) }
             .maxByOrNull { it.departureTime.toLocalDateTime() }
             ?: throw TransitException.of(
                 TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
@@ -47,15 +45,17 @@ data class SubwayTimeTable(
             }
         }
 
-    private fun isReachable(
-        startStation: SubwayStation,
+    fun filterReachable(endStation: SubwayStation, routes: List<Route>): SubwayTimeTable {
+        return copy(schedules = schedules.filter { isReachable(endStation, it.finalStation, routes) })
+    }
+
+    fun isReachable(
         endStation: SubwayStation,
         finalStation: SubwayStation,
         routes: List<Route>,
-        direction: SubwayDirection
     ): Boolean {
         return routes.any { route ->
-            route.isReachable(startStation.name, endStation.name, finalStation.name, direction)
+            route.isReachable(startStation.name, endStation.name, finalStation.name, subwayDirection)
         }
     }
 }

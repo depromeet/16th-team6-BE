@@ -12,11 +12,12 @@ sealed class TransitInfo {
     data class SubwayInfo(
         val subwayLine: SubwayLine,
         val timeTable: SubwayTimeTable,
-        val targetSchedule: SubwaySchedule
+        val lastSchedule: SubwaySchedule,
+        val isExpress: Boolean
     ) : TransitInfo() {
-        fun resolveFinalStationName(): String = targetSchedule.finalStation.name
+        fun resolveFinalStationName(): String = lastSchedule.finalStation.name
 
-        fun resolveDirectionName(): String = targetSchedule.subwayDirection.getName(subwayLine.isCircular)
+        fun resolveDirectionName(): String = lastSchedule.subwayDirection.getName(subwayLine.isCircular)
     }
 
     data class BusInfo(
