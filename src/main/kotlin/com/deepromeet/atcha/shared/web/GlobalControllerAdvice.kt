@@ -6,6 +6,8 @@ import com.deepromeet.atcha.shared.web.exception.RequestException
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.logging.LogLevel
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
@@ -99,14 +101,22 @@ class GlobalControllerAdvice {
             LogLevel.WARN -> log.warn(exception) { exception.message }
             else -> log.info(exception) { exception.message }
         }
-        return ResponseEntity.status(exception.status)
-            .body(
-                ApiResponse.error(
-                    exception.errorType.errorCode,
-                    request.requestURI,
-                    exception.message ?: exception.errorType.message
-                )
+
+        val apiResponse =
+            ApiResponse.error(
+                exception.errorType.errorCode,
+                request.requestURI,
+                exception.message ?: exception.errorType.message
             )
+
+        return if (isServerSentEventRequest(request)) {
+            ResponseEntity.status(exception.status)
+                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .body(apiResponse)
+        } else {
+            ResponseEntity.status(exception.status)
+                .body(apiResponse)
+        }
     }
 
     private fun findRootCause(throwable: Throwable): Throwable {
@@ -115,5 +125,10 @@ class GlobalControllerAdvice {
             cause = cause.cause!!
         }
         return cause
+    }
+
+    private fun isServerSentEventRequest(request: HttpServletRequest): Boolean {
+        val accept = request.getHeader(HttpHeaders.ACCEPT)
+        return accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)
     }
 }
