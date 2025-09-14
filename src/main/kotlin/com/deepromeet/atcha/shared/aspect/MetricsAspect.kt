@@ -14,8 +14,10 @@ private val log = KotlinLogging.logger {}
 class MetricsAspect(
     private val metricsRepository: LastRouteMetricsRepository
 ) {
-
-    @Around("execution(* com.deepromeet.atcha.route.application.LastRouteCalculator.streamLastRoutes(..)) || execution(* com.deepromeet.atcha.route.application.LastRouteCalculator.calcLastRoutes(..))")
+    @Around(
+        "execution(* com.deepromeet.atcha.route.application.LastRouteCalculator.streamLastRoutes(..)) || " +
+            "execution(* com.deepromeet.atcha.route.application.LastRouteCalculator.calcLastRoutes(..))"
+    )
     fun collectTotalMetrics(joinPoint: ProceedingJoinPoint): Any? {
         val args = joinPoint.args
         val itineraries = args.getOrNull(2) as? List<*>
