@@ -66,7 +66,7 @@ class LastRouteLegCalculator(
                 )
             }
         } catch (e: Exception) {
-            log.warn { "❌ 지하철 막차 시간 계산 실패 - 노선: ${leg.route}, 출발역: ${leg.start.name}, 도착역: ${leg.end.name}" }
+            log.debug(e) { "❌ 지하철 막차 시간 계산 실패 - 노선: ${leg.route}, 출발역: ${leg.start.name}, 도착역: ${leg.end.name}" }
             throw e
         }
     }
