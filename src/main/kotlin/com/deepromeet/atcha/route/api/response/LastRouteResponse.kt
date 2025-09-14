@@ -50,6 +50,8 @@ data class LastRouteLegResponse(
     val targetBusTerm: Int? = null,
     val subwayFinalStation: String? = null,
     val subwayDirection: String? = null,
+    val isExpressSubway: Boolean? = null,
+    val isLastSubway: Boolean? = null,
     val passStopList: List<RoutePassStopResponse>? = null,
     val step: List<RouteStep>? = null,
     val passShape: String? = null
@@ -77,6 +79,11 @@ data class LastRouteLegResponse(
         targetBusTerm = lastRouteLeg.busInfo?.timeTable?.term,
         subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
         subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
+        isExpressSubway = lastRouteLeg.subwayInfo?.isExpress,
+        isLastSubway =
+            lastRouteLeg.subwayInfo?.lastSchedule?.departureTime?.toLocalDateTime()?.isEqual(
+                lastRouteLeg.departureDateTime
+            ),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
         step = lastRouteLeg.steps,
         passShape = lastRouteLeg.pathCoordinates

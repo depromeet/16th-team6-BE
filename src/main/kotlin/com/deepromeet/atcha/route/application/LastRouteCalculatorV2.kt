@@ -112,7 +112,13 @@ class LastRouteCalculatorV2(
 
                             leg.toLastTransitLeg(
                                 departureDateTime = cursor.truncatedTo(ChronoUnit.SECONDS),
-                                transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, timeTable.schedules[0])
+                                transitInfo =
+                                    TransitInfo.SubwayInfo(
+                                        subwayLine,
+                                        timeTable,
+                                        timeTable.schedules[0],
+                                        leg.isExpress()
+                                    )
                             )
                         } catch (e: Exception) {
                             log.warn(e) { "지하철 정보 조회 실패, 기본값 사용: ${leg.route}, ${leg.start.name}, ${leg.end.name}" }

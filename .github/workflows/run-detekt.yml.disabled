@@ -1,8 +1,7 @@
 name: run detekt
 on:
   pull_request:
-    branches:
-      - dev
+    branches: [ dev ]
 jobs:
   detekt:
     runs-on: ubuntu-latest

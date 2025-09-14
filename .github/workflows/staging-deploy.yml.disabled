@@ -3,7 +3,7 @@ name: STAGING CD
 on:
   workflow_dispatch:
   pull_request:
-    branches: [ ]
+    branches: [ dev ]
 
 jobs:
   build:
