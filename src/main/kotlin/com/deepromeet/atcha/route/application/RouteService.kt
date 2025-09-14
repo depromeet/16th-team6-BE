@@ -36,6 +36,7 @@ class RouteService(
     private val routeArrivalCalculator: RouteArrivalCalculator,
     private val lastRouteUpdater: LastRouteUpdater
 ) {
+    @Deprecated("deprecated")
     suspend fun getLastRoutes(
         userId: UserId,
         start: Coordinate,

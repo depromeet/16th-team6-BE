@@ -34,7 +34,7 @@ class LastRouteCalculator(
     private val lastRouteAppender: LastRouteAppender,
     private val metricsRepository: LastRouteMetricsRepository
 ) {
-    @Deprecated("streamLastRoutes로 업그레이드")
+    @Deprecated("deprecated")
     suspend fun calcLastRoutes(
         start: Coordinate,
         destination: Coordinate,
