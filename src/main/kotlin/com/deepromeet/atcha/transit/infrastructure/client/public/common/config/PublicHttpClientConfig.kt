@@ -12,8 +12,8 @@ class PublicHttpClientConfig(
     private val rateLimitFilter: HttpRateLimitFilter
 ) {
     @Bean
-    fun publicApiWebClient(webClientBuilder: WebClient.Builder): WebClient {
-        return webClientBuilder
+    fun publicApiWebClient(customWebClientBuilder: WebClient.Builder): WebClient {
+        return customWebClientBuilder
             .filter(rateLimitFilter.rateLimitFilter())
             .filter(HttpResponseLogger.logRequest())
 //            .filter(HttpResponseLogger.logResponse())

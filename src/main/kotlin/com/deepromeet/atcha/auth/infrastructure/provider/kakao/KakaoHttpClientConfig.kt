@@ -19,7 +19,9 @@ class KakaoHttpClientConfig(
         return commonWebClient.mutate()
             .baseUrl(kakaoApiUrl)
             .defaultHeader("Content-Type", "application/x-www-form-urlencoded;charset=utf-8")
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.AUTH_API, "Kakao"))
+            .filters { filters ->
+                filters.add(0, circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.AUTH_API, "Kakao"))
+            }
             .build()
     }
 

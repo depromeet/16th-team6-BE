@@ -24,7 +24,12 @@ class GyeonggiBusHttpClientConfig(
         return publicApiWebClient.mutate()
             .baseUrl(gyeonggiRouteUrl)
             .defaultHeader("Accept", "application/xml")
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "GyeonggiRoute"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "GyeonggiRoute")
+                )
+            }
             .build()
     }
 
@@ -33,7 +38,12 @@ class GyeonggiBusHttpClientConfig(
         return publicApiWebClient.mutate()
             .baseUrl(gyeonggiArrivalUrl)
             .defaultHeader("Accept", "application/xml")
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "GyeonggiArrival"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "GyeonggiArrival")
+                )
+            }
             .build()
     }
 
@@ -42,9 +52,15 @@ class GyeonggiBusHttpClientConfig(
         return publicApiWebClient.mutate()
             .baseUrl(gyeonggiPositionUrl)
             .defaultHeader("Accept", "application/xml")
-            .filter(
-                circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "GyeonggiBusPosition")
-            )
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(
+                        CircuitBreakerType.PUBLIC_API,
+                        "GyeonggiBusPosition"
+                    )
+                )
+            }
             .build()
     }
 

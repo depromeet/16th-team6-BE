@@ -24,7 +24,12 @@ class TMapHttpClientConfig(
             .defaultHeader("appKey", appKey)
             .defaultHeader("accept", "application/json")
             .defaultHeader("content-type", "application/json")
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.COMMERCIAL_API, "T-MAP"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.COMMERCIAL_API, "T-MAP")
+                )
+            }
             .build()
     }
 

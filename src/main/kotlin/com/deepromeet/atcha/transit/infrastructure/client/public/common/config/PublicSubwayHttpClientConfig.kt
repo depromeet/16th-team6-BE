@@ -21,7 +21,12 @@ class PublicSubwayHttpClientConfig(
     fun publicSubwayWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(publicApiUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "PublicSubway"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "PublicSubway")
+                )
+            }
             .build()
     }
 
@@ -29,9 +34,15 @@ class PublicSubwayHttpClientConfig(
     fun publicSubwayScheduleWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(subwayScheduleUrl)
-            .filter(
-                circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "PublicSubwaySchedule")
-            )
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(
+                        CircuitBreakerType.PUBLIC_API,
+                        "PublicSubwaySchedule"
+                    )
+                )
+            }
             .build()
     }
 

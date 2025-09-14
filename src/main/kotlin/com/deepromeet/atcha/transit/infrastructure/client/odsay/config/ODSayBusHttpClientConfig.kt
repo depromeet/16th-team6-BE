@@ -12,11 +12,11 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 class ODSayBusHttpClientConfig {
     @Bean
     fun odsayBusHttpClient(
-        webClientBuilder: WebClient.Builder,
+        customWebClientBuilder: WebClient.Builder,
         @Value("\${odsay.api.url}") baseUrl: String
     ): ODSayBusHttpClient {
         val webClient =
-            webClientBuilder
+            customWebClientBuilder
                 .baseUrl(baseUrl)
                 .build()
 

@@ -8,6 +8,7 @@ import io.github.oshai.kotlinlogging.KotlinLogging
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.WebClientRequestException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import kotlin.coroutines.cancellation.CancellationException
 
 private val log = KotlinLogging.logger {}
@@ -30,6 +31,9 @@ object ApiClientUtils {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: WebClientRequestException) {
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
+            } catch (e: WebClientResponseException) {
+                log.warn { "API 응답 에러 - $errorMessage: ${e.statusCode} ${e.responseBodyAsString}" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
             } catch (e: Exception) {
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
@@ -74,6 +78,9 @@ object ApiClientUtils {
                 log.warn { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
             } catch (e: WebClientRequestException) {
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
+            } catch (e: WebClientResponseException) {
+                log.warn { "API 응답 에러 - $errorMessage: ${e.statusCode} ${e.responseBodyAsString}" }
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_REQUEST_ERROR, e)
             } catch (e: Exception) {
                 throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)

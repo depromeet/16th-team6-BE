@@ -23,7 +23,12 @@ class IncheonBusHttpClientConfig(
     fun incheonRouteWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(incheonRouteUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonRoute"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonRoute")
+                )
+            }
             .build()
     }
 
@@ -31,7 +36,12 @@ class IncheonBusHttpClientConfig(
     fun incheonArrivalWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(incheonArrivalUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonArrival"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonArrival")
+                )
+            }
             .build()
     }
 
@@ -39,7 +49,12 @@ class IncheonBusHttpClientConfig(
     fun incheonPositionWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(incheonPositionUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonPosition"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "IncheonPosition")
+                )
+            }
             .build()
     }
 

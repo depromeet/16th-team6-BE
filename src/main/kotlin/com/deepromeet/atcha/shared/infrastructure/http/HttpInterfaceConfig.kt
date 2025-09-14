@@ -21,7 +21,7 @@ import java.util.concurrent.TimeUnit
 @Configuration
 class HttpInterfaceConfig {
     @Bean
-    fun webClientBuilder(): WebClient.Builder {
+    fun customWebClientBuilder(): WebClient.Builder {
         val httpClient =
             HttpClient.create()
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 2_000)
@@ -51,20 +51,24 @@ class HttpInterfaceConfig {
         return WebClient.builder()
             .clientConnector(ReactorClientHttpConnector(httpClient))
             .exchangeStrategies(strategies)
-            .filter(DecodingErrorLogger.logOnDecodingError())
-            .defaultStatusHandler(
-                { status -> status.isError },
-                { response ->
-                    response.createException().flatMap { ex ->
-                        Mono.error(HttpErrorHandler.handleException(ex))
+            .filter { request, next ->
+                next.exchange(request)
+                    .flatMap { resp ->
+                        if (resp.statusCode().isError) {
+                            resp.createException().flatMap { ex ->
+                                Mono.error(HttpErrorHandler.handleException(ex))
+                            }
+                        } else {
+                            Mono.just(resp)
+                        }
                     }
-                }
-            )
+            }
+            .filter(DecodingErrorLogger.logOnDecodingError())
     }
 
     @Bean
-    fun commonWebClient(webClientBuilder: WebClient.Builder): WebClient {
-        return webClientBuilder
+    fun commonWebClient(customWebClientBuilder: WebClient.Builder): WebClient {
+        return customWebClientBuilder
             .build()
     }
 }

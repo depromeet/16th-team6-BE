@@ -19,7 +19,12 @@ class PublicHolidayHttpClientConfig(
     fun publicHolidayWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(holidayApiUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "PublicHoliday"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "PublicHoliday")
+                )
+            }
             .build()
     }
 

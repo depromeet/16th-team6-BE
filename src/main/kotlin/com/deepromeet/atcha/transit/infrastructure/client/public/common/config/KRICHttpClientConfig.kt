@@ -19,7 +19,9 @@ class KRICHttpClientConfig(
     fun kricWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(kricApiUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "KRIC"))
+            .filters { filters ->
+                filters.add(0, circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "KRIC"))
+            }
             .build()
     }
 

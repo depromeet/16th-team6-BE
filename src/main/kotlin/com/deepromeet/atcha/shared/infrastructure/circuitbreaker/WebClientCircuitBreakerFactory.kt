@@ -6,7 +6,6 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import io.github.resilience4j.reactor.circuitbreaker.operator.CircuitBreakerOperator
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
-import reactor.core.publisher.Mono
 import java.util.concurrent.ConcurrentHashMap
 
 @Component
@@ -28,13 +27,6 @@ class WebClientCircuitBreakerFactory(
 
         return ExchangeFilterFunction { request, next ->
             next.exchange(request)
-                .flatMap { response ->
-                    if (response.statusCode().isError) {
-                        response.createException().flatMap { Mono.error(it) }
-                    } else {
-                        Mono.just(response)
-                    }
-                }
                 .transformDeferred(CircuitBreakerOperator.of(cb))
         }
     }

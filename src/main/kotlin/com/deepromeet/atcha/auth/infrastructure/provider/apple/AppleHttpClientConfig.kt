@@ -18,7 +18,9 @@ class AppleHttpClientConfig(
     fun appleWebClient(commonWebClient: WebClient): WebClient {
         return commonWebClient.mutate()
             .baseUrl(appleApiUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.AUTH_API, "Apple"))
+            .filters { filters ->
+                filters.add(0, circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.AUTH_API, "Apple"))
+            }
             .build()
     }
 

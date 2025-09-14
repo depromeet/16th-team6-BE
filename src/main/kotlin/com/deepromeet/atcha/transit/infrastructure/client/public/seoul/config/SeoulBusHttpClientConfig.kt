@@ -25,7 +25,12 @@ class SeoulBusHttpClientConfig(
     fun seoulBusArrivalWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(seoulBusUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusArrival"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusArrival")
+                )
+            }
             .build()
     }
 
@@ -33,7 +38,12 @@ class SeoulBusHttpClientConfig(
     fun seoulBusRouteWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(seoulBusRouteUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusRoute"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusRoute")
+                )
+            }
             .build()
     }
 
@@ -41,7 +51,12 @@ class SeoulBusHttpClientConfig(
     fun seoulBusPositionWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(seoulBusPositionUrl)
-            .filter(circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusPosition"))
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusPosition")
+                )
+            }
             .build()
     }
 
@@ -49,9 +64,12 @@ class SeoulBusHttpClientConfig(
     fun seoulBusOperationWebClient(publicApiWebClient: WebClient): WebClient {
         return publicApiWebClient.mutate()
             .baseUrl(seoulBusOperationUrl)
-            .filter(
-                circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusOperation")
-            )
+            .filters { filters ->
+                filters.add(
+                    0,
+                    circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "SeoulBusOperation")
+                )
+            }
             .build()
     }
 

@@ -10,9 +10,9 @@ import org.springframework.web.service.invoker.HttpServiceProxyFactory
 @Configuration
 class KakaoRouteHttpClientConfig {
     @Bean
-    fun kakaoRouteHttpClient(webClientBuilder: WebClient.Builder): KakaoRouteHttpClient {
+    fun kakaoRouteHttpClient(customWebClientBuilder: WebClient.Builder): KakaoRouteHttpClient {
         val webClient =
-            webClientBuilder
+            customWebClientBuilder
                 .baseUrl("https://app.map.kakao.com")
                 .build()
 
