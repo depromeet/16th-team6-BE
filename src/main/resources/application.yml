@@ -21,6 +21,9 @@ logging:
             bind: INFO
         SQL: INFO
     root: INFO
+    org.apache.catalina: OFF
+    org.apache.coyote: OFF
+    org.apache.tomcat: OFF
 
 tmap:
   api:

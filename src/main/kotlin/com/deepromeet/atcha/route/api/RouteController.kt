@@ -69,7 +69,7 @@ class RouteController(
 
     @GetMapping(
         "/v3/last-routes/stream",
-        produces = [MediaType.TEXT_EVENT_STREAM_VALUE]
+        produces = [MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE]
     )
     fun streamLastRoutesV3(
         @CurrentUser id: Long,

@@ -80,7 +80,7 @@ class DiscordAppender(
             return "로그 정보가 소실되었습니다."
         }
 
-        var message = "[${event.level}] ${event.loggerName} - ${event.formattedMessage}"
+        var message = "[${event.level}] - ${event.formattedMessage}"
 
         val throwableProxy = event.throwableProxy
         if (throwableProxy != null) {
