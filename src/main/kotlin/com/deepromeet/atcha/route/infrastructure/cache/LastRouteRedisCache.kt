@@ -17,7 +17,7 @@ class LastRouteRedisCache(
         return try {
             lastRouteRedisTemplate.opsForValue().get(getKey(routeId))
         } catch (e: Exception) {
-            logger.warn { "마지막 경로 정보 조회 중 오류 발생: ${e.message}" }
+            logger.warn { "막차 경로 정보 조회 중 오류 발생: ${e.message}" }
             null
         }
     }
@@ -26,7 +26,7 @@ class LastRouteRedisCache(
         try {
             lastRouteRedisTemplate.opsForValue().set(getKey(route.id), route, Duration.ofDays(1))
         } catch (e: Exception) {
-            logger.warn { "마지막 경로 정보 저장 중 오류 발생: ${e.message}" }
+            logger.warn { "막차 경로 정보 저장 중 오류 발생: ${e.message}" }
         }
     }
 
