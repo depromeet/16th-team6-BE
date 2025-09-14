@@ -67,7 +67,6 @@ class UserRouteDepartureTimeRefresher(
         return if (firstTransit.isBus()) firstTransit else null
     }
 
-    /** "배차간격 × 3" 이내가 아니면 갱신 금지 */
     private fun isNotRefreshTarget(
         plannedDeparture: LocalDateTime,
         busTerm: Int
