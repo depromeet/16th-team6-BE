@@ -55,9 +55,12 @@ class SubwayManager(
         val dailyType = dailyTypeResolver.resolve(TransitType.SUBWAY)
         val direction = SubwayDirection.resolve(routes, startStation, nextStation, endStation)
 
-        return subwayTimeTableCache.get(startStation, dailyType, direction)
-            ?: subwayTimetableClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
-                subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
-            }
+        val subwayTimeTable =
+            subwayTimeTableCache.get(startStation, dailyType, direction)
+                ?: subwayTimetableClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
+                    subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
+                }
+
+        return subwayTimeTable.filterReachable(endStation, routes)
     }
 }
