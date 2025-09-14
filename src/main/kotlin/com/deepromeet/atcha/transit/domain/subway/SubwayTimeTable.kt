@@ -45,14 +45,17 @@ data class SubwayTimeTable(
             }
         }
 
-    fun filterReachable(endStation: SubwayStation, routes: List<Route>): SubwayTimeTable {
+    fun filterReachable(
+        endStation: SubwayStation,
+        routes: List<Route>
+    ): SubwayTimeTable {
         return copy(schedules = schedules.filter { isReachable(endStation, it.finalStation, routes) })
     }
 
     fun isReachable(
         endStation: SubwayStation,
         finalStation: SubwayStation,
-        routes: List<Route>,
+        routes: List<Route>
     ): Boolean {
         return routes.any { route ->
             route.isReachable(startStation.name, endStation.name, finalStation.name, subwayDirection)
