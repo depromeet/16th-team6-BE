@@ -12,14 +12,15 @@ import java.time.Duration
 
 @Component
 class TMapRateLimitFilter {
-    private val bucket = Bucket.builder()
-        .addLimit(
-            Bandwidth.builder()
-                .capacity(20)
-                .refillGreedy(20, Duration.ofSeconds(1))
-                .build()
-        )
-        .build()
+    private val bucket =
+        Bucket.builder()
+            .addLimit(
+                Bandwidth.builder()
+                    .capacity(20)
+                    .refillGreedy(20, Duration.ofSeconds(1))
+                    .build()
+            )
+            .build()
 
     fun rateLimitFilter(): ExchangeFilterFunction {
         return ExchangeFilterFunction { request: ClientRequest, next: ExchangeFunction ->
