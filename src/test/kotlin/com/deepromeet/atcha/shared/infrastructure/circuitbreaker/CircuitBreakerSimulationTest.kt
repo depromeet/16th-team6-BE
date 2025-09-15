@@ -7,11 +7,9 @@ import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.test.context.ActiveProfiles
 import kotlin.test.assertEquals
 
 @SpringBootTest
-@ActiveProfiles("test")
 class CircuitBreakerSimulationTest {
     @Autowired
     private lateinit var circuitBreakerRegistry: CircuitBreakerRegistry

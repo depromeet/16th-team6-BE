@@ -11,10 +11,6 @@ spring:
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
 
-tmap:
-  api:
-    app-key: ${secret.dev.TMAP_API_KEY}
-
 redis:
   host: redis
   port: 6379
@@ -32,7 +28,6 @@ kric:
 
 odsay:
   api:
-    url: https://api.odsay.com
     service-key: ${secret.dev.ODSAY_SERVICE_KEY}
     spare-key: ${secret.dev.ODSAY_SPARE_KEY}
     real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
@@ -66,10 +61,7 @@ management:
       enabled: true
       show-components: never
 
-mixpanel:
-  token: ${secret.prod.MIXPANEL_TOKEN}
 
 discord:
   webhook:
-    url:
-      dev: ${secret.dev.DISCORD_WEBHOOK_URL}
+    url: ${secret.dev.DISCORD_WEBHOOK_URL}

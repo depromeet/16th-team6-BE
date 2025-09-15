@@ -46,7 +46,6 @@ kric:
 
 odsay:
   api:
-    url: https://api.odsay.com
     service-key: ${secret.dev.ODSAY_SERVICE_KEY}
     spare-key: ${secret.dev.ODSAY_SPARE_KEY}
     real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
@@ -83,10 +82,7 @@ management:
       enabled: true
       show-components: never
 
-mixpanel:
-  token: ${secret.prod.MIXPANEL_TOKEN}
 
 discord:
   webhook:
-    url:
-      prod: ${secret.prod.DISCORD_WEBHOOK_URL}
+    url: ${secret.prod.DISCORD_WEBHOOK_URL}
