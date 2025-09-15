@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.route.domain.sort
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import kotlinx.coroutines.async
@@ -29,7 +30,7 @@ class LastRouteReader(
         coroutineScope {
             lastRouteIndexCache.get(start, end).takeIf { it.isNotEmpty() }?.map {
                 async { read(it) }
-            }?.awaitAll()
+            }?.awaitAll()?.sort()
         }
 
     fun readRemainingTime(routeId: String): Int = read(routeId).calculateRemainingTime()
