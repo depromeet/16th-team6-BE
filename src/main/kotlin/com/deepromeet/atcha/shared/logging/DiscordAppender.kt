@@ -76,33 +76,36 @@ class DiscordAppender(
     }
 
     private fun getStackTrace(event: ILoggingEvent?): String {
-        if (event == null) {
-            return "로그 정보가 소실되었습니다."
-        }
+        if (event == null) return "로그 정보가 소실되었습니다."
 
         var message = "[${event.level}] - ${event.formattedMessage}"
 
-        val throwableProxy = event.throwableProxy
-        if (throwableProxy != null) {
-            val stackTrace = ThrowableProxyUtil.asString(throwableProxy)
+        val throwableProxy = event.throwableProxy ?: return message
+        val lines = ThrowableProxyUtil.asString(throwableProxy).lines()
 
-            // Root Cause를 찾기 위해 "Caused by:" 라인들을 모두 찾아서 가장 마지막 것을 사용
-            val causedByLines = stackTrace.lines().filter { it.trim().startsWith(CAUSED_BY) }
+        val causedByLines = lines.filter { it.trim().startsWith(CAUSED_BY) }
 
-            if (causedByLines.isNotEmpty()) {
-                // 가장 마지막 "Caused by:"가 실제 root cause
-                val rootCause = causedByLines.last().trim()
-                val rootCauseException = rootCause.substring(CAUSED_BY.length).trim()
-                message += "\n🔍 Root Cause: $rootCauseException"
-            } else {
-                // "Caused by:"가 없으면 첫 번째 예외가 root cause
-                val firstLine = stackTrace.lines().firstOrNull { it.trim().isNotEmpty() }
-                if (firstLine != null) {
-                    message += "\n🔍 Exception: ${firstLine.trim()}"
-                }
-            }
+        if (causedByLines.isNotEmpty()) {
+            val rootCause = causedByLines.last().trim().substring(CAUSED_BY.length).trim()
+            message += "\n🔍 Root Cause: $rootCause"
+
+            val rootCauseIndex = lines.indexOfLast { it.trim().startsWith(CAUSED_BY) }
+            val location = findLocationLine(lines.drop(rootCauseIndex + 1))
+            if (location != null) message += "\n📍 위치: $location"
+        } else {
+            val firstException = lines.firstOrNull { it.trim().isNotEmpty() }?.trim()
+            if (firstException != null) message += "\n🔍 Exception: $firstException"
+
+            val location = findLocationLine(lines)
+            if (location != null) message += "\n📍 위치: $location"
         }
 
         return message.take(LOG_MAX_LEN)
+    }
+
+    private fun findLocationLine(lines: List<String>): String? {
+        return lines.firstOrNull {
+            it.trim().startsWith("at ") && it.contains("com.deepromeet.atcha")
+        }?.trim()?.substring(3)
     }
 }
