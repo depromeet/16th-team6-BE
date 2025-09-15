@@ -57,9 +57,8 @@ class SubwayManager(
 
         val subwayTimeTable =
             subwayTimeTableCache.get(startStation, dailyType, direction)
-                ?: subwayTimetableClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
-                    subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
-                }
+                ?: subwayTimetableClient.getTimeTable(startStation, dailyType, direction)
+                    .also { timeTable -> subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable) }
 
         return subwayTimeTable.filterReachable(endStation, routes)
     }

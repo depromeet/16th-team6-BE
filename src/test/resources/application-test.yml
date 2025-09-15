@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: secret-env.yml
   datasource:
     url: jdbc:h2:mem:testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
@@ -6,56 +8,60 @@ spring:
     password:
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: create
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.H2Dialect
-        show-sql: false
-        format_sql: false
-
-resilience4j:
-  circuitbreaker:
-    instances:
-      public-api:
-        failure-rate-threshold: 60.0
-        minimum-number-of-calls: 10
-        sliding-window-size: 20
-        wait-duration-in-open-state: PT30S
-        permitted-number-of-calls-in-half-open-state: 3
-        slow-call-rate-threshold: 70.0
-        slow-call-duration-threshold: PT4S
-        automatic-transition-from-open-to-half-open-enabled: true
-        sliding-window-type: count-based
-
-      commercial-api:
-        failure-rate-threshold: 50.0
-        minimum-number-of-calls: 5
-        sliding-window-size: 10
-        wait-duration-in-open-state: PT20S
-        permitted-number-of-calls-in-half-open-state: 2
-        slow-call-rate-threshold: 60.0
-        slow-call-duration-threshold: PT4S
-        automatic-transition-from-open-to-half-open-enabled: true
-        sliding-window-type: count-based
-
-      auth-api:
-        failure-rate-threshold: 40.0
-        minimum-number-of-calls: 3
-        sliding-window-size: 8
-        wait-duration-in-open-state: PT60S
-        permitted-number-of-calls-in-half-open-state: 1
-        slow-call-rate-threshold: 50.0
-        slow-call-duration-threshold: PT4S
-        automatic-transition-from-open-to-half-open-enabled: true
-        sliding-window-type: count-based
+        show-sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
 
 logging:
   level:
-    com.deepromeet.atcha: DEBUG
-    root: INFO
+    com.deepromeet.seulseul: DEBUG
+    tracer: trace
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+        SQL: trace
 
-discord:
-  webhook:
-    url:
-      local: ${secret.local.DISCORD_WEBHOOK_URL}
-      prod: ${secret.prod.DISCORD_WEBHOOK_URL}
+kakao:
+  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
+
+apple:
+  api:
+    url: https://appleid.apple.com
+
+tmap:
+  api:
+    app-key: ${secret.dev.TMAP_API_KEY}
+
+redis:
+  host: localhost
+  port: 6379
+
+open-api:
+  api:
+    service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+    spare-key: ${secret.dev.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
+
+kric:
+  api:
+    service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
+
+jwt:
+  access:
+    secret: ${secret.dev.JWT_ACCESS_SECRET}
+    expiration: ${secret.dev.JWT_ACCESS_EXPIRATION_MS}
+  refresh:
+    secret: ${secret.dev.JWT_REFRESH_SECRET}
+    expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
+

@@ -1,8 +1,6 @@
 spring:
   config:
     import: secret-env.yml
-  profiles:
-    active: local
   jpa:
     properties:
      hibernate:
@@ -73,6 +71,13 @@ kric:
     url:
       subway: https://openapi.kric.go.kr/openapi/trainUseInfo
 
+odsay:
+  api:
+    url: https://api.odsay.com
+
+mixpanel:
+  token: ${secret.prod.MIXPANEL_TOKEN}
+
 redis:
   stream:
     event:
@@ -128,9 +133,3 @@ management:
   health:
     circuitbreakers:
       enabled: true
-
-discord:
-  webhook:
-    url:
-      local: ${secret.local.DISCORD_WEBHOOK_URL}
-      prod: ${secret.prod.DISCORD_WEBHOOK_URL}

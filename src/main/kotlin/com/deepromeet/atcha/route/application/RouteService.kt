@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.application
 
 import com.deepromeet.atcha.location.application.ServiceRegionValidator
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.route.aspect.RouteCache
 import com.deepromeet.atcha.route.domain.ItineraryValidator
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteSortType
@@ -37,6 +38,7 @@ class RouteService(
     private val lastRouteUpdater: LastRouteUpdater
 ) {
     @Deprecated("deprecated")
+    @RouteCache
     suspend fun getLastRoutes(
         userId: UserId,
         start: Coordinate,
@@ -44,9 +46,6 @@ class RouteService(
         sortType: LastRouteSortType
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes
-        }
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
@@ -71,6 +70,7 @@ class RouteService(
             .sort(sortType)
     }
 
+    @RouteCache
     fun getLastRouteStream(
         userId: UserId,
         start: Coordinate,
@@ -78,11 +78,6 @@ class RouteService(
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
-//            lastRouteReader.read(start, destination)?.let { cached ->
-//                cached.sort().forEach { emit(it) }
-//                return@flow
-//            }
-
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
             lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
