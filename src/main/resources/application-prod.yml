@@ -74,7 +74,7 @@ management:
       exposure:
         exclude: "*"
     access:
-      default: none
+      default: read_only
   endpoint:
     health:
       show-components: never
