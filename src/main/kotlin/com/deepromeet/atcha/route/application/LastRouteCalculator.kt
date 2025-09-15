@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.channelFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentLinkedQueue
 
 private val log = KotlinLogging.logger {}
 private const val MAX_CALCULATION_TIME = 15_000L
@@ -67,7 +68,7 @@ class LastRouteCalculator(
         itineraries: List<RouteItinerary>
     ): Flow<LastRoute> =
         channelFlow {
-            val lastRouteBuffer = mutableListOf<LastRoute>()
+            val lastRouteBuffer = ConcurrentLinkedQueue<LastRoute>()
             val calculationTasks = createCalculationTasks(itineraries, lastRouteBuffer)
             calculationTasks.handleResultsInBackground(lastRouteBuffer, start, destination)
             sendRoutes(calculationTasks)
@@ -75,7 +76,7 @@ class LastRouteCalculator(
 
     private fun createCalculationTasks(
         itineraries: List<RouteItinerary>,
-        lastRouteBuffer: MutableList<LastRoute>
+        lastRouteBuffer: ConcurrentLinkedQueue<LastRoute>
     ): List<Deferred<LastRoute?>> =
         itineraries.map { itinerary ->
             backgroundCalculationScope.async(Dispatchers.Default) {
@@ -85,15 +86,15 @@ class LastRouteCalculator(
 
     private suspend fun calculateValidRoute(
         itinerary: RouteItinerary,
-        buffer: MutableList<LastRoute>
+        buffer: ConcurrentLinkedQueue<LastRoute>
     ): LastRoute? {
         val route =
             withTimeoutOrNull(MAX_CALCULATION_TIME) {
                 calculateRoute(itinerary)
             }
 
-        return route?.also { buffer.add(it) }
-            ?.takeIf { it.isValidLastRoute() }
+        return route?.takeIf { it.isValidLastRoute() }
+            ?.also { buffer.offer(it) }
     }
 
     private suspend fun calculateRoute(itinerary: RouteItinerary): LastRoute? =
@@ -106,7 +107,7 @@ class LastRouteCalculator(
         }.getOrNull()
 
     private fun List<Deferred<LastRoute?>>.handleResultsInBackground(
-        lastRouteBuffer: List<LastRoute>,
+        lastRouteBuffer: ConcurrentLinkedQueue<LastRoute>,
         start: Coordinate,
         destination: Coordinate
     ) {
