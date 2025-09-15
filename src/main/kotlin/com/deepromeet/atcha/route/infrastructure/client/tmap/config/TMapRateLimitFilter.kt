@@ -4,6 +4,7 @@ import io.github.bucket4j.Bandwidth
 import io.github.bucket4j.Bucket
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.reactor.mono
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import org.springframework.web.reactive.function.client.ClientRequest
 import org.springframework.web.reactive.function.client.ExchangeFilterFunction
@@ -11,13 +12,16 @@ import org.springframework.web.reactive.function.client.ExchangeFunction
 import java.time.Duration
 
 @Component
-class TMapRateLimitFilter {
+class TMapRateLimitFilter(
+    @param:Value("\${tmap.limits.per-api.routes}")
+    private val permits: String
+) {
     private val bucket =
         Bucket.builder()
             .addLimit(
                 Bandwidth.builder()
-                    .capacity(20)
-                    .refillGreedy(20, Duration.ofSeconds(1))
+                    .capacity(permits.toLong())
+                    .refillGreedy(permits.toLong(), Duration.ofSeconds(1))
                     .build()
             )
             .build()
