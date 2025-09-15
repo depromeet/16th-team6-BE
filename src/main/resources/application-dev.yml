@@ -61,6 +61,8 @@ management:
   endpoint:
     health:
       show-components: never
+      status:
+        order: down, out-of-service, up, unknown
 
 
 discord:

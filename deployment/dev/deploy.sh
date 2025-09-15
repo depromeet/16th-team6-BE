@@ -37,6 +37,8 @@ check_service() {
   done
 
   echo "Failed to check service $SERVICE_NAME after $MAX_RETRIES attempts."
+  echo "Cleaning up failed service: $SERVICE_NAME"
+  docker compose down $SERVICE_NAME
   return 1
 }
 
