@@ -29,6 +29,9 @@ logging:
 tmap:
   api:
     url: https://apis.openapi.sk.com
+  limits:
+    per-api:
+      routes: 20
 
 kakao:
   api:
