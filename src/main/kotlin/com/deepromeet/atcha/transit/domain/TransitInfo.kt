@@ -5,19 +5,16 @@ import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
-import com.deepromeet.atcha.transit.domain.subway.SubwaySchedule
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 
 sealed class TransitInfo {
     data class SubwayInfo(
         val subwayLine: SubwayLine,
-        val timeTable: SubwayTimeTable,
-        val lastSchedule: SubwaySchedule,
-        val isExpress: Boolean
+        val timeTable: SubwayTimeTable
     ) : TransitInfo() {
-        fun resolveFinalStationName(): String = lastSchedule.finalStation.name
+        fun resolveFinalStationName(): String = timeTable.getLastTime().finalStation.name
 
-        fun resolveDirectionName(): String = lastSchedule.subwayDirection.getName(subwayLine.isCircular)
+        fun resolveDirectionName(): String = timeTable.getLastTime().subwayDirection.getName(subwayLine.isCircular)
     }
 
     data class BusInfo(

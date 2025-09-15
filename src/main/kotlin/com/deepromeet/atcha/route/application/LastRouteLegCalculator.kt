@@ -14,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
-import java.time.temporal.ChronoUnit
 
 private val log = KotlinLogging.logger {}
 
@@ -46,23 +45,22 @@ class LastRouteLegCalculator(
             coroutineScope {
                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
-                val routesDeferred = async { subwayManager.getRoutes(subwayLine) }
-                val startStationDeferred = async { subwayManager.getStation(subwayLine, leg.start.name) }
-                val endStationDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
-                val nextStationDeferred =
-                    async { subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName()) }
+                val routesAsync = async { subwayManager.getRoutes(subwayLine) }
+                val startAsync = async { subwayManager.getStation(subwayLine, leg.start.name) }
+                val nextAsync = async { subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName()) }
+                val destinationAsync = async { subwayManager.getStation(subwayLine, leg.end.name) }
 
-                val routes = routesDeferred.await()
-                val startStation = startStationDeferred.await()
-                val endStation = endStationDeferred.await()
-                val nextStation = nextStationDeferred.await()
+                val routes = routesAsync.await()
+                val start = startAsync.await()
+                val next = nextAsync.await()
+                val destination = destinationAsync.await()
 
-                val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
-                val lastSchedule = timeTable.getLastTime(endStation, leg.isExpress())
+                val timeTable = subwayManager.getTimeTable(start, next, destination, routes, leg.isExpress())
+                val lastSchedule = timeTable.getLastTime()
 
                 leg.toLastTransitLeg(
-                    departureDateTime = lastSchedule.departureTime.toLocalDateTime().truncatedTo(ChronoUnit.SECONDS),
-                    transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, lastSchedule, leg.isExpress())
+                    departureDateTime = lastSchedule.departureTime.toLocalDateTime(),
+                    transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable)
                 )
             }
         } catch (e: Exception) {
@@ -79,7 +77,7 @@ class LastRouteLegCalculator(
         val lastDepartureTime = busSchedule.busTimeTable.lastTime
 
         return leg.toLastTransitLeg(
-            departureDateTime = lastDepartureTime.truncatedTo(ChronoUnit.SECONDS),
+            departureDateTime = lastDepartureTime,
             transitInfo = TransitInfo.BusInfo(busSchedule)
         )
     }

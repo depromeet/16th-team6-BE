@@ -12,20 +12,7 @@ data class SubwayTimeTable(
     val subwayDirection: SubwayDirection,
     val schedules: List<SubwaySchedule>
 ) {
-    fun getLastTime(
-        destinationStation: SubwayStation,
-        isExpress: Boolean
-    ): SubwaySchedule =
-        schedules
-            .filter { it.isExpress == isExpress }
-            .maxByOrNull { it.departureTime.toLocalDateTime() }
-            ?: throw TransitException.of(
-                TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
-                "${startStation.routeName} 지하철 '${startStation.name}'역에서" +
-                    " '${destinationStation.name}'역으로 가는 " +
-                    "'${subwayDirection.getName(SubwayLine.fromRouteName(startStation.routeName).isCircular)}' " +
-                    "방향 막차 시간을 찾을 수 없습니다."
-            )
+    fun getLastTime(): SubwaySchedule = schedules.maxBy { it.departureTime.toLocalDateTime() }
 
     fun findNearestTime(
         time: LocalDateTime,
@@ -47,9 +34,20 @@ data class SubwayTimeTable(
 
     fun filterReachable(
         endStation: SubwayStation,
-        routes: List<Route>
+        routes: List<Route>,
+        isExpress: Boolean
     ): SubwayTimeTable {
-        return copy(schedules = schedules.filter { isReachable(endStation, it.finalStation, routes) })
+        val reachableSchedules =
+            schedules.filter { isReachable(endStation, it.finalStation, routes) }
+                .filter { it.isExpress == isExpress }
+                .ifEmpty {
+                    throw TransitException(
+                        TransitError.NOT_FOUND_SUBWAY_SCHEDULE,
+                        "'${endStation.name}'역으로 가는 유효한 시간표가 없습니다."
+                    )
+                }
+
+        return copy(schedules = reachableSchedules)
     }
 
     fun isReachable(

@@ -7,7 +7,6 @@ import com.deepromeet.atcha.transit.domain.TransitInfo
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 
 @Service
 class LastRouteTimeAdjuster {
@@ -134,7 +133,7 @@ class LastRouteTimeAdjuster {
 
             legs[i] =
                 leg.copy(
-                    departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
+                    departureDateTime = boardingTime
                 )
             adjustBaseTime = boardingTime
         }
@@ -169,7 +168,7 @@ class LastRouteTimeAdjuster {
 
             legs[i] =
                 leg.copy(
-                    departureDateTime = boardingTime.truncatedTo(ChronoUnit.SECONDS)
+                    departureDateTime = boardingTime
                 )
             adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
         }

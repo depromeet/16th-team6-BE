@@ -7,6 +7,7 @@ import com.deepromeet.atcha.route.domain.RouteStep
 import com.deepromeet.atcha.transit.domain.RoutePassStop
 import com.deepromeet.atcha.transit.domain.bus.BusStation
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 data class LastRouteResponse(
     val routeId: String,
@@ -25,7 +26,7 @@ data class LastRouteResponse(
 
     constructor(lastRoute: LastRoute) : this(
         routeId = lastRoute.id,
-        departureDateTime = lastRoute.departureDateTime.format(dateTimeFormatter),
+        departureDateTime = lastRoute.departureDateTime.truncatedTo(ChronoUnit.SECONDS).format(dateTimeFormatter),
         totalTime = lastRoute.totalTime,
         totalWalkTime = lastRoute.totalWalkTime,
         totalWorkDistance = lastRoute.totalWalkDistance,
@@ -64,7 +65,7 @@ data class LastRouteLegResponse(
         distance = lastRouteLeg.distance,
         sectionTime = lastRouteLeg.sectionTime,
         mode = lastRouteLeg.mode.value,
-        departureDateTime = lastRouteLeg.departureDateTime?.format(dateTimeFormatter),
+        departureDateTime = lastRouteLeg.departureDateTime?.truncatedTo(ChronoUnit.SECONDS)?.format(dateTimeFormatter),
         route = lastRouteLeg.route,
         type = lastRouteLeg.type,
         service = lastRouteLeg.service,
@@ -79,9 +80,9 @@ data class LastRouteLegResponse(
         targetBusTerm = lastRouteLeg.busInfo?.timeTable?.term,
         subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
         subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
-        isExpressSubway = lastRouteLeg.subwayInfo?.isExpress,
+        isExpressSubway = lastRouteLeg.isExpress(),
         isLastSubway =
-            lastRouteLeg.subwayInfo?.lastSchedule?.departureTime?.toLocalDateTime()?.isEqual(
+            lastRouteLeg.subwayInfo?.timeTable?.getLastTime()?.departureTime?.toLocalDateTime()?.isEqual(
                 lastRouteLeg.departureDateTime
             ),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },

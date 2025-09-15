@@ -18,7 +18,6 @@ import kotlinx.coroutines.coroutineScope
 import org.springframework.stereotype.Component
 import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
 import java.util.UUID
 
 private val log = KotlinLogging.logger {}
@@ -72,7 +71,7 @@ class LastRouteCalculatorV2(
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime = departAt.truncatedTo(ChronoUnit.SECONDS),
+                departureDateTime = departAt,
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 transferCount = itinerary.transferCount,
@@ -108,16 +107,21 @@ class LastRouteCalculatorV2(
                             val startStation = subwayManager.getStation(subwayLine, leg.start.name)
                             val endStation = subwayManager.getStation(subwayLine, leg.end.name)
                             val nextStation = subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName())
-                            val timeTable = subwayManager.getTimeTable(startStation, nextStation, endStation, routes)
+                            val timeTable =
+                                subwayManager.getTimeTable(
+                                    startStation,
+                                    nextStation,
+                                    endStation,
+                                    routes,
+                                    false
+                                )
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.truncatedTo(ChronoUnit.SECONDS),
+                                departureDateTime = cursor,
                                 transitInfo =
                                     TransitInfo.SubwayInfo(
                                         subwayLine,
-                                        timeTable,
-                                        timeTable.schedules[0],
-                                        leg.isExpress()
+                                        timeTable
                                     )
                             )
                         } catch (e: Exception) {
@@ -134,7 +138,7 @@ class LastRouteCalculatorV2(
                             val busSchedule = busManager.getSchedule(routeId, stationMeta, leg.passStops!!)
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.truncatedTo(ChronoUnit.SECONDS),
+                                departureDateTime = cursor,
                                 transitInfo = TransitInfo.BusInfo(busSchedule)
                             )
                         } catch (e: Exception) {

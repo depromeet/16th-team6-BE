@@ -50,6 +50,8 @@ data class LastRouteLeg(
 
     fun isSubway(): Boolean = mode == RouteMode.SUBWAY
 
+    fun isExpress(): Boolean = route?.contains("(급행)") == true
+
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
     }

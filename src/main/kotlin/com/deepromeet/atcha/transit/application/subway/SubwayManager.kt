@@ -47,19 +47,20 @@ class SubwayManager(
     }
 
     suspend fun getTimeTable(
-        startStation: SubwayStation,
-        nextStation: SubwayStation,
-        endStation: SubwayStation,
-        routes: List<Route>
+        start: SubwayStation,
+        next: SubwayStation,
+        destination: SubwayStation,
+        routes: List<Route>,
+        isExpress: Boolean
     ): SubwayTimeTable {
         val dailyType = dailyTypeResolver.resolve(TransitType.SUBWAY)
-        val direction = SubwayDirection.resolve(routes, startStation, nextStation, endStation)
+        val direction = SubwayDirection.resolve(routes, start, next, destination)
 
         val subwayTimeTable =
-            subwayTimeTableCache.get(startStation, dailyType, direction)
-                ?: subwayTimetableClient.getTimeTable(startStation, dailyType, direction)
-                    .also { timeTable -> subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable) }
+            subwayTimeTableCache.get(start, dailyType, direction)
+                ?: subwayTimetableClient.getTimeTable(start, dailyType, direction)
+                    .also { timeTable -> subwayTimeTableCache.cache(start, dailyType, direction, timeTable) }
 
-        return subwayTimeTable.filterReachable(endStation, routes)
+        return subwayTimeTable.filterReachable(destination, routes, isExpress)
     }
 }
