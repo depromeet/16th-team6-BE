@@ -76,10 +76,7 @@ management:
     access:
       default: none
   endpoint:
-    prometheus:
-      enabled: true
     health:
-      enabled: true
       show-components: never
 
 

@@ -8,6 +8,10 @@ spring:
     hibernate:
       ddl-auto: update
 
+tmap:
+  api:
+    app-key: ${secret.dev.TMAP_API_KEY}
+
 kakao:
   client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
 
@@ -55,10 +59,7 @@ management:
     access:
       default: none
   endpoint:
-    prometheus:
-      enabled: true
     health:
-      enabled: true
       show-components: never
 
 
