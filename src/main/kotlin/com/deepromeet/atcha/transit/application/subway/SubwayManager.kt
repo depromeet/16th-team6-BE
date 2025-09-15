@@ -22,15 +22,18 @@ class SubwayManager(
     private val dailyTypeResolver: DailyTypeResolver,
     private val subwayBranchRepository: SubwayBranchRepository,
     private val subwayTimeTableCache: SubwayTimeTableCache,
-    private val subwayStationCache: SubwayStationCache
+    private val subwayStationCache: SubwayStationCache,
+    private val subwayRouteCache: SubwayRouteCache
 ) {
-    suspend fun getRoutes(subwayLine: SubwayLine): List<Route> =
-        withContext(Dispatchers.IO) {
-            subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
-                .groupBy { it.finalStationName }
-                .values
-                .map { Route(it) }
-        }
+    suspend fun getRoutes(subwayLine: SubwayLine): List<Route> {
+        return subwayRouteCache.get(subwayLine)
+            ?: withContext(Dispatchers.IO) {
+                subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
+                    .groupBy { it.finalStationName }
+                    .values
+                    .map { Route(it) }
+            }.also { routes -> subwayRouteCache.cache(subwayLine, routes) }
+    }
 
     suspend fun getStation(
         subwayLine: SubwayLine,
