@@ -16,6 +16,7 @@ class LastRouteIndexRedisCache(
         routeIds: List<String>
     ) {
         val key = getKey(start, end)
+        lastRouteIndexRedisTemplate.delete(key)
         routeIds.forEach {
             lastRouteIndexRedisTemplate.opsForList().rightPush(key, it)
         }
