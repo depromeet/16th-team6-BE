@@ -22,7 +22,7 @@ class LastRouteLegCalculator(
     private val subwayManager: SubwayManager,
     private val busManager: BusManager
 ) {
-    suspend fun calcWithLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
+    suspend fun calcLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
         return coroutineScope {
             legs.map { leg ->
                 async {

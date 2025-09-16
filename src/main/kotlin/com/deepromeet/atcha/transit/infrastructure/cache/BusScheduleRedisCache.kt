@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
 import com.deepromeet.atcha.shared.infrastructure.cache.RedisCacheHitRecorder
-import com.deepromeet.atcha.transit.application.bus.BusTimeTableCache
+import com.deepromeet.atcha.transit.application.bus.BusScheduleCache
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import io.github.oshai.kotlinlogging.KotlinLogging
@@ -12,10 +12,10 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
 
 @Component
-class BusTimeTableRedisCache(
-    private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>,
+class BusScheduleRedisCache(
+    private val busScheduleRedisTemplate: RedisTemplate<String, BusSchedule>,
     private val cacheHitRecorder: RedisCacheHitRecorder
-) : BusTimeTableCache {
+) : BusScheduleCache {
     private val log = KotlinLogging.logger {}
 
     override fun get(
@@ -24,7 +24,7 @@ class BusTimeTableRedisCache(
     ): BusSchedule? {
         val key = getKey(routeName, busStation)
         return try {
-            val schedule = busTimeTableRedisTemplate.opsForValue().get(key)
+            val schedule = busScheduleRedisTemplate.opsForValue().get(key)
             cacheHitRecorder.record("timetable:bus", schedule != null)
             schedule
         } catch (e: Exception) {
@@ -42,7 +42,7 @@ class BusTimeTableRedisCache(
         val key = getKey(routeName, busStation)
         val ttlSeconds = calculateTtlUntilMidnight()
         try {
-            busTimeTableRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
+            busScheduleRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
         } catch (e: Exception) {
             log.warn { "버스 시간표 캐시 저장 중 오류 발생: ${e.message}" }
         }

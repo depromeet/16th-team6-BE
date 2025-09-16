@@ -3,7 +3,7 @@ package com.deepromeet.atcha.transit.application.bus
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 
-interface BusTimeTableCache {
+interface BusScheduleCache {
     fun get(
         routeName: String,
         busStation: BusStationMeta

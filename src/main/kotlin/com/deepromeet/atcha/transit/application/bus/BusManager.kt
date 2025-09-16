@@ -27,7 +27,7 @@ class BusManager(
     private val busPositionFetcher: CompositeBusPositionFetcher,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
-    private val busTimeTableCache: BusTimeTableCache,
+    private val busScheduleCache: BusScheduleCache,
     private val mixpanelEventPublisher: MixpanelEventPublisher
 ) {
     suspend fun getSchedule(
@@ -35,7 +35,7 @@ class BusManager(
         stationMeta: BusStationMeta,
         passStops: RoutePassStops
     ): BusSchedule {
-        busTimeTableCache.get(routeName, stationMeta)?.let { return it }
+        busScheduleCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
 
         val busApiCallCountPerRequestProperty = BusApiCallCountPerRequestProperty(routeName = routeName)
@@ -49,7 +49,7 @@ class BusManager(
 
         mixpanelEventPublisher.publishBusRouteApiCallCountEvent(busApiCallCountPerRequestProperty)
 
-        busTimeTableCache.cache(routeName, stationMeta, schedule)
+        busScheduleCache.cache(routeName, stationMeta, schedule)
         return schedule
     }
 

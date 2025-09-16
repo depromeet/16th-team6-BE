@@ -13,7 +13,7 @@ import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
 import org.springframework.data.redis.serializer.StringRedisSerializer
 
 @Configuration
-class BusTimeTableRedisConfig {
+class BusScheduleRedisConfig {
     @Bean
     fun busTimeTableRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, BusSchedule> {
         val kotlinModule = KotlinModule.Builder().build()

@@ -9,6 +9,7 @@ import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.google.firebase.database.utilities.Utilities.getOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger {}
@@ -19,6 +20,11 @@ class BusRouteResolver(
     private val busRouteMatcher: BusRouteMatcher,
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
+    @Cacheable(
+        value = ["busRouteInfo"],
+        key = "#routeName + ':' + #station.hashCode()",
+        cacheManager = "apiCacheManager"
+    )
     suspend fun resolve(
         routeName: String,
         station: BusStationMeta,
