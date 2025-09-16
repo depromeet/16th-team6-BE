@@ -11,7 +11,7 @@ spring:
 
 logging:
   level:
-    com.deepromeet.atcha: INFO
+    com.deepromeet.atcha: DEBUG
     tracer: trace
     org:
       hibernate:
@@ -20,6 +20,9 @@ logging:
             bind: INFO
         SQL: INFO
     root: INFO
+    io:
+      github:
+        resilience4j: INFO
     org.apache.catalina: OFF
     org.apache.coyote: OFF
     org.apache.tomcat: OFF
