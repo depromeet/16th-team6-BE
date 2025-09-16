@@ -99,7 +99,7 @@ class LastRouteCalculator(
 
     private suspend fun calculateRoute(itinerary: RouteItinerary): LastRoute? =
         runCatching {
-            val calculatedLegs = legCalculator.calcWithLastTime(itinerary.legs)
+            val calculatedLegs = legCalculator.calcLastTime(itinerary.legs)
             val timeAdjustedLegs = timeAdjuster.adjustTransitDepartureTimes(calculatedLegs)
             LastRoute.create(itinerary, timeAdjustedLegs)
         }.onFailure { exception ->
