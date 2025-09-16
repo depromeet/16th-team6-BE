@@ -9,6 +9,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.cache.config.CacheKeys
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils.isServiceResultApiLimitExceeded
 import org.springframework.beans.factory.annotation.Value
@@ -30,7 +31,7 @@ class PublicSeoulBusRouteInfoClient(
     private val realLastKey: String
 ) : BusRouteInfoClient {
     @Cacheable(
-        cacheNames = ["api:seoul:busRouteList"],
+        cacheNames = [CacheKeys.Api.Seoul.BUS_ROUTE_LIST],
         key = "#routeName",
         sync = true,
         cacheManager = "apiCacheManager"
@@ -92,7 +93,7 @@ class PublicSeoulBusRouteInfoClient(
             )
 
     @Cacheable(
-        cacheNames = ["api:seoul:busRouteStationList"],
+        cacheNames = [CacheKeys.Api.Seoul.BUS_ROUTE_STATION_LIST],
         key = "#route.id",
         sync = true,
         cacheManager = "apiCacheManager"

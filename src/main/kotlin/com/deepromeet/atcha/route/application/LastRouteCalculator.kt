@@ -122,12 +122,7 @@ class LastRouteCalculator(
 
     private fun ProducerScope<LastRoute>.sendRoutes(calculationTasks: List<Deferred<LastRoute?>>) {
         calculationTasks.forEach { job ->
-            launch {
-                val route = job.await()
-                if (route != null) {
-                    send(route)
-                }
-            }
+            launch { job.await()?.let { send(it) } }
         }
     }
 

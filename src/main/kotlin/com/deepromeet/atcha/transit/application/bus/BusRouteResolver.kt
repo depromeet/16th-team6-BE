@@ -7,6 +7,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.cache.config.CacheKeys
 import com.google.firebase.database.utilities.Utilities.getOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.cache.annotation.Cacheable
@@ -21,8 +22,9 @@ class BusRouteResolver(
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
     @Cacheable(
-        value = ["routes:busRouteInfo"],
+        cacheNames = [CacheKeys.Transit.BUS_ROUTE_INFO],
         key = "#routeName + ':' + #station.hashCode()",
+        sync = true,
         cacheManager = "apiCacheManager"
     )
     suspend fun resolve(

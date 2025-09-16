@@ -10,6 +10,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.cache.config.CacheKeys
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.cache.annotation.Cacheable
@@ -28,7 +29,7 @@ class PublicIncheonRouteInfoClient(
     private val realLastKey: String
 ) : BusRouteInfoClient {
     @Cacheable(
-        cacheNames = ["api:incheon:busRouteList"],
+        cacheNames = [CacheKeys.Api.Incheon.BUS_ROUTE_LIST],
         key = "#routeName",
         sync = true,
         cacheManager = "apiCacheManager"
@@ -90,7 +91,7 @@ class PublicIncheonRouteInfoClient(
         )
 
     @Cacheable(
-        cacheNames = ["api:incheon:busRouteStationList"],
+        cacheNames = [CacheKeys.Api.Incheon.BUS_ROUTE_STATION_LIST],
         key = "#route.id",
         sync = true,
         cacheManager = "apiCacheManager"
