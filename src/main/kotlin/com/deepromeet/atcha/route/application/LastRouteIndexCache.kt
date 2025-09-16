@@ -1,12 +1,14 @@
 package com.deepromeet.atcha.route.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import java.time.Duration
 
 interface LastRouteIndexCache {
     fun cache(
         start: Coordinate,
         end: Coordinate,
-        routeIds: List<String>
+        routeIds: List<String>,
+        ttl: Duration
     )
 
     fun get(
