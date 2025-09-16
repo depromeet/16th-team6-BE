@@ -47,7 +47,7 @@ enum class SubwayLine(
 
     companion object {
         fun fromRouteName(name: String): SubwayLine {
-            return entries.find { it.routeNames.contains(name) }
+            return entries.find { it.routeNames.contains(normalize(name)) }
                 ?: throw IllegalArgumentException("Invalid route name: $name")
         }
 
@@ -55,5 +55,7 @@ enum class SubwayLine(
             return entries.find { it.lnCd == code }
                 ?: throw IllegalArgumentException("Invalid route code: $code")
         }
+
+        private fun normalize(routeName: String): String = routeName.replace("(급행)", "")
     }
 }
