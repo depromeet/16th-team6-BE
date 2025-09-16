@@ -9,6 +9,7 @@ import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.async
 import kotlinx.coroutines.cancelChildren
 import kotlinx.coroutines.coroutineScope
@@ -21,6 +22,8 @@ class BusRouteMatcher(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
     private val transitNameComparer: TransitNameComparer
 ) {
+    private val log = KotlinLogging.logger {}
+
     suspend fun getMatchedRoute(
         busRoutes: List<BusRoute>,
         stationMeta: BusStationMeta,
@@ -57,7 +60,10 @@ class BusRouteMatcher(
     ): RouteProcessResult? {
         val stationList =
             runCatching { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
-                .getOrElse { return null }
+                .getOrElse {
+                    log.debug { "BusRouteMatcher.processRouteWithSimilarity() - 정류장 조회 중 오류 발생 해당 노선 제거 " }
+                    return null
+                }
 
         val routeStations = stationList.busRouteStations.filter(::isValidStation)
         val routeStops = routeStations.map { it.stationName }
