@@ -62,7 +62,8 @@ class WebClientCircuitBreakerFactory(
                     log.debug {
                         "❌ $label 호출 실패 " +
                             "(에러: ${ev.throwable.javaClass.simpleName}, " +
-                            "실패: ${m.numberOfFailedCalls}, " +
+                            "메시지: ${ev.throwable.message}, + "
+                        "실패: ${m.numberOfFailedCalls}, " +
                             "총: ${m.numberOfSuccessfulCalls + m.numberOfFailedCalls}, " +
                             "실패율: ${m.failureRate}%, 상태: ${cb.state})"
                     }

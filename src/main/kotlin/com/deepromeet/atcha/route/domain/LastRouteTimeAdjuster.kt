@@ -127,10 +127,6 @@ class LastRouteTimeAdjuster {
             val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
             val boardingTime = leg.calcBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
 
-            if (leg.isSubway()) {
-                validateWaitingTime(leg, adjustedDepartureTime, boardingTime)
-            }
-
             legs[i] =
                 leg.copy(
                     departureDateTime = boardingTime
@@ -188,9 +184,9 @@ class LastRouteTimeAdjuster {
                 """
                 |지하철 경로 대기시간 초과
                 |구간: ${leg.start.name} -> ${leg.end.name}
-                |교통수단: ${leg.mode}
+                |교통수단: ${leg.route}
+                |탑승 시간: $boardingTime
                 |계산된 시간: $calculatedTime
-                |탑승 가능: $boardingTime
                 |대기시간: ${waitingMinutes}분
                 """.trimMargin()
             )

@@ -24,11 +24,11 @@ class HttpInterfaceConfig {
     fun customWebClientBuilder(): WebClient.Builder {
         val httpClient =
             HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1_000)
-                .responseTimeout(Duration.ofMillis(2_500))
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3_000)
+                .responseTimeout(Duration.ofMillis(5_000))
                 .doOnConnected { conn ->
-                    conn.addHandlerLast(ReadTimeoutHandler(2_500, TimeUnit.MILLISECONDS))
-                        .addHandlerLast(WriteTimeoutHandler(2_000, TimeUnit.MILLISECONDS))
+                    conn.addHandlerLast(ReadTimeoutHandler(5_000, TimeUnit.MILLISECONDS))
+                        .addHandlerLast(WriteTimeoutHandler(5_000, TimeUnit.MILLISECONDS))
                 }
 
         val xmlMapper =

@@ -46,7 +46,7 @@ class BusRouteMatcher(
 
             throw TransitException.of(
                 TransitError.NOT_FOUND_BUS_ROUTE,
-                "'${busRoutes.map { it.name }}'노선들에서 '${stationMeta.name}'을" +
+                "'${busRoutes.first().serviceRegion}'의 '${busRoutes.map { it.name }}'노선들에서 '${stationMeta.name}'을" +
                     " 경유하며 사용자 경로(${passStopList.stops.map { it.stationName }})와 유사한 노선을 찾지 못했습니다."
             )
         }

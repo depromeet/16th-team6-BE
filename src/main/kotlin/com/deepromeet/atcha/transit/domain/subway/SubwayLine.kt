@@ -35,7 +35,7 @@ enum class SubwayLine(
     UI_SINSEOL(listOf("우이신설경전철", "우이신설선"), "UI"),
 
     // GTX 노선
-    GTX_A(listOf("GTX-A"), "A"),
+    GTX_A(listOf("GTX-A", "GTX-A_2"), "A"),
 
     // 인천
     INCHEON_LINE_1(listOf("인천선", "인천1호선", "인천1"), "I1"),
