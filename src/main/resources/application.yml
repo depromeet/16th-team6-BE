@@ -1,4 +1,7 @@
 spring:
+  mvc:
+    async:
+      request-timeout: 5000
   config:
     import: secret-env.yml
   jpa:
