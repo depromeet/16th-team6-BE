@@ -23,9 +23,10 @@ class PublicRateLimiterRegistry(props: OpenApiProps) {
                 normalizedUrl.startsWith(base)
             }?.value ?: return
 
+        val limit = limitMap[key] ?: defaultLimit
         val bucket =
             bucketMap.computeIfAbsent(normalizedUrl) {
-                newBucket(limitMap[key] ?: defaultLimit)
+                newBucket(limit)
             }
 
         while (true) {

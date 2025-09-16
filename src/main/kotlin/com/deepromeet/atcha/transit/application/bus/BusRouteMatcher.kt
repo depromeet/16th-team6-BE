@@ -55,7 +55,10 @@ class BusRouteMatcher(
         route: BusRoute,
         plannedStops: List<String>
     ): RouteProcessResult? {
-        val stationList = busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route)
+        val stationList =
+            runCatching { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
+                .getOrElse { return null }
+
         val routeStations = stationList.busRouteStations.filter(::isValidStation)
         val routeStops = routeStations.map { it.stationName }
 

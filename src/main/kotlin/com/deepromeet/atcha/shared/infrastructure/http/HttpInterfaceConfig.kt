@@ -2,6 +2,7 @@ package com.deepromeet.atcha.shared.infrastructure.http
 
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.dataformat.xml.XmlMapper
+import io.github.oshai.kotlinlogging.KotlinLogging
 import io.netty.channel.ChannelOption
 import io.netty.handler.timeout.ReadTimeoutHandler
 import io.netty.handler.timeout.WriteTimeoutHandler
@@ -13,18 +14,23 @@ import org.springframework.http.codec.json.Jackson2JsonDecoder
 import org.springframework.http.codec.json.Jackson2JsonEncoder
 import org.springframework.web.reactive.function.client.ExchangeStrategies
 import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.WebClientRequestException
+import org.springframework.web.reactive.function.client.WebClientResponseException
 import reactor.core.publisher.Mono
 import reactor.netty.http.client.HttpClient
+import reactor.util.retry.Retry
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 
 @Configuration
 class HttpInterfaceConfig {
+    private val log = KotlinLogging.logger {}
+
     @Bean
     fun customWebClientBuilder(): WebClient.Builder {
         val httpClient =
             HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3_000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1_000)
                 .responseTimeout(Duration.ofMillis(5_000))
                 .doOnConnected { conn ->
                     conn.addHandlerLast(ReadTimeoutHandler(5_000, TimeUnit.MILLISECONDS))
@@ -53,6 +59,7 @@ class HttpInterfaceConfig {
             .exchangeStrategies(strategies)
             .filter { request, next ->
                 next.exchange(request)
+                    .retryWhen(createRetrySpec())
                     .flatMap { resp ->
                         if (resp.statusCode().isError) {
                             resp.createException().flatMap { ex ->
@@ -64,6 +71,23 @@ class HttpInterfaceConfig {
                     }
             }
             .filter(DecodingErrorLogger.logOnDecodingError())
+    }
+
+    private fun createRetrySpec(): Retry {
+        return Retry.backoff(3, Duration.ofMillis(500)) // 3회 재시도, 500ms 간격으로 exponential backoff
+            .maxBackoff(Duration.ofSeconds(2))
+            .filter(::shouldRetry)
+            .doBeforeRetry { retrySignal ->
+                log.warn("재시도 시도: ${retrySignal.totalRetries() + 1}회, 예외: ${retrySignal.failure().message}")
+            }
+    }
+
+    private fun shouldRetry(throwable: Throwable): Boolean {
+        return when {
+            throwable is WebClientRequestException -> true
+            throwable is WebClientResponseException -> throwable.statusCode.is5xxServerError
+            else -> false
+        }
     }
 
     @Bean
