@@ -35,7 +35,7 @@ class DefaultRedisConfig(
     fun redisConnectionFactory(): RedisConnectionFactory {
         val config =
             LettuceClientConfiguration.builder()
-                .commandTimeout(Duration.ofSeconds(2))
+                .commandTimeout(Duration.ofSeconds(5))
                 .build()
         return LettuceConnectionFactory(
             RedisStandaloneConfiguration(host, port),

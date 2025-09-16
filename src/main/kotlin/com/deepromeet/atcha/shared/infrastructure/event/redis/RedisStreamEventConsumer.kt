@@ -10,11 +10,10 @@ import org.springframework.data.redis.connection.stream.MapRecord
 import org.springframework.data.redis.connection.stream.ReadOffset
 import org.springframework.data.redis.connection.stream.RecordId
 import org.springframework.data.redis.connection.stream.StreamOffset
-import org.springframework.data.redis.connection.stream.StreamReadOptions
 import org.springframework.data.redis.core.RedisTemplate
+import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.net.InetAddress
-import java.time.Duration
 
 private const val EVENT_TYPE = "eventType"
 private const val PAYLOAD = "payload"
@@ -35,12 +34,11 @@ class RedisStreamEventConsumer(
     private val streamOps = redisTemplate.opsForStream<String, String>()
     private val consumerId: String = InetAddress.getLocalHost().hostName
     private val consumer = Consumer.from(groupName, consumerId)
-    private val readOptions = StreamReadOptions.empty().block(Duration.ofSeconds(1))
     private val streams = StreamOffset.create(streamKey, ReadOffset.lastConsumed())
 
-//    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     fun consumeEvents() {
-        val messages = streamOps.read(consumer, readOptions, streams)
+        val messages = streamOps.read(consumer, streams)
 
         messages?.forEach { message ->
             val result = handleEvent(message)
@@ -48,7 +46,7 @@ class RedisStreamEventConsumer(
         }
     }
 
-//    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/10 * * * * ?")
     fun reclaimPendingEvents() {
         pendingMessageReclaimer.reclaimPendingMessages(
             streamKey = streamKey,
