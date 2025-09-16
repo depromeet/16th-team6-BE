@@ -29,16 +29,16 @@ class BusRouteMatcher(
         coroutineScope {
             val plannedStops = passStopList.stops.map { it.stationName }
 
-            val routeMatching =
+            val routeMatchingJobs =
                 busRoutes.map { route ->
                     async {
                         processRouteWithSimilarity(route, plannedStops)
                     }
                 }
 
-            routeMatching.forEach { job ->
+            routeMatchingJobs.forEach { job ->
                 val result = job.await()
-                if (result != null && result.similarity >= SIM_THRESHOLD) {
+                if (result != null) {
                     coroutineContext.cancelChildren()
                     return@coroutineScope result.busRouteInfo
                 }
@@ -62,7 +62,7 @@ class BusRouteMatcher(
         val (lcs, matchingInfo) = lcsWithFirstMatch(plannedStops, routeStops)
         val similarity = lcs.toDouble() / plannedStops.size
 
-        return if (similarity > 0 && matchingInfo != null) {
+        return if (similarity >= SIM_THRESHOLD && matchingInfo != null) {
             val targetStationIndex =
                 (matchingInfo.routeStartIndex - matchingInfo.plannedStartIndex)
                     .coerceAtLeast(0)
