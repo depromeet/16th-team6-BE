@@ -21,7 +21,7 @@ class BusRouteResolver(
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
     @Cacheable(
-        value = ["busRouteInfo"],
+        value = ["routes:busRouteInfo"],
         key = "#routeName + ':' + #station.hashCode()",
         cacheManager = "apiCacheManager"
     )
