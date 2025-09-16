@@ -12,7 +12,6 @@ import org.springframework.data.redis.connection.stream.RecordId
 import org.springframework.data.redis.connection.stream.StreamOffset
 import org.springframework.data.redis.connection.stream.StreamReadOptions
 import org.springframework.data.redis.core.RedisTemplate
-import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.net.InetAddress
 import java.time.Duration
@@ -39,7 +38,7 @@ class RedisStreamEventConsumer(
     private val readOptions = StreamReadOptions.empty().block(Duration.ofSeconds(1))
     private val streams = StreamOffset.create(streamKey, ReadOffset.lastConsumed())
 
-    @Scheduled(cron = "*/10 * * * * ?")
+//    @Scheduled(cron = "*/10 * * * * ?")
     fun consumeEvents() {
         val messages = streamOps.read(consumer, readOptions, streams)
 
@@ -49,7 +48,7 @@ class RedisStreamEventConsumer(
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * ?")
+//    @Scheduled(cron = "*/10 * * * * ?")
     fun reclaimPendingEvents() {
         pendingMessageReclaimer.reclaimPendingMessages(
             streamKey = streamKey,
