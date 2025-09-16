@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit
 
 @Component
 class BusScheduleRedisCache(
-    private val busTimeTableRedisTemplate: RedisTemplate<String, BusSchedule>,
+    private val busScheduleRedisTemplate: RedisTemplate<String, BusSchedule>,
     private val cacheHitRecorder: RedisCacheHitRecorder
 ) : BusScheduleCache {
     private val log = KotlinLogging.logger {}
@@ -24,7 +24,7 @@ class BusScheduleRedisCache(
     ): BusSchedule? {
         val key = getKey(routeName, busStation)
         return try {
-            val schedule = busTimeTableRedisTemplate.opsForValue().get(key)
+            val schedule = busScheduleRedisTemplate.opsForValue().get(key)
             cacheHitRecorder.record("timetable:bus", schedule != null)
             schedule
         } catch (e: Exception) {
@@ -42,7 +42,7 @@ class BusScheduleRedisCache(
         val key = getKey(routeName, busStation)
         val ttlSeconds = calculateTtlUntilMidnight()
         try {
-            busTimeTableRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
+            busScheduleRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
         } catch (e: Exception) {
             log.warn { "버스 시간표 캐시 저장 중 오류 발생: ${e.message}" }
         }
