@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
@@ -38,10 +39,12 @@ class ApiCacheConfig(private val redisConnectionFactory: RedisConnectionFactory)
             objectMapper.typeFactory.constructType(
                 object : TypeReference<List<BusRoute>>() {}
             )
+        val busRouteInfoType: JavaType = objectMapper.typeFactory.constructType(BusRouteInfo::class.java)
 
         val busRouteStationListSerializer =
             Jackson2JsonRedisSerializer<BusRouteStationList>(objectMapper, busRouteStationListType)
         val busRouteListSerializer = Jackson2JsonRedisSerializer<List<BusRoute>>(objectMapper, busRouteListType)
+        val busRouteInfoSerializer = Jackson2JsonRedisSerializer<BusRouteInfo>(objectMapper, busRouteInfoType)
 
         val cacheConfigurations =
             mapOf(
@@ -74,6 +77,11 @@ class ApiCacheConfig(private val redisConnectionFactory: RedisConnectionFactory)
                     createCacheConfiguration(
                         Duration.ofDays(7),
                         busRouteListSerializer
+                    ),
+                "busRouteInfo" to
+                    createCacheConfiguration(
+                        Duration.ofHours(1),
+                        busRouteInfoSerializer
                     )
             )
 
