@@ -4,6 +4,16 @@ spring:
       request-timeout: 5000
   config:
     import: secret-env.yml
+  data:
+    redis:
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+          time-between-eviction-runs: 60s
   jpa:
     properties:
      hibernate:
@@ -132,10 +142,22 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics,circuitbreakers,circuitbreakerevents
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
   endpoint:
     health:
       show-details: always
   health:
     circuitbreakers:
+      enabled: true
+  metrics:
+    tags:
+      application: atcha
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+server:
+  tomcat:
+    mbeanregistry:
       enabled: true
