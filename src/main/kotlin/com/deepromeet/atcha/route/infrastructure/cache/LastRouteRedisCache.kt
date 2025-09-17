@@ -30,6 +30,19 @@ class LastRouteRedisCache(
         }
     }
 
+    override fun cacheAll(routes: List<LastRoute>) {
+        try {
+            val keyValueMap = routes.associate { getKey(it.id) to it }
+            lastRouteRedisTemplate.opsForValue().multiSet(keyValueMap)
+
+            keyValueMap.keys.forEach { key ->
+                lastRouteRedisTemplate.expire(key, Duration.ofDays(1))
+            }
+        } catch (e: Exception) {
+            logger.warn { "막차 경로 정보 일괄 저장 중 오류 발생: ${e.message}" }
+        }
+    }
+
     fun getKey(routeId: String): String {
         return "routes:last:$routeId"
     }

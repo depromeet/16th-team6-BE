@@ -36,7 +36,7 @@ class RedisStreamEventConsumer(
     private val consumer = Consumer.from(groupName, consumerId)
     private val streams = StreamOffset.create(streamKey, ReadOffset.lastConsumed())
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/30 * * * * ?")
     fun consumeEvents() {
         val messages = streamOps.read(consumer, streams)
 
@@ -46,7 +46,7 @@ class RedisStreamEventConsumer(
         }
     }
 
-    @Scheduled(cron = "*/10 * * * * ?")
+    @Scheduled(cron = "*/30 * * * * ?")
     fun reclaimPendingEvents() {
         pendingMessageReclaimer.reclaimPendingMessages(
             streamKey = streamKey,

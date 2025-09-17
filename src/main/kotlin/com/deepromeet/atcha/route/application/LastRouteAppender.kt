@@ -9,7 +9,8 @@ import java.time.LocalDateTime
 @Component
 class LastRouteAppender(
     private val lastRouteCache: LastRouteCache,
-    private val lastRouteIndexCache: LastRouteIndexCache
+    private val lastRouteIndexCache: LastRouteIndexCache,
+    routeCache: LastRouteCache
 ) {
     fun append(route: LastRoute) {
         lastRouteCache.cache(route)
@@ -23,8 +24,6 @@ class LastRouteAppender(
         val lastDepartureTime = routes.maxBy { it.departureDateTime }.departureDateTime
         val ttl = Duration.between(LocalDateTime.now(), lastDepartureTime)
         lastRouteIndexCache.cache(start, end, routes.map { it.id }, ttl)
-        routes.forEach { route ->
-            lastRouteCache.cache(route)
-        }
+        lastRouteCache.cacheAll(routes)
     }
 }

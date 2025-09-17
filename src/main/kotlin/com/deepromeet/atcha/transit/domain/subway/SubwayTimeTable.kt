@@ -42,7 +42,7 @@ data class SubwayTimeTable(
                 .filter { it.isExpress == isExpress }
                 .ifEmpty {
                     throw TransitException(
-                        TransitError.NOT_FOUND_SUBWAY_SCHEDULE,
+                        TransitError.NOT_FOUND_SUBWAY_LAST_TIME,
                         "'${endStation.routeName}'노선의 '${endStation.name}'역으로 가는 유효한 시간표가 없습니다."
                     )
                 }

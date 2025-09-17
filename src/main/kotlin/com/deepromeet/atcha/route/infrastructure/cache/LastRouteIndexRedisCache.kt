@@ -18,9 +18,12 @@ class LastRouteIndexRedisCache(
     ) {
         try {
             val key = getKey(start, end)
-            lastRouteIndexRedisTemplate.delete(key)
-            lastRouteIndexRedisTemplate.opsForList().rightPushAll(key, routeIds)
-            lastRouteIndexRedisTemplate.expire(key, ttl)
+            lastRouteIndexRedisTemplate.executePipelined { connection ->
+                lastRouteIndexRedisTemplate.delete(key)
+                lastRouteIndexRedisTemplate.opsForList().rightPushAll(key, routeIds)
+                lastRouteIndexRedisTemplate.expire(key, ttl)
+                null
+            }
         } catch (_: Exception) {
             // Redis 캐시 실패 시 무시
         }
