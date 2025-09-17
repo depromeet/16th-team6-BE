@@ -70,6 +70,7 @@ class ApiCacheConfig(private val redisConnectionFactory: RedisConnectionFactory)
 
         return RedisCacheManager.builder(redisConnectionFactory)
             .withInitialCacheConfigurations(cacheConfigurations)
+            .enableStatistics()
             .build()
     }
 
