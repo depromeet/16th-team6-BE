@@ -62,7 +62,7 @@ class ApiCacheConfig(private val redisConnectionFactory: RedisConnectionFactory)
                 put(
                     CacheKeys.Transit.BUS_ROUTE_INFO,
                     createCacheConfiguration(
-                        Duration.ofHours(1),
+                        Duration.ofDays(7),
                         busRouteInfoSerializer
                     )
                 )

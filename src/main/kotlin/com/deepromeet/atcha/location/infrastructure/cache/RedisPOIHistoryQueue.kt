@@ -3,13 +3,10 @@ package com.deepromeet.atcha.location.infrastructure.cache
 import com.deepromeet.atcha.location.application.POIHistoryQueue
 import com.deepromeet.atcha.location.domain.POI
 import com.deepromeet.atcha.user.domain.User
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
 
 const val LIST_FULL_SIZE: Long = 10L
-
-private val logger = KotlinLogging.logger {}
 
 @Component
 class RedisPOIHistoryQueue(
@@ -20,7 +17,6 @@ class RedisPOIHistoryQueue(
         poi: POI
     ) {
         val key: String = getKey(user)
-        logger.info { "Pushing POI to Redis: $poi" }
         redisTemplate.opsForList().leftPush(key, poi)
         redisTemplate.opsForList().trim(key, 0, LIST_FULL_SIZE - 1)
     }
@@ -30,7 +26,6 @@ class RedisPOIHistoryQueue(
         poi: POI
     ) {
         val key: String = getKey(user)
-        logger.info { "Popping POI from Redis: $poi" }
         redisTemplate.opsForList().remove(key, 1, poi)
     }
 
