@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.user.api.controller
 
 import com.deepromeet.atcha.app.application.AppService
+import com.deepromeet.atcha.app.domain.Platform
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.user.api.request.AlertFrequencyUpdateRequest
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -29,10 +31,11 @@ class UserController(
 ) {
     @GetMapping("/members/me")
     fun getUserInfo(
-        @CurrentUser userId: Long
+        @CurrentUser userId: Long,
+        @RequestHeader("X-Platform") platform: String
     ): ApiResponse<UserInfoResponse> {
         val user = userService.getUser(UserId(userId))
-        val appVersion = appService.getAppVersion()
+        val appVersion = appService.getAppVersion(Platform.fromString(platform))
         return ApiResponse.success(UserInfoResponse.from(user, appVersion))
     }
 
