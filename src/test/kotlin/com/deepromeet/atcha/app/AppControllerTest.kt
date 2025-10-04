@@ -16,6 +16,7 @@ class AppControllerTest : BaseControllerTest() {
         // when & then
         RestAssured.given().log().all()
             .header("Content-Type", "application/json")
+            .header("X-Platform", "ANDROID")
             .body(request)
             .`when`().post("/api/app/version")
             .then().log().all()
@@ -30,6 +31,7 @@ class AppControllerTest : BaseControllerTest() {
 
         RestAssured.given().log().all()
             .header("Content-Type", "application/json")
+            .header("X-Platform", "ANDROID")
             .body(request)
             .`when`().post("/api/app/version")
             .then().log().all()
@@ -39,7 +41,7 @@ class AppControllerTest : BaseControllerTest() {
         val result =
             RestAssured.given().log().all()
                 .header("Content-Type", "application/json")
-                .body(request)
+                .header("X-Platform", "ANDROID")
                 .`when`().get("/api/app/version")
                 .then().log().all()
                 .statusCode(200)

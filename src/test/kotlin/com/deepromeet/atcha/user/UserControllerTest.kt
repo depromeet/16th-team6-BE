@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.user
 
 import com.deepromeet.atcha.app.application.AppVersionAppender
+import com.deepromeet.atcha.app.domain.Platform
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
@@ -39,7 +40,7 @@ class UserControllerTest(
         user = userAppender.append(user)
         val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
-        appVersionAppender.createAppVersion("test v1.0.0")
+        appVersionAppender.createAppVersion(Platform.ANDROID,"test v1.0.0")
     }
 
     @Test
@@ -47,6 +48,7 @@ class UserControllerTest(
         val result =
             RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+                .header("X-Platform", "ANDROID")
                 .`when`().get("/api/members/me")
                 .then().log().all()
                 .statusCode(200)
@@ -55,6 +57,7 @@ class UserControllerTest(
         val objectMapper = jacksonObjectMapper()
         val findUser: UserInfoResponse = objectMapper.convertValue(result, UserInfoResponse::class.java)
         assertThat(findUser.id).isEqualTo(user.id.value)
+        assertThat(findUser.appVersion).isEqualTo("test v1.0.0")
     }
 
     @Test
