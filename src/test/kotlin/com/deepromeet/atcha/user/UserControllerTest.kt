@@ -40,7 +40,7 @@ class UserControllerTest(
         user = userAppender.append(user)
         val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
-        appVersionAppender.createAppVersion(Platform.ANDROID,"test v1.0.0")
+        appVersionAppender.createAppVersion(Platform.ANDROID, "test v1.0.0")
     }
 
     @Test

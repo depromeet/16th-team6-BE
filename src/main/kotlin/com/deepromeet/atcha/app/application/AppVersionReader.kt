@@ -15,5 +15,8 @@ class AppVersionReader(
     @Transactional(readOnly = true)
     fun getAppVersion(platform: Platform): AppVersion =
         appVersionRepository.findByPlatform(platform)
-            ?: throw AppException.of(AppError.NO_MATCHED_PLATFORM, "Android 플랫폼 앱 버전을 찾을 수 없습니다")
+            ?: throw AppException.of(
+                AppError.NO_MATCHED_PLATFORM,
+                "${platform.displayName} 플랫폼 앱 버전을 찾을 수 없습니다"
+            )
 }
