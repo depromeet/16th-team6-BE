@@ -116,7 +116,7 @@ class RouteController(
             routeService.getTargetBusArrivals(
                 UserId(id),
                 routeName
-            ).map { RealTimeBusArrivalResponse(it) }
+            ).map { RealTimeBusArrivalResponse(routeName, it) }
         )
     }
 

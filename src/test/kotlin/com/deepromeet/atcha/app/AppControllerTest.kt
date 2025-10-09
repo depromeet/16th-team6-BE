@@ -11,7 +11,7 @@ class AppControllerTest : BaseControllerTest() {
     @Test
     fun `앱 버전을 추가한다`() {
         // given
-        val request = AppVersionUpdateRequest("test v1.0.0")
+        val request = AppVersionUpdateRequest("v1.0.0")
 
         // when & then
         RestAssured.given().log().all()
@@ -26,7 +26,7 @@ class AppControllerTest : BaseControllerTest() {
     @Test
     fun `앱 버전을 조회한다`() {
         // given
-        val version = "test v1.0.0"
+        val version = "v1.0.0"
         val request = AppVersionUpdateRequest(version)
 
         RestAssured.given().log().all()
