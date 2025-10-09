@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RealTimeBusArrivalResponse(
+    val routeName: String,
     val busStatus: BusStatus,
     val remainingTime: Int,
     val remainingStations: Int?,
@@ -23,7 +24,8 @@ data class RealTimeBusArrivalResponse(
         private val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
     }
 
-    constructor(busArrival: BusArrival) : this(
+    constructor(routeName: String, busArrival: BusArrival) : this(
+        routeName,
         busArrival.busStatus,
         busArrival.remainingTime,
         busArrival.remainingStations,
