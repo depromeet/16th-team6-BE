@@ -58,7 +58,8 @@ data class LastRoute(
             adjustedLegs: List<LastRouteLeg>
         ): LastRoute {
             val departureDateTime = calculateDepartureTime(adjustedLegs)
-            val arrivalTime = calculateArrivalTime(adjustedLegs)
+            val legsWithDepartureTime = fillWalkingDepartureTime(adjustedLegs, departureDateTime)
+            val arrivalTime = calculateArrivalTime(legsWithDepartureTime)
             val totalTime = Duration.between(departureDateTime, arrivalTime).seconds
 
             return LastRoute(
@@ -70,8 +71,29 @@ data class LastRoute(
                 transferCount = itinerary.transferCount,
                 totalDistance = itinerary.totalDistance,
                 pathType = itinerary.pathType,
-                legs = adjustedLegs
+                legs = legsWithDepartureTime
             )
+        }
+
+        private fun fillWalkingDepartureTime(
+            legs: List<LastRouteLeg>,
+            routeDepartureTime: LocalDateTime
+        ): List<LastRouteLeg> {
+            return legs.mapIndexed { index, leg ->
+                if (leg.isWalk()) {
+                    val departureTime =
+                        when {
+                            index == 0 -> routeDepartureTime
+                            else -> {
+                                val prevLeg = legs[index - 1]
+                                prevLeg.departureDateTime!!.plusSeconds(prevLeg.sectionTime.toLong())
+                            }
+                        }
+                    leg.copy(departureDateTime = departureTime)
+                } else {
+                    leg
+                }
+            }
         }
 
         private fun calculateDepartureTime(legs: List<LastRouteLeg>): LocalDateTime {
