@@ -61,6 +61,26 @@ data class BusRealTimeArrivals(
             nextIndex++
         }
 
+        // lastTime을 넘어가기 전까지 추가 버스 생성
+        if (matchedBuses.last().expectedArrivalTime?.isBefore(busInfo.timeTable.lastTime) == true) {
+            var currentArrivalTime = matchedBuses.last().expectedArrivalTime!!
+
+            while (currentArrivalTime.isBefore(busInfo.timeTable.lastTime)) {
+                currentArrivalTime = currentArrivalTime.plusMinutes(term)
+                if (!currentArrivalTime.isAfter(busInfo.timeTable.lastTime)) {
+                    matchedBuses +=
+                        BusArrival.createEstimated(
+                            vehicleId = "ESTIMATED_$nextIndex",
+                            estimatedArrivalTime = currentArrivalTime,
+                            remainStations = null,
+                            busCongestion = null,
+                            remainingSeats = null
+                        )
+                    nextIndex++
+                }
+            }
+        }
+
         return matchedBuses.sortedBy { it.expectedArrivalTime }
     }
 
