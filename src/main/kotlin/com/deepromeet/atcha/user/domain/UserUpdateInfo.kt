@@ -8,7 +8,6 @@ data class UserUpdateInfo(
     val address: String?,
     val lat: Double?,
     val lon: Double?,
-    val alertFrequencies: MutableSet<Int>?,
     val fcmToken: String?
 ) {
     fun hasHomeAddress(): Boolean {

@@ -23,7 +23,6 @@ class UserAppender(
             User.create(
                 providerId = providerContext.providerUserId,
                 homeAddress = homeAddress,
-                alertFrequencies = signUpInfo.alertFrequencies.toSet(),
                 fcmToken = signUpInfo.fcmToken
             )
 

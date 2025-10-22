@@ -29,14 +29,6 @@ class UserUpdater(
         }
     }
 
-    fun updateAlertFrequency(
-        user: User,
-        alertFrequency: MutableSet<Int>
-    ): User {
-        val updatedUser = user.updateAlertFrequencies(alertFrequency)
-        return userRepository.save(updatedUser)
-    }
-
     fun updateHomeAddress(
         user: User,
         homeAddress: HomeAddress

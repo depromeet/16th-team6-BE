@@ -7,8 +7,7 @@ data class UserInfoUpdateResponse(
     val providerId: String,
     val address: String,
     val lat: Double,
-    val lon: Double,
-    val alertFrequencies: Set<Int>
+    val lon: Double
 ) {
     companion object {
         fun from(domain: User) =
@@ -17,8 +16,7 @@ data class UserInfoUpdateResponse(
                 domain.providerId,
                 domain.homeAddress?.address ?: "",
                 domain.homeAddress?.coordinate?.lat ?: 0.0,
-                domain.homeAddress?.coordinate?.lon ?: 0.0,
-                domain.alertFrequencies
+                domain.homeAddress?.coordinate?.lon ?: 0.0
             )
     }
 }

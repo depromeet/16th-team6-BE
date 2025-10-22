@@ -28,15 +28,6 @@ class UserService(
     }
 
     @Transactional
-    fun updateAlertFrequency(
-        id: UserId,
-        alertFrequency: MutableSet<Int>
-    ): User {
-        val user = userReader.read(id)
-        return userUpdater.updateAlertFrequency(user, alertFrequency)
-    }
-
-    @Transactional
     fun updateHomeAddress(
         id: UserId,
         homeAddress: HomeAddress

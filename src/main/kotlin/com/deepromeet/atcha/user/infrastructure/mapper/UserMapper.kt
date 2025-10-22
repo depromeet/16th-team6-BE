@@ -24,7 +24,6 @@ class UserMapper {
             id = UserId(entity.id),
             providerId = entity.providerId,
             homeAddress = entity.address.toDomain(),
-            alertFrequencies = entity.alertFrequencies.toSet(),
             fcmToken = entity.fcmToken,
             isDeleted = entity.isDeleted
         )
@@ -35,7 +34,6 @@ class UserMapper {
             id = domain.id.value,
             providerId = domain.providerId,
             address = domain.homeAddress.toEntity(),
-            alertFrequencies = domain.alertFrequencies.toMutableSet(),
             fcmToken = domain.fcmToken,
             isDeleted = domain.isDeleted
         )
