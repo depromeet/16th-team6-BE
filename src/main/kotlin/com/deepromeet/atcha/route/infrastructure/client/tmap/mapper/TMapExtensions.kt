@@ -68,6 +68,6 @@ fun Station.toRoutePassStop(): RoutePassStop {
 
 fun PassStopList.toDomain(): RoutePassStops {
     return RoutePassStops.of(
-        this.stationList.map { it.toRoutePassStop() }
+        this.stations.map { it.toRoutePassStop() }
     )
 }
