@@ -22,7 +22,6 @@ object UserFixture {
             id = UserId(id),
             providerId = providerId,
             homeAddress = homeAddress,
-            alertFrequencies = alertFrequencies,
             fcmToken = fcmToken
         )
 
@@ -35,7 +34,6 @@ object UserFixture {
             address = user.homeAddress.address,
             lat = user.homeAddress.coordinate.lat,
             lon = user.homeAddress.coordinate.lon,
-            alertFrequencies = user.alertFrequencies.toMutableSet(),
             fcmToken = user.fcmToken ?: ""
         )
 }

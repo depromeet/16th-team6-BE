@@ -55,9 +55,16 @@ data class RouteLeg(
         departureDateTime: LocalDateTime,
         transitInfo: TransitInfo
     ): LastRouteLeg {
+        val adjustedSectionTime =
+            if (mode == RouteMode.BUS) {
+                (sectionTime * BUS_TIME_REDUCTION_RATE).toInt()
+            } else {
+                sectionTime
+            }
+
         return LastRouteLeg(
             distance = distance,
-            sectionTime = sectionTime,
+            sectionTime = adjustedSectionTime,
             mode = mode,
             departureDateTime = departureDateTime,
             route = route,
@@ -74,5 +81,6 @@ data class RouteLeg(
 
     companion object {
         private const val WALK_TIME_BUFFER_SECONDS = 120
+        private const val BUS_TIME_REDUCTION_RATE = 0.7
     }
 }
