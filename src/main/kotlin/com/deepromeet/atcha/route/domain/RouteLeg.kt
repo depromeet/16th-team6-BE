@@ -81,6 +81,6 @@ data class RouteLeg(
 
     companion object {
         private const val WALK_TIME_BUFFER_SECONDS = 120
-        private const val BUS_TIME_REDUCTION_RATE = 0.7
+        private const val BUS_TIME_REDUCTION_RATE = 0.8
     }
 }
