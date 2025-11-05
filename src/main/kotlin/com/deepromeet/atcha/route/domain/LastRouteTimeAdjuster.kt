@@ -3,7 +3,6 @@ package com.deepromeet.atcha.route.domain
 import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
 import com.deepromeet.atcha.transit.domain.TimeDirection
-import com.deepromeet.atcha.transit.domain.TransitInfo
 import org.springframework.stereotype.Service
 import java.time.Duration
 import java.time.LocalDateTime
@@ -12,9 +11,6 @@ import java.time.LocalDateTime
 class LastRouteTimeAdjuster {
     suspend fun adjustTransitDepartureTimes(legs: List<LastRouteLeg>): List<LastRouteLeg> {
         val adjustedLegs = legs.toMutableList()
-
-        // 첫 번째 대중교통이 버스인 경우를 제외하고 모든 버스의 출발시간을 배차간격만큼 빼기
-        adjustBusDepartureTimes(adjustedLegs)
 
         val transitLegs = adjustedLegs.withIndex().filter { it.value.isTransit() }
         if (transitLegs.isEmpty()) return adjustedLegs
@@ -68,41 +64,6 @@ class LastRouteTimeAdjuster {
         adjustLegsAfterBase(adjustedLegs, adjustBaseIndex)
 
         return adjustedLegs
-    }
-
-    private fun adjustBusDepartureTimes(adjustedLegs: MutableList<LastRouteLeg>) {
-        val firstTransitIndex = adjustedLegs.indexOfFirst { it.isTransit() }
-        val isFirstTransitBus = firstTransitIndex != -1 && adjustedLegs[firstTransitIndex].isBus()
-
-        for (i in adjustedLegs.indices) {
-            val leg = adjustedLegs[i]
-            if (leg.isBus()) {
-                // 첫 번째 대중교통이 버스이고 현재 leg가 그 첫 번째 버스라면 건너뛰기
-                if (isFirstTransitBus && i == firstTransitIndex) continue
-
-                val busInfo = leg.requireBusInfo()
-
-                // 배차간격이 긴 버스(30분 이상)는 건너뛰기
-                if (isLongTermBus(busInfo)) continue
-
-                val lastBusTime = leg.departureDateTime!!
-                val prevLastBusTime = lastBusTime.minusMinutes(busInfo.timeTable.term.toLong())
-
-                val adjustedBusInfo =
-                    busInfo.copy(
-                        timeTable =
-                            busInfo.timeTable.copy(
-                                lastTime = prevLastBusTime
-                            )
-                    )
-
-                adjustedLegs[i] =
-                    leg.copy(
-                        departureDateTime = prevLastBusTime,
-                        transitInfo = adjustedBusInfo
-                    )
-            }
-        }
     }
 
     private suspend fun adjustLegsBeforeBase(
@@ -192,6 +153,4 @@ class LastRouteTimeAdjuster {
             )
         }
     }
-
-    private fun isLongTermBus(busInfo: TransitInfo.BusInfo): Boolean = busInfo.timeTable.term >= 30
 }
