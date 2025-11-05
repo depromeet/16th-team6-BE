@@ -3,6 +3,7 @@
 IS_BLUE=$(docker compose ps | grep atcha-blue)
 DEFAULT_CONF="data/nginx/nginx.conf"
 MAX_RETRIES=150
+SCALE=1
 
 check_service() {
   local RETRIES=0
@@ -37,6 +38,8 @@ check_service() {
   done
 
   echo "Failed to check service $SERVICE_NAME after $MAX_RETRIES attempts."
+  echo "Cleaning up failed service: $SERVICE_NAME"
+  docker compose down $SERVICE_NAME
   return 1
 }
 
@@ -64,8 +67,8 @@ if [ -z "$IS_BLUE" ]; then
   echo "1. BLUE 이미지 받기"
   docker compose pull atcha-blue
 
-  echo "2. BLUE 컨테이너 실행"
-  docker compose up -d atcha-blue --scale atcha-blue=2
+  echo "2. BLUE 컨테이너 실행 (scale: $SCALE)"
+  docker compose up -d atcha-blue --scale atcha-blue=$SCALE
 
   echo "3. BLUE 컨테이너 헬스 체크"
   if ! check_service "atcha-blue"; then
@@ -88,8 +91,8 @@ else
   echo "1. GREEN 이미지 받기"
   docker compose pull atcha-green
 
-  echo "2. GREEN 컨테이너 실행"
-  docker compose up -d atcha-green --scale atcha-green=2
+  echo "2. GREEN 컨테이너 실행 (scale: $SCALE)"
+  docker compose up -d atcha-green --scale atcha-green=$SCALE
 
   echo "3. GREEN 컨테이너 헬스 체크"
   if ! check_service "atcha-green"; then

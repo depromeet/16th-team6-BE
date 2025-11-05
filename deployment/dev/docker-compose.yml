@@ -38,6 +38,7 @@ services:
 
   redis:
     container_name: atcha-redis
+    restart: always
     networks:
       - app-tier
     image: redis:latest

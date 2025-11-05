@@ -7,6 +7,7 @@ import com.deepromeet.atcha.shared.domain.event.domain.EventHandler
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Component
+import java.time.format.DateTimeFormatter
 
 private val log = KotlinLogging.logger { }
 
@@ -15,6 +16,10 @@ class UserRouteRefreshedEventHandler(
     private val notificationProcessingService: NotificationProcessingService,
     private val objectMapper: ObjectMapper
 ) : EventHandler {
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     override fun supports(eventType: String): Boolean {
         return eventType == "USER_ROUTE_REFRESHED"
     }
@@ -27,8 +32,8 @@ class UserRouteRefreshedEventHandler(
                 userId = event.userRoute.userId.toString(),
                 token = event.userRoute.token,
                 idempotencyKey = createIdempotencyKey(event.userRoute),
-                departureTime = event.userRoute.departureTime,
-                updatedAt = event.userRoute.updatedAt
+                departureTime = event.userRoute.updatedDepartureTime.format(dateTimeFormatter),
+                updatedAt = event.userRoute.updatedAt.format(dateTimeFormatter)
             )
 
         val result = notificationProcessingService.process(notificationData)
@@ -47,6 +52,10 @@ class UserRouteRefreshedEventHandler(
     }
 
     private fun createIdempotencyKey(userRoute: UserRoute): String {
-        return "notification:processed:${userRoute.userId}:${userRoute.lastRouteId}:${userRoute.updatedAt}"
+        return "notification:processed:${userRoute.userId}:${userRoute.lastRouteId}:${
+            userRoute.updatedAt.format(
+                dateTimeFormatter
+            )
+        }"
     }
 }

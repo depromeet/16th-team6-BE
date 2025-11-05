@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
@@ -11,7 +12,7 @@ data class LastRouteLeg(
     val distance: Int,
     val sectionTime: Int,
     val mode: RouteMode,
-    val departureDateTime: String? = null,
+    val departureDateTime: LocalDateTime? = null,
     val route: String? = null,
     val type: String? = null,
     val service: String? = null,
@@ -28,16 +29,28 @@ data class LastRouteLeg(
     }
 
     val busInfo: TransitInfo.BusInfo?
-        get() = transitInfo as? TransitInfo.BusInfo
+        get() = transitInfo as? TransitInfo.BusInfo?
 
     val subwayInfo: TransitInfo.SubwayInfo?
-        get() = transitInfo as? TransitInfo.SubwayInfo
+        get() = transitInfo as? TransitInfo.SubwayInfo?
+
+    fun requireBusInfo(): TransitInfo.BusInfo {
+        return requireNotNull(busInfo) { "버스 경로는 버스 정보(BusInfo)가 필수입니다." }
+    }
+
+    fun requireSubwayInfo(): TransitInfo.SubwayInfo {
+        return requireNotNull(subwayInfo) { "지하철 경로는 지하철 정보(SubwayInfo)가 필수입니다." }
+    }
 
     fun isTransit(): Boolean = mode.isTransit()
 
     fun isWalk(): Boolean = mode.isWalk()
 
     fun isBus(): Boolean = mode == RouteMode.BUS
+
+    fun isSubway(): Boolean = mode == RouteMode.SUBWAY
+
+    fun isExpress(): Boolean = route?.contains("(급행)") == true
 
     fun resolveRouteName(): String {
         return route!!.split(":")[1]
@@ -50,14 +63,6 @@ data class LastRouteLeg(
         )
     }
 
-    fun withIncreasedWalkTime(nextLeg: LastRouteLeg?): LastRouteLeg {
-        return if (isWalk() && nextLeg?.isTransit() == true) {
-            copy(sectionTime = sectionTime + 120) // 2분 추가
-        } else {
-            this
-        }
-    }
-
     fun calcBoardingTime(
         targetTime: LocalDateTime,
         direction: TimeDirection
@@ -65,8 +70,8 @@ data class LastRouteLeg(
         return when (transitInfo) {
             is TransitInfo.SubwayInfo -> {
                 transitInfo.timeTable.findNearestTime(targetTime, direction)
-                    ?.departureTime
-                    ?: throw TransitException.Companion.of(
+                    ?.departureTime?.toLocalDateTime()
+                    ?: throw TransitException.of(
                         TransitError.NOT_FOUND_SPECIFIED_TIME,
                         "지하철 '$route'의 ${start.name}역에서 " +
                             "$targetTime ${direction}의 시간표를 찾을 수 없습니다."
@@ -76,7 +81,7 @@ data class LastRouteLeg(
                 try {
                     transitInfo.timeTable.calculateNearestTime(targetTime, direction)
                 } catch (e: TransitException) {
-                    throw TransitException.Companion.of(
+                    throw TransitException.of(
                         TransitError.NOT_FOUND_SPECIFIED_TIME,
                         "버스 '$route'의 ${start.name}정류장에서 " +
                             "$targetTime ${direction}의 시간표를 찾을 수 없습니다.",
@@ -85,7 +90,7 @@ data class LastRouteLeg(
                 }
             }
             TransitInfo.NoInfoTable -> {
-                throw TransitException.Companion.of(
+                throw TransitException.of(
                     TransitError.NOT_FOUND_SPECIFIED_TIME,
                     "해당 교통수단의 막차 시간 정보가 없습니다. " +
                         "$mode - ${start.name} -> ${end.name}"
@@ -102,7 +107,7 @@ data class LastRouteLeg(
 
     private fun validateTransitDepartureTime() {
         if (mode.requiresDepartureTime) {
-            require(!departureDateTime.isNullOrBlank()) {
+            require(departureDateTime != null) {
                 "대중교통($mode)의 출발시간은 필수입니다"
             }
         }

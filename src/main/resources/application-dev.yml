@@ -8,12 +8,12 @@ spring:
     hibernate:
       ddl-auto: update
 
-kakao:
-  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
-
 tmap:
   api:
     app-key: ${secret.dev.TMAP_API_KEY}
+
+kakao:
+  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
 
 redis:
   host: redis
@@ -32,7 +32,6 @@ kric:
 
 odsay:
   api:
-    url: https://api.odsay.com
     service-key: ${secret.dev.ODSAY_SERVICE_KEY}
     spare-key: ${secret.dev.ODSAY_SPARE_KEY}
     real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
@@ -58,10 +57,14 @@ management:
       exposure:
         exclude: "*"
     access:
-      default: none
+      default: read_only
   endpoint:
-    prometheus:
-      enabled: true
     health:
-      enabled: true
       show-components: never
+      status:
+        order: down, out-of-service, up, unknown
+
+
+discord:
+  webhook:
+    url: ${secret.dev.DISCORD_WEBHOOK_URL}

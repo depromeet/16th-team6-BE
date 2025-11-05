@@ -18,7 +18,7 @@ data class BusRouteStationResponse(
         busRouteId = busRouteStation.busRoute.id.value,
         busRouteName = busRouteStation.busRoute.name,
         busStationId = busRouteStation.busStation.id.value,
-        busStationNumber = busRouteStation.busStation.busStationNumber.value,
+        busStationNumber = busRouteStation.busStation.busStationNumber.value.ifBlank { "미정차" },
         busStationName = busRouteStation.busStation.busStationMeta.name,
         busStationLat = busRouteStation.busStation.busStationMeta.coordinate.lat,
         busStationLon = busRouteStation.busStation.busStationMeta.coordinate.lon,

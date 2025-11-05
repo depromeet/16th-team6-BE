@@ -1,7 +1,7 @@
 package com.deepromeet.atcha.transit.domain.subway
 
 enum class SubwayLine(
-    val routeName: List<String>,
+    val routeNames: List<String>,
     val lnCd: String,
     val isCircular: Boolean = false
 ) {
@@ -35,19 +35,19 @@ enum class SubwayLine(
     UI_SINSEOL(listOf("우이신설경전철", "우이신설선"), "UI"),
 
     // GTX 노선
-    GTX_A(listOf("GTX-A"), "A"),
+    GTX_A(listOf("GTX-A", "GTX-A_2"), "A"),
 
     // 인천
     INCHEON_LINE_1(listOf("인천선", "인천1호선", "인천1"), "I1"),
     INCHEON_LINE_2(listOf("인천2호선", "인천2"), "I2");
 
     fun mainName(): String {
-        return routeName.first()
+        return routeNames.first()
     }
 
     companion object {
         fun fromRouteName(name: String): SubwayLine {
-            return entries.find { it.routeName.contains(name) }
+            return entries.find { it.routeNames.contains(normalize(name)) }
                 ?: throw IllegalArgumentException("Invalid route name: $name")
         }
 
@@ -55,5 +55,7 @@ enum class SubwayLine(
             return entries.find { it.lnCd == code }
                 ?: throw IllegalArgumentException("Invalid route code: $code")
         }
+
+        private fun normalize(routeName: String): String = routeName.replace("(급행)", "")
     }
 }

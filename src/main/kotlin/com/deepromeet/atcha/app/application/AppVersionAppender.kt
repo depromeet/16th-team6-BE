@@ -11,16 +11,22 @@ class AppVersionAppender(
     private val appVersionRepository: AppVersionRepository
 ) {
     @Transactional
-    fun createAppVersion(version: String): AppVersion {
-        val appVersion = AppVersion(version = version, platform = Platform.ANDROID)
+    fun createAppVersion(
+        platform: Platform,
+        version: String
+    ): AppVersion {
+        val appVersion = AppVersion(version = version, platform = platform)
         return appVersionRepository.save(appVersion)
     }
 
     @Transactional
-    fun updateAppVersion(version: String) {
+    fun updateAppVersion(
+        platform: Platform,
+        version: String
+    ) {
         val appVersion =
-            appVersionRepository.findByPlatform(Platform.ANDROID) // TODO 플랫폼 추가 시 수정 필요
-                ?: createAppVersion(version)
+            appVersionRepository.findByPlatform(platform) // TODO 플랫폼 추가 시 수정 필요
+                ?: createAppVersion(platform, version)
         appVersion.version = version
     }
 }

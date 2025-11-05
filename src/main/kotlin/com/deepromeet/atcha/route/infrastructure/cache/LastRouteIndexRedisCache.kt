@@ -4,7 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.application.LastRouteIndexCache
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
-import java.util.concurrent.TimeUnit
+import java.time.Duration
 
 @Component
 class LastRouteIndexRedisCache(
@@ -13,20 +13,31 @@ class LastRouteIndexRedisCache(
     override fun cache(
         start: Coordinate,
         end: Coordinate,
-        routeIds: List<String>
+        routeIds: List<String>,
+        ttl: Duration
     ) {
-        val key = getKey(start, end)
-        routeIds.forEach {
-            lastRouteIndexRedisTemplate.opsForList().rightPush(key, it)
+        try {
+            val key = getKey(start, end)
+            lastRouteIndexRedisTemplate.executePipelined { connection ->
+                lastRouteIndexRedisTemplate.delete(key)
+                lastRouteIndexRedisTemplate.opsForList().rightPushAll(key, routeIds)
+                lastRouteIndexRedisTemplate.expire(key, ttl)
+                null
+            }
+        } catch (_: Exception) {
+            // Redis 캐시 실패 시 무시
         }
-        lastRouteIndexRedisTemplate.expire(key, 12, TimeUnit.HOURS)
     }
 
     override fun get(
         start: Coordinate,
         end: Coordinate
     ): List<String> {
-        return lastRouteIndexRedisTemplate.opsForList().range(getKey(start, end), 0, -1) ?: emptyList()
+        return try {
+            lastRouteIndexRedisTemplate.opsForList().range(getKey(start, end), 0, -1) ?: emptyList()
+        } catch (_: Exception) {
+            emptyList()
+        }
     }
 
     fun getKey(

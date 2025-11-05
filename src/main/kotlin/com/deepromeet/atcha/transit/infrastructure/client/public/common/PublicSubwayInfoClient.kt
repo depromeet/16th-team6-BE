@@ -4,9 +4,9 @@ import com.deepromeet.atcha.transit.application.TransitNameComparer
 import com.deepromeet.atcha.transit.application.subway.SubwayInfoClient
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
+import com.deepromeet.atcha.transit.domain.subway.SubwaySchedule
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
-import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class PublicSubwayInfoClient(
-    private val subwayInfoFeignClient: PublicSubwayInfoFeignClient,
+    private val subwayInfoHttpClient: PublicSubwayInfoHttpClient,
     private val subwayStationRepository: SubwayStationRepository,
     private val transitNameComparer: TransitNameComparer,
     @Value("\${open-api.api.service-key}")
@@ -41,7 +41,7 @@ class PublicSubwayInfoClient(
             primaryKey = serviceKey,
             spareKey = spareKey,
             realLastKey = realLastKey,
-            apiCall = { key -> subwayInfoFeignClient.getStationByName(key, stationName) },
+            apiCall = { key -> subwayInfoHttpClient.getStationByName(key, stationName) },
             isLimitExceeded = { response -> isSubwayApiLimitExceeded(response) },
             processResult = { response ->
                 response.response.body.items?.item
@@ -82,7 +82,7 @@ class PublicSubwayInfoClient(
                         spareKey = spareKey,
                         realLastKey = realLastKey,
                         apiCall = { key ->
-                            subwayInfoFeignClient.getStationSchedule(
+                            subwayInfoHttpClient.getStationSchedule(
                                 key,
                                 startStation.id!!.value,
                                 dailyType.code,
@@ -112,7 +112,7 @@ class PublicSubwayInfoClient(
     private suspend fun mapToSchedule(
         scheduleItems: List<SubwayTimeResponse>,
         subwayStations: List<SubwayStation>
-    ): List<SubwayTime> =
+    ): List<SubwaySchedule> =
         coroutineScope {
             scheduleItems.map { item ->
                 async(Dispatchers.Default) {

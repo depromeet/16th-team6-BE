@@ -21,43 +21,49 @@ class SubwayManager(
     private val subwayTimetableClient: SubwayTimetableClient,
     private val dailyTypeResolver: DailyTypeResolver,
     private val subwayBranchRepository: SubwayBranchRepository,
-    private val subwayTimeTableCache: SubwayTimeTableCache
+    private val subwayTimeTableCache: SubwayTimeTableCache,
+    private val subwayStationCache: SubwayStationCache,
+    private val subwayRouteCache: SubwayRouteCache
 ) {
-    suspend fun getRoutes(subwayLine: SubwayLine): List<Route> =
-        withContext(Dispatchers.IO) {
-            subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
-                .groupBy { it.finalStationName }
-                .values
-                .map { Route(it) }
-        }
+    suspend fun getRoutes(subwayLine: SubwayLine): List<Route> {
+        return subwayRouteCache.get(subwayLine)
+            ?: withContext(Dispatchers.IO) {
+                subwayBranchRepository.findByRouteCode(subwayLine.lnCd)
+                    .groupBy { it.finalStationName }
+                    .values
+                    .map { Route(it) }
+            }.also { routes -> subwayRouteCache.cache(subwayLine, routes) }
+    }
 
     suspend fun getStation(
         subwayLine: SubwayLine,
         stationName: String
     ): SubwayStation {
-        return withContext(Dispatchers.IO) {
-            subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, stationName)
-                ?: throw TransitException.of(
-                    TransitError.NOT_FOUND_SUBWAY_STATION,
-                    "DB에서 지하철 노선 '${subwayLine.mainName()}'의 역 '$stationName'을 찾을 수 없습니다."
-                )
-        }
+        return subwayStationCache.get(subwayLine, stationName)
+            ?: withContext(Dispatchers.IO) {
+                subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, stationName)
+                    ?: throw TransitException.of(
+                        TransitError.NOT_FOUND_SUBWAY_STATION,
+                        "DB에서 지하철 노선 '${subwayLine.mainName()}'의 역 '$stationName'을 찾을 수 없습니다."
+                    )
+            }.also { subwayStation -> subwayStationCache.cache(subwayLine, stationName, subwayStation) }
     }
 
     suspend fun getTimeTable(
-        startStation: SubwayStation,
-        endStation: SubwayStation,
-        routes: List<Route>
+        start: SubwayStation,
+        next: SubwayStation,
+        destination: SubwayStation,
+        routes: List<Route>,
+        isExpress: Boolean
     ): SubwayTimeTable {
         val dailyType = dailyTypeResolver.resolve(TransitType.SUBWAY)
-        val direction = SubwayDirection.Companion.resolve(routes, startStation, endStation)
+        val direction = SubwayDirection.resolve(routes, start, next, destination)
 
-        subwayTimeTableCache.get(startStation, dailyType, direction)?.let {
-            return it
-        }
+        val subwayTimeTable =
+            subwayTimeTableCache.get(start, dailyType, direction)
+                ?: subwayTimetableClient.getTimeTable(start, dailyType, direction)
+                    .also { timeTable -> subwayTimeTableCache.cache(start, dailyType, direction, timeTable) }
 
-        return subwayTimetableClient.getTimeTable(startStation, dailyType, direction).also { timeTable ->
-            subwayTimeTableCache.cache(startStation, dailyType, direction, timeTable)
-        }
+        return subwayTimeTable.filterReachable(destination, routes, isExpress)
     }
 }

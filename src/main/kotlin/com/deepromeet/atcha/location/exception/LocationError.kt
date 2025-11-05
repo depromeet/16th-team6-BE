@@ -10,10 +10,9 @@ enum class LocationError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    FAILED_TO_READ_POIS(500, "LOC_001", "POI 정보를 읽어오는데 실패했습니다", LogLevel.ERROR),
     FAILED_TO_READ_LOCATION(500, "LOC_002", "위치 정보를 읽어오는데 실패했습니다", LogLevel.ERROR),
-    INVALID_LATITUDE(400, "LOC_003", "유효하지 않은 위도입니다", LogLevel.ERROR),
-    INVALID_LONGITUDE(400, "LOC_004", "유효하지 않은 경도입니다", LogLevel.ERROR)
+    INVALID_LATITUDE(400, "LOC_003", "유효하지 않은 위도입니다", LogLevel.WARN),
+    INVALID_LONGITUDE(400, "LOC_004", "유효하지 않은 경도입니다", LogLevel.WARN)
 }
 
 class LocationException(

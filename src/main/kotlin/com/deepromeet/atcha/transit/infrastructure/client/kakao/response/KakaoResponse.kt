@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.transit.infrastructure.client.kakao.response
 
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.annotation.JsonProperty

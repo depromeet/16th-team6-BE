@@ -1,47 +1,55 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.route.domain.LastRoute
-import com.deepromeet.atcha.route.domain.RoutePassStops
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
+import com.deepromeet.atcha.location.domain.ServiceRegion
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.MixpanelEventPublisher
+import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
+import com.deepromeet.atcha.transit.domain.RoutePassStops
+import com.deepromeet.atcha.transit.domain.TransitInfo
+import com.deepromeet.atcha.transit.domain.bus.BusPosition
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRoutePositions
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.CompositeBusPositionFetcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class BusManager(
     private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
-    private val busPositionFetcherMap: Map<ServiceRegion, BusPositionFetcher>,
+    private val busPositionFetcher: CompositeBusPositionFetcher,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
-    private val busTimeTableCache: BusTimeTableCache,
-    private val startedBusCache: StartedBusCache
+    private val busScheduleCache: BusScheduleCache,
+    private val mixpanelEventPublisher: MixpanelEventPublisher
 ) {
     suspend fun getSchedule(
         routeName: String,
         stationMeta: BusStationMeta,
         passStops: RoutePassStops
     ): BusSchedule {
-        busTimeTableCache.get(routeName, stationMeta)?.let { return it }
+        busScheduleCache.get(routeName, stationMeta)?.let { return it }
         val busRouteInfo = busRouteResolver.resolve(routeName, stationMeta, passStops)
 
+        val busApiCallCountPerRequestProperty = BusApiCallCountPerRequestProperty(routeName = routeName)
+
         val schedule =
-            busScheduleProvider.getBusSchedule(busRouteInfo)
+            busScheduleProvider.getBusSchedule(busRouteInfo, busApiCallCountPerRequestProperty)
                 ?: throw TransitException.of(
                     TransitError.NOT_FOUND_BUS_SCHEDULE,
                     "버스 노선 '$routeName' 정류소 '${stationMeta.name}'의 시간표 정보를 찾을 수 없습니다."
                 )
 
-        busTimeTableCache.cache(routeName, stationMeta, schedule)
+        mixpanelEventPublisher.publishBusRouteApiCallCountEvent(busApiCallCountPerRequestProperty)
+
+        busScheduleCache.cache(routeName, stationMeta, schedule)
         return schedule
     }
 
@@ -49,7 +57,7 @@ class BusManager(
         routeName: String,
         meta: BusStationMeta,
         passStopList: RoutePassStops
-    ): BusRealTimeArrival {
+    ): BusRealTimeArrivals {
         val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
         return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }
@@ -59,32 +67,25 @@ class BusManager(
     }
 
     suspend fun getBusPositions(route: BusRoute): BusRoutePositions =
-        withContext(Dispatchers.IO) {
-            coroutineScope {
-                val stations = async { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
-                val positions = async { busPositionFetcherMap[route.serviceRegion]!!.fetch(route.id) }
-                BusRoutePositions(stations.await(), positions.await())
-            }
+        coroutineScope {
+            val stations = async(Dispatchers.IO) { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
+            val positions = async(Dispatchers.IO) { busPositionFetcher.fetch(route) }
+            BusRoutePositions(stations.await(), positions.await())
         }
 
-    suspend fun isBusStarted(lastRoute: LastRoute): Boolean {
-        val firstBus = lastRoute.findFirstBus()
-        val busInfo = firstBus?.busInfo ?: return false
-
+    suspend fun locateBus(
+        busInfo: TransitInfo.BusInfo,
+        departureDateTime: LocalDateTime
+    ): BusPosition? {
         val busPositions =
             runCatching {
-                getBusPositions(busInfo.busRoute)
-            }.getOrElse { return false }
+                getBusPositions(busInfo.busRouteInfo.route)
+            }.getOrNull() ?: return null
 
-        busPositions.findTargetBus(
+        return busPositions.findTargetBus(
             busInfo.busStation,
-            firstBus.departureDateTime!!,
+            departureDateTime,
             busInfo.timeTable.term
-        )?.let {
-            startedBusCache.cache(lastRoute.id, it)
-            return true
-        }
-
-        return false
+        )
     }
 }

@@ -1,6 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.location.domain.ServiceRegion
+import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.NON_STOP_STATION_NAME
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
 import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
@@ -8,7 +10,6 @@ import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusStationId
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 import com.deepromeet.atcha.transit.domain.bus.BusStationNumber
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
 data class SeoulBusRouteStationResponse(
@@ -43,7 +44,7 @@ data class SeoulBusRouteStationResponse(
             busStation =
                 BusStation(
                     id = BusStationId(station),
-                    busStationNumber = BusStationNumber(arsId),
+                    busStationNumber = BusStationNumber(resolveBusStationNumber()),
                     busStationMeta =
                         BusStationMeta(
                             name = stationNm,
@@ -56,4 +57,10 @@ data class SeoulBusRouteStationResponse(
                 ),
             turnPoint = turnPoint
         )
+
+    fun resolveBusStationNumber(): String {
+        val trimmedArsId = arsId.trim()
+        val isNonStopStation = NON_STOP_STATION_NAME.any { keyword -> stationNm.contains(keyword) }
+        return if ((trimmedArsId.isBlank() || trimmedArsId == "0") && isNonStopStation) "미정차" else trimmedArsId
+    }
 }

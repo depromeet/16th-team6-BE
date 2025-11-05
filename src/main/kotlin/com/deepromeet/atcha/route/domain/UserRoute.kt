@@ -2,35 +2,36 @@ package com.deepromeet.atcha.route.domain
 
 import com.deepromeet.atcha.user.domain.UserId
 import java.time.LocalDateTime
-import java.time.format.DateTimeFormatter
 
 data class UserRoute(
-    val departureTime: String,
-    val updatedAt: String,
+    val baseDepartureTime: LocalDateTime,
+    val updatedDepartureTime: LocalDateTime,
+    val updatedAt: LocalDateTime,
     val token: String,
     val lastRouteId: String,
     val userId: UserId
 ) {
-    companion object {
-        private val dateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
-    }
-
     constructor(
         token: String,
-        departureTime: String,
+        departureTime: LocalDateTime,
         routeId: String,
         userId: UserId
     ) : this(
         token = token,
-        updatedAt = LocalDateTime.now().format(dateTimeFormatter),
-        departureTime = departureTime,
+        updatedAt = LocalDateTime.now(),
+        baseDepartureTime = departureTime,
+        updatedDepartureTime = departureTime,
         lastRouteId = routeId,
         userId = userId
     )
 
+    fun isUpdated(): Boolean {
+        return baseDepartureTime != updatedDepartureTime
+    }
+
     fun updateDepartureTime(newDepartureTime: LocalDateTime) =
         this.copy(
-            departureTime = newDepartureTime.format(dateTimeFormatter),
-            updatedAt = LocalDateTime.now().format(dateTimeFormatter)
+            updatedDepartureTime = newDepartureTime,
+            updatedAt = LocalDateTime.now()
         )
 }

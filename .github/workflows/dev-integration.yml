@@ -52,4 +52,4 @@ jobs:
         run: chmod +x gradlew
 
       - name: Test with Gradle
-        run: ./gradlew test -Dspring.profiles.active=local
+        run: ./gradlew test

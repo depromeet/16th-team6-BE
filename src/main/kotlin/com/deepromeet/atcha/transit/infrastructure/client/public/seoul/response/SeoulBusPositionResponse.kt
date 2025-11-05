@@ -30,8 +30,10 @@ data class SeoulBusPositionResponse(
                 "4" -> BusCongestion.MEDIUM
                 "5" -> BusCongestion.HIGH
                 "6" -> BusCongestion.VERY_HIGH
-                else -> throw IllegalArgumentException("Unknown bus congestion: $congetion")
+                else -> BusCongestion.UNKNOWN
             }
+
+        val remainSeats = congetion?.toInt()?.takeIf { it > 6 }
 
         return BusPosition(
             vehicleId = vehId,
@@ -39,7 +41,8 @@ data class SeoulBusPositionResponse(
             vehicleNumber = plainNo,
             fullSectionDistance = fullSectDist?.toDouble() ?: 0.0,
             currentSectionDistance = sectDist.toDouble(),
-            busCongestion = busCongestion
+            busCongestion = busCongestion,
+            remainSeats = remainSeats
         )
     }
 }

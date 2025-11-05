@@ -1,0 +1,67 @@
+spring:
+  config:
+    import: secret-env.yml
+  datasource:
+    url: jdbc:h2:mem:testdb;MODE=MYSQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create
+    properties:
+      hibernate:
+        show-sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
+
+logging:
+  level:
+    com.deepromeet.seulseul: DEBUG
+    tracer: trace
+    org:
+      hibernate:
+        orm:
+          jdbc:
+            bind: trace
+        SQL: trace
+
+kakao:
+  client-id: ${secret.dev.OAUTH_KAKAO_CLIENT_ID}
+
+apple:
+  api:
+    url: https://appleid.apple.com
+
+tmap:
+  api:
+    app-key: ${secret.dev.TMAP_API_KEY}
+
+redis:
+  host: localhost
+  port: 6379
+
+open-api:
+  api:
+    service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+    spare-key: ${secret.dev.OPEN_API_SPARE_KEY}
+    real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
+
+kric:
+  api:
+    service-key: ${secret.dev.KRIC_SERVICE_KEY}
+
+odsay:
+  api:
+    service-key: ${secret.dev.ODSAY_SERVICE_KEY}
+    spare-key: ${secret.dev.ODSAY_SPARE_KEY}
+    real-last-key: ${secret.dev.ODSAY_REAL_LAST_KEY}
+
+jwt:
+  access:
+    secret: ${secret.dev.JWT_ACCESS_SECRET}
+    expiration: ${secret.dev.JWT_ACCESS_EXPIRATION_MS}
+  refresh:
+    secret: ${secret.dev.JWT_REFRESH_SECRET}
+    expiration: ${secret.dev.JWT_REFRESH_EXPIRATION_MS}
+

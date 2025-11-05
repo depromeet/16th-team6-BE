@@ -1,0 +1,34 @@
+package com.deepromeet.atcha.transit.infrastructure.client.public.common.config
+
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.CircuitBreakerType
+import com.deepromeet.atcha.shared.infrastructure.circuitbreaker.WebClientCircuitBreakerFactory
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.KRICSubwayStationHttpClient
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.context.annotation.Bean
+import org.springframework.context.annotation.Configuration
+import org.springframework.web.reactive.function.client.WebClient
+import org.springframework.web.reactive.function.client.support.WebClientAdapter
+import org.springframework.web.service.invoker.HttpServiceProxyFactory
+
+@Configuration
+class KRICHttpClientConfig(
+    @Value("\${kric.api.url.subway}") private val kricApiUrl: String,
+    private val circuitBreakerFactory: WebClientCircuitBreakerFactory
+) {
+    @Bean
+    fun kricWebClient(publicApiWebClient: WebClient): WebClient {
+        return publicApiWebClient.mutate()
+            .baseUrl(kricApiUrl)
+            .filters { filters ->
+                filters.add(0, circuitBreakerFactory.createCircuitBreakerFilter(CircuitBreakerType.PUBLIC_API, "KRIC"))
+            }
+            .build()
+    }
+
+    @Bean
+    fun kricSubwayStationHttpClient(kricWebClient: WebClient): KRICSubwayStationHttpClient {
+        val adapter = WebClientAdapter.create(kricWebClient)
+        val factory = HttpServiceProxyFactory.builderFor(adapter).build()
+        return factory.createClient(KRICSubwayStationHttpClient::class.java)
+    }
+}

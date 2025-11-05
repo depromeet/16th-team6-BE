@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.cache.config
 
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteStationList
 import com.fasterxml.jackson.annotation.JsonAutoDetect
 import com.fasterxml.jackson.annotation.PropertyAccessor
@@ -33,53 +34,57 @@ class ApiCacheConfig(private val redisConnectionFactory: RedisConnectionFactory)
 
     @Bean
     fun apiCacheManager(): CacheManager {
-        val busRouteStationListType: JavaType = objectMapper.typeFactory.constructType(BusRouteStationList::class.java)
-        val busRouteListType: JavaType =
-            objectMapper.typeFactory.constructType(
-                object : TypeReference<List<BusRoute>>() {}
+        val busRouteStationListSerializer = createSerializer<BusRouteStationList>()
+        val busRouteListSerializer =
+            createSerializer<List<BusRoute>>(
+                objectMapper.typeFactory.constructType(object : TypeReference<List<BusRoute>>() {})
             )
-
-        val busRouteStationListSerializer =
-            Jackson2JsonRedisSerializer<BusRouteStationList>(objectMapper, busRouteStationListType)
-        val busRouteListSerializer = Jackson2JsonRedisSerializer<List<BusRoute>>(objectMapper, busRouteListType)
+        val busRouteInfoSerializer = createSerializer<BusRouteInfo>()
 
         val cacheConfigurations =
-            mapOf(
-                "api:seoul:busRouteStationList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteStationListSerializer
-                    ),
-                "api:incheon:busRouteStationList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteStationListSerializer
-                    ),
-                "api:gyeonggi:busRouteStationList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteStationListSerializer
-                    ),
-                "api:seoul:busRouteList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteListSerializer
-                    ),
-                "api:incheon:busRouteList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteListSerializer
-                    ),
-                "api:gyeonggi:busRouteList" to
-                    createCacheConfiguration(
-                        Duration.ofDays(7),
-                        busRouteListSerializer
+            buildMap {
+                putAll(
+                    createCacheConfigurationsForKeys(
+                        keys = CacheKeys.Api.BUS_ROUTE_STATION_LISTS,
+                        ttl = Duration.ofDays(7),
+                        serializer = busRouteStationListSerializer
                     )
-            )
+                )
+
+                putAll(
+                    createCacheConfigurationsForKeys(
+                        keys = CacheKeys.Api.BUS_ROUTE_LISTS,
+                        ttl = Duration.ofDays(7),
+                        serializer = busRouteListSerializer
+                    )
+                )
+
+                put(
+                    CacheKeys.Transit.BUS_ROUTE_INFO,
+                    createCacheConfiguration(
+                        Duration.ofDays(7),
+                        busRouteInfoSerializer
+                    )
+                )
+            }
 
         return RedisCacheManager.builder(redisConnectionFactory)
             .withInitialCacheConfigurations(cacheConfigurations)
+            .enableStatistics()
             .build()
+    }
+
+    private inline fun <reified T> createSerializer(javaType: JavaType? = null): Jackson2JsonRedisSerializer<T> {
+        val type = javaType ?: objectMapper.typeFactory.constructType(T::class.java)
+        return Jackson2JsonRedisSerializer(objectMapper, type)
+    }
+
+    private fun createCacheConfigurationsForKeys(
+        keys: List<String>,
+        ttl: Duration,
+        serializer: Jackson2JsonRedisSerializer<*>
+    ): Map<String, RedisCacheConfiguration> {
+        return keys.associateWith { createCacheConfiguration(ttl, serializer) }
     }
 
     private fun createCacheConfiguration(

@@ -4,11 +4,12 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.infrastructure.client.tmap.mapper.toDomain
 import com.deepromeet.atcha.route.infrastructure.client.tmap.request.TMapRouteRequest
-import com.deepromeet.atcha.transit.application.region.RegionIdentifier
+import com.deepromeet.atcha.shared.exception.ExternalApiError
+import com.deepromeet.atcha.shared.exception.ExternalApiException
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
-import feign.RetryableException
 import io.github.oshai.kotlinlogging.KotlinLogging
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -17,10 +18,9 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class TransitRouteClientV2(
-    private val tmapRouteSearchClient: TMapRouteClient,
-    private val regionIdentifier: RegionIdentifier
+    private val tmapRouteHttpClient: TMapRouteHttpClient
 ) {
-    fun fetchItinerariesV2(
+    suspend fun fetchItinerariesV2(
         start: Coordinate,
         end: Coordinate
     ): List<RouteItinerary> {
@@ -30,7 +30,7 @@ class TransitRouteClientV2(
 
         val response =
             try {
-                tmapRouteSearchClient.getRoutes(
+                tmapRouteHttpClient.getRoutes(
                     TMapRouteRequest(
                         startX = start.lon.toString(),
                         startY = start.lat.toString(),
@@ -40,9 +40,12 @@ class TransitRouteClientV2(
                         searchDttm = baseDate
                     )
                 )
-            } catch (e: RetryableException) {
-                log.error(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
-                throw TransitException.of(TransitError.API_TIME_OUT, e)
+            } catch (e: Exception) {
+                log.warn(e) { "TMap API 호출 중 네트워크 오류(타임아웃 등) 발생" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_TIME_OUT, e)
+            } catch (e: CallNotPermittedException) {
+                log.warn(e) { "외부 서비스 일시적 장애 발생" }
+                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN)
             }
 
         response.result?.let { result ->

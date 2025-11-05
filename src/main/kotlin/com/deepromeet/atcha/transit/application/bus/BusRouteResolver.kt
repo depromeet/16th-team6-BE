@@ -1,13 +1,16 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.route.domain.RoutePassStops
-import com.deepromeet.atcha.transit.application.region.ServiceRegionCandidatePolicy
+import com.deepromeet.atcha.location.application.ServiceRegionCandidatePolicy
+import com.deepromeet.atcha.location.domain.ServiceRegion
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.cache.config.CacheKeys
+import com.google.firebase.database.utilities.Utilities.getOrNull
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.cache.annotation.Cacheable
 import org.springframework.stereotype.Component
 
 private val log = KotlinLogging.logger {}
@@ -18,6 +21,12 @@ class BusRouteResolver(
     private val busRouteMatcher: BusRouteMatcher,
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
+    @Cacheable(
+        cacheNames = [CacheKeys.Transit.BUS_ROUTE_INFO],
+        key = "#routeName + ':' + #station.hashCode()",
+        sync = true,
+        cacheManager = "apiCacheManager"
+    )
     suspend fun resolve(
         routeName: String,
         station: BusStationMeta,
@@ -45,7 +54,7 @@ class BusRouteResolver(
         passStopList: RoutePassStops
     ): BusRouteInfo? =
         runCatching {
-            val routes = clientMap[region]!!.getBusRoute(routeName)
+            val routes = clientMap[region]!!.getBusRoutes(routeName)
             busRouteMatcher.getMatchedRoute(routes, station, passStopList)
-        }.getOrNull()
+        }.onFailure { log.debug { it.message } }.getOrNull()
 }

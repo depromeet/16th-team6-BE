@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="5 seconds">
+    <property resource="application-dev.yml"/>
+    <property resource="application-prod.yml"/>
+    <property resource="application-staging.yml"/>
+    <statusListener class="ch.qos.logback.core.status.NopStatusListener"/>
+    <springProperty name="DISCORD_WEBHOOK_URL" source="discord.webhook.url"/>
+    <appender name="CONSOLE_APPENDER" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>
+                %highlight([%level]) [%d{yy-MM-dd HH:mm:ss.SSS}] %green([%thread]) %cyan([%logger{0}:%line])-%message%n
+            </pattern>
+        </encoder>
+    </appender>
+
+    <appender name="WEBHOOK_APPENDER" class="com.deepromeet.atcha.shared.logging.DiscordAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>ERROR</level>
+        </filter>
+        <webhookUrl>${DISCORD_WEBHOOK_URL}</webhookUrl>
+        <username>Atcha Bot</username>
+        <format>
+            <label>
+                <pattern>profile=dev,host=${HOSTNAME},level=%level</pattern>
+                <readMarkers>true</readMarkers>
+            </label>
+            <message>
+                <pattern>
+                    %highlight([%-5level]) [%d{yy-MM-dd HH:mm:ss.SSS}] %green([%thread]) %yellow([traceId=%X{traceId}]) %cyan([%logger{0}:%line])-%message%n
+                </pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <springProfile name="local">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="dev">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="prod">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+            <appender-ref ref="WEBHOOK_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="staging">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test">
+        <root level="ERROR">
+            <appender-ref ref="CONSOLE_APPENDER"/>
+        </root>
+    </springProfile>
+</configuration>

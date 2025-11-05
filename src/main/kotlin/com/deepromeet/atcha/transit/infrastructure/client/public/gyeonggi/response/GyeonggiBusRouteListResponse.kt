@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response
 
+import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.domain.bus.BusRoute
 import com.deepromeet.atcha.transit.domain.bus.BusRouteId
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
@@ -18,9 +18,9 @@ data class GyeonggiBusRoute(
     @field:JacksonXmlProperty(localName = "districtCd")
     val districtCode: Int,
     @field:JacksonXmlProperty(localName = "endStationId")
-    val endStationId: String,
+    val endStationId: String?,
     @field:JacksonXmlProperty(localName = "endStationName")
-    val endStationName: String,
+    val endStationName: String?,
     @field:JacksonXmlProperty(localName = "regionName")
     val regionName: String?,
     @field:JacksonXmlProperty(localName = "routeId")

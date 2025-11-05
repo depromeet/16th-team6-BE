@@ -8,7 +8,6 @@ data class SignUpInfo(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: Set<Int>,
     val fcmToken: String
 ) {
     fun getAddress(): HomeAddress = HomeAddress(address, Coordinate(lat, lon))

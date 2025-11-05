@@ -37,13 +37,14 @@ class LastRouteCalculatorV2(
     suspend fun calculateRoutesV2(
         start: Coordinate,
         destination: Coordinate,
-        itineraries: List<RouteItinerary>
+        itineraries: List<RouteItinerary>,
+        time: Int
     ): List<LastRoute> {
         val routes =
             coroutineScope {
                 itineraries.map { itinerary ->
                     async(Dispatchers.Default) {
-                        calculateRouteDemo(itinerary)
+                        calculateRouteDemo(itinerary, time)
                     }
                 }
                     .awaitAll()
@@ -58,16 +59,19 @@ class LastRouteCalculatorV2(
         return routes
     }
 
-    private suspend fun calculateRouteDemo(itinerary: RouteItinerary): LastRoute? {
+    private suspend fun calculateRouteDemo(
+        itinerary: RouteItinerary,
+        time: Int
+    ): LastRoute? {
         try {
-            val legs = buildDemoLegs(itinerary.legs) ?: return null
+            val legs = buildDemoLegs(itinerary.legs, time) ?: return null
             val walkFixed = increaseWalkTime(legs)
             val departAt = calculateDepartureDateTime(walkFixed)
             val totalSec = calculateTotalTime(walkFixed, departAt)
 
             return LastRoute(
                 id = UUID.randomUUID().toString(),
-                departureDateTime = departAt.toString(),
+                departureDateTime = departAt,
                 totalTime = totalSec.toInt(),
                 totalWalkTime = itinerary.totalWalkTime,
                 transferCount = itinerary.transferCount,
@@ -77,7 +81,7 @@ class LastRouteCalculatorV2(
                 legs = walkFixed
             )
         } catch (e: Exception) {
-            log.error(e) { "[V2‑DEMO] 경로 계산 중 오류 발생" }
+            log.warn(e) { "[V2‑DEMO] 경로 계산 중 오류 발생" }
             return null
         }
     }
@@ -86,24 +90,39 @@ class LastRouteCalculatorV2(
      * sectionTime 누적 + 각 레그는 **시간표 조회** 하여 TransitInfo 채운다.
      * ─ departureDateTime 은 현재시각+5분부터 누적, 시간표 기준과 무관.
      */
-    private suspend fun buildDemoLegs(legs: List<RouteLeg>): List<LastRouteLeg>? {
-        var cursor = LocalDateTime.now().plusMinutes(5)
-        val result = mutableListOf<LastRouteLeg>()
+    private suspend fun buildDemoLegs(
+        legs: List<RouteLeg>,
+        time: Int
+    ): List<LastRouteLeg>? {
+        var cursor = LocalDateTime.now().plusMinutes(time.toLong())
+        val result = mutableListOf<LastRouteLeg?>()
 
         for (leg in legs) {
-            val lastRouteLeg: LastRouteLeg =
+            val lastRouteLeg: LastRouteLeg? =
                 when (leg.mode) {
                     RouteMode.SUBWAY -> {
                         try {
-                            val subwayLine = SubwayLine.Companion.fromRouteName(leg.route!!)
+                            val subwayLine = SubwayLine.fromRouteName(leg.route!!)
                             val routes = subwayManager.getRoutes(subwayLine)
                             val startStation = subwayManager.getStation(subwayLine, leg.start.name)
                             val endStation = subwayManager.getStation(subwayLine, leg.end.name)
-                            val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
+                            val nextStation = subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName())
+                            val timeTable =
+                                subwayManager.getTimeTable(
+                                    startStation,
+                                    nextStation,
+                                    endStation,
+                                    routes,
+                                    false
+                                )
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.toString(),
-                                transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, timeTable.schedules[0])
+                                departureDateTime = cursor,
+                                transitInfo =
+                                    TransitInfo.SubwayInfo(
+                                        subwayLine,
+                                        timeTable
+                                    )
                             )
                         } catch (e: Exception) {
                             log.warn(e) { "지하철 정보 조회 실패, 기본값 사용: ${leg.route}, ${leg.start.name}, ${leg.end.name}" }
@@ -119,7 +138,7 @@ class LastRouteCalculatorV2(
                             val busSchedule = busManager.getSchedule(routeId, stationMeta, leg.passStops!!)
 
                             leg.toLastTransitLeg(
-                                departureDateTime = cursor.toString(),
+                                departureDateTime = cursor,
                                 transitInfo = TransitInfo.BusInfo(busSchedule)
                             )
                         } catch (e: Exception) {
@@ -135,7 +154,7 @@ class LastRouteCalculatorV2(
             cursor = cursor.plusSeconds(leg.sectionTime.toLong())
         }
 
-        return result
+        return result.filterNotNull()
     }
 
     /**
@@ -163,7 +182,7 @@ class LastRouteCalculatorV2(
         }
 
         val firstTransit = legs[firstTransitIndex]
-        val departureDateTime = LocalDateTime.parse(firstTransit.departureDateTime!!)
+        val departureDateTime = firstTransit.departureDateTime!!
         val totalWalkTime =
             if (firstTransitIndex > 0) {
                 legs.subList(0, firstTransitIndex)
@@ -190,7 +209,7 @@ class LastRouteCalculatorV2(
         }
 
         val lastTransit = legs[lastTransitIndex]
-        val lastTransitDepartureTime = LocalDateTime.parse(lastTransit.departureDateTime!!)
+        val lastTransitDepartureTime = lastTransit.departureDateTime!!
         var arrivalTime = lastTransitDepartureTime.plusSeconds(lastTransit.sectionTime.toLong())
 
         val totalWalkTime =

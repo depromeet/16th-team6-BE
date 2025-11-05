@@ -10,10 +10,11 @@ enum class RequestError(
     override val message: String,
     override val logLevel: LogLevel
 ) : BaseErrorType {
-    NO_REQUEST_INFO(500, "REQ_001", "요청 정보가 존재하지 않습니다.", LogLevel.ERROR),
+    NO_REQUEST_INFO(400, "REQ_001", "요청 정보가 존재하지 않습니다.", LogLevel.WARN),
     NOT_VALID_HEADER(400, "REQ_002", "잘못된 헤더 형식입니다.", LogLevel.WARN),
     NO_MATCHED_METHOD(400, "REQ_003", "잘못된 API 요청입니다.", LogLevel.WARN),
-    NO_MATCHED_RESOURCE(400, "REQ_004", "잘못된 API 요청입니다.", LogLevel.WARN)
+    NO_MATCHED_RESOURCE(400, "REQ_004", "잘못된 API 요청입니다.", LogLevel.WARN),
+    INVALID_REQUEST(400, "REQ_005", "잘못된 API 요청입니다.", LogLevel.WARN)
 }
 
 class RequestException(

@@ -34,7 +34,6 @@ kric:
 
 odsay:
   api:
-    url: https://api.odsay.com
     service-key: ${secret.staging.ODSAY_SERVICE_KEY}
     spare-key: ${secret.staging.ODSAY_SPARE_KEY}
     real-last-key: ${secret.staging.ODSAY_REAL_LAST_KEY}
@@ -46,3 +45,7 @@ jwt:
   refresh:
     secret: ${secret.staging.JWT_REFRESH_SECRET}
     expiration: ${secret.staging.JWT_REFRESH_EXPIRATION_MS}
+
+discord:
+  webhook:
+    url: ${secret.staging.DISCORD_WEBHOOK_URL}

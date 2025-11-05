@@ -10,7 +10,6 @@ import com.deepromeet.atcha.transit.application.subway.SubwayManager
 import com.deepromeet.atcha.transit.domain.TransitInfo
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -23,10 +22,10 @@ class LastRouteLegCalculator(
     private val subwayManager: SubwayManager,
     private val busManager: BusManager
 ) {
-    suspend fun calcWithLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
+    suspend fun calcLastTime(legs: List<RouteLeg>): List<LastRouteLeg> {
         return coroutineScope {
             legs.map { leg ->
-                async(Dispatchers.Default) {
+                async {
                     when (leg.mode) {
                         RouteMode.SUBWAY -> calculateSubwayLeg(leg)
                         RouteMode.BUS -> calculateBusLeg(leg)
@@ -37,7 +36,7 @@ class LastRouteLegCalculator(
                         )
                     }
                 }
-            }.awaitAll()
+            }.awaitAll().filterNotNull()
         }
     }
 
@@ -46,24 +45,26 @@ class LastRouteLegCalculator(
             coroutineScope {
                 val subwayLine = SubwayLine.fromRouteName(leg.route!!)
 
-                val routesDeferred = async { subwayManager.getRoutes(subwayLine) }
-                val startStationDeferred = async { subwayManager.getStation(subwayLine, leg.start.name) }
-                val endStationDeferred = async { subwayManager.getStation(subwayLine, leg.end.name) }
+                val routesAsync = async { subwayManager.getRoutes(subwayLine) }
+                val startAsync = async { subwayManager.getStation(subwayLine, leg.start.name) }
+                val nextAsync = async { subwayManager.getStation(subwayLine, leg.passStops!!.getNextStationName()) }
+                val destinationAsync = async { subwayManager.getStation(subwayLine, leg.end.name) }
 
-                val routes = routesDeferred.await()
-                val startStation = startStationDeferred.await()
-                val endStation = endStationDeferred.await()
+                val routes = routesAsync.await()
+                val start = startAsync.await()
+                val next = nextAsync.await()
+                val destination = destinationAsync.await()
 
-                val timeTable = subwayManager.getTimeTable(startStation, endStation, routes)
-                val lastSchedule = timeTable.getLastTime(endStation, routes, leg.isExpress())
+                val timeTable = subwayManager.getTimeTable(start, next, destination, routes, leg.isExpress())
+                val lastSchedule = timeTable.getLastTime()
 
                 leg.toLastTransitLeg(
-                    departureDateTime = lastSchedule.departureTime.toString(),
-                    transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable, lastSchedule)
+                    departureDateTime = lastSchedule.departureTime.toLocalDateTime(),
+                    transitInfo = TransitInfo.SubwayInfo(subwayLine, timeTable)
                 )
             }
         } catch (e: Exception) {
-            log.warn { "❌ 지하철 막차 시간 계산 실패 - 노선: ${leg.route}, 출발역: ${leg.start.name}, 도착역: ${leg.end.name}" }
+            log.debug(e) { "❌ 지하철 막차 시간 계산 실패 - 노선: ${leg.route}, 출발역: ${leg.start.name}, 도착역: ${leg.end.name}" }
             throw e
         }
     }
@@ -76,7 +77,7 @@ class LastRouteLegCalculator(
         val lastDepartureTime = busSchedule.busTimeTable.lastTime
 
         return leg.toLastTransitLeg(
-            departureDateTime = lastDepartureTime.toString(),
+            departureDateTime = lastDepartureTime,
             transitInfo = TransitInfo.BusInfo(busSchedule)
         )
     }

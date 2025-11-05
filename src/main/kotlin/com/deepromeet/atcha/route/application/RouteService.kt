@@ -1,6 +1,8 @@
 package com.deepromeet.atcha.route.application
 
+import com.deepromeet.atcha.location.application.ServiceRegionValidator
 import com.deepromeet.atcha.location.domain.Coordinate
+import com.deepromeet.atcha.route.aspect.RouteCache
 import com.deepromeet.atcha.route.domain.ItineraryValidator
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteSortType
@@ -10,12 +12,14 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
-import com.deepromeet.atcha.transit.application.region.ServiceRegionValidator
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
 
 @Service
 class RouteService(
@@ -29,8 +33,12 @@ class RouteService(
     private val busManager: BusManager,
     private val userRouteDepartureTimeRefresher: UserRouteDepartureTimeRefresher,
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
-    private val transitRouteClientV2: TransitRouteClientV2
+    private val transitRouteClientV2: TransitRouteClientV2,
+    private val routeArrivalCalculator: RouteArrivalCalculator,
+    private val lastRouteUpdater: LastRouteUpdater
 ) {
+    @Deprecated("deprecated")
+    @RouteCache
     suspend fun getLastRoutes(
         userId: UserId,
         start: Coordinate,
@@ -38,9 +46,6 @@ class RouteService(
         sortType: LastRouteSortType
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
-        lastRouteReader.read(start, destination)?.let { routes ->
-            return routes.sort(sortType)
-        }
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
@@ -53,31 +58,26 @@ class RouteService(
         userId: UserId,
         start: Coordinate,
         end: Coordinate?,
-        sortType: LastRouteSortType
+        sortType: LastRouteSortType,
+        time: Int
     ): List<LastRoute> {
         val destination = end ?: userReader.read(userId).getHomeCoordinate()
         serviceRegionValidator.validate(start, destination)
         val itineraries = transitRouteClientV2.fetchItinerariesV2(start, destination)
         val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
         return lastRouteCalculatorV2
-            .calculateRoutesV2(start, destination, validItineraries)
+            .calculateRoutesV2(start, destination, validItineraries, time)
             .sort(sortType)
     }
 
+    @RouteCache
     fun getLastRouteStream(
         userId: UserId,
         start: Coordinate,
-        end: Coordinate?,
-        sortType: LastRouteSortType
+        end: Coordinate?
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
-
-            lastRouteReader.read(start, destination)?.let { cached ->
-                cached.sort(sortType).forEach { emit(it) }
-                return@flow
-            }
-
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
             lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
@@ -91,7 +91,15 @@ class RouteService(
     suspend fun isBusStarted(lastRouteId: String): Boolean {
         startedBusCache.get(lastRouteId)?.let { return true }
         val lastRoute = lastRouteReader.read(lastRouteId)
-        return busManager.isBusStarted(lastRoute)
+
+        val firstBus = lastRoute.findFirstBus()
+        val busInfo = firstBus.requireBusInfo()
+        val departureDateTime = firstBus.departureDateTime ?: return false
+
+        val locatedBus = busManager.locateBus(busInfo, departureDateTime) ?: return false
+
+        startedBusCache.cache(lastRouteId, locatedBus)
+        return true
     }
 
     fun getDepartureRemainingTime(routeId: String): Int {
@@ -104,7 +112,7 @@ class RouteService(
     ) {
         val user = userReader.read(id)
         val route = lastRouteReader.read(lastRouteId)
-        userRouteManager.update(user, route)
+        userRouteManager.append(user, route)
     }
 
     fun deleteUserRoute(id: UserId) {
@@ -117,5 +125,30 @@ class RouteService(
         val userRoute = userRouteManager.read(user)
         return userRouteDepartureTimeRefresher.refreshDepartureTime(userRoute)
             ?: userRoute
+    }
+
+    suspend fun getTargetBusArrivals(
+        userId: UserId,
+        routeName: String
+    ): List<BusArrival> {
+        val user = userReader.read(userId)
+        val userRoute = userRouteManager.read(user)
+        val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
+        val targetBus = lastRoute.findBus(routeName)
+        val scheduledTime = targetBus.departureDateTime!!
+
+        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
+
+        if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
+            return listOf(BusArrival.createScheduled(scheduledTime))
+        }
+
+        val closest = routeArrivalCalculator.closestArrivals(targetBus, scheduledTime)
+
+        closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
+            lastRouteUpdater.updateDepartureTime(lastRoute, targetBus, newArrival)
+        }
+
+        return closest ?: listOf(BusArrival.createScheduled(scheduledTime))
     }
 }

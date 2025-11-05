@@ -4,6 +4,7 @@ import com.deepromeet.atcha.user.domain.HomeAddress
 import com.deepromeet.atcha.user.domain.User
 import com.deepromeet.atcha.user.domain.UserId
 import com.deepromeet.atcha.user.domain.UserUpdateInfo
+import com.deepromeet.atcha.user.domain.UserWithdrawalReason
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,7 +12,8 @@ import org.springframework.transaction.annotation.Transactional
 class UserService(
     private val userReader: UserReader,
     private val userAppender: UserAppender,
-    private val userUpdater: UserUpdater
+    private val userUpdater: UserUpdater,
+    private val userWithdrawalManager: UserWithdrawalManager
 ) {
     @Transactional(readOnly = true)
     fun getUser(id: UserId): User = userReader.read(id)
@@ -26,15 +28,6 @@ class UserService(
     }
 
     @Transactional
-    fun updateAlertFrequency(
-        id: UserId,
-        alertFrequency: MutableSet<Int>
-    ): User {
-        val user = userReader.read(id)
-        return userUpdater.updateAlertFrequency(user, alertFrequency)
-    }
-
-    @Transactional
     fun updateHomeAddress(
         id: UserId,
         homeAddress: HomeAddress
@@ -44,8 +37,8 @@ class UserService(
     }
 
     @Transactional
-    fun deleteUser(id: UserId) {
-        val user = userReader.read(id)
-        userAppender.delete(user)
+    fun deleteUser(reason: UserWithdrawalReason) {
+        val user = userReader.read(reason.userId)
+        userWithdrawalManager.withdraw(user, reason)
     }
 }

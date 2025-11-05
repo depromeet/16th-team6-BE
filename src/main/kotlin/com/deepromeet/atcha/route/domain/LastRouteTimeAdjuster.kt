@@ -1,0 +1,156 @@
+package com.deepromeet.atcha.route.domain
+
+import com.deepromeet.atcha.route.exception.RouteError
+import com.deepromeet.atcha.route.exception.RouteException
+import com.deepromeet.atcha.transit.domain.TimeDirection
+import org.springframework.stereotype.Service
+import java.time.Duration
+import java.time.LocalDateTime
+
+@Service
+class LastRouteTimeAdjuster {
+    suspend fun adjustTransitDepartureTimes(legs: List<LastRouteLeg>): List<LastRouteLeg> {
+        val adjustedLegs = legs.toMutableList()
+
+        val transitLegs = adjustedLegs.withIndex().filter { it.value.isTransit() }
+        if (transitLegs.isEmpty()) return adjustedLegs
+
+        // 1. 대중교통 기준 가장 빠른 막차 시간 찾기
+        val earliestTransitLeg =
+            transitLegs.minBy {
+                it.value.departureDateTime!!
+            }
+
+        var isAllRideable = true
+        var lastUnrideableIndex: Int? = null
+
+        // 2. 가장 빠른 출발 시간을 기준으로 뒤에 있는 대중교통 탑승 가능 여부 확인
+        for (i in earliestTransitLeg.index until adjustedLegs.lastIndex) {
+            val currentLeg = adjustedLegs[i]
+            if (currentLeg.isWalk()) continue
+
+            // 2-1. 출발 시간 + 소요 시간
+            var currentLegAvailableTime =
+                currentLeg.departureDateTime!!
+                    .plusSeconds(currentLeg.sectionTime.toLong())
+
+            // 2-2. 2-1 결과 시간과 다음 대중교통 출발 시간 비교 -> 탑승 가능 여부 확인
+            var nextIndex = i + 1
+            while (nextIndex <= adjustedLegs.lastIndex && adjustedLegs[nextIndex].isWalk()) {
+                currentLegAvailableTime =
+                    currentLegAvailableTime
+                        .plusSeconds(adjustedLegs[nextIndex].sectionTime.toLong())
+                nextIndex++
+            }
+
+            if (nextIndex > adjustedLegs.lastIndex) break
+
+            val nextLeg = adjustedLegs[nextIndex]
+            val nextLegDepartureTime = nextLeg.departureDateTime!!
+
+            if (currentLegAvailableTime.isAfter(nextLegDepartureTime)) {
+                isAllRideable = false
+                lastUnrideableIndex = nextIndex
+            }
+        }
+
+        // 3. 기준점 설정 : 가장 빠른 출발 시간 기준 or 탑승 불가한 마지막 대중교통
+        val adjustBaseIndex = if (isAllRideable) earliestTransitLeg.index else lastUnrideableIndex!!
+
+        // 4. 기준점 앞쪽 시간 재조정
+        adjustLegsBeforeBase(adjustedLegs, adjustBaseIndex)
+
+        // 5. 기준점 뒤쪽 시간 재조정
+        adjustLegsAfterBase(adjustedLegs, adjustBaseIndex)
+
+        return adjustedLegs
+    }
+
+    private suspend fun adjustLegsBeforeBase(
+        legs: MutableList<LastRouteLeg>,
+        baseIndex: Int
+    ) {
+        var adjustBaseTime = legs[baseIndex].departureDateTime
+
+        for (i in baseIndex - 1 downTo 0) {
+            val leg = legs[i]
+
+            if (adjustBaseTime == null) {
+                legs[i] = leg.copy(departureDateTime = null)
+                continue
+            }
+
+            if (leg.isWalk()) {
+                adjustBaseTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
+                continue
+            }
+
+            val adjustedDepartureTime = adjustBaseTime.minusSeconds(leg.sectionTime.toLong())
+            val boardingTime = leg.calcBoardingTime(adjustedDepartureTime, TimeDirection.BEFORE)
+
+            legs[i] =
+                leg.copy(
+                    departureDateTime = boardingTime
+                )
+            adjustBaseTime = boardingTime
+        }
+    }
+
+    private suspend fun adjustLegsAfterBase(
+        legs: MutableList<LastRouteLeg>,
+        baseIndex: Int
+    ) {
+        var adjustBaseTime =
+            legs[baseIndex].departureDateTime!!
+                .plusSeconds(legs[baseIndex].sectionTime.toLong())
+
+        for (i in baseIndex + 1 until legs.size) {
+            val leg = legs[i]
+
+            if (adjustBaseTime == null) {
+                legs[i] = leg.copy(departureDateTime = null)
+                continue
+            }
+
+            if (leg.isWalk()) {
+                adjustBaseTime = adjustBaseTime.plusSeconds(leg.sectionTime.toLong())
+                continue
+            }
+
+            val boardingTime = leg.calcBoardingTime(adjustBaseTime, TimeDirection.AFTER)
+
+            if (leg.isSubway()) {
+                validateWaitingTime(leg, adjustBaseTime, boardingTime)
+            }
+
+            legs[i] =
+                leg.copy(
+                    departureDateTime = boardingTime
+                )
+            adjustBaseTime = boardingTime.plusSeconds(leg.sectionTime.toLong())
+        }
+    }
+
+    private fun validateWaitingTime(
+        leg: LastRouteLeg,
+        calculatedTime: LocalDateTime,
+        boardingTime: LocalDateTime
+    ) {
+        val waitingDuration = Duration.between(calculatedTime, boardingTime)
+        val waitingMinutes = waitingDuration.abs().toMinutes()
+
+        if (waitingMinutes > 20) {
+            throw RouteException.of(
+                RouteError.INVALID_LAST_ROUTE,
+                """
+                |지하철 경로 대기시간 초과
+                |구간: ${leg.start.name} -> ${leg.end.name}
+                |교통수단: ${leg.route}
+                |탑승 시간: $boardingTime
+                |계산된 시간: $calculatedTime
+                |대기시간: ${waitingMinutes}분
+                """.trimMargin()
+            )
+        }
+    }
+}

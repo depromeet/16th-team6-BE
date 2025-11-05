@@ -20,7 +20,7 @@ class ODSayCallCounter(
     private val redisTemplate: StringRedisTemplate
 ) {
     companion object {
-        private const val ODSAY_API_CALL_COUNT_KEY = "odsay:call_count"
+        private const val ODSAY_API_CALL_COUNT_KEY = "metrics:odsay:call_count"
         private val incrScript =
             RedisScript.of(
                 "local c = redis.call('INCR', KEYS[1]); " +

@@ -4,7 +4,7 @@ import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.location.domain.POI
 
 interface POIFinder {
-    fun find(
+    suspend fun find(
         keyword: String,
         currentCoordinate: Coordinate
     ): List<POI>

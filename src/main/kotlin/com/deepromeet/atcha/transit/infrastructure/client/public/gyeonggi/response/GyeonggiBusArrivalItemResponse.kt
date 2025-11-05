@@ -1,8 +1,8 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response
 
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusCongestion
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 
@@ -12,6 +12,8 @@ data class GyeonggiBusArrivalItemResponse(
 )
 
 data class BusArrivalItem(
+    @field:JacksonXmlProperty(localName = "flag")
+    val flag: String,
     @field:JacksonXmlProperty(localName = "routeDestId")
     val routeDestId: Int,
     @field:JacksonXmlProperty(localName = "routeDestName")
@@ -30,6 +32,10 @@ data class BusArrivalItem(
     val stationNm2: String,
     @field:JacksonXmlProperty(localName = "turnSeq")
     val turnSeq: Int,
+    @field:JacksonXmlProperty(localName = "locationNo1")
+    val locationNo1: Int?,
+    @field:JacksonXmlProperty(localName = "locationNo2")
+    val locationNo2: Int?,
     @field:JacksonXmlProperty(localName = "predictTimeSec1")
     val predictTimeSec1: Int?,
     @field:JacksonXmlProperty(localName = "predictTimeSec2")
@@ -47,10 +53,12 @@ data class BusArrivalItem(
     @field:JacksonXmlProperty(localName = "vehId2")
     val vehId2: Int
 ) {
-    fun toRealTimeArrival(): BusRealTimeArrival {
-        val firstRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, vehId1)
-        val secondRealTimeArrivalInfo = createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, vehId2)
-        return BusRealTimeArrival(
+    fun toRealTimeArrival(): BusRealTimeArrivals {
+        val firstRealTimeArrivalInfo =
+            createRealTimeArrivalInfo(predictTimeSec1, crowded1, remainSeatCnt1, locationNo1, vehId1)
+        val secondRealTimeArrivalInfo =
+            createRealTimeArrivalInfo(predictTimeSec2, crowded2, remainSeatCnt2, locationNo2, vehId2)
+        return BusRealTimeArrivals(
             listOf(firstRealTimeArrivalInfo, secondRealTimeArrivalInfo)
         )
     }
@@ -59,8 +67,9 @@ data class BusArrivalItem(
         predictTimeSec: Int?,
         crowded: Int,
         remainSeatCnt: Int,
+        remainStations: Int?,
         vehId: Int
-    ): BusRealTimeInfo {
+    ): BusArrival {
         val busCongestion =
             when (crowded) {
                 1 -> BusCongestion.LOW
@@ -70,22 +79,24 @@ data class BusArrivalItem(
                 else -> BusCongestion.UNKNOWN
             }
 
-        return BusRealTimeInfo(
+        return BusArrival(
             vehicleId = vehId.toString(),
-            busStatus = determineBusStatus(predictTimeSec),
+            busStatus = determineBusStatus(),
             remainingTime = predictTimeSec ?: 0,
-            remainingStations = null,
+            remainingStations = remainStations,
             isLast = null,
             busCongestion = busCongestion,
             remainingSeats = remainSeatCnt
         )
     }
 
-    private fun determineBusStatus(predictTimeSec: Int?): BusStatus {
+    private fun determineBusStatus(): BusStatus {
         return when {
-            predictTimeSec == null -> BusStatus.END
-            predictTimeSec <= 60 -> BusStatus.SOON
-            else -> BusStatus.OPERATING
+            flag == "RUN" -> BusStatus.OPERATING
+            flag == "PASS" -> BusStatus.OPERATING
+            flag == "STOP" -> BusStatus.END
+            flag == "WAIT" -> BusStatus.WAITING
+            else -> BusStatus.END
         }
     }
 }

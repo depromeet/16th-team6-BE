@@ -3,15 +3,14 @@ package com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.respo
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.TransitTimeParser
 import com.deepromeet.atcha.transit.domain.bus.BusDirection
-import com.deepromeet.atcha.transit.domain.bus.BusRoute
-import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusRouteOperationInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRouteStation
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusServiceHours
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
 import com.deepromeet.atcha.transit.domain.bus.BusTravelTimeCalculator
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
+import com.deepromeet.atcha.transit.exception.TransitError
+import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -101,8 +100,9 @@ data class BusRouteInfoItem(
 
     fun toBusSchedule(
         dailyType: DailyType,
-        routeStation: BusRouteStation
+        busRouteInfo: BusRouteInfo
     ): BusSchedule {
+        val routeStation = busRouteInfo.targetStation
         val travelTimeFromStart =
             BusTravelTimeCalculator.calculate(
                 routeStation,
@@ -117,13 +117,7 @@ data class BusRouteInfoItem(
             )
 
         return BusSchedule(
-            busRoute =
-                BusRoute(
-                    id = BusRouteId(routeId),
-                    name = routeName,
-                    serviceRegion = ServiceRegion.GYEONGGI
-                ),
-            busStation = routeStation.busStation,
+            busRouteInfo = busRouteInfo,
             busTimeTable = busTimeTable
         )
     }
@@ -159,7 +153,9 @@ data class BusRouteInfoItem(
                     TransitTimeParser
                         .parseTime(last, LocalDate.now(), TIME_FORMATTER)
                         .plusMinutes(travelTimeFromStart),
-                term = termMap[dailyType] ?: 0
+                term =
+                    termMap[dailyType]
+                        ?: throw TransitException.of(TransitError.BUS_TERM_REQUIRED)
             )
         }
 

@@ -1,6 +1,6 @@
 package com.deepromeet.atcha.auth.application
 
-import com.deepromeet.atcha.auth.domain.Provider
+import com.deepromeet.atcha.auth.domain.ProviderContext
 import com.deepromeet.atcha.auth.domain.UserProvider
 import com.deepromeet.atcha.auth.domain.UserProviderRepository
 import com.deepromeet.atcha.user.domain.User
@@ -12,8 +12,8 @@ class UserProviderAppender(
 ) {
     fun append(
         user: User,
-        provider: Provider
-    ): UserProvider = userProviderRepository.save(UserProvider.create(user.id, provider))
+        providerContext: ProviderContext
+    ): UserProvider = userProviderRepository.save(UserProvider.create(user.id, providerContext))
 
     fun updateProviderToken(
         userProvider: UserProvider,

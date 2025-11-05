@@ -1,15 +1,12 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.seoul.response
 
+import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.bus.BusCongestion
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrival
-import com.deepromeet.atcha.transit.domain.bus.BusRealTimeInfo
-import com.deepromeet.atcha.transit.domain.bus.BusRoute
-import com.deepromeet.atcha.transit.domain.bus.BusRouteId
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
+import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
-import com.deepromeet.atcha.transit.domain.bus.BusStation
 import com.deepromeet.atcha.transit.domain.bus.BusStatus
 import com.deepromeet.atcha.transit.domain.bus.BusTimeTable
-import com.deepromeet.atcha.transit.domain.region.ServiceRegion
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty
@@ -64,15 +61,9 @@ data class SeoulBusArrivalResponse(
     @JacksonXmlProperty(localName = "vehId2")
     val vehId2: String
 ) {
-    fun toBusSchedule(station: BusStation): BusSchedule =
+    fun toBusSchedule(busRouteInfo: BusRouteInfo): BusSchedule =
         BusSchedule(
-            busRoute =
-                BusRoute(
-                    id = BusRouteId(busRouteId),
-                    name = busRouteAbrv,
-                    serviceRegion = ServiceRegion.SEOUL
-                ),
-            busStation = station,
+            busRouteInfo = busRouteInfo,
             busTimeTable =
                 BusTimeTable(
                     firstTime = parseDateTime(firstTm),
@@ -81,8 +72,8 @@ data class SeoulBusArrivalResponse(
                 )
         )
 
-    fun toBusRealTimeArrival(): BusRealTimeArrival {
-        return BusRealTimeArrival(
+    fun toBusRealTimeArrival(): BusRealTimeArrivals {
+        return BusRealTimeArrivals(
             listOf(
                 createRealTimeArrivalInfo(
                     arrivalMessage = arrmsg1,
@@ -114,13 +105,12 @@ data class SeoulBusArrivalResponse(
         rerdieDiv: Int,
         rerideNum: Int,
         vehId: String
-    ): BusRealTimeInfo {
+    ): BusArrival {
         val busStatus = determineBusStatus(arrivalMessage)
 
         val busCongestion =
             when (rerdieDiv) {
-                0 -> BusCongestion.UNKNOWN
-                2 -> BusCongestion.UNKNOWN
+                0, 1, 2 -> BusCongestion.UNKNOWN
                 4 ->
                     when (rerideNum) {
                         0 -> BusCongestion.UNKNOWN
@@ -134,13 +124,12 @@ data class SeoulBusArrivalResponse(
 
         val remainingSeats =
             when (rerdieDiv) {
-                0 -> 0
-                2 -> rerideNum
-                4 -> 0
+                0, 4 -> 0
+                1, 2 -> rerideNum
                 else -> throw IllegalArgumentException("Unknown rerdieDiv: $rerdieDiv")
             }
 
-        return BusRealTimeInfo(
+        return BusArrival(
             vehicleId = vehId,
             busStatus = busStatus,
             remainingTime = remainingTime.toInt(),

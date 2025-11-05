@@ -5,9 +5,7 @@ import com.deepromeet.atcha.shared.exception.ExternalApiException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.ServiceResult
 import com.deepromeet.atcha.transit.infrastructure.client.public.gyeonggi.response.PublicGyeonggiResponse
 import io.github.oshai.kotlinlogging.KotlinLogging
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runInterruptible
-import kotlinx.coroutines.withContext
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException
 import org.springframework.stereotype.Component
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -17,19 +15,14 @@ private val log = KotlinLogging.logger {}
 object ApiClientUtils {
     suspend fun <T, R> callApiByKeyProvider(
         keyProvider: () -> String,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         processResult: (T) -> R,
         errorMessage: String
     ): R {
         val response: T =
-            try {
+            executeWithExceptionHandling(errorMessage) {
                 val apiKey = keyProvider()
-                interruptible { apiCall(apiKey) }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                log.warn(e) { "API 호출 중 오류: ${e.message} - $errorMessage" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
+                apiCall(apiKey)
             }
         return processResult(response)
     }
@@ -38,7 +31,7 @@ object ApiClientUtils {
         primaryKey: String,
         spareKey: String,
         realLastKey: String,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         isLimitExceeded: (T) -> Boolean,
         processResult: (T) -> R,
         errorMessage: String
@@ -50,7 +43,7 @@ object ApiClientUtils {
 
     private suspend fun <T> callApiWithRetryInternal(
         keys: List<String>,
-        apiCall: (String) -> T,
+        apiCall: suspend (String) -> T,
         isLimitExceeded: (T) -> Boolean,
         errorMessage: String,
         index: Int
@@ -61,15 +54,9 @@ object ApiClientUtils {
         }
 
         val currentKey = keys[index]
-
         val response =
-            try {
-                interruptible { apiCall(currentKey) }
-            } catch (e: CancellationException) {
-                throw e
-            } catch (e: Exception) {
-                log.warn(e) { "예상치 못한 오류: ${e.message} - $errorMessage" }
-                throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
+            executeWithExceptionHandling(errorMessage) {
+                apiCall(currentKey)
             }
 
         return if (isLimitExceeded(response)) {
@@ -80,8 +67,21 @@ object ApiClientUtils {
         }
     }
 
-    private suspend fun <T> interruptible(block: () -> T): T =
-        withContext(Dispatchers.IO) { runInterruptible { block() } }
+    private suspend fun <T> executeWithExceptionHandling(
+        errorMessage: String,
+        apiCall: suspend () -> T
+    ): T {
+        return try {
+            apiCall()
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: CallNotPermittedException) {
+            log.error { "서킷 브레이커로 인해 호출 차단됨 - $errorMessage" }
+            throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_CIRCUIT_BREAKER_OPEN, e)
+        } catch (e: Exception) {
+            throw ExternalApiException.of(ExternalApiError.EXTERNAL_API_UNKNOWN_ERROR, e)
+        }
+    }
 
     fun <T> isServiceResultApiLimitExceeded(response: ServiceResult<T>): Boolean {
         val limitMessages =

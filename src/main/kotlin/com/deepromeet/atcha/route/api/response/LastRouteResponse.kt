@@ -3,8 +3,11 @@ package com.deepromeet.atcha.route.api.response
 import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.RouteLocation
-import com.deepromeet.atcha.route.domain.RoutePassStop
 import com.deepromeet.atcha.route.domain.RouteStep
+import com.deepromeet.atcha.transit.domain.RoutePassStop
+import com.deepromeet.atcha.transit.domain.bus.BusStation
+import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 data class LastRouteResponse(
     val routeId: String,
@@ -17,9 +20,13 @@ data class LastRouteResponse(
     val pathType: Int,
     val legs: List<LastRouteLegResponse>
 ) {
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     constructor(lastRoute: LastRoute) : this(
         routeId = lastRoute.id,
-        departureDateTime = lastRoute.departureDateTime,
+        departureDateTime = lastRoute.departureDateTime.truncatedTo(ChronoUnit.SECONDS).format(dateTimeFormatter),
         totalTime = lastRoute.totalTime,
         totalWalkTime = lastRoute.totalWalkTime,
         totalWorkDistance = lastRoute.totalWalkDistance,
@@ -40,24 +47,44 @@ data class LastRouteLegResponse(
     val service: String? = null,
     val start: RouteLocationResponse,
     val end: RouteLocationResponse,
+    val targetBusStation: BusStationResponse? = null,
+    val targetBusTerm: Int? = null,
     val subwayFinalStation: String? = null,
     val subwayDirection: String? = null,
+    val isExpressSubway: Boolean? = null,
+    val isLastSubway: Boolean? = null,
     val passStopList: List<RoutePassStopResponse>? = null,
     val step: List<RouteStep>? = null,
     val passShape: String? = null
 ) {
+    companion object {
+        private val dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss")
+    }
+
     constructor(lastRouteLeg: LastRouteLeg) : this(
         distance = lastRouteLeg.distance,
         sectionTime = lastRouteLeg.sectionTime,
         mode = lastRouteLeg.mode.value,
-        departureDateTime = lastRouteLeg.departureDateTime,
+        departureDateTime = lastRouteLeg.departureDateTime?.truncatedTo(ChronoUnit.SECONDS)?.format(dateTimeFormatter),
         route = lastRouteLeg.route,
         type = lastRouteLeg.type,
         service = lastRouteLeg.service,
         start = RouteLocationResponse(lastRouteLeg.start),
         end = RouteLocationResponse(lastRouteLeg.end),
+        targetBusStation =
+            lastRouteLeg.busInfo?.busRouteInfo?.targetStation?.busStation?.let {
+                BusStationResponse(
+                    it
+                )
+            },
+        targetBusTerm = lastRouteLeg.busInfo?.timeTable?.term,
         subwayFinalStation = lastRouteLeg.subwayInfo?.resolveFinalStationName(),
         subwayDirection = lastRouteLeg.subwayInfo?.resolveDirectionName(),
+        isExpressSubway = lastRouteLeg.isExpress(),
+        isLastSubway =
+            lastRouteLeg.subwayInfo?.timeTable?.getLastTime()?.departureTime?.toLocalDateTime()?.isEqual(
+                lastRouteLeg.departureDateTime
+            ),
         passStopList = lastRouteLeg.passStops?.stops?.map { RoutePassStopResponse(it) },
         step = lastRouteLeg.steps,
         passShape = lastRouteLeg.pathCoordinates
@@ -91,5 +118,19 @@ data class RoutePassStopResponse(
         routePassStop.stationName,
         routePassStop.location.longitude.toString(),
         routePassStop.location.latitude.toString()
+    )
+}
+
+data class BusStationResponse(
+    val busStationId: String,
+    val busStationNumber: String,
+    val busStationName: String
+) {
+    constructor(
+        busStation: BusStation
+    ) : this(
+        busStation.id.value,
+        busStation.busStationNumber.value,
+        busStation.busStationMeta.name
     )
 }

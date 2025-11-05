@@ -3,30 +3,35 @@ package com.deepromeet.atcha.shared.web
 import com.deepromeet.atcha.shared.exception.CustomException
 import com.deepromeet.atcha.shared.web.exception.RequestError
 import com.deepromeet.atcha.shared.web.exception.RequestException
+import com.fasterxml.jackson.databind.ObjectMapper
 import io.github.oshai.kotlinlogging.KotlinLogging
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.boot.logging.LogLevel
+import org.springframework.http.HttpHeaders
+import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
 
-private val logger = KotlinLogging.logger {}
+private val log = KotlinLogging.logger {}
 
 @RestControllerAdvice
-class GlobalControllerAdvice {
+class GlobalControllerAdvice(
+    private val objectMapper: ObjectMapper
+) {
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(
         exception: CustomException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> = handle(exception, request)
+    ): ResponseEntity<*> = handle(exception, request)
 
     @ExceptionHandler(HttpRequestMethodNotSupportedException::class)
     fun handleHttpRequestMethodNotSupportedException(
         httpException: HttpRequestMethodNotSupportedException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         val exception =
             RequestException.of(
                 RequestError.NO_MATCHED_METHOD,
@@ -42,9 +47,9 @@ class GlobalControllerAdvice {
     fun handleNoResourceFoundException(
         noResourceException: NoResourceFoundException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         val exception =
-            RequestException.Companion.of(
+            RequestException.of(
                 RequestError.NO_MATCHED_RESOURCE,
                 "요청하신 리소스를 찾을 수 없습니다: ${noResourceException.resourcePath}"
             )
@@ -52,34 +57,88 @@ class GlobalControllerAdvice {
     }
 
     @ExceptionHandler(Exception::class)
-    fun handleException(exception: Exception): ResponseEntity<ApiResponse<Unit>> {
-        logger.error(exception) { "알 수 없는 서버 에러입니다" }
-        return ResponseEntity.internalServerError()
-            .body(
-                ApiResponse.error(
-                    "INTERNAL_SERVER_ERROR",
-                    exception.cause?.message
-                        ?: "알 수 없는 서버 에러입니다"
-                )
-            )
+    fun handleException(
+        exception: Exception,
+        request: HttpServletRequest
+    ): ResponseEntity<*> {
+        return when (val rootCause = findRootCause(exception)) {
+            is IllegalArgumentException -> {
+                val customException =
+                    RequestException.of(
+                        RequestError.INVALID_REQUEST,
+                        rootCause.message ?: "잘못된 요청 파라미터입니다",
+                        rootCause
+                    )
+                handle(customException, request)
+            }
+            is IllegalStateException -> {
+                val customException =
+                    RequestException.of(
+                        RequestError.INVALID_REQUEST,
+                        rootCause.message ?: "현재 상태에서 처리할 수 없는 요청입니다",
+                        rootCause
+                    )
+                handle(customException, request)
+            }
+            else -> {
+                log.error(exception) { "알 수 없는 서버 에러입니다" }
+                val apiResponse =
+                    ApiResponse.error(
+                        "INTERNAL_SERVER_ERROR",
+                        exception.cause?.message ?: "알 수 없는 서버 에러입니다"
+                    )
+
+                if (isServerSentEventRequest(request)) {
+                    val sseData = "data: ${objectMapper.writeValueAsString(apiResponse)}\n\n"
+                    ResponseEntity.internalServerError()
+                        .contentType(MediaType.TEXT_EVENT_STREAM)
+                        .body(sseData)
+                } else {
+                    ResponseEntity.internalServerError().body(apiResponse)
+                }
+            }
+        }
     }
 
     private fun handle(
         exception: CustomException,
         request: HttpServletRequest
-    ): ResponseEntity<ApiResponse<Unit>> {
+    ): ResponseEntity<*> {
         when (exception.errorType.logLevel) {
-            LogLevel.ERROR -> logger.error(exception) { exception.message }
-            LogLevel.WARN -> logger.warn(exception) { exception.message }
-            else -> logger.info(exception) { exception.message }
+            LogLevel.ERROR -> log.error(exception) { exception.message }
+            LogLevel.WARN -> log.warn(exception) { exception.message }
+            else -> log.info(exception) { exception.message }
         }
-        return ResponseEntity.status(exception.status)
-            .body(
-                ApiResponse.error(
-                    exception.errorType.errorCode,
-                    request.requestURI,
-                    exception.message ?: exception.errorType.message
-                )
+
+        val apiResponse =
+            ApiResponse.error(
+                exception.errorType.errorCode,
+                request.requestURI,
+                exception.message ?: exception.errorType.message
             )
+
+        return if (isServerSentEventRequest(request)) {
+            // SSE 포맷으로 변환
+            val sseData = "data: ${objectMapper.writeValueAsString(apiResponse)}\n\n"
+            ResponseEntity.status(exception.status)
+                .contentType(MediaType.TEXT_EVENT_STREAM)
+                .body(sseData)
+        } else {
+            ResponseEntity.status(exception.status)
+                .body(apiResponse)
+        }
+    }
+
+    private fun findRootCause(throwable: Throwable): Throwable {
+        var cause = throwable
+        while (cause.cause != null && cause.cause != cause) {
+            cause = cause.cause!!
+        }
+        return cause
+    }
+
+    private fun isServerSentEventRequest(request: HttpServletRequest): Boolean {
+        val accept = request.getHeader(HttpHeaders.ACCEPT)
+        return accept != null && accept.contains(MediaType.TEXT_EVENT_STREAM_VALUE)
     }
 }

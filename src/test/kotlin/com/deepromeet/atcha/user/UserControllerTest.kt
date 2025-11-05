@@ -1,6 +1,7 @@
 package com.deepromeet.atcha.user
 
 import com.deepromeet.atcha.app.application.AppVersionAppender
+import com.deepromeet.atcha.app.domain.Platform
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.JwtTokenGenerator
 import com.deepromeet.atcha.support.BaseControllerTest
@@ -39,7 +40,7 @@ class UserControllerTest(
         user = userAppender.append(user)
         val generateToken = jwtTokenGenerator.generateTokens(user.id)
         accessToken = generateToken.accessToken
-        appVersionAppender.createAppVersion("test v1.0.0")
+        appVersionAppender.createAppVersion(Platform.ANDROID, "test v1.0.0")
     }
 
     @Test
@@ -47,6 +48,7 @@ class UserControllerTest(
         val result =
             RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
+                .header("X-Platform", "ANDROID")
                 .`when`().get("/api/members/me")
                 .then().log().all()
                 .statusCode(200)
@@ -55,6 +57,7 @@ class UserControllerTest(
         val objectMapper = jacksonObjectMapper()
         val findUser: UserInfoResponse = objectMapper.convertValue(result, UserInfoResponse::class.java)
         assertThat(findUser.id).isEqualTo(user.id.value)
+        assertThat(findUser.appVersion).isEqualTo("test v1.0.0")
     }
 
     @Test
@@ -63,7 +66,6 @@ class UserControllerTest(
         val userInfoUpdateRequest =
             UserInfoUpdateRequest(
                 nickname = "새로운 닉네임",
-                alertFrequencies = mutableSetOf(2),
                 profileImageUrl = "new",
                 address = "new",
                 lat = 37.99,
@@ -83,7 +85,6 @@ class UserControllerTest(
         val findUser = userReader.read(user.id)
 
         // then
-        assertThat(findUser.alertFrequencies).isEqualTo(userInfoUpdateRequest.alertFrequencies)
         assertThat(findUser.homeAddress.address).isEqualTo(userInfoUpdateRequest.address)
         assertThat(findUser.homeAddress.coordinate.lat).isEqualTo(userInfoUpdateRequest.lat)
         assertThat(findUser.homeAddress.coordinate.lon).isEqualTo(userInfoUpdateRequest.lon)
@@ -92,14 +93,21 @@ class UserControllerTest(
 
     @Test
     fun `회원 탈퇴`() {
-        // given && when
-        RestAssured.given().log().all()
+        // given
+        val request = mapOf("reason" to "서비스 불만")
+
+        // when
+        RestAssured.given()
+            .log().all()
             .header(HttpHeaders.AUTHORIZATION, "Bearer $accessToken")
-            .`when`().delete("/api/members/me")
-            .then().log().all()
+            .contentType(ContentType.JSON)
+            .body(request)
+            .`when`()
+            .delete("/api/members/me")
+            .then()
+            .log().all()
             .statusCode(204)
 
-        // then
         assertThatThrownBy { userReader.read(user.id) }
             .isInstanceOf(UserException::class.java)
     }

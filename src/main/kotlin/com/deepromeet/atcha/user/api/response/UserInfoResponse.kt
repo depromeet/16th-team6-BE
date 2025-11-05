@@ -9,7 +9,6 @@ data class UserInfoResponse(
     val address: String,
     val lat: Double,
     val lon: Double,
-    val alertFrequencies: Set<Int>,
     val appVersion: String
 ) {
     companion object {
@@ -22,7 +21,6 @@ data class UserInfoResponse(
             domain.homeAddress.address,
             domain.homeAddress.coordinate.lat,
             domain.homeAddress.coordinate.lon,
-            domain.alertFrequencies,
             appVersion = appVersion.version
         )
     }

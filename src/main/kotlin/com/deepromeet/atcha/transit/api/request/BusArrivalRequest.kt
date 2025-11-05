@@ -2,8 +2,8 @@ package com.deepromeet.atcha.transit.api.request
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.api.request.RoutePassStopRequest
-import com.deepromeet.atcha.route.domain.RoutePassStop
-import com.deepromeet.atcha.route.domain.RoutePassStops
+import com.deepromeet.atcha.transit.domain.RoutePassStop
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
 
 data class BusArrivalRequest(
@@ -13,6 +13,16 @@ data class BusArrivalRequest(
     val lat: Double,
     val lon: Double
 ) {
+    init {
+        require(routeName.contains(":")) {
+            "유효하지 않은 정류장 이름입니다. : $routeName"
+        }
+
+        require(stationName.isNotBlank()) {
+            "정류장 이름은 비어있을 수 없습니다."
+        }
+    }
+
     fun toBusStationMeta() =
         BusStationMeta(
             stationName,

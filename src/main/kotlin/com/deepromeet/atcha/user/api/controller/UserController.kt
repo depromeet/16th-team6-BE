@@ -1,11 +1,12 @@
 package com.deepromeet.atcha.user.api.controller
 
 import com.deepromeet.atcha.app.application.AppService
+import com.deepromeet.atcha.app.domain.Platform
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
-import com.deepromeet.atcha.user.api.request.AlertFrequencyUpdateRequest
 import com.deepromeet.atcha.user.api.request.HomeAddressUpdateRequest
 import com.deepromeet.atcha.user.api.request.UserInfoUpdateRequest
+import com.deepromeet.atcha.user.api.request.UserWithdrawalRequest
 import com.deepromeet.atcha.user.api.response.UserInfoResponse
 import com.deepromeet.atcha.user.api.response.UserInfoUpdateResponse
 import com.deepromeet.atcha.user.application.UserService
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -28,10 +30,11 @@ class UserController(
 ) {
     @GetMapping("/members/me")
     fun getUserInfo(
-        @CurrentUser userId: Long
+        @CurrentUser userId: Long,
+        @RequestHeader("X-Platform") platform: String
     ): ApiResponse<UserInfoResponse> {
         val user = userService.getUser(UserId(userId))
-        val appVersion = appService.getAppVersion()
+        val appVersion = appService.getAppVersion(Platform.fromString(platform))
         return ApiResponse.success(UserInfoResponse.from(user, appVersion))
     }
 
@@ -41,15 +44,6 @@ class UserController(
         @RequestBody userInfoUpdateRequest: UserInfoUpdateRequest
     ): ApiResponse<UserInfoUpdateResponse> {
         val result = userService.updateUser(UserId(userId), userInfoUpdateRequest.toUpdateUserInfo())
-        return ApiResponse.success(UserInfoUpdateResponse.from(result))
-    }
-
-    @PatchMapping("/members/me/alert-frequency")
-    fun updateAlertFrequency(
-        @CurrentUser userId: Long,
-        @RequestBody request: AlertFrequencyUpdateRequest
-    ): ApiResponse<UserInfoUpdateResponse> {
-        val result = userService.updateAlertFrequency(UserId(userId), request.alertFrequencies.toMutableSet())
         return ApiResponse.success(UserInfoUpdateResponse.from(result))
     }
 
@@ -65,8 +59,9 @@ class UserController(
     @DeleteMapping("/members/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUser(
-        @CurrentUser userId: Long
+        @CurrentUser userId: Long,
+        @RequestBody request: UserWithdrawalRequest
     ) {
-        userService.deleteUser(UserId(userId))
+        userService.deleteUser(request.toDomain(UserId(userId)))
     }
 }

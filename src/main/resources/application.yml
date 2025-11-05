@@ -1,20 +1,30 @@
 spring:
+  mvc:
+    async:
+      request-timeout: 5000
   config:
     import: secret-env.yml
-  profiles:
-    active: local
+  data:
+    redis:
+      lettuce:
+        pool:
+          enabled: true
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+          time-between-eviction-runs: 60s
   jpa:
     properties:
      hibernate:
        show-sql: true
        format_sql: true
        default_batch_fetch_size: 100
+    open-in-view: false
 
 logging:
   level:
     com.deepromeet.atcha: DEBUG
-    org.springframework.cloud.openfeign: INFO
-    feign: INFO
     tracer: trace
     org:
       hibernate:
@@ -23,10 +33,19 @@ logging:
             bind: INFO
         SQL: INFO
     root: INFO
+    io:
+      github:
+        resilience4j: INFO
+    org.apache.catalina: OFF
+    org.apache.coyote: OFF
+    org.apache.tomcat: OFF
 
 tmap:
   api:
     url: https://apis.openapi.sk.com
+  limits:
+    per-api:
+      routes: 20
 
 kakao:
   api:
@@ -57,7 +76,7 @@ open-api:
   limits:
     default: 100
     per-api:
-      subway-schedule: 30
+      subway-schedule: 10
       gyeonggi-route: 30
       incheon-route: 3
       incheon-arrival: 10
@@ -68,6 +87,13 @@ kric:
     url:
       subway: https://openapi.kric.go.kr/openapi/trainUseInfo
 
+odsay:
+  api:
+    url: https://api.odsay.com
+
+mixpanel:
+  token: ${secret.prod.MIXPANEL_TOKEN}
+
 redis:
   stream:
     event:
@@ -75,3 +101,63 @@ redis:
       group: "event-processor"
       dead-letter:
         key: "atcha:events:dead-letter"
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      public-api:
+        failure-rate-threshold: 60.0
+        minimum-number-of-calls: 100
+        sliding-window-size: 500
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 10
+        slow-call-rate-threshold: 70.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      commercial-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 50
+        sliding-window-size: 200
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 5
+        slow-call-rate-threshold: 60.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+      auth-api:
+        failure-rate-threshold: 50.0
+        minimum-number-of-calls: 20
+        sliding-window-size: 100
+        wait-duration-in-open-state: PT30S
+        permitted-number-of-calls-in-half-open-state: 5
+        slow-call-rate-threshold: 50.0
+        slow-call-duration-threshold: PT4S
+        automatic-transition-from-open-to-half-open-enabled: true
+        sliding-window-type: count-based
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus,circuitbreakers,circuitbreakerevents
+  endpoint:
+    health:
+      show-details: always
+  health:
+    circuitbreakers:
+      enabled: true
+  metrics:
+    tags:
+      application: atcha
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+
+server:
+  tomcat:
+    mbeanregistry:
+      enabled: true

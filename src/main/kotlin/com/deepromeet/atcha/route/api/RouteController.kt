@@ -5,9 +5,9 @@ import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
 import com.deepromeet.atcha.route.api.response.UserRouteResponse
 import com.deepromeet.atcha.route.application.RouteService
-import com.deepromeet.atcha.route.domain.LastRoute
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
+import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
 
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController
 class RouteController(
     private val routeService: RouteService
 ) {
+    @Deprecated("deprecated")
     @GetMapping("/last-routes")
     suspend fun getLastRoutes(
         @CurrentUser id: Long,
@@ -52,31 +54,32 @@ class RouteController(
                 UserId(id),
                 request.toStart(),
                 request.toEnd(),
-                request.sortType
+                request.sortType,
+                request.time
             ).map { LastRouteResponse(it) }
         )
 
     @GetMapping(
         "/v3/last-routes/stream",
-        produces = [MediaType.TEXT_EVENT_STREAM_VALUE]
+        produces = [MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE]
     )
     fun streamLastRoutesV3(
         @CurrentUser id: Long,
         @ModelAttribute request: LastRoutesRequest
-    ): Flow<LastRouteResponse> =
-        routeService.getLastRouteStream(
+    ): Flow<LastRouteResponse> {
+        return routeService.getLastRouteStream(
             UserId(id),
             request.toStart(),
-            request.toEnd(),
-            request.sortType
-        ).map { LastRouteResponse(it) }
+            request.toEnd()
+        ).map { route -> LastRouteResponse(route) }
+    }
 
     @GetMapping("/last-routes/{routeId}")
     fun getLastRoute(
         @PathVariable routeId: String
-    ): ApiResponse<LastRoute> =
+    ): ApiResponse<LastRouteResponse> =
         ApiResponse.success(
-            routeService.getRoute(routeId)
+            LastRouteResponse(routeService.getRoute(routeId))
         )
 
     @GetMapping("/last-routes/{lastRouteId}/bus-started")
@@ -104,11 +107,23 @@ class RouteController(
         routeService.addUserRoute(UserId(id), request.lastRouteId)
     }
 
+    @GetMapping("/user-routes/bus-arrival")
+    suspend fun getBusArrivalInUserRoute(
+        @CurrentUser id: Long,
+        @RequestParam routeName: String
+    ): ApiResponse<List<RealTimeBusArrivalResponse>> {
+        return ApiResponse.success(
+            routeService.getTargetBusArrivals(
+                UserId(id),
+                routeName
+            ).map { RealTimeBusArrivalResponse(routeName, it) }
+        )
+    }
+
     @DeleteMapping("/user-routes")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteUserRoute(
-        @CurrentUser id: Long,
-        @ModelAttribute request: UserRouteRequest
+        @CurrentUser id: Long
     ) {
         routeService.deleteUserRoute(UserId(id))
     }

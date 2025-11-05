@@ -5,11 +5,9 @@ import com.deepromeet.atcha.transit.application.subway.SubwayTimetableClient
 import com.deepromeet.atcha.transit.domain.DailyType
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
+import com.deepromeet.atcha.transit.domain.subway.SubwaySchedule
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
-import com.deepromeet.atcha.transit.domain.subway.SubwayTime
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
-import com.deepromeet.atcha.transit.exception.TransitError
-import com.deepromeet.atcha.transit.exception.TransitException
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayJsonResponse.Companion.isSubwayApiLimitExceeded
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.TrainScheduleResponse
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.utils.ApiClientUtils
@@ -26,7 +24,7 @@ private const val PAGE_SIZE = 300
 
 @Component
 class PublicSubwayTimetableClient(
-    private val subwayScheduleFeignClient: PublicSubwayScheduleFeignClient,
+    private val subwayScheduleHttpClient: PublicSubwayScheduleHttpClient,
     private val subwayStationRepository: SubwayStationRepository,
     private val transitNameComparer: TransitNameComparer,
     @Value("\${open-api.api.service-key}") private val serviceKey: String,
@@ -75,7 +73,7 @@ class PublicSubwayTimetableClient(
                 spareKey = spareKey,
                 realLastKey = realLastKey,
                 apiCall = { key ->
-                    subwayScheduleFeignClient.getTrainSchedule(
+                    subwayScheduleHttpClient.getTrainSchedule(
                         key,
                         line.mainName(),
                         startStation.normalizeName(),
@@ -105,7 +103,7 @@ class PublicSubwayTimetableClient(
                             spareKey = spareKey,
                             realLastKey = realLastKey,
                             apiCall = { key ->
-                                subwayScheduleFeignClient.getTrainSchedule(
+                                subwayScheduleHttpClient.getTrainSchedule(
                                     key,
                                     line.mainName(),
                                     startStation.normalizeName(),
@@ -131,7 +129,7 @@ class PublicSubwayTimetableClient(
     private suspend fun mapToSchedule(
         scheduleItems: List<TrainScheduleResponse>,
         subwayStations: List<SubwayStation>
-    ): List<SubwayTime> =
+    ): List<SubwaySchedule> =
         coroutineScope {
             scheduleItems.map { item ->
                 async(Dispatchers.Default) {
@@ -139,9 +137,12 @@ class PublicSubwayTimetableClient(
                         subwayStations.find { st ->
                             transitNameComparer.isSame(st.name, item.arvlStnNm) ||
                                 st.name.startsWith(item.arvlStnNm)
-                        } ?: throw TransitException.of(
-                            TransitError.NOT_FOUND_SUBWAY_STATION,
-                            "${item.lineNm} 지하철역 데이터에서 도착역 '${item.arvlStnNm}'을 찾을 수 없습니다."
+                        } ?: SubwayStation(
+                            id = null,
+                            stationCode = item.stnCd ?: "UNKNOWN",
+                            name = item.arvlStnNm,
+                            routeName = SubwayLine.fromRouteName(item.lineNm!!).mainName(),
+                            routeCode = SubwayLine.fromRouteName(item.lineNm).lnCd
                         )
                     item.toDomain(finalStation)
                 }

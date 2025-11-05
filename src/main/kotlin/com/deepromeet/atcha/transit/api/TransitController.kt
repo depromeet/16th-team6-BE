@@ -22,7 +22,7 @@ class TransitController(
     private val transitService: TransitService
 ) {
     @GetMapping("/taxi-fare")
-    fun getTaxiFare(
+    suspend fun getTaxiFare(
         @ModelAttribute request: TaxiFareRequest
     ): ApiResponse<Fare> =
         ApiResponse.success(
@@ -66,7 +66,7 @@ class TransitController(
     }
 
     @GetMapping("/batch")
-    fun batch(): ApiResponse<Unit> {
+    suspend fun batch(): ApiResponse<Unit> {
         transitService.init()
         return ApiResponse.success(Unit)
     }

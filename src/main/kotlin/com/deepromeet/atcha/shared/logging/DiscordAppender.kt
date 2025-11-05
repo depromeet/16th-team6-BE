@@ -1,0 +1,111 @@
+package com.deepromeet.atcha.shared.logging
+
+import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.classic.spi.ThrowableProxyUtil
+import ch.qos.logback.core.UnsynchronizedAppenderBase
+import com.deepromeet.atcha.shared.infrastructure.discord.DiscordMessage
+import com.deepromeet.atcha.shared.infrastructure.discord.DiscordMessage.Embed
+import com.deepromeet.atcha.shared.logging.exception.DiscordError
+import com.deepromeet.atcha.shared.logging.exception.DiscordException
+import com.fasterxml.jackson.databind.ObjectMapper
+import org.springframework.http.HttpMethod
+import org.springframework.http.MediaType.APPLICATION_JSON_VALUE
+import java.net.URL
+import java.time.LocalDateTime
+import javax.net.ssl.HttpsURLConnection
+
+class DiscordAppender(
+    var webhookUrl: String = "",
+    var username: String = ""
+) : UnsynchronizedAppenderBase<ILoggingEvent>() {
+    companion object {
+        private const val CAUSED_BY = "Caused by:"
+        private const val CONTENT_TYPE = "Content-Type"
+
+        private const val CONNECT_TIMEOUT_MS = 2000
+        private const val READ_TIMEOUT_MS = 2000
+
+        private const val LOG_MAX_LEN = 1900
+    }
+
+    private val objectMapper = ObjectMapper()
+
+    override fun append(event: ILoggingEvent?) {
+        if (event == null || webhookUrl.isBlank()) return
+
+        try {
+            val url: URL = URL(webhookUrl)
+            val connection =
+                (url.openConnection() as HttpsURLConnection).apply {
+                    requestMethod = HttpMethod.POST.name()
+                    setRequestProperty(CONTENT_TYPE, APPLICATION_JSON_VALUE)
+                    doOutput = true
+                    connectTimeout = CONNECT_TIMEOUT_MS
+                    readTimeout = READ_TIMEOUT_MS
+                }
+
+            connection.getOutputStream().use { stream ->
+                stream.write(createMessage(event))
+                stream.flush()
+
+                connection.getInputStream().close()
+                connection.disconnect()
+            }
+        } catch (e: Exception) {
+            throw DiscordException.of(DiscordError.DISCORD_LOG_DELIVERY_FAILURE, e)
+        }
+    }
+
+    private fun createMessage(event: ILoggingEvent?): ByteArray {
+        return objectMapper.writeValueAsBytes(
+            DiscordMessage().apply {
+                content = "🚨 에러 발생 비이이이이사아아아앙"
+                embeds =
+                    listOf(
+                        Embed().apply {
+                            title = "ℹ️ 에러 정보"
+                            description =
+                                """
+                                🕖 발생 시간 : ${LocalDateTime.now()}
+                                📄 예외 : ${getStackTrace(event)}
+                                """.trimIndent()
+                        }
+                    )
+            }
+        )
+    }
+
+    private fun getStackTrace(event: ILoggingEvent?): String {
+        if (event == null) return "로그 정보가 소실되었습니다."
+
+        var message = "[${event.level}] - ${event.formattedMessage}"
+
+        val throwableProxy = event.throwableProxy ?: return message
+        val lines = ThrowableProxyUtil.asString(throwableProxy).lines()
+
+        val causedByLines = lines.filter { it.trim().startsWith(CAUSED_BY) }
+
+        if (causedByLines.isNotEmpty()) {
+            val rootCause = causedByLines.last().trim().substring(CAUSED_BY.length).trim()
+            message += "\n🔍 Root Cause: $rootCause"
+
+            val rootCauseIndex = lines.indexOfLast { it.trim().startsWith(CAUSED_BY) }
+            val location = findLocationLine(lines.drop(rootCauseIndex + 1))
+            if (location != null) message += "\n📍 위치: $location"
+        } else {
+            val firstException = lines.firstOrNull { it.trim().isNotEmpty() }?.trim()
+            if (firstException != null) message += "\n🔍 Exception: $firstException"
+
+            val location = findLocationLine(lines)
+            if (location != null) message += "\n📍 위치: $location"
+        }
+
+        return message.take(LOG_MAX_LEN)
+    }
+
+    private fun findLocationLine(lines: List<String>): String? {
+        return lines.firstOrNull {
+            it.trim().startsWith("at ") && it.contains("com.deepromeet.atcha")
+        }?.trim()?.substring(3)
+    }
+}
