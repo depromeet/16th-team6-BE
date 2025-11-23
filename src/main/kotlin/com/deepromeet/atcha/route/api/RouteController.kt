@@ -137,4 +137,13 @@ class RouteController(
                 routeService.refreshUserRoute(UserId(id))
             )
         )
+
+    @GetMapping("real-time-subway-arrival/{stationName}")
+    fun getRealTimeSubwayArrival(
+        @RequestParam stationName: String
+    ): ApiResponse<Any> {
+        return ApiResponse.success(
+            routeService.getRealTimeSubwayArrival(stationName)
+        )
+    }
 }
