@@ -16,6 +16,7 @@ data class PublicSubwayRealtimeResponse(
         val developerMessage: String,
         val total: Int
     )
+
     data class RealtimeArrival(
         val arvlCd: String,
         val arvlMsg2: String,
@@ -47,6 +48,6 @@ data class PublicSubwayRealtimeResponse(
         val trainCo: String?,
         val trainLineNm: String,
         val trnsitCo: String,
-        val updnLine: String,
+        val updnLine: String
     )
 }
