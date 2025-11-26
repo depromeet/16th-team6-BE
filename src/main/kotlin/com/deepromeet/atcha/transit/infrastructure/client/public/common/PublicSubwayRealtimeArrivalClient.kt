@@ -32,6 +32,7 @@ class PublicSubwayRealtimeArrivalClient(
                 },
                 errorMessage = "실시간 지하철 호선 정보를 가져오는데 실패했습니다 - $statnNm"
             )
+        println(result)
     }
 
     private fun isRealtimeSubwayApiLimitExceeded(response: PublicSubwayRealtimeResponse): Boolean {

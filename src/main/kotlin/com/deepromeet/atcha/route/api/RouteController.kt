@@ -139,8 +139,8 @@ class RouteController(
         )
 
     @GetMapping("real-time-subway-arrival/{stationName}")
-    fun getRealTimeSubwayArrival(
-        @RequestParam stationName: String
+    suspend fun getRealTimeSubwayArrival(
+        @PathVariable stationName: String
     ): ApiResponse<Any> {
         return ApiResponse.success(
             routeService.getRealTimeSubwayArrival(stationName)

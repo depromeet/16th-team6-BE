@@ -12,6 +12,7 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
+import com.deepromeet.atcha.transit.application.subway.RealtimeSubwayFetcher
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
@@ -35,7 +36,8 @@ class RouteService(
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
     private val transitRouteClientV2: TransitRouteClientV2,
     private val routeArrivalCalculator: RouteArrivalCalculator,
-    private val lastRouteUpdater: LastRouteUpdater
+    private val lastRouteUpdater: LastRouteUpdater,
+    private val realtimeSubwayFetcher: RealtimeSubwayFetcher
 ) {
     @Deprecated("deprecated")
     @RouteCache
@@ -152,6 +154,7 @@ class RouteService(
         return closest ?: listOf(BusArrival.createScheduled(scheduledTime))
     }
 
-    fun getRealTimeSubwayArrival(stationName: String) {
+    suspend fun getRealTimeSubwayArrival(stationName: String) {
+        realtimeSubwayFetcher.fetch(stationName)
     }
 }
