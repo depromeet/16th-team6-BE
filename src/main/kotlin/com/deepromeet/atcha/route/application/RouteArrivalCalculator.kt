@@ -37,7 +37,7 @@ class RouteArrivalCalculator(
         val arrivals =
             subwayManager.getRealTimeArrival(
                 targetSubway.resolveRouteName(),
-                targetSubway.toBusStationMeta(),
+                targetSubway.toSubwayStationMeta(),
                 targetSubway.passStops!!
             )
         val positions = subwayManager.getBusPositions(subwayInfo.busRouteInfo.route)

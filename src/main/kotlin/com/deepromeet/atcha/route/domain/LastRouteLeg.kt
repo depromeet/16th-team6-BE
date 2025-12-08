@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.domain
 
+import com.deepromeet.atcha.transit.application.subway.SubwayStationMeta
 import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TimeDirection
 import com.deepromeet.atcha.transit.domain.TransitInfo
@@ -58,6 +59,13 @@ data class LastRouteLeg(
 
     fun toBusStationMeta(): BusStationMeta {
         return BusStationMeta(
+            start.name,
+            start.coordinate
+        )
+    }
+
+    fun toSubwayStationMeta(): SubwayStationMeta {
+        return SubwayStationMeta(
             start.name,
             start.coordinate
         )
