@@ -47,6 +47,13 @@ data class LastRoute(
         )
     }
 
+    fun findSubway(routeName: String): LastRouteLeg {
+        return legs.firstOrNull { it.route.equals(routeName) } ?: throw RouteException.of(
+            RouteError.INVALID_LAST_ROUTE,
+            "$id 경로에서 ${routeName}에 해당하는 지하철를 찾을 수 없습니다."
+        )
+    }
+
     fun calcWalkingTimeToFirstTransit(): Long =
         legs.takeWhile { !it.isTransit() }
             .sumOf { it.sectionTime }

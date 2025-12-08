@@ -157,4 +157,26 @@ class RouteService(
     suspend fun getRealTimeSubwayArrival(stationName: String) {
         realtimeSubwayFetcher.fetch(stationName)
     }
+
+
+    suspend fun getTargetSubwayArrivals(
+        userId: UserId,
+        routeName: String
+    ) {
+        val user = userReader.read(userId)
+        val userRoute = userRouteManager.read(user)
+        val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
+        val targetSubway = lastRoute.findSubway(routeName)
+        val scheduledTime = targetSubway.departureDateTime!!
+
+        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
+
+        val closest = routeArrivalCalculator.closestSubwayArrivals(targetSubway, scheduledTime)
+
+        closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
+            lastRouteUpdater.updateDepartureTime(lastRoute, targetSubway, newArrival)
+        }
+
+    }
+
 }

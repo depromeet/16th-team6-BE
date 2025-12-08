@@ -26,4 +26,21 @@ class RouteArrivalCalculator(
 
         return arrivals.getClosestArrivalsWithPositions(busInfo, scheduled, approachingBuses)
     }
+
+    suspend fun closestSubwayArrivals(
+        targetSubway: LastRouteLeg,
+        scheduled: LocalDateTime
+    ): List<BusArrival>? {
+        val subwayInfo = targetSubway.requireSubwayInfo()
+        val arrivals =
+            busManager.getRealTimeArrival(
+                targetSubway.resolveRouteName(),
+                targetSubway.toBusStationMeta(),
+                targetSubway.passStops!!
+            )
+        val positions = busManager.getBusPositions(subwayInfo.busRouteInfo.route)
+        val approachingBuses = positions.getApproachingBuses(subwayInfo.busStation)
+
+        return arrivals.getClosestSubwayArrivalsWithPositions(subwayInfo, scheduled, approachingBuses)
+    }
 }
