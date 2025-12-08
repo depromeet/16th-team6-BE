@@ -1,11 +1,14 @@
 package com.deepromeet.atcha.transit.application.subway
 
 import com.deepromeet.atcha.transit.application.DailyTypeResolver
+import com.deepromeet.atcha.transit.domain.RoutePassStops
 import com.deepromeet.atcha.transit.domain.TransitType
+import com.deepromeet.atcha.transit.domain.bus.BusRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.subway.Route
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
+import com.deepromeet.atcha.transit.domain.subway.SubwayStationData
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
@@ -65,5 +68,14 @@ class SubwayManager(
                     .also { timeTable -> subwayTimeTableCache.cache(start, dailyType, direction, timeTable) }
 
         return subwayTimeTable.filterReachable(destination, routes, isExpress)
+    }
+
+    suspend fun getRealTimeArrival(
+        routeName: String,
+        meta: SubwayStationData,
+        passStopList: RoutePassStops
+    ): BusRealTimeArrivals {
+        val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
+        return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
     }
 }

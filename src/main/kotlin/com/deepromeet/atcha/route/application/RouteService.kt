@@ -158,7 +158,6 @@ class RouteService(
         realtimeSubwayFetcher.fetch(stationName)
     }
 
-
     suspend fun getTargetSubwayArrivals(
         userId: UserId,
         routeName: String
@@ -176,7 +175,5 @@ class RouteService(
         closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
             lastRouteUpdater.updateDepartureTime(lastRoute, targetSubway, newArrival)
         }
-
     }
-
 }

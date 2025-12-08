@@ -99,7 +99,6 @@ data class BusRealTimeArrivals(
         return matchedBuses.sortedBy { it.expectedArrivalTime }
     }
 
-
     fun createArrivalSubwayCandidatesWithPositions(
         subwayInfo: TransitInfo.SubwayInfo,
         approachingBuses: List<BusPosition>
