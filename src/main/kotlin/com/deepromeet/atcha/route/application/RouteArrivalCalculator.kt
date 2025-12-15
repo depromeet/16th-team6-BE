@@ -4,6 +4,7 @@ import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.subway.SubwayManager
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
+import com.deepromeet.atcha.transit.domain.subway.SubwayArrival
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
@@ -32,17 +33,19 @@ class RouteArrivalCalculator(
     suspend fun closestSubwayArrivals(
         targetSubway: LastRouteLeg,
         scheduled: LocalDateTime
-    ): List<BusArrival>? {
+    ): List<SubwayArrival>? {
         val subwayInfo = targetSubway.requireSubwayInfo()
-        val arrivals =
-            subwayManager.getRealTimeArrival(
-                targetSubway.resolveRouteName(),
-                targetSubway.toBusStationMeta(),
-                targetSubway.passStops!!
-            )
-        val positions = subwayManager.getBusPositions(subwayInfo.busRouteInfo.route)
-        val approachingBuses = positions.getApproachingBuses(subwayInfo.busStation)
+        val stationName = targetSubway.start.name
+        val subwayLine = subwayInfo.subwayLine
+        val direction = subwayInfo.timeTable.subwayDirection
 
-        return arrivals.getClosestSubwayArrivalsWithPositions(subwayInfo, scheduled, approachingBuses)
+        val arrivals =
+            subwayManager.getRealTimeSubwayArrivals(
+                stationName = stationName,
+                subwayLine = subwayLine,
+                direction = direction
+            )
+
+        return arrivals.getClosestArrivals(scheduled)
     }
 }
