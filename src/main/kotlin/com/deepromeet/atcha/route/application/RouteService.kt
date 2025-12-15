@@ -154,7 +154,7 @@ class RouteService(
         return closest ?: listOf(BusArrival.createScheduled(scheduledTime))
     }
 
-    suspend fun getRealTimeSubwayArrival(stationName: String) {
+    suspend fun getRealTimeSubwayArrivalStation(stationName: String) {
         realtimeSubwayFetcher.fetch(stationName)
     }
 
