@@ -6,22 +6,29 @@ private const val DEFAULT_TITLE = "앗차"
 
 @Component
 class NotificationContentCreator {
-    fun createPushContent(data: NotificationData): NotificationContent {
+    fun createPushContent(
+        data: NotificationData,
+        isReal: Boolean
+    ): NotificationContent {
         return when (data) {
-            is RouteRefreshNotificationData -> createRouteRefreshNotification(data)
+            is RouteRefreshNotificationData -> createRouteRefreshNotification(data, isReal)
         }
     }
 
-    private fun createRouteRefreshNotification(data: RouteRefreshNotificationData): NotificationContent {
+    private fun createRouteRefreshNotification(
+        data: RouteRefreshNotificationData,
+        isReal: Boolean
+    ): NotificationContent {
         return NotificationContent(
             title = DEFAULT_TITLE,
-            body = data.departureTime.toString(),
+            body = data.departureTime,
             dataMap =
                 mutableMapOf(
                     "title" to DEFAULT_TITLE,
-                    "body" to (data.departureTime.toString()),
+                    "body" to (data.departureTime),
                     "type" to NotificationType.REFRESH.toString(),
-                    "updatedAt" to (data.updatedAt)
+                    "updatedAt" to (data.updatedAt),
+                    "isReal" to isReal.toString()
                 )
         )
     }
