@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 data class RealTimeSubwayArrivalResponse(
     val routeName: String,
-    val arrivalStatus: SubwayArrivalStatus,
+    val subwayArrivalStatus: SubwayArrivalStatus,
     val remainingTime: Int,
     val remainingStations: Int?,
     val isLast: Boolean,
@@ -23,7 +23,7 @@ data class RealTimeSubwayArrivalResponse(
 
     constructor(routeName: String, subwayArrival: SubwayArrival) : this(
         routeName = routeName,
-        arrivalStatus = subwayArrival.arrivalStatus,
+        subwayArrivalStatus = subwayArrival.arrivalStatus,
         remainingTime = subwayArrival.remainingTimeSeconds,
         remainingStations = subwayArrival.remainingStations,
         isLast = subwayArrival.isLast,
