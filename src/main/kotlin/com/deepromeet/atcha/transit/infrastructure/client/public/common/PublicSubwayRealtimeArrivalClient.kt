@@ -16,23 +16,18 @@ class PublicSubwayRealtimeArrivalClient(
     @Value("\${open-api.api.realtime-subway.key}")
     private val realLastKey: String
 ) : RealtimeSubwayFetcher {
-    override suspend fun fetch(statnNm: String) {
-        val result =
-            ApiClientUtils.callApiWithRetry(
-                primaryKey = serviceKey,
-                spareKey = spareKey,
-                realLastKey = realLastKey,
-                apiCall = {
-                        key ->
-                    publicSubwayRealtimeArrivalHttpClient.getPublicSubwayRealtime(key, statnNm = statnNm)
-                },
-                isLimitExceeded = { response -> isRealtimeSubwayApiLimitExceeded(response) },
-                processResult = { response ->
-                    response
-                },
-                errorMessage = "실시간 지하철 호선 정보를 가져오는데 실패했습니다 - $statnNm"
-            )
-        println(result)
+    override suspend fun fetch(stationName: String): PublicSubwayRealtimeResponse {
+        return ApiClientUtils.callApiWithRetry(
+            primaryKey = serviceKey,
+            spareKey = spareKey,
+            realLastKey = realLastKey,
+            apiCall = { key ->
+                publicSubwayRealtimeArrivalHttpClient.getPublicSubwayRealtime(key, statnNm = stationName)
+            },
+            isLimitExceeded = { response -> isRealtimeSubwayApiLimitExceeded(response) },
+            processResult = { response -> response },
+            errorMessage = "실시간 지하철 도착 정보를 가져오는데 실패했습니다 - $stationName"
+        )
     }
 
     private fun isRealtimeSubwayApiLimitExceeded(response: PublicSubwayRealtimeResponse): Boolean {
@@ -41,16 +36,6 @@ class PublicSubwayRealtimeArrivalClient(
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
             )
-
-//        val isLimited =
-//            response.header.resultCode != "00" ||
-//                (limitMessages.any { response.header.resultMsg.contains(it) })
-//
-//        if (isLimited) {
-//            log.warn { "공휴일 API 요청 수 초과: ${response.header.resultMsg}" }
-//        }
-//
-//        return isLimited
-        return false
+        return response.errorMessage.code in limitMessages
     }
 }
