@@ -20,7 +20,8 @@ class NotificationProcessingService(
         }
 
         return try {
-            val content = notificationContentCreator.createPushContent(data)
+            val isReal = duplicateChecker.isFirstNotification(data.userId, data.routeId)
+            val content = notificationContentCreator.createPushContent(data, isReal)
             val messaging = Messaging(content, data.token)
 
             if (messagingManager.send(messaging)) {

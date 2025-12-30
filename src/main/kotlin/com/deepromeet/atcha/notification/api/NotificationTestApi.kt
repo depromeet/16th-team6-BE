@@ -5,6 +5,7 @@ import com.deepromeet.atcha.notification.domain.Messaging
 import com.deepromeet.atcha.notification.domain.NotificationContentCreator
 import com.deepromeet.atcha.notification.domain.RouteRefreshNotificationData
 import com.deepromeet.atcha.notification.infrastructure.fcm.FcmService
+import com.deepromeet.atcha.route.application.RouteService
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
@@ -18,7 +19,8 @@ import java.util.UUID
 class NotificationTestApi(
     private val fcmService: FcmService,
     private val notificationContentCreator: NotificationContentCreator,
-    private val massagingManager: MessagingManager
+    private val massagingManager: MessagingManager,
+    private val routeService: RouteService
 ) {
     @PostMapping("/push")
     fun pushNotificationTest(
@@ -59,14 +61,19 @@ class NotificationTestApi(
         val now = LocalDateTime.now().plusMinutes(2).truncatedTo(ChronoUnit.SECONDS).toString()
         val routeRefreshNotificationData =
             RouteRefreshNotificationData(
-                "1",
-                token,
-                UUID.randomUUID().toString(),
-                now,
-                now
+                userId = token,
+                token = token,
+                routeId = "test-route-id",
+                idempotencyKey = UUID.randomUUID().toString(),
+                departureTime = now,
+                updatedAt = now
             )
 
-        val createPushContent = notificationContentCreator.createPushContent(routeRefreshNotificationData)
+        val createPushContent =
+            notificationContentCreator.createPushContent(
+                routeRefreshNotificationData,
+                isReal = true
+            )
         val messaging = Messaging(createPushContent, token)
         massagingManager.send(messaging)
     }
