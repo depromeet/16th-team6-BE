@@ -42,7 +42,7 @@ class RedisNotificationDuplicateChecker(
         userId: String,
         routeId: String
     ): Boolean {
-        val key = "$FIRST_NOTIFICATION_KEY_PREFIX$userId:$routeId"
+        val key = "$FIRST_NOTIFICATION_KEY_PREFIX:$userId:$routeId"
         return try {
             redisTemplate.opsForValue().setIfAbsent(
                 key,
