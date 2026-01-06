@@ -9,11 +9,11 @@ import org.springframework.stereotype.Component
 @Component
 class PublicSubwayRealtimeArrivalClient(
     private val publicSubwayRealtimeArrivalHttpClient: PublicSubwayRealtimeArrivalHttpClient,
-    @Value("\${open-api.api.realtime-subway.key}")
+    @Value("\${open-api.api.subway-realtime-key}")
     private val serviceKey: String,
-    @Value("\${open-api.api.realtime-subway.key}")
+    @Value("\${open-api.api.subway-realtime-key}")
     private val spareKey: String,
-    @Value("\${open-api.api.realtime-subway.key}")
+    @Value("\${open-api.api.subway-realtime-key}")
     private val realLastKey: String
 ) : RealtimeSubwayFetcher {
     override suspend fun fetch(stationName: String): PublicSubwayRealtimeResponse {

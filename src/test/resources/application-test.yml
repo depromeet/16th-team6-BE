@@ -46,6 +46,9 @@ open-api:
     service-key: ${secret.dev.OPEN_API_SERVICE_KEY}
     spare-key: ${secret.dev.OPEN_API_SPARE_KEY}
     real-last-key: ${secret.dev.OPEN_API_REAL_LAST_KEY}
+    subway-realtime-key: ${secret.dev.OPEN_API_SERVICE_KEY}
+    url:
+      realtime-subway: http://swopenapi.seoul.go.kr/api/subway
 
 kric:
   api:

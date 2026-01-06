@@ -72,6 +72,7 @@ open-api:
       incheon-position: https://apis.data.go.kr/6280000/busLocationService
       subway: http://apis.data.go.kr/1613000/SubwayInfoService
       subway-schedule: https://apis.data.go.kr/B553766/schedule
+      realtime-subway: http://swopenapi.seoul.go.kr/api/subway
       holiday: http://apis.data.go.kr/B090041/openapi/service/SpcdeInfoService
   limits:
     default: 100

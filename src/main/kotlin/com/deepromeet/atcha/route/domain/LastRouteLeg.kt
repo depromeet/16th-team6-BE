@@ -64,13 +64,6 @@ data class LastRouteLeg(
         )
     }
 
-    fun toSubwayStationMeta(): SubwayStationMeta {
-        return SubwayStationMeta(
-            start.name,
-            start.coordinate
-        )
-    }
-
     fun calcBoardingTime(
         targetTime: LocalDateTime,
         direction: TimeDirection
