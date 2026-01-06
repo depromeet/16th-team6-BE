@@ -102,4 +102,5 @@ data class BusRealTimeArrivals(
                 add(arrivals[targetIndex + 1])
             }
         }
+
 }

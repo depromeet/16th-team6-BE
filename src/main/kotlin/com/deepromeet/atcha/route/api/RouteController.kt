@@ -8,6 +8,7 @@ import com.deepromeet.atcha.route.application.RouteService
 import com.deepromeet.atcha.shared.web.ApiResponse
 import com.deepromeet.atcha.shared.web.token.CurrentUser
 import com.deepromeet.atcha.transit.api.response.RealTimeBusArrivalResponse
+import com.deepromeet.atcha.transit.api.response.RealTimeSubwayArrivalResponse
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -137,4 +138,26 @@ class RouteController(
                 routeService.refreshUserRoute(UserId(id))
             )
         )
+
+    @GetMapping("real-time-subway-arrival/{stationName}")
+    suspend fun getRealTimeSubwayArrival(
+        @PathVariable stationName: String
+    ): ApiResponse<Any> {
+        return ApiResponse.success(
+            routeService.getRealTimeSubwayArrivalStation(stationName)
+        )
+    }
+
+    @GetMapping("/user-routes/subway-arrival")
+    suspend fun getSubwayArrivalInUserRoute(
+        @CurrentUser id: Long,
+        @RequestParam routeName: String
+    ): ApiResponse<List<RealTimeSubwayArrivalResponse>> {
+        return ApiResponse.success(
+            routeService.getTargetSubwayArrivals(
+                UserId(id),
+                routeName
+            ).map { RealTimeSubwayArrivalResponse(routeName, it) }
+        )
+    }
 }
