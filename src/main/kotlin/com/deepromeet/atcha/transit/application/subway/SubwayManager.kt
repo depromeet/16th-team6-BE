@@ -11,11 +11,15 @@ import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayRealtimeResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayBranchRepository
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class SubwayManager(
@@ -75,14 +79,18 @@ class SubwayManager(
         subwayLine: SubwayLine,
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
-        val stationName = stationName.replace("역$".toRegex(), "")
-        val response = realtimeSubwayFetcher.fetch(stationName)
+        val afterRegexStationName: String = stationName.replace("역$".toRegex(), "")
+        log.warn { "-----지하철 실시간 요청 시작-----" }
+        log.warn { "변환 전 역 이름: $stationName, 변환 후 역 이름: $afterRegexStationName, 방향: $direction 노선: $subwayLine" }
+
+        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(afterRegexStationName)
+        log.warn { "조회한 지하철 정보\n response: $response" }
 
         if (response.realtimeArrivalList.isNullOrEmpty()) {
             return SubwayRealTimeArrivals.empty()
         }
 
-        val filteredArrivals =
+        val filteredArrivals: List<SubwayArrival> =
             response.realtimeArrivalList
                 .filter { arrival ->
                     matchesSubwayLine(arrival.subwayId, subwayLine) &&
@@ -90,7 +98,9 @@ class SubwayManager(
                 }
                 .map { SubwayArrival.fromRealtimeArrival(it) }
                 .sortedBy { it.remainingTimeSeconds }
+        log.warn { "필터링된 지하철 정보\n filteredArrivals: $filteredArrivals" }
 
+        log.warn { "-----지하철 실시간 요청 완료-----" }
         return SubwayRealTimeArrivals(filteredArrivals)
     }
 
