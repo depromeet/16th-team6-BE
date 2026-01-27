@@ -75,9 +75,10 @@ class SubwayManager(
         subwayLine: SubwayLine,
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
+        val stationName = stationName.replace("역$".toRegex(), "")
         val response = realtimeSubwayFetcher.fetch(stationName)
 
-        if (response.realtimeArrivalList.isEmpty()) {
+        if (response.realtimeArrivalList.isNullOrEmpty()) {
             return SubwayRealTimeArrivals.empty()
         }
 
