@@ -12,7 +12,7 @@ interface PublicSubwayRealtimeArrivalHttpClient {
         @PathVariable key: String,
         @PathVariable type: String = "json",
         @PathVariable startIndex: Int = 1,
-        @PathVariable endIndex: Int = 10,
+        @PathVariable endIndex: Int = 50,
         @PathVariable statnNm: String
     ): PublicSubwayRealtimeResponse
 }

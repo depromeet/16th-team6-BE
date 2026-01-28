@@ -170,11 +170,11 @@ class RouteService(
         val targetSubway = lastRoute.findSubway(routeName)
         val scheduledTime = targetSubway.departureDateTime!!
 
-        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
-
-        if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
-            return listOf(SubwayArrival.createScheduled(scheduledTime))
-        }
+//        TODO : 어느정도 검증 완료된 후 '남은 시간에 따른 실시간 정보 리턴' 적용 예정
+//        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
+//        if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
+//            return listOf(SubwayArrival.createScheduled(scheduledTime))
+//        }
 
         val closest = routeArrivalCalculator.closestSubwayArrivals(targetSubway, scheduledTime)
 
