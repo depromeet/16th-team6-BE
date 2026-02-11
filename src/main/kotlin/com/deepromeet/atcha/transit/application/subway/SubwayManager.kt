@@ -91,7 +91,7 @@ class SubwayManager(
         }
 
         val filteredArrivals: List<SubwayArrival> =
-            response.realtimeArrivalList
+            response.realtimeArrivalList!!
                 .filter { arrival ->
                     matchesSubwayLine(arrival.subwayId, subwayLine) &&
                         matchesDirection(arrival.updnLine, direction)
