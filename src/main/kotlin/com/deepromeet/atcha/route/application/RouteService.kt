@@ -157,8 +157,7 @@ class RouteService(
     }
 
     suspend fun getRealTimeSubwayArrivalStation(stationName: String): PublicSubwayRealtimeResponse {
-        // "역" suffix만 제거, 역 이름은 그대로 사용
-        val apiStationName = stationName.replace("역$".toRegex(), "")
+        val apiStationName = stationName.removeSuffix("역")
         return realtimeSubwayFetcher.fetch(apiStationName)
     }
 

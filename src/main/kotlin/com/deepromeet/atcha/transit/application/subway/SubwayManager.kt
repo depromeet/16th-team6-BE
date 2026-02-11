@@ -79,7 +79,7 @@ class SubwayManager(
         subwayLine: SubwayLine,
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
-        val apiStationName: String = stationName.replace("역$".toRegex(), "")
+        val apiStationName: String = stationName.removeSuffix("역")
         log.warn { "-----지하철 실시간 요청 시작-----" }
         log.warn { "역 이름: $stationName -> API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
 
