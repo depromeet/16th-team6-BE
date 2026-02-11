@@ -76,7 +76,7 @@ class PublicSubwayTimetableClient(
                     subwayScheduleHttpClient.getTrainSchedule(
                         key,
                         line.mainName(),
-                        startStation.normalizeName(),
+                        startStation.name,
                         dailyType.description,
                         direction.getName(line.isCircular),
                         pageNo = 1,
@@ -106,7 +106,7 @@ class PublicSubwayTimetableClient(
                                 subwayScheduleHttpClient.getTrainSchedule(
                                     key,
                                     line.mainName(),
-                                    startStation.normalizeName(),
+                                    startStation.name, // DB의 풀네임 그대로 사용
                                     dailyType.description,
                                     direction.getName(line.isCircular),
                                     pageNo = page,

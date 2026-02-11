@@ -35,7 +35,7 @@ class RouteArrivalCalculator(
         scheduled: LocalDateTime
     ): List<SubwayArrival>? {
         val subwayInfo = targetSubway.requireSubwayInfo()
-        val stationName = subwayInfo.timeTable.startStation.normalizeName()
+        val stationName = subwayInfo.timeTable.startStation.name
         val subwayLine = subwayInfo.subwayLine
         val direction = subwayInfo.timeTable.subwayDirection
 
