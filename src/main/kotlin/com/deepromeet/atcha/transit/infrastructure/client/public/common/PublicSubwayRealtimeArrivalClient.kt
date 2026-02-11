@@ -36,6 +36,6 @@ class PublicSubwayRealtimeArrivalClient(
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR",
                 "LIMITED_NUMBER_OF_SERVICE_REQUESTS_PER_SECOND_EXCEEDS_ERROR"
             )
-        return response.errorMessage.code in limitMessages
+        return response.resolveErrorMessage().code in limitMessages
     }
 }
