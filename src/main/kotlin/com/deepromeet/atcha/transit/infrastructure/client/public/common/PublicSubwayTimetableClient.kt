@@ -103,10 +103,11 @@ class PublicSubwayTimetableClient(
                             spareKey = spareKey,
                             realLastKey = realLastKey,
                             apiCall = { key ->
+                                // DB의 풀네임 그대로 사용
                                 subwayScheduleHttpClient.getTrainSchedule(
                                     key,
                                     line.mainName(),
-                                    startStation.name, // DB의 풀네임 그대로 사용
+                                    startStation.name,
                                     dailyType.description,
                                     direction.getName(line.isCircular),
                                     pageNo = page,
