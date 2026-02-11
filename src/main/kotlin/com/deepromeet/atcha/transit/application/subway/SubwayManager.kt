@@ -32,6 +32,29 @@ class SubwayManager(
     private val subwayRouteCache: SubwayRouteCache,
     private val realtimeSubwayFetcher: RealtimeSubwayFetcher
 ) {
+    companion object {
+        /**
+         * 서울시 Open API에서 괄호를 포함한 전체 역 이름을 요구하는 역들의 매핑 테이블
+         * normalizeName()으로 괄호가 제거되면 API에서 데이터를 찾을 수 없으므로,
+         * 원본 이름으로 변환하여 API를 호출해야 함
+         */
+        private val STATION_NAME_MAPPING = mapOf(
+            "천호" to "천호(풍납토성)",
+            "총신대입구" to "총신대입구(이수)",
+            "충정로" to "충정로(경기대입구)",
+            "남태령" to "남태령(사당)",
+            "월곡" to "월곡(동덕여대)",
+            "신설동" to "신설동(구버전)",
+            "고속터미널" to "고속터미널(센트럴시티)"
+        )
+    }
+
+    /**
+     * 서울시 Open API에서 사용하는 역 이름으로 변환
+     */
+    private fun convertToApiStationName(normalizedName: String): String {
+        return STATION_NAME_MAPPING[normalizedName] ?: normalizedName
+    }
     suspend fun getRoutes(subwayLine: SubwayLine): List<Route> {
         return subwayRouteCache.get(subwayLine)
             ?: withContext(Dispatchers.IO) {
@@ -80,10 +103,11 @@ class SubwayManager(
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
         val afterRegexStationName: String = stationName.replace("역$".toRegex(), "")
+        val apiStationName: String = convertToApiStationName(afterRegexStationName)
         log.warn { "-----지하철 실시간 요청 시작-----" }
-        log.warn { "변환 전 역 이름: $stationName, 변환 후 역 이름: $afterRegexStationName, 방향: $direction 노선: $subwayLine" }
+        log.warn { "변환 전 역 이름: $stationName, 변환 후 역 이름: $afterRegexStationName, API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
 
-        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(afterRegexStationName)
+        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(apiStationName)
         log.warn { "조회한 지하철 정보\n response: $response" }
 
         if (response.realtimeArrivalList.isNullOrEmpty()) {
