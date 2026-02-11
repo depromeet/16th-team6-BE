@@ -79,11 +79,11 @@ class SubwayManager(
         subwayLine: SubwayLine,
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
-        val afterRegexStationName: String = stationName.replace("역$".toRegex(), "")
+        val apiStationName: String = stationName.removeSuffix("역")
         log.warn { "-----지하철 실시간 요청 시작-----" }
-        log.warn { "변환 전 역 이름: $stationName, 변환 후 역 이름: $afterRegexStationName, 방향: $direction 노선: $subwayLine" }
+        log.warn { "역 이름: $stationName -> API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
 
-        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(afterRegexStationName)
+        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(apiStationName)
         log.warn { "조회한 지하철 정보\n response: $response" }
 
         if (response.realtimeArrivalList.isNullOrEmpty()) {

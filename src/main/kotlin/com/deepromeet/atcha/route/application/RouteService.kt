@@ -157,7 +157,8 @@ class RouteService(
     }
 
     suspend fun getRealTimeSubwayArrivalStation(stationName: String): PublicSubwayRealtimeResponse {
-        return realtimeSubwayFetcher.fetch(stationName)
+        val apiStationName = stationName.removeSuffix("역")
+        return realtimeSubwayFetcher.fetch(apiStationName)
     }
 
     suspend fun getTargetSubwayArrivals(
