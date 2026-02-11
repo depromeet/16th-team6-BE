@@ -13,6 +13,7 @@ import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
 import com.deepromeet.atcha.transit.application.subway.RealtimeSubwayFetcher
+import com.deepromeet.atcha.transit.application.subway.SubwayStationNameConverter
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
 import com.deepromeet.atcha.transit.domain.subway.SubwayArrival
 import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayRealtimeResponse
@@ -157,7 +158,9 @@ class RouteService(
     }
 
     suspend fun getRealTimeSubwayArrivalStation(stationName: String): PublicSubwayRealtimeResponse {
-        return realtimeSubwayFetcher.fetch(stationName)
+        val normalizedName = stationName.replace("역$".toRegex(), "")
+        val apiStationName = SubwayStationNameConverter.convertToApiStationName(normalizedName)
+        return realtimeSubwayFetcher.fetch(apiStationName)
     }
 
     suspend fun getTargetSubwayArrivals(
