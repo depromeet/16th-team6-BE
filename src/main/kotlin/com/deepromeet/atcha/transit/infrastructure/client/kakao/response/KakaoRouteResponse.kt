@@ -13,6 +13,10 @@ data class KakaoRouteResponse(
             throw TransitException.of(TransitError.TAXI_START_NOT_FOUND)
         }
 
+        if (status.code == "SAME_START_END") {
+            throw TransitException.of(TransitError.TAXI_SAME_LOCATION)
+        }
+
         if (status.code != "SUCCESS") {
             throw TransitException.of(
                 TransitError.TAXI_FARE_FETCH_FAILED,
