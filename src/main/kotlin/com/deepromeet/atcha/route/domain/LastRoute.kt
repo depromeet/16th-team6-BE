@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.domain
 
 import com.deepromeet.atcha.route.exception.RouteError
 import com.deepromeet.atcha.route.exception.RouteException
+import com.deepromeet.atcha.transit.domain.subway.SubwayLine
 import java.time.Duration
 import java.time.LocalDateTime
 import java.util.UUID
@@ -48,9 +49,28 @@ data class LastRoute(
     }
 
     fun findSubway(routeName: String): LastRouteLeg {
-        return legs.firstOrNull { it.route.equals(routeName) } ?: throw RouteException.of(
+        val targetLine =
+            try {
+                SubwayLine.fromRouteName(routeName)
+            } catch (e: IllegalArgumentException) {
+                throw RouteException.of(
+                    RouteError.INVALID_LAST_ROUTE,
+                    "$id 경로에서 ${routeName}에 해당하는 지하철을 찾을 수 없습니다. (유효하지 않은 노선명)"
+                )
+            }
+
+        return legs.firstOrNull { leg ->
+            leg.route?.let { legRoute ->
+                try {
+                    val legLine = SubwayLine.fromRouteName(legRoute)
+                    legLine == targetLine
+                } catch (e: IllegalArgumentException) {
+                    false
+                }
+            } ?: false
+        } ?: throw RouteException.of(
             RouteError.INVALID_LAST_ROUTE,
-            "$id 경로에서 ${routeName}에 해당하는 지하철를 찾을 수 없습니다."
+            "$id 경로에서 $routeName(${targetLine.name})에 해당하는 지하철을 찾을 수 없습니다."
         )
     }
 
