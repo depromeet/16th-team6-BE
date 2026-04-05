@@ -41,27 +41,15 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: [ "Prod A", "Prod B" ]
-    env:
-      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }}
-      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }}
+    # matrix를 제거하여 단일 실행으로 변경했습니다.
     steps:
-      - name: Set host variable based on target
-        id: set_host
-        run: |
-          if [ "${{ matrix.target }}" = "Prod A" ]; then
-            echo "HOST=${PROD_APP_A_IP}" >> $GITHUB_ENV
-          else
-            echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
-          fi
-
       - uses: actions/checkout@v4
+
       - name: Copy file via ssh password
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ env.HOST }}
+          # HOST 변수를 따로 설정할 필요 없이 바로 Prod A IP를 참조합니다.
+          host: ${{ secrets.PROD_APP_A_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
@@ -78,7 +66,7 @@ jobs:
       - name: SSH Jump Host to Prod Server and Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.HOST }}
+          host: ${{ secrets.PROD_APP_A_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
@@ -91,6 +79,7 @@ jobs:
           script: |
             cd /home/atcha
             rm -rf /home/atcha/data
+            # 복사된 파일들을 /home/atcha로 이동시키고 정리합니다.
             mv /home/atcha/deployment/prod/* /home/atcha/
             rm -rf /home/atcha/deployment
             sudo bash ./deploy.sh
