@@ -3,17 +3,23 @@ package com.deepromeet.atcha.transit.application.subway
 import com.deepromeet.atcha.transit.application.DailyTypeResolver
 import com.deepromeet.atcha.transit.domain.TransitType
 import com.deepromeet.atcha.transit.domain.subway.Route
+import com.deepromeet.atcha.transit.domain.subway.SubwayArrival
 import com.deepromeet.atcha.transit.domain.subway.SubwayDirection
 import com.deepromeet.atcha.transit.domain.subway.SubwayLine
+import com.deepromeet.atcha.transit.domain.subway.SubwayRealTimeArrivals
 import com.deepromeet.atcha.transit.domain.subway.SubwayStation
 import com.deepromeet.atcha.transit.domain.subway.SubwayTimeTable
 import com.deepromeet.atcha.transit.exception.TransitError
 import com.deepromeet.atcha.transit.exception.TransitException
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayRealtimeResponse
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayBranchRepository
 import com.deepromeet.atcha.transit.infrastructure.repository.SubwayStationRepository
+import io.github.oshai.kotlinlogging.KotlinLogging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Component
+
+private val log = KotlinLogging.logger {}
 
 @Component
 class SubwayManager(
@@ -23,7 +29,8 @@ class SubwayManager(
     private val subwayBranchRepository: SubwayBranchRepository,
     private val subwayTimeTableCache: SubwayTimeTableCache,
     private val subwayStationCache: SubwayStationCache,
-    private val subwayRouteCache: SubwayRouteCache
+    private val subwayRouteCache: SubwayRouteCache,
+    private val realtimeSubwayFetcher: RealtimeSubwayFetcher
 ) {
     suspend fun getRoutes(subwayLine: SubwayLine): List<Route> {
         return subwayRouteCache.get(subwayLine)
@@ -65,5 +72,75 @@ class SubwayManager(
                     .also { timeTable -> subwayTimeTableCache.cache(start, dailyType, direction, timeTable) }
 
         return subwayTimeTable.filterReachable(destination, routes, isExpress)
+    }
+
+    suspend fun getRealTimeSubwayArrivals(
+        stationName: String,
+        subwayLine: SubwayLine,
+        direction: SubwayDirection
+    ): SubwayRealTimeArrivals {
+        val apiStationName: String = stationName.removeSuffix("역")
+        log.warn { "-----지하철 실시간 요청 시작-----" }
+        log.warn { "역 이름: $stationName -> API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
+
+        val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(apiStationName)
+        log.warn { "조회한 지하철 정보\n response: $response" }
+
+        if (response.realtimeArrivalList.isNullOrEmpty()) {
+            return SubwayRealTimeArrivals.empty()
+        }
+
+        val filteredArrivals: List<SubwayArrival> =
+            response.realtimeArrivalList!!
+                .filter { arrival ->
+                    matchesSubwayLine(arrival.subwayId, subwayLine) &&
+                        matchesDirection(arrival.updnLine, direction)
+                }
+                .map { SubwayArrival.fromRealtimeArrival(it) }
+                .sortedBy { it.remainingTimeSeconds }
+        log.warn { "필터링된 지하철 정보\n filteredArrivals: $filteredArrivals" }
+
+        log.warn { "-----지하철 실시간 요청 완료-----" }
+        return SubwayRealTimeArrivals(filteredArrivals)
+    }
+
+    private fun matchesSubwayLine(
+        subwayId: String,
+        targetLine: SubwayLine
+    ): Boolean {
+        val lineCode =
+            when (subwayId) {
+                "1001" -> "1"
+                "1002" -> "2"
+                "1003" -> "3"
+                "1004" -> "4"
+                "1005" -> "5"
+                "1006" -> "6"
+                "1007" -> "7"
+                "1008" -> "8"
+                "1009" -> "9"
+                "1063" -> "K4"
+                "1065" -> "A1"
+                "1067" -> "K1"
+                "1075" -> "K2"
+                "1077" -> "D1"
+                "1092" -> "UI"
+                "1093" -> "WS"
+                "1081" -> "K5"
+                "1094" -> "L1"
+                else -> subwayId
+            }
+        return lineCode == targetLine.lnCd
+    }
+
+    private fun matchesDirection(
+        updnLine: String,
+        targetDirection: SubwayDirection
+    ): Boolean {
+        return when (updnLine) {
+            "상행", "내선" -> targetDirection == SubwayDirection.UP
+            "하행", "외선" -> targetDirection == SubwayDirection.DOWN
+            else -> true
+        }
     }
 }

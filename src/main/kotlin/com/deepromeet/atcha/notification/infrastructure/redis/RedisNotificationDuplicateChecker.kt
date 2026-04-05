@@ -12,6 +12,11 @@ private val logger = KotlinLogging.logger {}
 class RedisNotificationDuplicateChecker(
     private val redisTemplate: RedisTemplate<String, String>
 ) : NotificationDuplicateChecker {
+    companion object {
+        private const val FIRST_NOTIFICATION_KEY_PREFIX = "notification:first"
+        private val FIRST_NOTIFICATION_TTL = Duration.ofHours(6)
+    }
+
     override fun isNewNotification(idempotencyKey: String): Boolean {
         return try {
             redisTemplate.opsForValue().setIfAbsent(
@@ -30,6 +35,23 @@ class RedisNotificationDuplicateChecker(
             redisTemplate.delete(idempotencyKey)
         } catch (e: Exception) {
             logger.warn { "알림 실패 표시 중 오류 발생: ${e.message}" }
+        }
+    }
+
+    override fun isFirstNotification(
+        userId: String,
+        routeId: String
+    ): Boolean {
+        val key = "$FIRST_NOTIFICATION_KEY_PREFIX:$userId:$routeId"
+        return try {
+            redisTemplate.opsForValue().setIfAbsent(
+                key,
+                System.currentTimeMillis().toString(),
+                FIRST_NOTIFICATION_TTL
+            ) ?: false
+        } catch (e: Exception) {
+            logger.warn { "첫 알림 확인 중 오류 발생: ${e.message}" }
+            false
         }
     }
 }

@@ -12,7 +12,10 @@ import com.deepromeet.atcha.route.infrastructure.client.tmap.TransitRouteClientV
 import com.deepromeet.atcha.transit.application.TransitRouteSearchClient
 import com.deepromeet.atcha.transit.application.bus.BusManager
 import com.deepromeet.atcha.transit.application.bus.StartedBusCache
+import com.deepromeet.atcha.transit.application.subway.RealtimeSubwayFetcher
 import com.deepromeet.atcha.transit.domain.bus.BusArrival
+import com.deepromeet.atcha.transit.domain.subway.SubwayArrival
+import com.deepromeet.atcha.transit.infrastructure.client.public.common.response.PublicSubwayRealtimeResponse
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
@@ -35,7 +38,8 @@ class RouteService(
     private val lastRouteCalculatorV2: LastRouteCalculatorV2,
     private val transitRouteClientV2: TransitRouteClientV2,
     private val routeArrivalCalculator: RouteArrivalCalculator,
-    private val lastRouteUpdater: LastRouteUpdater
+    private val lastRouteUpdater: LastRouteUpdater,
+    private val realtimeSubwayFetcher: RealtimeSubwayFetcher
 ) {
     @Deprecated("deprecated")
     @RouteCache
@@ -78,6 +82,7 @@ class RouteService(
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
+            serviceRegionValidator.validate(start, destination)
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
             lastRouteCalculator.streamLastRoutes(start, destination, validItineraries)
@@ -150,5 +155,35 @@ class RouteService(
         }
 
         return closest ?: listOf(BusArrival.createScheduled(scheduledTime))
+    }
+
+    suspend fun getRealTimeSubwayArrivalStation(stationName: String): PublicSubwayRealtimeResponse {
+        val apiStationName = stationName.removeSuffix("역")
+        return realtimeSubwayFetcher.fetch(apiStationName)
+    }
+
+    suspend fun getTargetSubwayArrivals(
+        userId: UserId,
+        routeName: String
+    ): List<SubwayArrival> {
+        val user = userReader.read(userId)
+        val userRoute = userRouteManager.read(user)
+        val lastRoute = lastRouteReader.read(userRoute.lastRouteId)
+        val targetSubway = lastRoute.findSubway(routeName)
+        val scheduledTime = targetSubway.departureDateTime!!
+
+//        TODO : 어느정도 검증 완료된 후 '남은 시간에 따른 실시간 정보 리턴' 적용 예정
+//        val remainingMinutes = Duration.between(LocalDateTime.now(), scheduledTime).toMinutes()
+//        if (remainingMinutes < 2 || userRoute.isUpdated().not()) {
+//            return listOf(SubwayArrival.createScheduled(scheduledTime))
+//        }
+
+        val closest = routeArrivalCalculator.closestSubwayArrivals(targetSubway, scheduledTime)
+
+        closest?.firstOrNull()?.expectedArrivalTime?.let { newArrival ->
+            lastRouteUpdater.updateDepartureTime(lastRoute, targetSubway, newArrival)
+        }
+
+        return closest ?: listOf(SubwayArrival.createScheduled(scheduledTime))
     }
 }
