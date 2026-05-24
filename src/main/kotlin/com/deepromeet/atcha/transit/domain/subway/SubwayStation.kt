@@ -10,7 +10,8 @@ class SubwayStation(
     val stationCode: String,
     val name: String,
     val routeName: String,
-    val routeCode: String
+    val routeCode: String,
+    val normalizedName: String = normalize(name)
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -29,7 +30,14 @@ class SubwayStation(
         return javaClass.hashCode()
     }
 
-    fun normalizeName(): String {
-        return name.replace(Regex("""\s*\(.*?\)"""), "").trim()
+    companion object {
+        // DB normalized_name 컬럼과 동일한 규칙으로 정렬되어야 매칭이 일관됨.
+        // trim 을 먼저 둬야 "신촌역 " 처럼 뒤 공백 있는 입력의 '역' 접미사 제거가 동작.
+        fun normalize(name: String): String {
+            return name
+                .trim()
+                .replace(Regex(""" *\([^)]*\) *"""), "")
+                .removeSuffix("역")
+        }
     }
 }
