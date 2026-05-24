@@ -32,14 +32,12 @@ class SubwayStation(
 
     companion object {
         // DB normalized_name 컬럼과 동일한 규칙으로 정렬되어야 매칭이 일관됨.
-        // 1) 괄호와 안의 내용 제거 (앞뒤 공백 포함)
-        // 2) 끝의 '역' 접미사 제거
-        // 3) 양 끝 공백 trim
+        // trim 을 먼저 둬야 "신촌역 " 처럼 뒤 공백 있는 입력의 '역' 접미사 제거가 동작.
         fun normalize(name: String): String {
             return name
+                .trim()
                 .replace(Regex(""" *\([^)]*\) *"""), "")
                 .removeSuffix("역")
-                .trim()
         }
     }
 }
