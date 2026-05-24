@@ -49,7 +49,11 @@ class SubwayManager(
         return subwayStationCache.get(subwayLine, stationName)
             ?: withContext(Dispatchers.IO) {
                 val normalized = SubwayStation.normalize(stationName)
-                subwayStationRepository.findStationByNameAndRoute(subwayLine.lnCd, normalized)
+                val routeCode = subwayLine.lnCd
+                (
+                    subwayStationRepository.findFirstByRouteCodeAndNormalizedName(routeCode, normalized)
+                        ?: subwayStationRepository.findFirstByRouteCodeAndNameLike(routeCode, "%($normalized)%")
+                )
                     ?: throw TransitException.of(
                         TransitError.NOT_FOUND_SUBWAY_STATION,
                         "DB에서 지하철 노선 '${subwayLine.mainName()}'의 역 '$stationName'을 찾을 수 없습니다."
