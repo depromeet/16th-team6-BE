@@ -16,10 +16,17 @@ object ItineraryValidator {
 
         val transitModes = extractTransitModes(itinerary.legs)
 
-        return hasOnlyValidModes(transitModes) &&
-            hasNoBusInMiddle(transitModes) &&
-            hasValidBusCount(transitModes)
+        if (!hasOnlyValidModes(transitModes)) return false
+
+        // 순수 버스 3개 경로는 중간 버스/버스 수 제한을 예외 허용한다.
+        // (LastRouteCalculator가 가장 이른 막차 버스에 배차간격 버퍼를 둬 환승 위험을 보완한다.)
+        if (isBusOnlyThreeLegs(transitModes)) return true
+
+        return hasNoBusInMiddle(transitModes) && hasValidBusCount(transitModes)
     }
+
+    private fun isBusOnlyThreeLegs(transitModes: List<RouteMode>): Boolean =
+        transitModes.size == 3 && transitModes.all { it == RouteMode.BUS }
 
     private fun extractTransitModes(legs: List<RouteLeg>): List<RouteMode> {
         return legs.filter { it.mode != RouteMode.WALK }.map { it.mode }

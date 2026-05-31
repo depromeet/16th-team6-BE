@@ -2,6 +2,7 @@ package com.deepromeet.atcha.route.application
 
 import com.deepromeet.atcha.location.domain.Coordinate
 import com.deepromeet.atcha.route.domain.LastRoute
+import com.deepromeet.atcha.route.domain.LastRouteLeg
 import com.deepromeet.atcha.route.domain.LastRouteTimeAdjuster
 import com.deepromeet.atcha.route.domain.RouteItinerary
 import com.deepromeet.atcha.route.domain.isValidLastRoute
@@ -100,11 +101,28 @@ class LastRouteCalculator(
     private suspend fun calculateRoute(itinerary: RouteItinerary): LastRoute? =
         runCatching {
             val calculatedLegs = legCalculator.calcLastTime(itinerary.legs)
-            val timeAdjustedLegs = timeAdjuster.adjustTransitDepartureTimes(calculatedLegs)
+            val bufferedLegs = applyBusOnlyAnchorBuffer(calculatedLegs)
+            val timeAdjustedLegs = timeAdjuster.adjustTransitDepartureTimes(bufferedLegs)
             LastRoute.create(itinerary, timeAdjustedLegs)
         }.onFailure { exception ->
             log.warn(exception) { "여정의 막차 시간 계산 중 예외가 발생하여 해당 여정을 제외합니다." }
         }.getOrNull()
+
+    // 순수 버스 3개 경로는 중간 버스 환승 위험이 커서, 가장 이른 막차 버스(anchor)를 한 배차(term) 앞 차로 계획한다.
+    // 진짜 막차는 fallback으로 남아 한 번의 여유가 생기고, 상류 버스들이 anchor를 잡을 슬랙도 늘어난다.
+    private fun applyBusOnlyAnchorBuffer(legs: List<LastRouteLeg>): List<LastRouteLeg> {
+        val transitLegs = legs.filter { it.isTransit() }
+        if (transitLegs.size != 3 || !transitLegs.all { it.isBus() }) return legs
+
+        val anchor = transitLegs.minByOrNull { it.departureDateTime!! } ?: return legs
+        val timeTable = anchor.busInfo?.timeTable ?: return legs
+        val buffered = anchor.departureDateTime!!.minusMinutes(timeTable.term.toLong())
+        if (buffered.isBefore(timeTable.firstTime)) return legs
+
+        return legs.map { leg ->
+            if (leg === anchor) leg.copy(departureDateTime = buffered) else leg
+        }
+    }
 
     private fun List<Deferred<LastRoute?>>.handleResultsInBackground(
         lastRouteBuffer: ConcurrentLinkedQueue<LastRoute>,

@@ -36,13 +36,35 @@ class PublicSubwayTimetableClient(
         dailyType: DailyType,
         direction: SubwayDirection
     ): SubwayTimeTable {
-        val (stations, rawSchedules) = fetchDataConcurrently(startStation, dailyType, direction)
-        val schedule = mapToSchedule(rawSchedules, stations)
+        // 공공 API는 괄호 별칭/'역' 접미사를 뗀 정규화 이름으로 시간표를 색인한다.
+        val primary = fetchSchedule(startStation, startStation.normalizedName, dailyType, direction)
+
+        // 총신대입구(이수)처럼 노선별 역명이 다른 경우, 정규화 이름이 비면 괄호 안 별칭(이수)으로 재시도한다.
+        val schedule =
+            if (primary.isNotEmpty()) {
+                primary
+            } else {
+                startStation.parenthesisAlias()
+                    ?.let { fetchSchedule(startStation, it, dailyType, direction) }
+                    ?: primary
+            }
+
         return SubwayTimeTable(startStation, dailyType, direction, schedule)
+    }
+
+    private suspend fun fetchSchedule(
+        startStation: SubwayStation,
+        queryName: String,
+        dailyType: DailyType,
+        direction: SubwayDirection
+    ): List<SubwaySchedule> {
+        val (stations, rawSchedules) = fetchDataConcurrently(startStation, queryName, dailyType, direction)
+        return mapToSchedule(rawSchedules, stations)
     }
 
     private suspend fun fetchDataConcurrently(
         startStation: SubwayStation,
+        queryName: String,
         dailyType: DailyType,
         direction: SubwayDirection
     ): Pair<List<SubwayStation>, List<TrainScheduleResponse>> =
@@ -54,7 +76,7 @@ class PublicSubwayTimetableClient(
 
             val schedulesDeferred =
                 async(Dispatchers.IO) {
-                    fetchSchedulePages(startStation, dailyType, direction)
+                    fetchSchedulePages(startStation, queryName, dailyType, direction)
                 }
 
             stationsDeferred.await() to schedulesDeferred.await()
@@ -62,6 +84,7 @@ class PublicSubwayTimetableClient(
 
     private suspend fun fetchSchedulePages(
         startStation: SubwayStation,
+        queryName: String,
         dailyType: DailyType,
         direction: SubwayDirection
     ): List<TrainScheduleResponse> {
@@ -76,7 +99,7 @@ class PublicSubwayTimetableClient(
                     subwayScheduleHttpClient.getTrainSchedule(
                         key,
                         line.mainName(),
-                        startStation.name,
+                        queryName,
                         dailyType.description,
                         direction.getName(line.isCircular),
                         pageNo = 1,
@@ -103,11 +126,10 @@ class PublicSubwayTimetableClient(
                             spareKey = spareKey,
                             realLastKey = realLastKey,
                             apiCall = { key ->
-                                // DB의 풀네임 그대로 사용
                                 subwayScheduleHttpClient.getTrainSchedule(
                                     key,
                                     line.mainName(),
-                                    startStation.name,
+                                    queryName,
                                     dailyType.description,
                                     direction.getName(line.isCircular),
                                     pageNo = page,
@@ -124,7 +146,10 @@ class PublicSubwayTimetableClient(
                 }.awaitAll().forEach { allItems += it }
             }
         }
-        return allItems
+        // 공공 API는 stnNm을 부분 일치로 매칭하고('잠실' → 잠실/잠실나루/잠실새내) 정식 역명으로 응답한다('서울' → '서울역').
+        // DB와 동일한 정규화 규칙으로 비교해 요청한 역에 해당하는 행만 남긴다.
+        val target = SubwayStation.normalize(queryName)
+        return allItems.filter { it.stnNm?.let { name -> SubwayStation.normalize(name) == target } == true }
     }
 
     private suspend fun mapToSchedule(

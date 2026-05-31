@@ -30,7 +30,7 @@ class HttpInterfaceConfig {
     fun customWebClientBuilder(): WebClient.Builder {
         val httpClient =
             HttpClient.create()
-                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 1_000)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 3_000)
                 .responseTimeout(Duration.ofMillis(5_000))
                 .doOnConnected { conn ->
                     conn.addHandlerLast(ReadTimeoutHandler(5_000, TimeUnit.MILLISECONDS))

@@ -11,6 +11,7 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.HttpRequestMethodNotSupportedException
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.servlet.resource.NoResourceFoundException
@@ -52,6 +53,22 @@ class GlobalControllerAdvice(
             RequestException.of(
                 RequestError.NO_MATCHED_RESOURCE,
                 "요청하신 리소스를 찾을 수 없습니다: ${noResourceException.resourcePath}"
+            )
+        return handle(exception, request)
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(
+        validationException: MethodArgumentNotValidException,
+        request: HttpServletRequest
+    ): ResponseEntity<*> {
+        val detail =
+            validationException.bindingResult.fieldErrors
+                .joinToString(", ") { "${it.field}=${it.rejectedValue}" }
+        val exception =
+            RequestException.of(
+                RequestError.INVALID_REQUEST,
+                "요청 값이 올바르지 않습니다: $detail"
             )
         return handle(exception, request)
     }

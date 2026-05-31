@@ -85,11 +85,11 @@ class SubwayManager(
         direction: SubwayDirection
     ): SubwayRealTimeArrivals {
         val apiStationName: String = stationName.removeSuffix("역")
-        log.warn { "-----지하철 실시간 요청 시작-----" }
-        log.warn { "역 이름: $stationName -> API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
+        log.debug { "-----지하철 실시간 요청 시작-----" }
+        log.debug { "역 이름: $stationName -> API 역 이름: $apiStationName, 방향: $direction 노선: $subwayLine" }
 
         val response: PublicSubwayRealtimeResponse = realtimeSubwayFetcher.fetch(apiStationName)
-        log.warn { "조회한 지하철 정보\n response: $response" }
+        log.debug { "조회한 지하철 정보\n response: $response" }
 
         if (response.realtimeArrivalList.isNullOrEmpty()) {
             return SubwayRealTimeArrivals.empty()
@@ -103,9 +103,9 @@ class SubwayManager(
                 }
                 .map { SubwayArrival.fromRealtimeArrival(it) }
                 .sortedBy { it.remainingTimeSeconds }
-        log.warn { "필터링된 지하철 정보\n filteredArrivals: $filteredArrivals" }
+        log.debug { "필터링된 지하철 정보\n filteredArrivals: $filteredArrivals" }
 
-        log.warn { "-----지하철 실시간 요청 완료-----" }
+        log.debug { "-----지하철 실시간 요청 완료-----" }
         return SubwayRealTimeArrivals(filteredArrivals)
     }
 
