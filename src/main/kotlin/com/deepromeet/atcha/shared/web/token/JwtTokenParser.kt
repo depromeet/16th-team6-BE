@@ -10,6 +10,8 @@ import io.jsonwebtoken.security.Keys
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
+private const val CLOCK_SKEW_SECONDS = 30L
+
 @Component
 class JwtTokenParser(
     @Value("\${jwt.access.secret}")
@@ -44,6 +46,7 @@ class JwtTokenParser(
             val body =
                 Jwts.parserBuilder()
                     .setSigningKey(tokenKeyMap.get(tokenType))
+                    .setAllowedClockSkewSeconds(CLOCK_SKEW_SECONDS)
                     .build()
                     .parseClaimsJws(token)
                     .body
@@ -63,6 +66,7 @@ class JwtTokenParser(
             val body =
                 Jwts.parserBuilder()
                     .setSigningKey(tokenKeyMap.get(TokenType.REFRESH))
+                    .setAllowedClockSkewSeconds(CLOCK_SKEW_SECONDS)
                     .build()
                     .parseClaimsJws(refreshToken)
                     .body
@@ -86,6 +90,7 @@ class JwtTokenParser(
     ) {
         Jwts.parserBuilder()
             .setSigningKey(tokenKeyMap.get(tokenType))
+            .setAllowedClockSkewSeconds(CLOCK_SKEW_SECONDS)
             .build()
             .parseClaimsJws(token)
             .body.get("sub")
