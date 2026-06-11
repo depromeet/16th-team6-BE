@@ -41,52 +41,27 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        target: [ "Prod A", "Prod B" ]
-    env:
-      PROD_APP_A_IP: ${{ secrets.PROD_APP_A_IP }}
-      PROD_APP_B_IP: ${{ secrets.PROD_APP_B_IP }}
     steps:
-      - name: Set host variable based on target
-        id: set_host
-        run: |
-          if [ "${{ matrix.target }}" = "Prod A" ]; then
-            echo "HOST=${PROD_APP_A_IP}" >> $GITHUB_ENV
-          else
-            echo "HOST=${PROD_APP_B_IP}" >> $GITHUB_ENV
-          fi
-
       - uses: actions/checkout@v4
       - name: Copy file via ssh password
         uses: appleboy/scp-action@v0.1.4
         with:
-          host: ${{ env.HOST }}
+          host: ${{ secrets.PROD_APP_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
-
-          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
-          proxy_username: ${{ secrets.PROD_USERNAME }}
-          proxy_key: ${{ secrets.PROD_SSH_KEY }}
-          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
 
           timeout: 120s
           source: "./deployment/prod/"
           target: /home/atcha/
 
-      - name: SSH Jump Host to Prod Server and Deploy
+      - name: SSH to Prod Server and Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ env.HOST }}
+          host: ${{ secrets.PROD_APP_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
-
-          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
-          proxy_username: ${{ secrets.PROD_USERNAME }}
-          proxy_key: ${{ secrets.PROD_SSH_KEY }}
-          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
 
           script: |
             cd /home/atcha
