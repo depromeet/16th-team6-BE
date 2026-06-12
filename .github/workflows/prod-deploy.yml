@@ -41,45 +41,31 @@ jobs:
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    # matrix를 제거하여 단일 실행으로 변경했습니다.
     steps:
       - uses: actions/checkout@v4
-
       - name: Copy file via ssh password
         uses: appleboy/scp-action@v0.1.4
         with:
-          # HOST 변수를 따로 설정할 필요 없이 바로 Prod A IP를 참조합니다.
-          host: ${{ secrets.PROD_APP_A_IP }}
+          host: ${{ secrets.PROD_APP_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
-
-          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
-          proxy_username: ${{ secrets.PROD_USERNAME }}
-          proxy_key: ${{ secrets.PROD_SSH_KEY }}
-          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
 
           timeout: 120s
           source: "./deployment/prod/"
           target: /home/atcha/
 
-      - name: SSH Jump Host to Prod Server and Deploy
+      - name: SSH to Prod Server and Deploy
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.PROD_APP_A_IP }}
+          host: ${{ secrets.PROD_APP_IP }}
           username: ${{ secrets.PROD_USERNAME }}
           key: ${{ secrets.PROD_SSH_KEY }}
           port: ${{ secrets.REMOTE_SSH_PORT }}
 
-          proxy_host: ${{ secrets.REMOTE_BASTION_IP }}
-          proxy_username: ${{ secrets.PROD_USERNAME }}
-          proxy_key: ${{ secrets.PROD_SSH_KEY }}
-          proxy_port: ${{ secrets.REMOTE_SSH_PORT }}
-
           script: |
             cd /home/atcha
             rm -rf /home/atcha/data
-            # 복사된 파일들을 /home/atcha로 이동시키고 정리합니다.
             mv /home/atcha/deployment/prod/* /home/atcha/
             rm -rf /home/atcha/deployment
             sudo bash ./deploy.sh
