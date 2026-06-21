@@ -1,63 +1,41 @@
 package com.deepromeet.atcha.transit.infrastructure.cache
 
 import com.deepromeet.atcha.shared.infrastructure.cache.RedisCacheHitRecorder
+import com.deepromeet.atcha.shared.infrastructure.cache.RedisCacheStore
 import com.deepromeet.atcha.transit.application.bus.BusScheduleCache
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
 import com.deepromeet.atcha.transit.domain.bus.BusStationMeta
-import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.stereotype.Component
+import java.time.Duration
 import java.time.LocalDateTime
-import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
 
 @Component
 class BusScheduleRedisCache(
-    private val busScheduleRedisTemplate: RedisTemplate<String, BusSchedule>,
-    private val cacheHitRecorder: RedisCacheHitRecorder
+    busScheduleRedisTemplate: RedisTemplate<String, BusSchedule>,
+    cacheHitRecorder: RedisCacheHitRecorder
 ) : BusScheduleCache {
-    private val log = KotlinLogging.logger {}
+    private val store = RedisCacheStore(busScheduleRedisTemplate, cacheHitRecorder, metric = "timetable:bus")
 
     override fun get(
         routeName: String,
         busStation: BusStationMeta
-    ): BusSchedule? {
-        val key = getKey(routeName, busStation)
-        return try {
-            val schedule = busScheduleRedisTemplate.opsForValue().get(key)
-            cacheHitRecorder.record("timetable:bus", schedule != null)
-            schedule
-        } catch (e: Exception) {
-            log.warn { "버스 시간표 캐시 조회 중 오류 발생: ${e.message}" }
-            cacheHitRecorder.record("timetable:bus", false)
-            null
-        }
-    }
+    ): BusSchedule? = store.get(getKey(routeName, busStation))
 
     override fun cache(
         routeName: String,
         busStation: BusStationMeta,
         busSchedule: BusSchedule
-    ) {
-        val key = getKey(routeName, busStation)
-        val ttlSeconds = calculateTtlUntilMidnight()
-        try {
-            busScheduleRedisTemplate.opsForValue().set(key, busSchedule, ttlSeconds, TimeUnit.SECONDS)
-        } catch (e: Exception) {
-            log.warn { "버스 시간표 캐시 저장 중 오류 발생: ${e.message}" }
-        }
-    }
+    ) = store.put(getKey(routeName, busStation), busSchedule, ttlUntilMidnight())
 
     private fun getKey(
         routeName: String,
         busStation: BusStationMeta
-    ): String {
-        return "routes:time:bus:$routeName:${busStation.coordinate.lat},${busStation.coordinate.lon}"
-    }
+    ): String = "routes:time:bus:$routeName:${busStation.coordinate.lat},${busStation.coordinate.lon}"
 
-    private fun calculateTtlUntilMidnight(): Long {
+    private fun ttlUntilMidnight(): Duration {
         val now = LocalDateTime.now()
         val midnight = now.toLocalDate().plusDays(1).atStartOfDay()
-        return ChronoUnit.SECONDS.between(now, midnight)
+        return Duration.between(now, midnight)
     }
 }
