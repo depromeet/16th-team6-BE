@@ -9,8 +9,7 @@ import java.time.LocalDateTime
 @Component
 class LastRouteAppender(
     private val lastRouteCache: LastRouteCache,
-    private val lastRouteIndexCache: LastRouteIndexCache,
-    routeCache: LastRouteCache
+    private val lastRouteIndexCache: LastRouteIndexCache
 ) {
     fun append(route: LastRoute) {
         lastRouteCache.cache(route)

@@ -17,7 +17,7 @@ private val log = KotlinLogging.logger {}
 
 @Component
 class BusRouteResolver(
-    private val clientMap: Map<ServiceRegion, BusRouteInfoClient>,
+    private val busRouteInfoClients: BusRouteInfoClients,
     private val busRouteMatcher: BusRouteMatcher,
     private val regionPolicy: ServiceRegionCandidatePolicy
 ) {
@@ -54,7 +54,7 @@ class BusRouteResolver(
         passStopList: RoutePassStops
     ): BusRouteInfo? =
         runCatching {
-            val routes = clientMap[region]!!.getBusRoutes(routeName)
+            val routes = busRouteInfoClients.forRegion(region).getBusRoutes(routeName)
             busRouteMatcher.getMatchedRoute(routes, station, passStopList)
         }.onFailure { log.debug { it.message } }.getOrNull()
 }

@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.shared.infrastructure.mixpanel.MixpanelEventPublisher
 import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
 import com.deepromeet.atcha.transit.domain.RoutePassStops
@@ -23,7 +22,7 @@ import java.time.LocalDateTime
 
 @Component
 class BusManager(
-    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
+    private val busRouteInfoClients: BusRouteInfoClients,
     private val busPositionFetcher: CompositeBusPositionFetcher,
     private val busScheduleProvider: BusScheduleProvider,
     private val busRouteResolver: BusRouteResolver,
@@ -59,16 +58,17 @@ class BusManager(
         passStopList: RoutePassStops
     ): BusRealTimeArrivals {
         val routeInfo = busRouteResolver.resolve(routeName, meta, passStopList)
-        return busRouteInfoClientMap[routeInfo.route.serviceRegion]!!.getBusRealTimeInfo(routeInfo)
+        return busRouteInfoClients.forRegion(routeInfo.route.serviceRegion).getBusRealTimeInfo(routeInfo)
     }
 
     suspend fun getBusRouteOperationInfo(route: BusRoute): BusRouteOperationInfo {
-        return busRouteInfoClientMap[route.serviceRegion]!!.getBusRouteInfo(route)
+        return busRouteInfoClients.forRegion(route.serviceRegion).getBusRouteInfo(route)
     }
 
     suspend fun getBusPositions(route: BusRoute): BusRoutePositions =
         coroutineScope {
-            val stations = async(Dispatchers.IO) { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
+            val stations =
+                async(Dispatchers.IO) { busRouteInfoClients.forRegion(route.serviceRegion).getStationList(route) }
             val positions = async(Dispatchers.IO) { busPositionFetcher.fetch(route) }
             BusRoutePositions(stations.await(), positions.await())
         }
