@@ -1,5 +1,6 @@
 package com.deepromeet.atcha.route.api
 
+import com.deepromeet.atcha.route.api.request.GuestLastRoutesRequest
 import com.deepromeet.atcha.route.api.request.LastRoutesRequest
 import com.deepromeet.atcha.route.api.request.UserRouteRequest
 import com.deepromeet.atcha.route.api.response.LastRouteResponse
@@ -70,6 +71,19 @@ class RouteController(
     ): Flow<LastRouteResponse> {
         return routeService.getLastRouteStream(
             UserId(id),
+            request.toStart(),
+            request.toEnd()
+        ).map { route -> LastRouteResponse(route) }
+    }
+
+    @GetMapping(
+        "/v3/guest/last-routes/stream",
+        produces = [MediaType.TEXT_EVENT_STREAM_VALUE, MediaType.APPLICATION_JSON_VALUE]
+    )
+    fun streamGuestLastRoutesV3(
+        @ModelAttribute request: GuestLastRoutesRequest
+    ): Flow<LastRouteResponse> {
+        return routeService.getGuestLastRouteStream(
             request.toStart(),
             request.toEnd()
         ).map { route -> LastRouteResponse(route) }

@@ -19,6 +19,8 @@ import com.deepromeet.atcha.transit.infrastructure.client.public.common.response
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.domain.UserId
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.asFlow
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.flow.flow
 import org.springframework.stereotype.Service
 import java.time.Duration
@@ -82,6 +84,27 @@ class RouteService(
     ): Flow<LastRoute> =
         flow {
             val destination = end ?: userReader.read(userId).getHomeCoordinate()
+            emitAll(streamLastRoutes(start, destination))
+        }
+
+    fun getGuestLastRouteStream(
+        start: Coordinate,
+        end: Coordinate
+    ): Flow<LastRoute> =
+        flow {
+            val cached = lastRouteReader.read(start, end)
+            if (cached != null) {
+                emitAll(cached.asFlow())
+                return@flow
+            }
+            emitAll(streamLastRoutes(start, end))
+        }
+
+    private fun streamLastRoutes(
+        start: Coordinate,
+        destination: Coordinate
+    ): Flow<LastRoute> =
+        flow {
             serviceRegionValidator.validate(start, destination)
             val itineraries = transitRouteSearchClient.searchRoutes(start, destination)
             val validItineraries = ItineraryValidator.filterValidItineraries(itineraries)
