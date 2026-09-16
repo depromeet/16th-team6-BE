@@ -2,11 +2,6 @@ package com.deepromeet.atcha.shared.infrastructure.cache.config
 
 import com.deepromeet.atcha.route.domain.UserRoute
 import com.deepromeet.atcha.transit.domain.bus.BusPosition
-import com.fasterxml.jackson.databind.DeserializationFeature
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.SerializationFeature
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule
-import com.fasterxml.jackson.module.kotlin.KotlinModule
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -18,8 +13,6 @@ import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactor
 import org.springframework.data.redis.core.RedisTemplate
 import org.springframework.data.redis.core.script.RedisScript
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories
-import org.springframework.data.redis.serializer.Jackson2JsonRedisSerializer
-import org.springframework.data.redis.serializer.StringRedisSerializer
 import java.time.Duration
 
 @Configuration
@@ -69,38 +62,11 @@ class DefaultRedisConfig(
         return RedisScript.of(script, Long::class.java)
     }
 
-    fun <T> createRedisTemplate(
-        redisConnectionFactory: RedisConnectionFactory,
-        clazz: Class<T>
-    ): RedisTemplate<String, T> {
-        val template = RedisTemplate<String, T>()
-        template.connectionFactory = redisConnectionFactory
-
-        val kotlinModule = KotlinModule.Builder().build()
-        val objectMapper =
-            ObjectMapper()
-                .registerModule(kotlinModule)
-                .registerModule(JavaTimeModule())
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-                .configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false)
-
-        val serializer = Jackson2JsonRedisSerializer(objectMapper, clazz)
-
-        template.keySerializer = StringRedisSerializer()
-        template.valueSerializer = serializer
-        template.hashKeySerializer = StringRedisSerializer()
-        template.hashValueSerializer = serializer
-
-        return template
-    }
+    @Bean
+    fun startedBusRedisTemplate(factory: RedisTemplateFactory): RedisTemplate<String, BusPosition> =
+        factory.create(BusPosition::class.java)
 
     @Bean
-    fun startedBusRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, BusPosition> {
-        return createRedisTemplate(redisConnectionFactory, BusPosition::class.java)
-    }
-
-    @Bean
-    fun userRouteRedisTemplate(redisConnectionFactory: RedisConnectionFactory): RedisTemplate<String, UserRoute> {
-        return createRedisTemplate(redisConnectionFactory, UserRoute::class.java)
-    }
+    fun userRouteRedisTemplate(factory: RedisTemplateFactory): RedisTemplate<String, UserRoute> =
+        factory.create(UserRoute::class.java)
 }

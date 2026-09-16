@@ -1,8 +1,7 @@
 package com.deepromeet.atcha.transit.infrastructure.client.public.common
 
-import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.shared.infrastructure.mixpanel.event.BusApiCallCountPerRequestProperty
-import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient
+import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClients
 import com.deepromeet.atcha.transit.application.bus.BusScheduleProvider
 import com.deepromeet.atcha.transit.domain.bus.BusRouteInfo
 import com.deepromeet.atcha.transit.domain.bus.BusSchedule
@@ -16,7 +15,7 @@ private val log = KotlinLogging.logger {}
 @Component
 @Order(1)
 class RegionBusScheduleProvider(
-    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>
+    private val busRouteInfoClients: BusRouteInfoClients
 ) : BusScheduleProvider {
     override suspend fun getBusSchedule(
         routeInfo: BusRouteInfo,
@@ -25,8 +24,8 @@ class RegionBusScheduleProvider(
         try {
             busApiCallCountPerRequestProperty.incrementPublicBusCallCount()
 
-            return busRouteInfoClientMap[routeInfo.route.serviceRegion]
-                ?.getBusSchedule(routeInfo)
+            return busRouteInfoClients.forRegion(routeInfo.route.serviceRegion)
+                .getBusSchedule(routeInfo)
         } catch (e: CancellationException) {
             throw e
         } catch (e: Exception) {
