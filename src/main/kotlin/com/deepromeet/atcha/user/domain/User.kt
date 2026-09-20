@@ -40,6 +40,25 @@ data class User(
     }
 
     companion object {
+        const val GUEST_PROVIDER_PREFIX = "GUEST:"
+
+        fun guestProviderId(deviceId: String): String = GUEST_PROVIDER_PREFIX + deviceId
+
+        fun createGuest(
+            deviceId: String,
+            fcmToken: String?
+        ): User {
+            require(deviceId.isNotBlank()) { "Device ID cannot be blank" }
+
+            return User(
+                id = UserId(0L),
+                providerId = guestProviderId(deviceId),
+                homeAddress = HomeAddress("", Coordinate(0.0, 0.0)),
+                fcmToken = fcmToken,
+                isDeleted = false
+            )
+        }
+
         fun create(
             providerId: String,
             homeAddress: HomeAddress,
