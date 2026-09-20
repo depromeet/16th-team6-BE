@@ -65,7 +65,11 @@ jobs:
 
           script: |
             cd /home/atcha
-            rm -rf /home/atcha/data
-            mv /home/atcha/deployment/prod/* /home/atcha/
+            # data 디렉터리에는 TLS 인증서(data/certbot)가 들어 있으므로 통째로 지우지 않는다.
+            # nginx.conf(현재 활성 색)는 서버 상태이므로 건드리지 않고 deploy.sh 가 교체한다.
+            cp -f /home/atcha/deployment/prod/deploy.sh /home/atcha/deploy.sh
+            cp -f /home/atcha/deployment/prod/docker-compose.yml /home/atcha/docker-compose.yml
+            sudo cp -f /home/atcha/deployment/prod/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx-blue.conf
+            sudo cp -f /home/atcha/deployment/prod/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx-green.conf
             rm -rf /home/atcha/deployment
             sudo bash ./deploy.sh

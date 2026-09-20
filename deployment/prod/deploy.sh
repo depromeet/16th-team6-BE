@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-IS_BLUE=$(docker compose ps | grep atcha-blue)
-DEFAULT_CONF="data/nginx/nginx.conf"
+set -euo pipefail
+
+IS_BLUE=$(docker compose ps | grep atcha-blue || true)
+NGINX_DIR="/home/atcha/data/nginx"
 MAX_RETRIES=100
 
 check_service() {
@@ -53,56 +55,69 @@ ensure_nginx_running() {
   fi
 }
 
-restart_nginx() {
-  echo "nginx 컨테이너를 재시작합니다."
-  docker compose restart nginx
+# nginx.conf 를 지정한 색으로 교체한다.
+# 호스트 파일이 새 inode 로 바뀌면 실행 중인 컨테이너의 바인드 마운트가 끊기므로,
+# 마운트를 통해 컨테이너 안으로 직접 써 넣는다.
+switch_nginx_conf() {
+  local color=$1
+  echo "nginx 설정을 ${color} 로 교체합니다."
+  sudo cp -f "${NGINX_DIR}/nginx-${color}.conf" "${NGINX_DIR}/nginx.conf"
+  docker exec -i nginx sh -c 'cat > /etc/nginx/conf.d/nginx.conf' < "${NGINX_DIR}/nginx.conf"
+  docker exec nginx nginx -t
+  docker exec nginx nginx -s reload
+}
+
+# nginx 를 통해 실제로 새 컨테이너에 요청이 닿는지 확인한다.
+verify_upstream() {
+  local color=$1
+  local retries=0
+  while [ $retries -lt 10 ]; do
+    if docker exec nginx wget -q -O /dev/null "http://atcha-${color}:8080/api/health"; then
+      echo "${color} 업스트림 확인 완료."
+      return 0
+    fi
+    echo "${color} 업스트림 확인 실패, 재시도합니다. (attempt: $((retries+1)))"
+    sleep 3
+    retries=$((retries+1))
+  done
+  return 1
 }
 
 if [ -z "$IS_BLUE" ]; then
+  NEW_COLOR="blue"
+  OLD_COLOR="green"
   echo "### GREEN => BLUE ###"
-
-  echo "1. BLUE 이미지 받기"
-  docker compose pull atcha-blue
-
-  echo "2. BLUE 컨테이너 실행"
-  docker compose up -d atcha-blue
-
-  echo "3. BLUE 컨테이너 헬스 체크"
-  if ! check_service "atcha-blue"; then
-    echo "BLUE health check failed."
-    exit 1
-  fi
-
-  echo "4. nginx 재실행"
-  ensure_nginx_running
-  sudo cp -f /home/atcha/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx.conf
-  restart_nginx
-
-  echo "5. GREEN 컨테이너 중지 및 삭제"
-  docker compose stop atcha-green
-  docker compose rm -f atcha-green
-
 else
+  NEW_COLOR="green"
+  OLD_COLOR="blue"
   echo "### BLUE => GREEN ###"
-
-  echo "1. GREEN 이미지 받기"
-  docker compose pull atcha-green
-
-  echo "2. GREEN 컨테이너 실행"
-  docker compose up -d atcha-green
-
-  echo "3. GREEN 컨테이너 헬스 체크"
-  if ! check_service "atcha-green"; then
-    echo "GREEN health check failed."
-    exit 1
-  fi
-
-  echo "4. nginx 재실행"
-  ensure_nginx_running
-  sudo cp -f /home/atcha/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx.conf
-  restart_nginx
-
-  echo "5. BLUE 컨테이너 중지 및 삭제"
-  docker compose stop atcha-blue
-  docker compose rm -f atcha-blue
 fi
+
+echo "1. ${NEW_COLOR} 이미지 받기"
+docker compose pull "atcha-${NEW_COLOR}"
+
+echo "2. ${NEW_COLOR} 컨테이너 실행"
+docker compose up -d "atcha-${NEW_COLOR}"
+
+echo "3. ${NEW_COLOR} 컨테이너 헬스 체크"
+if ! check_service "atcha-${NEW_COLOR}"; then
+  echo "${NEW_COLOR} health check failed. 기존 컨테이너를 유지한 채 배포를 중단합니다."
+  exit 1
+fi
+
+echo "4. nginx 설정 전환"
+ensure_nginx_running
+switch_nginx_conf "$NEW_COLOR"
+
+echo "5. 전환 확인"
+if ! verify_upstream "$NEW_COLOR"; then
+  echo "${NEW_COLOR} 로 요청이 닿지 않습니다. ${OLD_COLOR} 로 되돌립니다."
+  switch_nginx_conf "$OLD_COLOR"
+  exit 1
+fi
+
+echo "6. ${OLD_COLOR} 컨테이너 중지 및 삭제"
+docker compose stop "atcha-${OLD_COLOR}"
+docker compose rm -f "atcha-${OLD_COLOR}"
+
+echo "배포 완료: ${OLD_COLOR} => ${NEW_COLOR}"
