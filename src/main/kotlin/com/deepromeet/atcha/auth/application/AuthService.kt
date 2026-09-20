@@ -13,6 +13,7 @@ import com.deepromeet.atcha.shared.web.token.TokenType
 import com.deepromeet.atcha.user.application.UserAppender
 import com.deepromeet.atcha.user.application.UserReader
 import com.deepromeet.atcha.user.application.UserUpdater
+import com.deepromeet.atcha.user.domain.User
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -68,6 +69,26 @@ class AuthService(
         val token = jwtTokenGenerator.generateTokens(user.id)
 
         return UserAuthInfo(user, token)
+    }
+
+    @Transactional
+    fun guestAuth(
+        deviceId: String,
+        fcmToken: String?
+    ): UserTokens {
+        require(deviceId.isNotBlank()) { "Device ID cannot be blank" }
+
+        val providerId = User.guestProviderId(deviceId)
+        val user =
+            if (userReader.checkExists(providerId)) {
+                val guest = userReader.readByProviderId(providerId)
+                fcmToken?.let { userUpdater.updateFcmToken(guest, it) } ?: guest
+            } else {
+                userAppender.append(User.createGuest(deviceId, fcmToken))
+            }
+
+        val token = jwtTokenGenerator.generateTokens(user.id)
+        return UserTokens(user.id, token)
     }
 
     @Transactional
