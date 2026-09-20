@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
-IS_BLUE=$(docker compose ps | grep atcha-blue)
-DEFAULT_CONF="data/nginx/nginx.conf"
+set -euo pipefail
+
+IS_BLUE=$(docker compose ps | grep atcha-blue || true)
+NGINX_DIR="/home/atcha/data/nginx"
 MAX_RETRIES=100
 
 check_service() {
@@ -59,50 +61,32 @@ restart_nginx() {
 }
 
 if [ -z "$IS_BLUE" ]; then
+  NEW_COLOR="blue"
+  OLD_COLOR="green"
   echo "### GREEN => BLUE ###"
-
-  echo "1. BLUE 이미지 받기"
-  docker compose pull atcha-blue
-
-  echo "2. BLUE 컨테이너 실행"
-  docker compose up -d atcha-blue
-
-  echo "3. BLUE 컨테이너 헬스 체크"
-  if ! check_service "atcha-blue"; then
-    echo "BLUE health check failed."
-    exit 1
-  fi
-
-  echo "4. nginx 재실행"
-  ensure_nginx_running
-  sudo cp -f /home/atcha/data/nginx/nginx-blue.conf /home/atcha/data/nginx/nginx.conf
-  restart_nginx
-
-  echo "5. GREEN 컨테이너 중지 및 삭제"
-  docker compose stop atcha-green
-  docker compose rm -f atcha-green
-
 else
+  NEW_COLOR="green"
+  OLD_COLOR="blue"
   echo "### BLUE => GREEN ###"
-
-  echo "1. GREEN 이미지 받기"
-  docker compose pull atcha-green
-
-  echo "2. GREEN 컨테이너 실행"
-  docker compose up -d atcha-green
-
-  echo "3. GREEN 컨테이너 헬스 체크"
-  if ! check_service "atcha-green"; then
-    echo "GREEN health check failed."
-    exit 1
-  fi
-
-  echo "4. nginx 재실행"
-  ensure_nginx_running
-  sudo cp -f /home/atcha/data/nginx/nginx-green.conf /home/atcha/data/nginx/nginx.conf
-  restart_nginx
-
-  echo "5. BLUE 컨테이너 중지 및 삭제"
-  docker compose stop atcha-blue
-  docker compose rm -f atcha-blue
 fi
+
+echo "1. ${NEW_COLOR} 이미지 받기"
+docker compose pull "atcha-${NEW_COLOR}"
+
+echo "2. ${NEW_COLOR} 컨테이너 실행"
+docker compose up -d "atcha-${NEW_COLOR}"
+
+echo "3. ${NEW_COLOR} 컨테이너 헬스 체크"
+if ! check_service "atcha-${NEW_COLOR}"; then
+  echo "${NEW_COLOR} health check failed."
+  exit 1
+fi
+
+echo "4. nginx 재실행"
+ensure_nginx_running
+sudo cp -f "${NGINX_DIR}/nginx-${NEW_COLOR}.conf" "${NGINX_DIR}/nginx.conf"
+restart_nginx
+
+echo "5. ${OLD_COLOR} 컨테이너 중지 및 삭제"
+docker compose stop "atcha-${OLD_COLOR}"
+docker compose rm -f "atcha-${OLD_COLOR}"
