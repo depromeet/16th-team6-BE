@@ -1,7 +1,9 @@
 package com.deepromeet.atcha.auth.api.controller
 
+import com.deepromeet.atcha.auth.api.request.GuestAuthRequest
 import com.deepromeet.atcha.auth.api.request.SignUpRequest
 import com.deepromeet.atcha.auth.api.response.ExistsUserResponse
+import com.deepromeet.atcha.auth.api.response.GuestAuthResponse
 import com.deepromeet.atcha.auth.api.response.LoginResponse
 import com.deepromeet.atcha.auth.api.response.ReissueTokenResponse
 import com.deepromeet.atcha.auth.api.response.SignUpResponse
@@ -54,6 +56,14 @@ class AuthController(
         val userToken = authService.login(ProviderToken.of(providerToken, provider), fcmToken)
         val result = LoginResponse(userToken)
         return ApiResponse.success(result)
+    }
+
+    @PostMapping("/auth/guest")
+    fun guestAuth(
+        @RequestBody request: GuestAuthRequest
+    ): ApiResponse<GuestAuthResponse> {
+        val userTokens = authService.guestAuth(request.deviceId, request.fcmToken)
+        return ApiResponse.success(GuestAuthResponse(userTokens))
     }
 
     @PostMapping("/auth/logout")
