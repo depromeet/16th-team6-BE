@@ -1,6 +1,5 @@
 package com.deepromeet.atcha.transit.application.bus
 
-import com.deepromeet.atcha.location.domain.ServiceRegion
 import com.deepromeet.atcha.transit.application.TransitNameComparer
 import com.deepromeet.atcha.transit.application.bus.BusRouteInfoClient.Companion.isValidStation
 import com.deepromeet.atcha.transit.domain.RoutePassStops
@@ -19,7 +18,7 @@ private const val SIM_THRESHOLD = 0.6
 
 @Component
 class BusRouteMatcher(
-    private val busRouteInfoClientMap: Map<ServiceRegion, BusRouteInfoClient>,
+    private val busRouteInfoClients: BusRouteInfoClients,
     private val transitNameComparer: TransitNameComparer
 ) {
     private val log = KotlinLogging.logger {}
@@ -59,7 +58,7 @@ class BusRouteMatcher(
         plannedStops: List<String>
     ): RouteProcessResult? {
         val stationList =
-            runCatching { busRouteInfoClientMap[route.serviceRegion]!!.getStationList(route) }
+            runCatching { busRouteInfoClients.forRegion(route.serviceRegion).getStationList(route) }
                 .getOrElse {
                     log.debug { "BusRouteMatcher.processRouteWithSimilarity() - 정류장 조회 중 오류 발생 해당 노선 제거 " }
                     return null
